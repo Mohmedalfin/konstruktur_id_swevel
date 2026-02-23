@@ -1,0 +1,20 @@
+:root {
+    --primary: #0C111D;
+    --secondary: #F6AF2B;
+    --bg-landing-1: #FFF8ED;
+    --bg-landing-2: #FEF0D9;
+    --text-primary: #FFFFFF;
+    --text-secondary: #0E214A;
+    --bg-nav: #151A2A;
+    --bg-third: #0D1425;
+    --outline-slider: #6D7381;
+    --checklist-box: #D9D9D9;
+    --text-pudar: rgba(0, 0, 0, 0.4);
+    --text-primary-pudar: rgba(14, 33, 74, 0.2);
+    --bg-dashboard: #E9E9E9;
+    --bg-card: #F8F8F8;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
