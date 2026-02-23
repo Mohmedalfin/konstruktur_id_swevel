@@ -8,12 +8,6 @@ class Home extends BaseController
 {
     public function index()
     {
-        $roleModel = new RoleModel();
-        
-        // Ambil semua data role
-        $data['daftar_role'] = $roleModel->findAll();
-
-        // Kirim data ke view
-        return view('tampil_role', $data);
+        return view('auth/loginUser');
     }
 }
