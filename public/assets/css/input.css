@@ -1,20 +1,105 @@
+/* ================================
+   CSS Variables (Design System)
+================================= */
+@import "tailwindcss";
+
+/* Preline UI */
+@source "../node_modules/preline/dist/*.js";
+@import "preline/variants.css";
+
+
+/* ======================
+   COLOR TOKENS (BASE)
+====================== */
 :root {
+    /* Brand */
     --primary: #0C111D;
     --secondary: #F6AF2B;
+
+    /* Background */
+    --bg-main: #ffffff;
     --bg-landing-1: #FFF8ED;
     --bg-landing-2: #FEF0D9;
-    --text-primary: #FFFFFF;
-    --text-secondary: #0E214A;
     --bg-nav: #151A2A;
     --bg-third: #0D1425;
-    --outline-slider: #6D7381;
-    --checklist-box: #D9D9D9;
-    --text-pudar: rgba(0, 0, 0, 0.4);
-    --text-primary-pudar: rgba(14, 33, 74, 0.2);
     --bg-dashboard: #E9E9E9;
     --bg-card: #F8F8F8;
+
+    /* Text */
+    --text-primary: #0E214A;
+    --text-light: #FFFFFF;
+    --text-muted: rgba(0, 0, 0, 0.4);
+
+    /* Border */
+    --border-default: #E5E7EB;
 }
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* ======================
+   DARK MODE TOKENS
+====================== */
+.dark {
+    --bg-main: #0C111D;
+    --bg-card: #151A2A;
+    --text-primary: #FFFFFF;
+    --text-muted: rgba(255, 255, 255, 0.6);
+}
+
+/* ======================
+   TAILWIND MAPPING
+====================== */
+@theme {
+
+    /* Brand */
+    --color-primary: var(--primary);
+    --color-secondary: var(--secondary);
+
+    /* Background */
+    --color-bg-main: var(--bg-main);
+    --color-bg-landing-1: var(--bg-landing-1);
+    --color-bg-landing-2: var(--bg-landing-2);
+    --color-bg-nav: var(--bg-nav);
+    --color-bg-third: var(--bg-third);
+    --color-bg-dashboard: var(--bg-dashboard);
+    --color-bg-card: var(--bg-card);
+
+    /* Text */
+    --color-text-primary: var(--text-primary);
+    --color-text-light: var(--text-light);
+    --color-text-muted: var(--text-muted);
+
+    /* Border */
+    --color-border: var(--border-default);
+
+}
+
+
+/* ================================
+   Base Layer Customization
+================================= */
+@layer base {
+    html {
+        font-family: 'Montserrat', sans-serif;
+    }
+}
+
+
+/* ================================
+   Custom Scrollbar (Thin Modern)
+================================= */
+.scrollbar-thin::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: var(--outline-slider);
+    border-radius: 9999px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: var(--secondary);
+}
