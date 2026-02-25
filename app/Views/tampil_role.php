@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Percobaan Role CI4</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
+    <link href="<?= base_url('assets/css/output.css') ?>" rel="stylesheet">
 </head>
 <body class="bg-slate-100 p-10">
 
