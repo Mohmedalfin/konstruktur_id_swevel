@@ -6,78 +6,93 @@
 /* Preline UI */
 @source "../node_modules/preline/dist/*.js";
 @import "preline/variants.css";
+@import "preline/css/themes/theme.css";
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
 
 /* ======================
-   COLOR TOKENS (BASE)
+   CUSTOM BRAND OVERRIDES
+   (applied after Preline theme)
 ====================== */
 :root {
-  /* Brand */
+  /* Brand overrides */
   --primary: #0C111D;
-  --secondary: #F6AF2B;
+  --primary-foreground: #FFFFFF;
+  --primary-hover: #1a2338;
+  --primary-focus: #1a2338;
+  --primary-active: #1a2338;
 
-  /* Background */
-  --bg-main: #ffffff;
+  --secondary: #F6AF2B;
+  --secondary-foreground: #FFFFFF;
+  --secondary-hover: #e5a020;
+  --secondary-focus: #e5a020;
+
+  /* Custom Backgrounds */
   --bg-landing-1: #FFF8ED;
   --bg-landing-2: #FEF0D9;
   --bg-nav: #151A2A;
   --bg-third: #0D1425;
   --bg-dashboard: #E9E9E9;
-  --bg-card: #F8F8F8;
+  --bg-card-custom: #F8F8F8;
 
-  /* Text */
-  --text-primary: #0E214A;
+  /* Custom Text */
+  --text-brand-primary: #0E214A;
   --text-light: #FFFFFF;
-  --text-muted: rgba(0, 0, 0, 0.4);
+  --text-brand-muted: rgba(0, 0, 0, 0.4);
 
-  /* Border */
+  /* Custom Border */
   --border-default: #E5E7EB;
+
+  /* Navbar overrides */
+  --navbar: #151A2A;
+  --navbar-line: #1e2640;
+  --navbar-divider: #2a3352;
+  --navbar-nav-foreground: #FFFFFF;
+  --navbar-nav-hover: rgba(255, 255, 255, 0.1);
+  --navbar-nav-focus: rgba(255, 255, 255, 0.1);
+  --navbar-nav-active: rgba(255, 255, 255, 0.15);
+  --navbar-nav-list-divider: #2a3352;
 }
 
 /* ======================
-   DARK MODE TOKENS
+   DARK MODE OVERRIDES
 ====================== */
 .dark {
-  --bg-main: #0C111D;
-  --bg-card: #151A2A;
-  --text-primary: #FFFFFF;
-  --text-muted: rgba(255,255,255,0.6);
+  --bg-card-custom: #151A2A;
+  --text-brand-primary: #FFFFFF;
+  --text-brand-muted: rgba(255,255,255,0.6);
 }
 
 /* ======================
-   TAILWIND MAPPING
+   TAILWIND CUSTOM COLORS
+   (extends Preline's @theme)
 ====================== */
 @theme {
-
-  /* Brand */
-  --color-primary: var(--primary);
-  --color-secondary: var(--secondary);
-
-  /* Background */
-  --color-bg-main: var(--bg-main);
+  /* Custom Background Colors */
   --color-bg-landing-1: var(--bg-landing-1);
   --color-bg-landing-2: var(--bg-landing-2);
   --color-bg-nav: var(--bg-nav);
   --color-bg-third: var(--bg-third);
   --color-bg-dashboard: var(--bg-dashboard);
-  --color-bg-card: var(--bg-card);
+  --color-bg-card: var(--bg-card-custom);
 
-  /* Text */
-  --color-text-primary: var(--text-primary);
+  /* Custom Text Colors */
+  --color-text-primary: var(--text-brand-primary);
   --color-text-light: var(--text-light);
-  --color-text-muted: var(--text-muted);
-
-  /* Border */
-  --color-border: var(--border-default);
-
+  --color-text-muted: var(--text-brand-muted);
 }
 
 
 /* ================================
    Base Layer Customization
 ================================= */
+@theme {
+  --font-custom-default: 'Montserrat', sans-serif;
+}
+
 @layer base {
-  html {
+  html, body {
     font-family: 'Montserrat', sans-serif;
   }
 }
@@ -102,4 +117,39 @@
 
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
   background-color: var(--secondary);
+}
+
+/* ================================
+   Navbar Full-Height Nav Items
+   Forces menu items to fill the
+   entire navbar height on desktop
+================================= */
+@media (min-width: 768px) {
+  /* Fixed navbar height */
+  header > nav {
+    height: 3.5rem; /* 56px */
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  /* All wrapper divs between nav and links must pass height through */
+  header > nav > .hs-collapse,
+  header > nav > .hs-collapse > div,
+  header > nav > .hs-collapse > div > div,
+  header > nav > .hs-collapse > div > div > div,
+  header > nav > .hs-collapse > div > div > div > div,
+  header > nav > .hs-collapse > div > div > div > div > .hs-dropdown {
+    height: 100%;
+  }
+
+  /* Nav links and dropdown button fill full height, no rounded corners */
+  header > nav > .hs-collapse > div > div > div > div > a,
+  header > nav > .hs-collapse > div > div > div > div > .hs-dropdown > button {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    border-radius: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
 }
