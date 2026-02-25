@@ -172,7 +172,7 @@
                     </div>
                     <div class="flex items-center justify-between mb-8 text-xs sm:text-sm">
                         <label class="flex items-center cursor-pointer text-brand-dark text-xs">
-                            <input type="checkbox" class="w-4 h-4 mr-2 border-gray-300 rounded text-brand-dark focus:ring-brand-dark">
+                            <input type="checkbox" class="w-4 h-4 mr-2 rounded accent-secondary cursor-pointer">
                             Saya Menyetujui Syarat dan Ketentuan pada Kontraktor.id
                         </label>
                     </div>
