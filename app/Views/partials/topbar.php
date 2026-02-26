@@ -1,4 +1,4 @@
-<header class="bg-primary text-white py-4">
+<header class="bg-primary text-white py-5">
     <h1 class="text-center text-4xl font-bold">
         <?= isset($title) ? $title : 'title ga kebaca' ?>
     </h1>
