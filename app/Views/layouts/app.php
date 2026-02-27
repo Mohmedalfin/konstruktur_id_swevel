@@ -25,8 +25,8 @@
     <script src="<?= base_url('assets/vendor/lodash/lodash.min.js') ?>"></script>
     <script src="<?= base_url('assets/vendor/vanilla-calendar-pro/index.js') ?>"></script>
 
-    <!-- ✅ PRELINE CORE (INI YANG KAMU KURANG) -->
-    <script src="<?= base_url('assets/vendor/preline/dist/index.js') ?>"></script>
+    <!-- ✅ PRELINE CORE -->
+    <script src="<?= base_url('node_modules/preline/dist/preline.js') ?>"></script>
     <script src="<?= base_url('assets/js/preline.js') ?>"></script>
     <script>
         window.addEventListener('load', () => {
