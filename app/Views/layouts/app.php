@@ -21,17 +21,24 @@
 
     <?= $this->include('partials/footer') ?>
 
-    <!-- PRELINE JS (wajib) -->
-    <script src="<?= base_url('assets/js/preline.js') ?>"></script>
+    <!-- Vendor JS (WAJIB untuk Advanced Datepicker) -->
+    <script src="<?= base_url('assets/vendor/lodash/lodash.min.js') ?>"></script>
+    <script src="<?= base_url('assets/vendor/vanilla-calendar-pro/index.js') ?>"></script>
 
-    <!-- Auto init (wajib) -->
+    <!-- ✅ PRELINE CORE (INI YANG KAMU KURANG) -->
+    <script src="<?= base_url('assets/vendor/preline/dist/index.js') ?>"></script>
+    <script src="<?= base_url('assets/js/preline.js') ?>"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            if (window.HSStaticMethods) window.HSStaticMethods.autoInit();
+        window.addEventListener('load', () => {
+            window.HSStaticMethods?.autoInit();
+            // biasanya cukup autoInit saja, tapi aman:
+            window.HSDatepicker?.autoInit?.();
         });
     </script>
+    <!-- PRELINE JS (wajib) -->
 
     <?= $this->renderSection('scripts') ?>
+
 </body>
 
 </html>
