@@ -1,34 +1,17 @@
 @import "tailwindcss";
 
-/* Preline UI */
-@source "../node_modules/preline/dist/*.js";
-@import "preline/variants.css";
-@import "preline/css/themes/theme.css";
-@import "preline/src/plugins/datepicker/styles-utility.css";
-
-/* Plugins */
-@plugin "@tailwindcss/forms";
+/* Scan Preline JS supaya class ter-detect */
+@source "../../../node_modules/preline/dist/*.js";
 
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
 /* ======================
-   CUSTOM BRAND OVERRIDES
-   (applied after Preline theme)
+   ROOT VARIABLES
 ====================== */
 :root {
-    /* Brand overrides */
     --primary: #0C111D;
-    --primary-foreground: #FFFFFF;
-    --primary-hover: #1a2338;
-    --primary-focus: #1a2338;
-    --primary-active: #1a2338;
-
     --secondary: #F6AF2B;
-    --secondary-foreground: #FFFFFF;
-    --secondary-hover: #e5a020;
-    --secondary-focus: #e5a020;
 
-    /* Custom Backgrounds */
     --bg-landing-1: #FFF8ED;
     --bg-landing-2: #FEF0D9;
     --bg-nav: #151A2A;
@@ -36,40 +19,42 @@
     --bg-dashboard: #E9E9E9;
     --bg-card-custom: #F8F8F8;
 
-    /* Custom Text */
     --text-brand-primary: #0E214A;
     --text-light: #FFFFFF;
     --text-brand-muted: rgba(0, 0, 0, 0.4);
 
-    /* Custom Border */
-    --border-default: #E5E7EB;
-
-    /* Navbar overrides */
-    --navbar: #151A2A;
+    /* Navbar */
     --navbar-line: #1e2640;
-    --navbar-divider: #2a3352;
-    --navbar-nav-foreground: #FFFFFF;
-    --navbar-nav-hover: rgba(255, 255, 255, 0.1);
-    --navbar-nav-focus: rgba(255, 255, 255, 0.1);
-    --navbar-nav-active: rgba(255, 255, 255, 0.15);
-    --navbar-nav-list-divider: #2a3352;
+    --navbar-foreground: #FFFFFF;
+    --navbar-hover: rgba(255, 255, 255, 0.1);
+    --navbar-focus: rgba(255, 255, 255, 0.1);
+
+    /* Table */
+    --table-category-bg: #3b5278;
+    --table-category-hover: #344a6b;
+    --table-row-bg: #f9fafb;
+    /* gray-50/70 equivalent */
+    --table-row-border: #e5e7eb;
+    /* gray-200 equivalent */
+    --table-text-body: #374151;
+    /* gray-700 */
+    --table-text-strong: #111827;
+    /* gray-900 */
+    --table-text-medium: #1f2937;
+    /* gray-800 */
+    --table-text-muted: #9ca3af;
+    /* gray-400 */
+    --table-text-subtle: #6b7280;
+    /* gray-500 */
 }
 
 /* ======================
-   DARK MODE OVERRIDES
-====================== */
-.dark {
-    --bg-card-custom: #151A2A;
-    --text-brand-primary: #FFFFFF;
-    --text-brand-muted: rgba(255, 255, 255, 0.6);
-}
-
-/* ======================
-   TAILWIND CUSTOM COLORS
-   (extends Preline's @theme)
+   TAILWIND THEME EXTENSION (v4)
 ====================== */
 @theme {
-    /* Custom Background Colors */
+    --color-primary: var(--primary);
+    --color-secondary: var(--secondary);
+
     --color-bg-landing-1: var(--bg-landing-1);
     --color-bg-landing-2: var(--bg-landing-2);
     --color-bg-nav: var(--bg-nav);
@@ -77,28 +62,41 @@
     --color-bg-dashboard: var(--bg-dashboard);
     --color-bg-card: var(--bg-card-custom);
 
-    /* Custom Text Colors */
     --color-text-primary: var(--text-brand-primary);
     --color-text-light: var(--text-light);
     --color-text-muted: var(--text-brand-muted);
+
+    /* Navbar utilities → bg-navbar, border-navbar-line, text-navbar-foreground, etc. */
+    --color-navbar: var(--bg-nav);
+    --color-navbar-line: var(--navbar-line);
+    --color-navbar-foreground: var(--navbar-foreground);
+    --color-navbar-hover: var(--navbar-hover);
+    --color-navbar-focus: var(--navbar-focus);
+
+    /* Table utilities → bg-table-category, hover:bg-table-category-hover, etc. */
+    --color-table-category: var(--table-category-bg);
+    --color-table-category-hover: var(--table-category-hover);
+    --color-table-row: var(--table-row-bg);
+    --color-table-border: var(--table-row-border);
+    --color-table-body: var(--table-text-body);
+    --color-table-strong: var(--table-text-strong);
+    --color-table-medium: var(--table-text-medium);
+    --color-table-muted: var(--table-text-muted);
+    --color-table-subtle: var(--table-text-subtle);
+
+    --font-sans: 'Montserrat', sans-serif;
 }
 
-
-/* ================================
-   Base Layer Customization
-================================= */
-@theme {
-    --font-custom-default: 'Montserrat', sans-serif;
-}
-
+/* ======================
+   BASE LAYER
+====================== */
 @layer base {
-
-    html,
-    body {
-        font-family: 'Montserrat', sans-serif;
+    html {
+        font-family: var(--font-sans);
+        scrollbar-gutter: stable;
+        /* Prevents layout shift when scrollbar appears/disappears */
     }
 }
-
 
 /* ================================
    Custom Scrollbar (Thin Modern)
@@ -141,12 +139,14 @@
     header>nav>.hs-collapse>div,
     header>nav>.hs-collapse>div>div,
     header>nav>.hs-collapse>div>div>div,
-    header>nav>.hs-collapse>div>div>div>div {
+    header>nav>.hs-collapse>div>div>div>div,
+    header>nav>.hs-collapse>div>div>div>div>.hs-dropdown {
         height: 100%;
     }
 
-    /* Nav links fill full height, no rounded corners */
-    header>nav>.hs-collapse>div>div>div>div>a {
+    /* Nav links and dropdown button fill full height, no rounded corners */
+    header>nav>.hs-collapse>div>div>div>div>a,
+    header>nav>.hs-collapse>div>div>div>div>.hs-dropdown>button {
         height: 100%;
         display: flex;
         align-items: center;

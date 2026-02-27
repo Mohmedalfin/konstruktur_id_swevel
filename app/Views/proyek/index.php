@@ -10,10 +10,10 @@
 
 <!-- Button Proyek Baru -->
 <div class="mb-4">
-  <button class="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-white shadow-md">
+  <a class="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-white shadow-md hover:bg-primary/90" href="<?= base_url('proyek/create') ?>">
     <i class="fa-solid fa-circle-plus"></i>
     <span class="font-semibold">Proyek Baru</span>
-  </button>
+  </a>
 </div>
 
 <!-- Panel Filter -->

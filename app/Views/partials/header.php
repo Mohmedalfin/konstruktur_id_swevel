@@ -60,37 +60,10 @@
                                             <i class="fa-regular fa-id-badge w-4"></i>
                                             Profile
                                         </a>
-
-                                        <!-- <div class="hs-dropdown [--strategy:static] md:[--strategy:absolute] [--adaptive:none] md:[--trigger:hover] [--is-collapse:true] md:[--is-collapse:false] relative">
-                                            <button id="hs-header-base-dropdown-sub" type="button" class="hs-dropdown-toggle w-full flex justify-between items-center text-sm text-dropdown-item-foreground p-2 md:px-3 hover:bg-dropdown-item-hover focus:outline-hidden focus:bg-dropdown-item-focus">
-                                                Sub Menu
-                                                <svg class="hs-dropdown-open:-rotate-180 md:hs-dropdown-open:-rotate-90 md:-rotate-90 ms-auto shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                    <path d="m6 9 6 6 6-6" />
-                                                </svg>
-                                            </button>
-
-                                            <div class="hs-dropdown-menu transition-[opacity,margin] duration-[0.1ms] md:duration-[150ms] hs-dropdown-open:opacity-100 opacity-0 relative md:w-48 hidden z-10 md:mt-2 md:mx-2.5! md:top-0 md:end-full ps-7 md:ps-0 md:bg-dropdown md:border md:border-dropdown-line md md:shadow-md before:hidden md:before:block before:absolute before:-end-5 before:top-0 before:h-full before:w-5 md:after:hidden after:absolute after:top-1 after:start-4.5 after:h-[calc(100%-4px)] after:border-s after:border-navbar-nav-list-divider" role="menu" aria-orientation="vertical" aria-labelledby="hs-header-base-dropdown-sub">
-                                                <div class="p-1 space-y-1">
-                                                    <a class="p-2 md:px-3 flex items-center text-sm text-dropdown-item-foreground hover:bg-dropdown-item-hover focus:outline-hidden focus:bg-dropdown-item-focus" href="#">
-                                                        About
-                                                    </a>
-
-                                                    <a class="p-2 md:px-3 flex items-center text-sm text-dropdown-item-foreground hover:bg-dropdown-item-hover focus:outline-hidden focus:bg-dropdown-item-focus" href="#">
-                                                        Downloads
-                                                    </a>
-
-                                                    <a class="p-2 md:px-3 flex items-center text-sm text-dropdown-item-foreground hover:bg-dropdown-item-hover focus:outline-hidden focus:bg-dropdown-item-focus" href="#">
-                                                        Team Account
-                                                    </a>
-                                                </div>
-                                            </div>
-                                        </div> -->
-
                                         <a class="p-2 md:px-3 flex items-center text-sm text-dropdown-item-foreground hover:bg-dropdown-item-hover focus:outline-hidden focus:bg-dropdown-item-focus gap-3" href="#">
                                             <i class="fa-solid fa-list-check w-4"></i>
                                             Daftar Proyek
                                         </a>
-
                                         <a class="p-2 md:px-3 flex items-center text-sm text-dropdown-item-foreground hover:bg-dropdown-item-hover focus:outline-hidden focus:bg-dropdown-item-focus gap-3 text-red-600" href="#">
                                             <i class="fa-solid fa-right-from-bracket w-4"></i>
                                             Logout
@@ -102,16 +75,6 @@
                         </div>
                     </div>
 
-                    <!-- Button Group -->
-                    <!-- <div class=" flex flex-wrap items-center gap-x-1.5">
-            <a class="py-[7px] px-2.5 inline-flex items-center font-medium text-sm rounded-lg bg-layer border border-layer-line text-layer-foreground shadow-2xs hover:bg-layer-hover disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:bg-layer-focus" href="#">
-              Sign in
-            </a>
-            <a class="py-2 px-2.5 inline-flex items-center font-medium text-sm rounded-lg bg-primary text-primary-foreground hover:bg-primary-hover focus:outline-hidden focus:bg-primary-focus disabled:opacity-50 disabled:pointer-events-none" href="#">
-              Get started
-            </a>
-          </div> -->
-                    <!-- End Button Group -->
                 </div>
             </div>
         </div>

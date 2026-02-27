@@ -27,7 +27,7 @@
 
     <!-- ✅ PRELINE CORE (INI YANG KAMU KURANG) -->
     <script src="<?= base_url('assets/vendor/preline/dist/index.js') ?>"></script>
-
+    <script src="<?= base_url('assets/js/preline.js') ?>"></script>
     <script>
         window.addEventListener('load', () => {
             window.HSStaticMethods?.autoInit();
@@ -36,7 +36,7 @@
         });
     </script>
     <!-- PRELINE JS (wajib) -->
-    <script src="<?= base_url('assets/js/preline.js') ?>"></script>
+
     <?= $this->renderSection('scripts') ?>
 
 </body>
