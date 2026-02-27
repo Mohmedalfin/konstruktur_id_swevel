@@ -8,8 +8,8 @@
     "build": "tailwindcss -i ./public/assets/css/input.css -o ./public/assets/css/output.css --minify"
   },
   "devDependencies": {
-    "tailwindcss": "^4.2.0",
-    "@tailwindcss/cli": "^4.2.0"
+    "@tailwindcss/cli": "^4.2.0",
+    "tailwindcss": "^4.2.1"
   },
   "dependencies": {
     "preline": "^2.0.0"
