@@ -35,8 +35,10 @@
             window.HSDatepicker?.autoInit?.();
         });
     </script>
-
+    <!-- PRELINE JS (wajib) -->
+    <script src="<?= base_url('assets/js/preline.js') ?>"></script>
     <?= $this->renderSection('scripts') ?>
+
 </body>
 
 </html>
