@@ -1,11 +1,7 @@
 <?= $this->extend('layouts/app') ?>
 
 <?= $this->section('topbar') ?>
-<<<<<<< Updated upstream
-<header class="bg-primary text-white py-4">
-=======
 <header class="bg-primary text-white py-5">
->>>>>>> Stashed changes
   <h1 class="text-center text-4xl font-bold">DAFTAR PROYEK</h1>
 </header>
 <?= $this->endSection() ?>
