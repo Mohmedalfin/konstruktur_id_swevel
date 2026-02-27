@@ -76,34 +76,6 @@
 </div>
 
 <!-- Grid Cards -->
-<<<<<<< Updated upstream
-<div class="mt-6 rounded-xl bg-white p-5 shadow-md">
-  <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-    <?php for ($i = 0; $i < 6; $i++): ?>
-      <div class="overflow-hidden rounded-xl bg-white shadow-md">
-        <div class="h-28 bg-primary/90"></div>
-
-        <div class="p-4">
-          <h3 class="text-sm font-bold text-text-primary leading-tight">
-            Pembangunan Gedung Klinik Pratama
-          </h3>
-
-          <div class="mt-3 space-y-2 text-xs text-gray-600">
-            <div class="flex items-center gap-2">
-              <i class="fa-solid fa-location-dot text-primary"></i>
-              <span>Kab. Sleman, DIY</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <i class="fa-solid fa-money-bill-wave text-primary"></i>
-              <span>Rp 3.250.000.000</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <i class="fa-solid fa-chart-simple text-primary"></i>
-              <span>-2,1%</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <i class="fa-solid fa-calendar-days text-primary"></i>
-=======
 <div class="mt-6 rounded-2xl bg-white p-6 shadow-md">
   <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
     <?php for ($i = 0; $i < 6; $i++): ?>
@@ -173,7 +145,6 @@
 
             <div class="flex items-center gap-3">
               <i class="fa-solid fa-calendar-days w-4 text-primary"></i>
->>>>>>> Stashed changes
               <span>2026-02-12</span>
             </div>
           </div>
