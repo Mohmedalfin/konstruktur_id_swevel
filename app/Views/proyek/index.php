@@ -7,7 +7,6 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
-
 <!-- Button Proyek Baru -->
 <div class="mb-4">
   <a class="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-white shadow-md hover:bg-primary/90" href="<?= base_url('proyek/create') ?>">
@@ -75,7 +74,9 @@
 <div class="mt-6 rounded-2xl bg-white p-6 shadow-md">
   <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
     <?php for ($i = 0; $i < 6; $i++): ?>
-      <div class="overflow-hidden rounded-2xl bg-white shadow-lg ring-1 ring-black/5">
+      <div class="relative group overflow-hidden rounded-2xl bg-white shadow-lg ring-1 ring-black/5 hover:shadow-xl transition-all duration-300">
+        <!-- Full Card Link -->
+        <a href="<?= base_url('menu-rap?id=' . ($i + 1)) ?>" class="absolute inset-0 z-10" aria-label="View Project"></a>
 
         <!-- COVER -->
         <div class="relative h-50 w-full overflow-hidden rounded-t-2xl">
@@ -149,7 +150,6 @@
     <?php endfor; ?>
   </div>
 </div>
-
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>

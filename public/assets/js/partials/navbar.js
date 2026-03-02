@@ -33,8 +33,24 @@
         }
     });
 
+    // Make dropdown button active if its internal links correspond to the current page
+    const dropBtn = document.getElementById('hs-header-base-dropdown');
+    if (dropBtn) {
+        // Here you can define which paths make the profile dropdown "active" (e.g. /profile)
+        const profilePaths = ['/profile', '/account', '/settings']; 
+        let isDropdownActive = profilePaths.some(path => currentPath.startsWith(path));
+
+        if (isDropdownActive) {
+            activeClasses.forEach(function (cls)   { dropBtn.classList.add(cls); });
+            inactiveClasses.forEach(function (cls) { dropBtn.classList.remove(cls); });
+        } else {
+            inactiveClasses.forEach(function (cls) { dropBtn.classList.add(cls); });
+            activeClasses.forEach(function (cls)   { dropBtn.classList.remove(cls); });
+        }
+    }
+
     /* ── Hamburger ↔ X icon swap ───────────────────────────────── */
-    const toggleBtn     = document.getElementById('hs-header-base-collapse');
+    const toggleBtn = document.getElementById('hs-header-base-collapse');
     if (toggleBtn) {
         const iconHamburger = document.getElementById('nav-icon-hamburger');
         const iconClose     = document.getElementById('nav-icon-close');

@@ -1,5 +1,4 @@
 <?php
-// wajib kasih $id unik, misal: "tanggal_mulai" / "estimasi_selesai"
 $id = $id ?? 'datepicker';
 $placeholder = $placeholder ?? 'Pilih tanggal';
 ?>
