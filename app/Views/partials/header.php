@@ -49,31 +49,40 @@ $userRole = session()->get('kategori_akun') ?? session()->get('role') ?? 'Kontra
                             <!-- Dropdown (User Profile) -->
                             <div class="hs-dropdown [--strategy:static] md:[--strategy:fixed] [--adaptive:none] md:[--adaptive:adaptive] [--is-collapse:true] md:[--is-collapse:false]">
                                 <button id="hs-header-base-dropdown" type="button"
-                                    class="hs-dropdown-toggle w-full h-14 p-2 md:px-3 md:justify-center flex items-center text-sm text-navbar-nav-foreground hover:bg-navbar-nav-hover focus:outline-hidden focus:bg-navbar-nav-focus gap-3"
+                                    class="hs-dropdown-toggle w-full h-14 p-2 md:px-3 md:justify-center flex items-center text-sm text-navbar-nav-foreground hover:bg-navbar-nav-hover focus:outline-hidden focus:bg-navbar-nav-focus rounded-lg"
                                     aria-haspopup="menu" aria-expanded="false" aria-label="Dropdown">
-                                    <i class="fa-solid fa-user text-xl"></i>
+ 
+                                    <div class="flex items-center p-2 gap-x-3 transition-all duration-300 hover:bg-white/10 cursor-pointer group animate-float">
+    
+                                        <div class="shrink-0 transition-all duration-500 ease-out group-hover:scale-125 group-hover:-rotate-12 group-hover:-translate-y-1">
+                                            <i class="text-white fa-solid fa-user text-md drop-shadow-[0_0_5px_rgba(255,255,255,0.5)]"></i>
+                                        </div>
 
-                                    <div class="leading-tight text-left">
-                                        <div class="text-sm font-semibold"><?= esc($userName) ?></div>
-                                        <div class="text-xs text-white/70"><?= esc($userRole) ?></div>
+                                        <div class="leading-tight text-left">
+                                            <div class="text-sm font-medium text-white"><?= esc($userName) ?></div>
+                                            <div class="text-xs text-secondary opacity-80"><?= esc($userRole) ?></div>
+                                        </div>
+
+                                        <svg class="text-white hs-dropdown-open:-rotate-180 duration-300 shrink-0 size-4 ms-auto md:ms-1 group-hover:translate-y-0.5" 
+                                            xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" 
+                                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="m6 9 6 6 6-6" />
+                                        </svg>
                                     </div>
-                                    <svg class="hs-dropdown-open:-rotate-180 md:hs-dropdown-open:rotate-0 duration-300 shrink-0 size-4 ms-auto md:ms-1" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="m6 9 6 6 6-6" />
-                                    </svg>
                                 </button>
 
-                                <div class="hs-dropdown-menu transition-[opacity,margin] duration-[0.1ms] md:duration-[150ms] hs-dropdown-open:opacity-100 opacity-0 relative w-full md:w-52 hidden z-10 top-full ps-7 md:ps-0 md:bg-dropdown md:border md:border-dropdown-line md:shadow-md before:absolute before:-top-4 before:start-0 before:w-full before:h-5 md:after:hidden after:absolute after:top-1 after:start-4.5 after:h-[calc(100%-4px)] after:border-s after:border-navbar-nav-list-divider"
+                                <div class="hs-dropdown-menu transition-[opacity,margin] duration-[0.1ms] md:duration-[150ms] hs-dropdown-open:opacity-100 opacity-0 relative w-full md:w-52 hidden z-10 top-full ps-7 md:ps-0 md:bg-white md:border md:border-gray-200 md:shadow-md before:absolute before:-top-4 before:start-0 before:w-full before:h-5 md:after:hidden after:absolute after:top-1 after:start-4.5 after:h-[calc(100%-4px)] after:border-s after:border-white/20"
                                     role="menu" aria-orientation="vertical" aria-labelledby="hs-header-base-dropdown">
                                     <div class="py-1 md:px-1 space-y-0.5">
-                                        <a class="p-2 md:px-3 flex items-center text-sm text-dropdown-item-foreground hover:bg-dropdown-item-hover focus:outline-hidden focus:bg-dropdown-item-focus gap-3" href="#">
+                                        <a class="p-2 md:px-3 flex items-center text-sm text-slate-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 rounded-lg gap-3" href="#">
                                             <i class="fa-regular fa-id-badge w-4"></i>
                                             Profile
                                         </a>
-                                        <a class="p-2 md:px-3 flex items-center text-sm text-dropdown-item-foreground hover:bg-dropdown-item-hover focus:outline-hidden focus:bg-dropdown-item-focus gap-3" href="#">
+                                        <a class="p-2 md:px-3 flex items-center text-sm text-slate-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 rounded-lg gap-3" href="#">
                                             <i class="fa-solid fa-list-check w-4"></i>
                                             Daftar Proyek
                                         </a>
-                                        <a class="p-2 md:px-3 flex items-center text-sm text-red-600 hover:bg-dropdown-item-hover focus:outline-hidden focus:bg-dropdown-item-focus gap-3" href="#">
+                                        <a class="p-2 md:px-3 flex items-center text-sm text-red-600 hover:bg-red-50 focus:outline-none focus:bg-red-50 rounded-lg gap-3" href="#">
                                             <i class="fa-solid fa-right-from-bracket w-4"></i>
                                             Logout
                                         </a>
@@ -91,4 +100,60 @@ $userRole = session()->get('kategori_akun') ?? session()->get('role') ?? 'Kontra
 </header>
 <!-- ========== END HEADER ========== -->
 
-<script src="<?= base_url('assets/js/partials/navbar.js') ?>"></script>
+<script>
+(function () {
+    /* ── User Profile Dropdown ──────────────────────────────────── */
+    const dropBtn  = document.getElementById('hs-header-base-dropdown');
+    const dropMenu = dropBtn ? dropBtn.closest('.hs-dropdown')?.querySelector('.hs-dropdown-menu') : null;
+
+    if (dropBtn && dropMenu) {
+        dropBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            const isOpen = dropBtn.getAttribute('aria-expanded') === 'true';
+            if (isOpen) {
+                dropMenu.classList.add('hidden');
+                dropMenu.classList.remove('opacity-100');
+                dropMenu.classList.add('opacity-0');
+                dropBtn.setAttribute('aria-expanded', 'false');
+            } else {
+                dropMenu.classList.remove('hidden');
+                dropMenu.classList.remove('opacity-0');
+                dropMenu.classList.add('opacity-100');
+                dropBtn.setAttribute('aria-expanded', 'true');
+            }
+        });
+
+        // Close when clicking outside
+        document.addEventListener('click', function () {
+            if (dropBtn.getAttribute('aria-expanded') === 'true') {
+                dropMenu.classList.add('hidden', 'opacity-0');
+                dropMenu.classList.remove('opacity-100');
+                dropBtn.setAttribute('aria-expanded', 'false');
+            }
+        });
+    }
+
+    /* ── Hamburger ↔ X icon swap ───────────────────────────────── */
+    const toggleBtn = document.getElementById('hs-header-base-collapse');
+    if (toggleBtn) {
+        const iconHamburger = document.getElementById('nav-icon-hamburger');
+        const iconClose     = document.getElementById('nav-icon-close');
+        const navMenu       = document.getElementById('hs-header-base');
+
+        toggleBtn.addEventListener('click', function () {
+            const isOpen = toggleBtn.getAttribute('aria-expanded') === 'true';
+            if (isOpen) {
+                toggleBtn.setAttribute('aria-expanded', 'false');
+                if (navMenu) navMenu.classList.add('hidden');
+                if (iconHamburger) iconHamburger.classList.remove('hidden');
+                if (iconClose)     iconClose.classList.add('hidden');
+            } else {
+                toggleBtn.setAttribute('aria-expanded', 'true');
+                if (navMenu) navMenu.classList.remove('hidden');
+                if (iconHamburger) iconHamburger.classList.add('hidden');
+                if (iconClose)     iconClose.classList.remove('hidden');
+            }
+        });
+    }
+})();
+</script>

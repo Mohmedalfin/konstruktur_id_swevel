@@ -1,6 +1,4 @@
 <?php
-// $tableVisible = true can be passed from the parent view to show the table immediately.
-// Default is hidden so ajax_rab.js can control visibility (dashboard page).
 $tableVisible = isset($tableVisible) && $tableVisible;
 $wrapperClass = $tableVisible ? '' : 'hidden';
 ?>
@@ -76,8 +74,6 @@ $wrapperClass = $tableVisible ? '' : 'hidden';
                     <td class="px-3 md:px-5 py-1.5 md:py-2"></td>
                 </tr>
             </tfoot>
-
         </table>
     </div>
-
 </div>
