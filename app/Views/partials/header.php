@@ -3,7 +3,7 @@ $userName = session()->get('nama_pengguna') ?? session()->get('nama') ?? 'Penggu
 $userRole = session()->get('kategori_akun') ?? session()->get('role') ?? 'Kontraktor';
 ?>
 <!-- ========== HEADER ========== -->
-<header class="flex flex-wrap  md:justify-start md:flex-nowrap z-50 w-full bg-navbar border-b border-navbar-line">
+<header class="flex flex-wrap md:justify-start md:flex-nowrap z-50 bg-navbar border-b border-navbar-line sticky top-0 transition-all duration-500 ease-in-out">
     <nav class="relative max-w-[85rem] w-full mx-auto md:flex md:items-center md:justify-between md:gap-3 py-2 px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center gap-x-1">
             <a class="flex-none font-semibold text-xl text-foreground focus:outline-hidden focus:opacity-80" href="#" aria-label="Brand">
@@ -100,60 +100,5 @@ $userRole = session()->get('kategori_akun') ?? session()->get('role') ?? 'Kontra
 </header>
 <!-- ========== END HEADER ========== -->
 
-<script>
-(function () {
-    /* ── User Profile Dropdown ──────────────────────────────────── */
-    const dropBtn  = document.getElementById('hs-header-base-dropdown');
-    const dropMenu = dropBtn ? dropBtn.closest('.hs-dropdown')?.querySelector('.hs-dropdown-menu') : null;
+<script src="<?= base_url('assets/js/partials/header.js') ?>"></script>
 
-    if (dropBtn && dropMenu) {
-        dropBtn.addEventListener('click', function (e) {
-            e.stopPropagation();
-            const isOpen = dropBtn.getAttribute('aria-expanded') === 'true';
-            if (isOpen) {
-                dropMenu.classList.add('hidden');
-                dropMenu.classList.remove('opacity-100');
-                dropMenu.classList.add('opacity-0');
-                dropBtn.setAttribute('aria-expanded', 'false');
-            } else {
-                dropMenu.classList.remove('hidden');
-                dropMenu.classList.remove('opacity-0');
-                dropMenu.classList.add('opacity-100');
-                dropBtn.setAttribute('aria-expanded', 'true');
-            }
-        });
-
-        // Close when clicking outside
-        document.addEventListener('click', function () {
-            if (dropBtn.getAttribute('aria-expanded') === 'true') {
-                dropMenu.classList.add('hidden', 'opacity-0');
-                dropMenu.classList.remove('opacity-100');
-                dropBtn.setAttribute('aria-expanded', 'false');
-            }
-        });
-    }
-
-    /* ── Hamburger ↔ X icon swap ───────────────────────────────── */
-    const toggleBtn = document.getElementById('hs-header-base-collapse');
-    if (toggleBtn) {
-        const iconHamburger = document.getElementById('nav-icon-hamburger');
-        const iconClose     = document.getElementById('nav-icon-close');
-        const navMenu       = document.getElementById('hs-header-base');
-
-        toggleBtn.addEventListener('click', function () {
-            const isOpen = toggleBtn.getAttribute('aria-expanded') === 'true';
-            if (isOpen) {
-                toggleBtn.setAttribute('aria-expanded', 'false');
-                if (navMenu) navMenu.classList.add('hidden');
-                if (iconHamburger) iconHamburger.classList.remove('hidden');
-                if (iconClose)     iconClose.classList.add('hidden');
-            } else {
-                toggleBtn.setAttribute('aria-expanded', 'true');
-                if (navMenu) navMenu.classList.remove('hidden');
-                if (iconHamburger) iconHamburger.classList.add('hidden');
-                if (iconClose)     iconClose.classList.remove('hidden');
-            }
-        });
-    }
-})();
-</script>
