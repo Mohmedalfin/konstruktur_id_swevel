@@ -8,6 +8,7 @@ if (! in_array($rabMode, ['readonly', 'new'], true)) {
     $rabMode = null;
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -25,8 +26,9 @@ if (! in_array($rabMode, ['readonly', 'new'], true)) {
     <!-- Pass init state to ajax_rab.js -->
     <script>
         window.RAB_INIT = {
-            mode: <?= $rabMode ? json_encode($rabMode) : 'null' ?>,
-            id:   <?= $rabId   ? json_encode($rabId)   : 'null' ?>
+            mode:          <?= $rabMode ? json_encode($rabMode) : 'null' ?>,
+            id:            <?= $rabId   ? json_encode($rabId)   : 'null' ?>,
+            rincianAhsUrl: <?= json_encode(base_url('menu-rap/rincian-ahs')) ?>
         };
     </script>
 

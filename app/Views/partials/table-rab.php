@@ -2,7 +2,8 @@
 $tableVisible = isset($tableVisible) && $tableVisible;
 $wrapperClass = $tableVisible ? '' : 'hidden';
 ?>
-<div id="rab-table-wrapper" class="max-w-[90rem] mx-auto px-3 sm:px-6 lg:px-8 py-4 md:py-8 <?= $wrapperClass ?>">
+
+<div id="rab-table-wrapper" class="w-full px-3 sm:px-6 lg:px-8 py-4 md:py-8 <?= $wrapperClass ?>">
 
     <!-- Table Toolbar -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
@@ -20,7 +21,7 @@ $wrapperClass = $tableVisible ? '' : 'hidden';
 
     <!-- Table Container -->
     <div class="overflow-x-auto rounded-xl shadow-md border border-table-border bg-white">
-        <table class="w-full text-left min-w-[800px] border-collapse table-fixed" id="rab-table">
+        <table class="w-full text-left min-w-[800px] border-collapse" id="rab-table">
 
             <!-- Column widths — locked permanently, never shift on open/close -->
             <colgroup>

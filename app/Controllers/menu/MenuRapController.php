@@ -12,10 +12,8 @@ class MenuRapController extends BaseController
         return view('proyek/menu/menu-rap');
     }
 
-    public function create()
+    public function rincianAHS()
     {
-        return view('proyek/menu/menu-rap');
+        return view('proyek/menu/rincian-ahs');
     }
-
-    public function store() {}
 }

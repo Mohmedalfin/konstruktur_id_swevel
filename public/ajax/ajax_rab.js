@@ -1,11 +1,11 @@
 /**
  * Data structure:
  *   { categories: [ { id, name, items: [ { no, uraian, volume, satuan, hargaDasar, harga } ] } ] }
- *
  * Modes:
  *  'readonly' — card clicked → category headers + sub-rows, accordion collapsible, Detail button
  *  'editable' — Add RAB clicked → category headers only, "+ Tambah Item" per category
  */
+
 (function () {
 
     'use strict';
@@ -31,7 +31,7 @@
     const addRabBtn   = document.getElementById('addRabBtn');
     const cards       = document.querySelectorAll('.rab-card');
 
-    if (!wrapper || !tbody) return; // guard: table-rab.php skeleton not present
+    if (!wrapper || !tbody) return; 
 
     /* ============================================================
        DUMMY DATA  (replace with real CI4 AJAX endpoints later)
@@ -215,7 +215,7 @@
                             <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums font-semibold text-table-strong">${fmt(item.harga)}</td>
                             <td class="px-3 md:px-5 py-2 md:py-2.5 text-center text-table-muted">${pct(item.harga, grandTotal)}</td>
                             <td class="px-3 md:px-5 py-2 md:py-2.5 text-center">
-                                <button class="bg-primary hover:bg-primary-hover active:scale-95 text-white px-2.5 md:px-3.5 py-1 rounded-md text-[10px] md:text-xs font-medium transition-all duration-150 focus:outline-none">
+                                <button onclick="window.location.href=(window.RAB_INIT&&window.RAB_INIT.rincianAhsUrl)||'/menu-rap/rincian-ahs'" class="cursor-pointer bg-primary hover:bg-primary-hover active:scale-95 text-white px-2.5 md:px-3.5 py-1 rounded-md text-[10px] md:text-xs font-medium transition-all duration-150 focus:outline-none">
                                     Detail
                                 </button>
                             </td>
