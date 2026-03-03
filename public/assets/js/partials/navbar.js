@@ -61,7 +61,60 @@
             if (iconClose)     iconClose.classList.toggle('hidden',      isCurrentlyOpen);
         });
     }
+
+    /* ── Floating navbar on scroll ──────────────────────────────── */
+    const header = document.querySelector('header');
+    if (header) {
+        // Classes added when floating
+        const floatAdd = [
+            'mt-3',           // gap from top edge
+            'mx-3',           // horizontal gap
+            'sm:mx-6',
+            'lg:mx-10',
+            'rounded-2xl',    // rounded pill corners
+            'shadow-xl',      // elevated shadow
+            'border',
+            'border-white/10',
+        ];
+        // Classes removed when floating (revert defaults)
+        const floatRemove = [
+            'border-b',
+            'border-navbar-line',
+        ];
+
+
+        let ticking  = false;
+        let floating = false;
+
+        function applyFloatState() {
+            const shouldFloat = window.scrollY > 20;
+            if (shouldFloat === floating) return; // nothing changed
+            floating = shouldFloat;
+
+            if (shouldFloat) {
+                floatAdd.forEach(cls    => header.classList.add(cls));
+                floatRemove.forEach(cls => header.classList.remove(cls));
+            } else {
+                floatAdd.forEach(cls    => header.classList.remove(cls));
+                floatRemove.forEach(cls => header.classList.add(cls));
+            }
+        }
+
+        window.addEventListener('scroll', function () {
+            if (!ticking) {
+                requestAnimationFrame(function () {
+                    applyFloatState();
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        }, { passive: true });
+
+        // Run once on load in case page is already scrolled
+        applyFloatState();
+    }
 })();
+
 
 /**
  * Toggles the visibility of table sub-rows with smooth CSS transitions.
