@@ -209,10 +209,16 @@
                         <tr class="subrow-${cat.id} ${subClass} bg-table-row border-b border-table-border hover:bg-white transition-colors duration-150">
                             <td class="px-3 md:px-5 py-2 md:py-2.5 text-center text-table-subtle">${item.no}</td>
                             <td class="px-3 md:px-5 py-2 md:py-2.5 font-medium text-table-medium max-w-0 truncate" title="${item.uraian}">${item.uraian}</td>
-                            <td class="px-3 md:px-5 py-2 md:py-2.5 text-center tabular-nums">${item.volume}</td>
+                            <td class="px-3 md:px-5 py-2 md:py-2.5 text-center">
+                                <input type="number" min="0" step="any"
+                                    value="${item.volume}"
+                                    class="w-20 px-2 py-1 text-xs border border-table-border rounded text-center focus:outline-none focus:ring-1 focus:ring-primary/40 focus:border-primary tabular-nums bg-white"
+                                    data-field="volume" data-cat="${cat.id}" data-item="${item.no}"
+                                    data-harga-dasar="${item.hargaDasar}" />
+                            </td>
                             <td class="px-3 md:px-5 py-2 md:py-2.5 text-center text-table-subtle">${item.satuan}</td>
                             <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums">${fmt(item.hargaDasar)}</td>
-                            <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums font-semibold text-table-strong">${fmt(item.harga)}</td>
+                            <td class="rab-harga-cell-${cat.id}-${item.no} px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums font-semibold text-table-strong">${fmt(item.harga)}</td>
                             <td class="px-3 md:px-5 py-2 md:py-2.5 text-center text-table-muted">${pct(item.harga, grandTotal)}</td>
                             <td class="px-3 md:px-5 py-2 md:py-2.5 text-center">
                                 <button onclick="window.location.href=(window.RAB_INIT&&window.RAB_INIT.rincianAhsUrl)||'/menu-rap/rincian-ahs'" class="cursor-pointer bg-primary hover:bg-primary-hover active:scale-95 text-white px-2.5 md:px-3.5 py-1 rounded-md text-[10px] md:text-xs font-medium transition-all duration-150 focus:outline-none">
@@ -220,6 +226,7 @@
                                 </button>
                             </td>
                         </tr>`;
+
                 });
             }
         });
@@ -227,7 +234,38 @@
         tbody.innerHTML = html;
         updateTotals(grandTotal);
         bindCategoryToggle();
+        bindVolumeInputs();
     }
+
+    /* ============================================================
+       VOLUME INPUT — live recalculation of Harga & footer totals
+    ============================================================ */
+    function bindVolumeInputs() {
+        tbody.querySelectorAll('input[data-field="volume"]').forEach(function (input) {
+            input.addEventListener('input', function () {
+                const volume     = parseFloat(input.value) || 0;
+                const hargaDasar = parseFloat(input.dataset.hargaDasar) || 0;
+                const newHarga   = volume * hargaDasar;
+
+                // Update the paired Harga cell
+                const catId  = input.dataset.cat;
+                const itemNo = input.dataset.item;
+                const cell   = tbody.querySelector('.rab-harga-cell-' + catId + '-' + itemNo);
+                if (cell) cell.textContent = fmt(newHarga);
+
+                // Recompute grand total from all current volume inputs
+                let total = 0;
+                tbody.querySelectorAll('input[data-field="volume"]').forEach(function (inp) {
+                    const v = parseFloat(inp.value) || 0;
+                    const h = parseFloat(inp.dataset.hargaDasar) || 0;
+                    total  += v * h;
+                });
+                updateTotals(total);
+            });
+        });
+    }
+
+
 
     /* ============================================================
        RENDER — EDITABLE (category headers only + Add Item per cat)
