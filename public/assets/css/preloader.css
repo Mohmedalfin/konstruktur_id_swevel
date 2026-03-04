@@ -1,0 +1,43 @@
+/* ===== FULLSCREEN LOADER ===== */
+#page-loader {
+    position: fixed;
+    inset: 0;
+    background: white;
+    /* bisa ganti #0f172a kalau mau dark */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    transition: opacity .4s ease, visibility .4s ease;
+}
+
+/* hide state */
+#page-loader.hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+
+/* loader size */
+.loader-container {
+    width: 50px;
+    height: 50px;
+}
+
+/* animation */
+.loader-boxes {
+    width: 50px;
+    height: 50px;
+    fill: none;
+    stroke-width: 50px;
+    stroke: #f97316;
+    /* orange modern */
+    stroke-dasharray: 50;
+    stroke-dashoffset: 50%;
+    animation: loaderAnimate 1.8s linear infinite;
+}
+
+@keyframes loaderAnimate {
+    to {
+        stroke-dashoffset: 250%;
+    }
+}

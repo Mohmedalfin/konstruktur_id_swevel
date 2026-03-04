@@ -6,7 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= esc($title ?? 'App') ?></title>
 
+
     <link rel="stylesheet" href="<?= base_url('assets/css/output.css') ?>">
+    <link rel="stylesheet" href="<?= base_url('assets/vendor/vanilla-calendar-pro/style/layout.css') ?>">
+    <link rel="stylesheet" href="<?= base_url('assets/vendor/vanilla-calendar-pro/style/index.css') ?>">
     <link rel="stylesheet" href="<?= base_url('assets/fontawesome/css/all.min.css') ?>">
 </head>
 
@@ -26,7 +29,7 @@
     <script src="<?= base_url('assets/vendor/vanilla-calendar-pro/index.js') ?>"></script>
 
     <!-- ✅ PRELINE CORE -->
-    <script src="<?= base_url('node_modules/preline/dist/preline.js') ?>"></script>
+    <script src="<?= base_url('assets/vendor/preline/dist/index.js') ?>"></script>
     <script src="<?= base_url('assets/js/preline.js') ?>"></script>
     <script>
         window.addEventListener('load', () => {
