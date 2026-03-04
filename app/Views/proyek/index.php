@@ -1,8 +1,16 @@
 <?= $this->extend('layouts/app') ?>
 
 <?= $this->section('topbar') ?>
-<header class="bg-primary text-white py-5">
-  <h1 class="text-center text-4xl font-bold">DAFTAR PROYEK</h1>
+<header class="relative text-white py-6 md:py-10 bg-cover bg-center"
+  style="background-image: url('<?= base_url('assets/images/BackgroundTopBar.png') ?>');">
+
+  <div class="absolute inset-0 bg-black/40"></div>
+
+  <div class="relative max-w-7xl mx-auto px-4">
+    <h1 class="text-center text-3xl font-bold">
+      <?= esc($title ?? 'DAFTAR PROYEK') ?>
+    </h1>
+  </div>
 </header>
 <?= $this->endSection() ?>
 

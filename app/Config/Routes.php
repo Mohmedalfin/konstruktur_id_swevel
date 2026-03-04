@@ -27,8 +27,8 @@ $routes->get('/menu-rap/create', 'menu\MenuRapController::create');
 $routes->post('/menu-rap/store', 'menu\MenuRapController::store');
 
 // schedule
-$routes->get('/schedule', 'ScheduleController::index');
+$routes->get('/schedule', 'menu\ScheduleController::index');
+
 
 // monitoring
 $routes->get('/monitoring', 'MonitoringController::index');
-

@@ -1,9 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 @import "tailwindcss";
 
 /* Scan Preline JS supaya class ter-detect */
 @source "../../../node_modules/preline/dist/*.js";
 
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
 /* ======================
    ROOT VARIABLES
@@ -32,13 +32,20 @@
   /* Table */
   --table-category-bg: #3b5278;
   --table-category-hover: #344a6b;
-  --table-row-bg: #f9fafb;           /* gray-50/70 equivalent */
-  --table-row-border: #e5e7eb;       /* gray-200 equivalent */
-  --table-text-body: #374151;        /* gray-700 */
-  --table-text-strong: #111827;      /* gray-900 */
-  --table-text-medium: #1f2937;      /* gray-800 */
-  --table-text-muted: #9ca3af;       /* gray-400 */
-  --table-text-subtle: #6b7280;      /* gray-500 */
+  --table-row-bg: #f9fafb;
+  /* gray-50/70 equivalent */
+  --table-row-border: #e5e7eb;
+  /* gray-200 equivalent */
+  --table-text-body: #374151;
+  /* gray-700 */
+  --table-text-strong: #111827;
+  /* gray-900 */
+  --table-text-medium: #1f2937;
+  /* gray-800 */
+  --table-text-muted: #9ca3af;
+  /* gray-400 */
+  --table-text-subtle: #6b7280;
+  /* gray-500 */
 }
 
 /* ======================
@@ -86,7 +93,8 @@
 @layer base {
   html {
     font-family: var(--font-sans);
-    scrollbar-gutter: stable; /* Prevents layout shift when scrollbar appears/disappears */
+    scrollbar-gutter: stable;
+    /* Prevents layout shift when scrollbar appears/disappears */
   }
 }
 
@@ -117,26 +125,28 @@
    entire navbar height on desktop
 ================================= */
 @media (min-width: 768px) {
+
   /* Fixed navbar height */
-  header > nav {
-    height: 3.5rem; /* 56px */
+  header>nav {
+    height: 3.5rem;
+    /* 56px */
     padding-top: 0;
     padding-bottom: 0;
   }
 
   /* All wrapper divs between nav and links must pass height through */
-  header > nav > .hs-collapse,
-  header > nav > .hs-collapse > div,
-  header > nav > .hs-collapse > div > div,
-  header > nav > .hs-collapse > div > div > div,
-  header > nav > .hs-collapse > div > div > div > div,
-  header > nav > .hs-collapse > div > div > div > div > .hs-dropdown {
+  header>nav>.hs-collapse,
+  header>nav>.hs-collapse>div,
+  header>nav>.hs-collapse>div>div,
+  header>nav>.hs-collapse>div>div>div,
+  header>nav>.hs-collapse>div>div>div>div,
+  header>nav>.hs-collapse>div>div>div>div>.hs-dropdown {
     height: 100%;
   }
 
   /* Nav links and dropdown button fill full height, no rounded corners */
-  header > nav > .hs-collapse > div > div > div > div > a,
-  header > nav > .hs-collapse > div > div > div > div > .hs-dropdown > button {
+  header>nav>.hs-collapse>div>div>div>div>a,
+  header>nav>.hs-collapse>div>div>div>div>.hs-dropdown>button {
     height: 100%;
     display: flex;
     align-items: center;
@@ -144,4 +154,45 @@
     padding-top: 0;
     padding-bottom: 0;
   }
+}
+
+/* === FIX: paksa kalender jadi grid 7 kolom === */
+[data-vc="dates"] {
+  color: #e5e7eb;
+  grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+}
+
+.vc-week__day {
+  color: #e5e7eb !important;
+}
+
+[aria-label="Sunday"] {
+  color: red !important;
+}
+
+[data-vc="date"] {
+  width: auto !important;
+}
+
+.vc-date {
+  border-bottom: 1px solid #e5e7eb !important;
+}
+
+[data-vc="date-btn"] {
+  width: 100% !important;
+  justify-content: center !important;
+}
+
+/* === FIX: Calendar popup background (vanilla-calendar-pro / Preline datepicker) === */
+[data-vc="calendar"] {
+  background: var(--primary) !important;
+  border: var(--secondary) !important;
+  box-shadow: var(--secondary) !important;
+}
+
+/* === Selected date (fallback): aria-selected === */
+[data-vc="calendar"] button[aria-selected="true"] {
+  background: var(--secondary) !important;
+  color: #fff !important;
+  /* border-radius: 9999px !important; */
 }

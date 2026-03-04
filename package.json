@@ -12,6 +12,7 @@
     "tailwindcss": "^4.2.1"
   },
   "dependencies": {
-    "preline": "^2.0.0"
+    "preline": "^2.7.0",
+    "vanilla-calendar-pro": "^3.1.0"
   }
 }
