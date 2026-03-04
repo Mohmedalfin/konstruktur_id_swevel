@@ -308,12 +308,12 @@
                             ${cat.name}
                         </span>
                     </td>
-                    <!-- Col 8: Tambah + Hapus buttons (right) -->
+                    <!-- Col 8: Tambah AHS + Hapus buttons (right) -->
                     <td class="px-2 md:px-3 py-2.5 md:py-3 text-center">
                         <div class="inline-flex items-center gap-1">
                             <button
                                 class="add-subitem-btn inline-flex items-center justify-center w-6 h-6 rounded-md bg-white/20 hover:bg-white/30 text-white transition-colors duration-150 focus:outline-none"
-                                data-cat="${cat.id}" data-catname="${cat.name}" title="Tambah item">
+                                data-cat="${cat.id}" data-catname="${cat.name}" title="Tambah AHS">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                 </svg>
@@ -394,62 +394,19 @@
     }
 
     /* ============================================================
-       ADD SUBITEM BUTTON (editable)
-       Stub — replace with modal / inline input form logic
+       ADD SUBITEM BUTTON (editable) — navigates to Tambah AHS
     ============================================================ */
     function bindAddSubItem() {
         tbody.querySelectorAll('.add-subitem-btn').forEach(btn => {
-            btn.addEventListener('click', function () {
-                const catId      = btn.dataset.cat;
-                const catName    = btn.dataset.catname;
-                const placeholder = tbody.querySelector(`.subrow-placeholder-${catId}`);
-
-                // Count existing items for this category
-                const existing = tbody.querySelectorAll(`.subrow-item-${catId}`).length;
-                const rowNo    = existing + 1;
-
-                const newRow = document.createElement('tr');
-                newRow.className = `subrow-item-${catId} bg-table-row border-b border-table-border`;
-                newRow.innerHTML = `
-                    <td class="px-3 md:px-5 py-2 md:py-2.5 text-center text-table-subtle">${rowNo}</td>
-                    <td class="px-3 md:px-5 py-2 md:py-2.5 max-w-0">
-                        <input type="text" placeholder="Uraian pekerjaan…"
-                            class="w-full px-2 py-1 text-xs border border-table-border rounded focus:outline-none focus:ring-1 focus:ring-primary/40 text-table-medium"/>
-                    </td>
-                    <td class="px-3 md:px-5 py-2 md:py-2.5 text-center">
-                        <input type="number" value="1" min="0"
-                            class="w-16 px-2 py-1 text-xs border border-table-border rounded text-center focus:outline-none focus:ring-1 focus:ring-primary/40"/>
-                    </td>
-                    <td class="px-3 md:px-5 py-2 md:py-2.5 text-center">
-                        <input type="text" value="m²"
-                            class="w-14 px-2 py-1 text-xs border border-table-border rounded text-center focus:outline-none focus:ring-1 focus:ring-primary/40"/>
-                    </td>
-                    <td class="px-3 md:px-5 py-2 md:py-2.5 text-right">
-                        <input type="number" value="0" min="0"
-                            class="w-28 px-2 py-1 text-xs border border-table-border rounded text-right focus:outline-none focus:ring-1 focus:ring-primary/40"/>
-                    </td>
-                    <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums font-semibold text-table-strong">Rp 0</td>
-                    <td class="px-3 md:px-5 py-2 md:py-2.5 text-center text-table-muted">—</td>
-                    <td class="px-3 md:px-5 py-2 md:py-2.5 text-center">
-                        <button class="remove-row-btn text-red-400 hover:text-red-600 transition-colors p-1 rounded" title="Hapus">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                            </svg>
-                        </button>
-                    </td>`;
-
-                // Remove placeholder row if first item
-                if (existing === 0 && placeholder) placeholder.remove();
-
-                // Insert before the category's Tambah button row
-                const catHeaderRow = btn.closest('tr');
-                catHeaderRow.after(newRow);
-
-                // Bind remove button
-                newRow.querySelector('.remove-row-btn').addEventListener('click', () => newRow.remove());
-
-                // Focus uraian input
-                newRow.querySelector('input[type="text"]').focus();
+            btn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                const catId = btn.dataset.cat;
+                // Store which category triggered this so tambah-ahs can pre-filter
+                try { sessionStorage.setItem('rab_tambah_ahs_cat', catId); } catch (_) {}
+                const url = (window.RAB_INIT && window.RAB_INIT.tambahAhsUrl)
+                    ? window.RAB_INIT.tambahAhsUrl
+                    : '/menu-rap/tambah-ahs';
+                window.location.href = url;
             });
         });
 

@@ -16,4 +16,9 @@ class MenuRapController extends BaseController
     {
         return view('proyek/menu/rincian-ahs');
     }
+
+    public function tambahAHS()
+    {
+        return view('proyek/menu/tambah-ahs');
+    }
 }

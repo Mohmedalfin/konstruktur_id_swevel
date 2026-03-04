@@ -2,7 +2,6 @@
 
 /* Scan Preline JS supaya class ter-detect */
 @source "../../../node_modules/preline/dist/*.js";
-
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
 /* ======================
@@ -86,7 +85,17 @@
 @layer base {
   html {
     font-family: var(--font-sans);
-    scrollbar-gutter: stable; /* Prevents layout shift when scrollbar appears/disappears */
+    scrollbar-gutter: stable;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  *, ::before, ::after {
+    font-family: inherit;
   }
 }
 

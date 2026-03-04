@@ -65,9 +65,8 @@
     /* ── Floating navbar on scroll ──────────────────────────────── */
     const header = document.querySelector('header');
     if (header) {
-        // Classes added when floating
         const floatAdd = [
-            'mt-3',           // gap from top edge
+            'top-3',          // gap from viewport top (works with sticky)
             'mx-3',           // horizontal gap
             'sm:mx-6',
             'lg:mx-10',
@@ -78,6 +77,7 @@
         ];
         // Classes removed when floating (revert defaults)
         const floatRemove = [
+            'top-0',
             'border-b',
             'border-navbar-line',
         ];
@@ -88,7 +88,7 @@
 
         function applyFloatState() {
             const shouldFloat = window.scrollY > 20;
-            if (shouldFloat === floating) return; // nothing changed
+            if (shouldFloat === floating) return; 
             floating = shouldFloat;
 
             if (shouldFloat) {
@@ -110,7 +110,6 @@
             }
         }, { passive: true });
 
-        // Run once on load in case page is already scrolled
         applyFloatState();
     }
 })();

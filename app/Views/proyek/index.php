@@ -71,98 +71,28 @@
 </div>
 
 <!-- Grid Cards -->
-<div class="mt-6 rounded-2xl bg-white p-6 shadow-md">
-  <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+<div class="mt-6">
+  <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
     <?php
     $cards = [
         // Cards with existing RAB data → readonly mode
-        ['title' => 'Pembangunan Gedung Klinik Pratama',     'lokasi' => 'Kab. Sleman, DIY',       'nilai' => 'Rp 3.250.000.000', 'pct' => '-2,1%', 'tgl' => '2026-02-12', 'href' => base_url('menu-rap?id=1')],
-        ['title' => 'Renovasi Gedung Kantor Dinas',          'lokasi' => 'Kota Semarang, Jateng',  'nilai' => 'Rp 1.800.000.000', 'pct' => '+0,8%', 'tgl' => '2026-01-20', 'href' => base_url('menu-rap?id=2')],
+        ['title' => 'Pembangunan Gedung Klinik Pratama',  'lokasi' => 'Kab. Sleman, DIY',       'nilai' => 'Rp 3.250.000.000', 'pct' => '-2,1%', 'tgl' => '2026-02-12', 'href' => base_url('menu-rap?id=1')],
+        ['title' => 'Renovasi Gedung Kantor Dinas',       'lokasi' => 'Kota Semarang, Jateng',  'nilai' => 'Rp 1.800.000.000', 'pct' => '+0,8%', 'tgl' => '2026-01-20', 'href' => base_url('menu-rap?id=2')],
         // Cards without RAB yet → editable / new mode
-        ['title' => 'Pembangunan Jembatan Desa',             'lokasi' => 'Kab. Banyumas, Jateng', 'nilai' => '—',                'pct' => '—',     'tgl' => '2026-03-05', 'href' => base_url('menu-rap?mode=new')],
-        ['title' => 'Rehabilitasi Gedung Sekolah',           'lokasi' => 'Kota Surabaya, Jatim',  'nilai' => '—',                'pct' => '—',     'tgl' => '2026-03-10', 'href' => base_url('menu-rap?mode=new')],
-        ['title' => 'Pembangunan Embung Irigasi',            'lokasi' => 'Kab. Bantul, DIY',      'nilai' => '—',                'pct' => '—',     'tgl' => '2026-03-18', 'href' => base_url('menu-rap?mode=new')],
-        ['title' => 'Peningkatan Jalan Kabupaten',           'lokasi' => 'Kab. Magelang, Jateng', 'nilai' => '—',                'pct' => '—',     'tgl' => '2026-03-22', 'href' => base_url('menu-rap?mode=new')],
+        ['title' => 'Pembangunan Jembatan Desa',          'lokasi' => 'Kab. Banyumas, Jateng',  'nilai' => null,               'pct' => null,    'tgl' => '2026-03-05', 'href' => base_url('menu-rap?mode=new')],
+        ['title' => 'Rehabilitasi Gedung Sekolah',        'lokasi' => 'Kota Surabaya, Jatim',   'nilai' => null,               'pct' => null,    'tgl' => '2026-03-10', 'href' => base_url('menu-rap?mode=new')],
+        ['title' => 'Pembangunan Embung Irigasi',         'lokasi' => 'Kab. Bantul, DIY',       'nilai' => null,               'pct' => null,    'tgl' => '2026-03-18', 'href' => base_url('menu-rap?mode=new')],
+        ['title' => 'Peningkatan Jalan Kabupaten',        'lokasi' => 'Kab. Magelang, Jateng',  'nilai' => null,               'pct' => null,    'tgl' => '2026-03-22', 'href' => base_url('menu-rap?mode=new')],
     ];
-    foreach ($cards as $card): ?>
-      <div class="relative group overflow-hidden rounded-2xl bg-white shadow-lg ring-1 ring-black/5 hover:shadow-xl transition-all duration-300">
-        <!-- Full Card Link -->
-        <a href="<?= $card['href'] ?>" class="absolute inset-0 z-10" aria-label="View Project"></a>
 
-        <!-- COVER -->
-        <div class="relative h-50 w-full overflow-hidden rounded-t-2xl">
-          <img
-            src="<?= base_url('assets/images/BackgroundLogin.png') ?>"
-            class="h-full w-full object-cover"
-            alt="Cover Proyek">
-
-          <!-- tombol ... (tidak diubah) -->
-          <div class="absolute top-0 right-0 z-20">
-            <div class="hs-dropdown relative inline-flex">
-              <button type="button"
-                class="hs-dropdown-toggle inline-flex size-6 items-center justify-center rounded-tr-lg rounded-bl-xl bg-primary text-white shadow-md ring-1 ring-black/10 hover:bg-white hover:text-primary px-5 ransition delay-150 duration-300 ease-in-out hover:-translate-y-1 hover:scale-110 hover:bg-indigo-500">
-                <i class="fa-solid fa-ellipsis"></i>
-              </button>
-
-              <!-- dropdown menu -->
-              <div
-                class="hs-dropdown-menu hidden z-50 mt-2 w-44 overflow-hidden rounded-xl bg-white shadow-xl ring-1 ring-black/10"
-                role="menu">
-                <a class="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100" href="#">
-                  <i class="fa-solid fa-user-plus w-4 text-light"></i>
-                  Undang Tim
-                </a>
-                <a class="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100" href="#">
-                  <i class="fa-regular fa-copy w-4"></i>
-                  Duplikat
-                </a>
-                <a class="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100" href="#">
-                  <i class="fa-regular fa-trash-can w-4"></i>
-                  Hapus
-                </a>
-                <a class="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100" href="#">
-                  <i class="fa-solid fa-circle-check w-4"></i>
-                  Selesaikan
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- BODY -->
-        <div class="p-5">
-          <h3 class="text-base font-bold leading-snug text-text-primary text-center">
-            <?= $card['title'] ?>
-          </h3>
-
-          <div class="mt-4 space-y-2 text-sm text-slate-700">
-            <div class="flex items-center gap-3">
-              <i class="fa-solid fa-location-dot w-4 text-primary"></i>
-              <span><?= $card['lokasi'] ?></span>
-            </div>
-
-            <div class="flex items-center gap-3">
-              <i class="fa-solid fa-money-bill-wave w-4 text-primary"></i>
-              <span><?= $card['nilai'] ?></span>
-            </div>
-
-            <div class="flex items-center gap-3">
-              <i class="fa-solid fa-chart-simple w-4 text-primary"></i>
-              <span><?= $card['pct'] ?></span>
-            </div>
-
-            <div class="flex items-center gap-3">
-              <i class="fa-solid fa-calendar-days w-4 text-primary"></i>
-              <span><?= $card['tgl'] ?></span>
-            </div>
-          </div>
-        </div>
-      </div>
-    <?php endforeach; ?>
-
+    foreach ($cards as $card):
+        echo view('partials/card-proyek', ['card' => $card]);
+    endforeach;
+    ?>
   </div>
 </div>
 <?= $this->endSection() ?>
+
 
 <?= $this->section('scripts') ?>
 <?= $this->endSection() ?>
