@@ -26,7 +26,6 @@
             }
         });
 
-        // Close when clicking outside
         document.addEventListener('click', function () {
             if (dropBtn.getAttribute('aria-expanded') === 'true') {
                 dropMenu.classList.add('hidden', 'opacity-0');
@@ -63,10 +62,16 @@
     const header = document.querySelector('header');
     if (header) {
         const floatAdd = [
-            'mt-3', 'mx-3', 'sm:mx-6', 'lg:mx-10',
-            'rounded-2xl', 'shadow-xl', 'border', 'border-white/10',
+            'top-3',          // gap from viewport top (works with sticky)
+            'mx-3',           // horizontal gap
+            'sm:mx-6',
+            'lg:mx-10',
+            'rounded-2xl',    // rounded corners
+            'shadow-xl',      // elevated shadow
+            'border',
+            'border-white/10',
         ];
-        const floatRemove = ['border-b', 'border-navbar-line'];
+        const floatRemove = ['top-0', 'border-b', 'border-navbar-line'];
 
         let ticking = false, floating = false;
 

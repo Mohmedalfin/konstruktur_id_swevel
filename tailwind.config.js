@@ -1,8 +1,9 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    "./app/Views/**/*.php", // Adjust these paths based on your framework structure
+    "./app/Views/**/*.php",
     "./public/**/*.html",
+    "./public/assets/js/**/*.js",
     "./src/**/*.{html,js,php}"
   ],
   theme: {
