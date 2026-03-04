@@ -50,12 +50,12 @@ $userRole = session()->get('kategori_akun') ?? session()->get('role') ?? 'Kontra
                             <!-- Dropdown (User Profile) -->
                             <div class="hs-dropdown [--strategy:static] md:[--strategy:fixed] [--adaptive:none] md:[--adaptive:adaptive] [--is-collapse:true] md:[--is-collapse:false]">
                                 <button id="hs-header-base-dropdown" type="button"
-                                    class="hs-dropdown-toggle w-full h-14 p-2 md:px-3 md:justify-center flex items-center text-sm text-navbar-nav-foreground hover:bg-navbar-nav-hover focus:outline-hidden focus:bg-navbar-nav-focus rounded-lg"
+                                    class="hs-dropdown-toggle w-full h-14 p-2 md:px-3 md:justify-center flex items-center text-sm text-navbar-nav-foreground hover:bg-navbar-nav-hover focus:outline-hidden focus:bg-navbar-nav-focus"
                                     aria-haspopup="menu" aria-expanded="false" aria-label="Dropdown">
  
-                                    <div class="flex items-center p-2 gap-x-3 transition-all duration-300 hover:bg-white/10 cursor-pointer group animate-float">
+                                    <div class="flex items-center p-2 gap-x-3">
     
-                                        <div class="shrink-0 transition-all duration-500 ease-out group-hover:scale-125 group-hover:-rotate-12 group-hover:-translate-y-1">
+                                        <div class="shrink-0">
                                             <i class="text-white fa-solid fa-user text-md drop-shadow-[0_0_5px_rgba(255,255,255,0.5)]"></i>
                                         </div>
 
