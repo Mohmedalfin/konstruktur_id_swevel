@@ -1,37 +1,24 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ["./app/Views/**/*.php"],
+  content: [
+    "./app/Views/**/*.php", // Adjust these paths based on your framework structure
+    "./public/**/*.html",
+    "./src/**/*.{html,js,php}"
+  ],
   theme: {
     extend: {
-      colors: {
-        primary: "var(--primary)",
-        secondary: "var(--secondary)",
-
-        bg: {
-          landing1: "var(--bg-landing-1)",
-          landing2: "var(--bg-landing-2)",
-          nav: "var(--bg-nav)",
-          third: "var(--bg-third)",
-          dashboard: "var(--bg-dashboard)",
-          card: "var(--bg-card)",
-        },
-
-        text: {
-          primary: "var(--text-primary)",
-          secondary: "var(--text-secondary)",
-          pudar: "var(--text-pudar)",
-          primaryPudar: "var(--text-primary-pudar)",
-        },
-
-        outline: {
-          slider: "var(--outline-slider)",
-        },
-
-        checklist: {
-          box: "var(--checklist-box)",
-        },
+      fontFamily: {
+        sans: ['Inter', 'sans-serif'],
       },
+      colors: {
+        brand: {
+          dark: '#162345',
+          accent: '#FBBF24',
+          cream: '#FEFDF8',
+          bg: '#333A4A'
+        }
+      }
     },
   },
   plugins: [],
-};
+}

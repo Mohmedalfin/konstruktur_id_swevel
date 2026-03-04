@@ -6,14 +6,15 @@ use App\Models\RoleModel; // Import modelnya
 
 class Home extends BaseController
 {
-    public function index()
+    
+    
+    public function login()
     {
-        $roleModel = new RoleModel();
-        
-        // Ambil semua data role
-        $data['daftar_role'] = $roleModel->findAll();
-
-        // Kirim data ke view
-        return view('tampil_role', $data);
+        return view('auth/loginUser');
+    }
+    
+    public function register()
+    {
+        return view('auth/registerUser');
     }
 }
