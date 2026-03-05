@@ -23,8 +23,8 @@ $routes->get('/dashboard', 'menu\DashboardController::index');
 
 // menu rap (RAB & RAP)
 $routes->get('/menu-rap', 'menu\MenuRapController::index');
-$routes->get('/menu-rap/create', 'menu\MenuRapController::create');
-$routes->post('/menu-rap/store', 'menu\MenuRapController::store');
+$routes->get('/menu-rap/rincian-ahs', 'menu\MenuRapController::rincianAHS');
+$routes->get('/menu-rap/tambah-ahs', 'menu\MenuRapController::tambahAHS');
 
 // schedule
 $routes->get('/schedule', 'menu\ScheduleController::index');

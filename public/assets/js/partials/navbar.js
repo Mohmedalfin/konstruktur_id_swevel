@@ -33,8 +33,24 @@
         }
     });
 
+    // Make dropdown button active if its internal links correspond to the current page
+    const dropBtn = document.getElementById('hs-header-base-dropdown');
+    if (dropBtn) {
+        // Here you can define which paths make the profile dropdown "active" (e.g. /profile)
+        const profilePaths = ['/profile', '/account', '/settings']; 
+        let isDropdownActive = profilePaths.some(path => currentPath.startsWith(path));
+
+        if (isDropdownActive) {
+            activeClasses.forEach(function (cls)   { dropBtn.classList.add(cls); });
+            inactiveClasses.forEach(function (cls) { dropBtn.classList.remove(cls); });
+        } else {
+            inactiveClasses.forEach(function (cls) { dropBtn.classList.add(cls); });
+            activeClasses.forEach(function (cls)   { dropBtn.classList.remove(cls); });
+        }
+    }
+
     /* ── Hamburger ↔ X icon swap ───────────────────────────────── */
-    const toggleBtn     = document.getElementById('hs-header-base-collapse');
+    const toggleBtn = document.getElementById('hs-header-base-collapse');
     if (toggleBtn) {
         const iconHamburger = document.getElementById('nav-icon-hamburger');
         const iconClose     = document.getElementById('nav-icon-close');
@@ -45,7 +61,59 @@
             if (iconClose)     iconClose.classList.toggle('hidden',      isCurrentlyOpen);
         });
     }
+
+    /* ── Floating navbar on scroll ──────────────────────────────── */
+    const header = document.querySelector('header');
+    if (header) {
+        const floatAdd = [
+            'top-3',          // gap from viewport top (works with sticky)
+            'mx-3',           // horizontal gap
+            'sm:mx-6',
+            'lg:mx-10',
+            'rounded-2xl',    // rounded pill corners
+            'shadow-xl',      // elevated shadow
+            'border',
+            'border-white/10',
+        ];
+        // Classes removed when floating (revert defaults)
+        const floatRemove = [
+            'top-0',
+            'border-b',
+            'border-navbar-line',
+        ];
+
+
+        let ticking  = false;
+        let floating = false;
+
+        function applyFloatState() {
+            const shouldFloat = window.scrollY > 20;
+            if (shouldFloat === floating) return; 
+            floating = shouldFloat;
+
+            if (shouldFloat) {
+                floatAdd.forEach(cls    => header.classList.add(cls));
+                floatRemove.forEach(cls => header.classList.remove(cls));
+            } else {
+                floatAdd.forEach(cls    => header.classList.remove(cls));
+                floatRemove.forEach(cls => header.classList.add(cls));
+            }
+        }
+
+        window.addEventListener('scroll', function () {
+            if (!ticking) {
+                requestAnimationFrame(function () {
+                    applyFloatState();
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        }, { passive: true });
+
+        applyFloatState();
+    }
 })();
+
 
 /**
  * Toggles the visibility of table sub-rows with smooth CSS transitions.

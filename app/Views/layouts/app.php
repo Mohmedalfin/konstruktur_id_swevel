@@ -16,7 +16,8 @@
 <body class="bg-gray-50">
 
     <?= $this->include('partials/header') ?>
-    <?= $this->renderSection('topbar') ?>
+    <?php echo view('partials/topbar', ['title' => 'Daftar Project', 'subtitle' => '']); ?>
+
 
     <main class="container mx-auto px-4 py-6">
         <?= $this->renderSection('content') ?>

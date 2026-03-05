@@ -1,11 +1,11 @@
 /**
  * Data structure:
  *   { categories: [ { id, name, items: [ { no, uraian, volume, satuan, hargaDasar, harga } ] } ] }
- *
  * Modes:
  *  'readonly' — card clicked → category headers + sub-rows, accordion collapsible, Detail button
  *  'editable' — Add RAB clicked → category headers only, "+ Tambah Item" per category
  */
+
 (function () {
 
     'use strict';
@@ -31,7 +31,7 @@
     const addRabBtn   = document.getElementById('addRabBtn');
     const cards       = document.querySelectorAll('.rab-card');
 
-    if (!wrapper || !tbody) return; // guard: table-rab.php skeleton not present
+    if (!wrapper || !tbody) return; 
 
     /* ============================================================
        DUMMY DATA  (replace with real CI4 AJAX endpoints later)
@@ -209,17 +209,24 @@
                         <tr class="subrow-${cat.id} ${subClass} bg-table-row border-b border-table-border hover:bg-white transition-colors duration-150">
                             <td class="px-3 md:px-5 py-2 md:py-2.5 text-center text-table-subtle">${item.no}</td>
                             <td class="px-3 md:px-5 py-2 md:py-2.5 font-medium text-table-medium max-w-0 truncate" title="${item.uraian}">${item.uraian}</td>
-                            <td class="px-3 md:px-5 py-2 md:py-2.5 text-center tabular-nums">${item.volume}</td>
+                            <td class="px-3 md:px-5 py-2 md:py-2.5 text-center">
+                                <input type="number" min="0" step="any"
+                                    value="${item.volume}"
+                                    class="w-20 px-2 py-1 text-xs border border-table-border rounded text-center focus:outline-none focus:ring-1 focus:ring-primary/40 focus:border-primary tabular-nums bg-white"
+                                    data-field="volume" data-cat="${cat.id}" data-item="${item.no}"
+                                    data-harga-dasar="${item.hargaDasar}" />
+                            </td>
                             <td class="px-3 md:px-5 py-2 md:py-2.5 text-center text-table-subtle">${item.satuan}</td>
                             <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums">${fmt(item.hargaDasar)}</td>
-                            <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums font-semibold text-table-strong">${fmt(item.harga)}</td>
+                            <td class="rab-harga-cell-${cat.id}-${item.no} px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums font-semibold text-table-strong">${fmt(item.harga)}</td>
                             <td class="px-3 md:px-5 py-2 md:py-2.5 text-center text-table-muted">${pct(item.harga, grandTotal)}</td>
                             <td class="px-3 md:px-5 py-2 md:py-2.5 text-center">
-                                <button class="bg-primary hover:bg-primary-hover active:scale-95 text-white px-2.5 md:px-3.5 py-1 rounded-md text-[10px] md:text-xs font-medium transition-all duration-150 focus:outline-none">
+                                <button onclick="window.location.href=(window.RAB_INIT&&window.RAB_INIT.rincianAhsUrl)||'/menu-rap/rincian-ahs'" class="cursor-pointer bg-primary hover:bg-primary-hover active:scale-95 text-white px-2.5 md:px-3.5 py-1 rounded-md text-[10px] md:text-xs font-medium transition-all duration-150 focus:outline-none">
                                     Detail
                                 </button>
                             </td>
                         </tr>`;
+
                 });
             }
         });
@@ -227,7 +234,38 @@
         tbody.innerHTML = html;
         updateTotals(grandTotal);
         bindCategoryToggle();
+        bindVolumeInputs();
     }
+
+    /* ============================================================
+       VOLUME INPUT — live recalculation of Harga & footer totals
+    ============================================================ */
+    function bindVolumeInputs() {
+        tbody.querySelectorAll('input[data-field="volume"]').forEach(function (input) {
+            input.addEventListener('input', function () {
+                const volume     = parseFloat(input.value) || 0;
+                const hargaDasar = parseFloat(input.dataset.hargaDasar) || 0;
+                const newHarga   = volume * hargaDasar;
+
+                // Update the paired Harga cell
+                const catId  = input.dataset.cat;
+                const itemNo = input.dataset.item;
+                const cell   = tbody.querySelector('.rab-harga-cell-' + catId + '-' + itemNo);
+                if (cell) cell.textContent = fmt(newHarga);
+
+                // Recompute grand total from all current volume inputs
+                let total = 0;
+                tbody.querySelectorAll('input[data-field="volume"]').forEach(function (inp) {
+                    const v = parseFloat(inp.value) || 0;
+                    const h = parseFloat(inp.dataset.hargaDasar) || 0;
+                    total  += v * h;
+                });
+                updateTotals(total);
+            });
+        });
+    }
+
+
 
     /* ============================================================
        RENDER — EDITABLE (category headers only + Add Item per cat)
@@ -270,12 +308,12 @@
                             ${cat.name}
                         </span>
                     </td>
-                    <!-- Col 8: Tambah + Hapus buttons (right) -->
+                    <!-- Col 8: Tambah AHS + Hapus buttons (right) -->
                     <td class="px-2 md:px-3 py-2.5 md:py-3 text-center">
                         <div class="inline-flex items-center gap-1">
                             <button
                                 class="add-subitem-btn inline-flex items-center justify-center w-6 h-6 rounded-md bg-white/20 hover:bg-white/30 text-white transition-colors duration-150 focus:outline-none"
-                                data-cat="${cat.id}" data-catname="${cat.name}" title="Tambah item">
+                                data-cat="${cat.id}" data-catname="${cat.name}" title="Tambah AHS">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                 </svg>
@@ -356,62 +394,19 @@
     }
 
     /* ============================================================
-       ADD SUBITEM BUTTON (editable)
-       Stub — replace with modal / inline input form logic
+       ADD SUBITEM BUTTON (editable) — navigates to Tambah AHS
     ============================================================ */
     function bindAddSubItem() {
         tbody.querySelectorAll('.add-subitem-btn').forEach(btn => {
-            btn.addEventListener('click', function () {
-                const catId      = btn.dataset.cat;
-                const catName    = btn.dataset.catname;
-                const placeholder = tbody.querySelector(`.subrow-placeholder-${catId}`);
-
-                // Count existing items for this category
-                const existing = tbody.querySelectorAll(`.subrow-item-${catId}`).length;
-                const rowNo    = existing + 1;
-
-                const newRow = document.createElement('tr');
-                newRow.className = `subrow-item-${catId} bg-table-row border-b border-table-border`;
-                newRow.innerHTML = `
-                    <td class="px-3 md:px-5 py-2 md:py-2.5 text-center text-table-subtle">${rowNo}</td>
-                    <td class="px-3 md:px-5 py-2 md:py-2.5 max-w-0">
-                        <input type="text" placeholder="Uraian pekerjaan…"
-                            class="w-full px-2 py-1 text-xs border border-table-border rounded focus:outline-none focus:ring-1 focus:ring-primary/40 text-table-medium"/>
-                    </td>
-                    <td class="px-3 md:px-5 py-2 md:py-2.5 text-center">
-                        <input type="number" value="1" min="0"
-                            class="w-16 px-2 py-1 text-xs border border-table-border rounded text-center focus:outline-none focus:ring-1 focus:ring-primary/40"/>
-                    </td>
-                    <td class="px-3 md:px-5 py-2 md:py-2.5 text-center">
-                        <input type="text" value="m²"
-                            class="w-14 px-2 py-1 text-xs border border-table-border rounded text-center focus:outline-none focus:ring-1 focus:ring-primary/40"/>
-                    </td>
-                    <td class="px-3 md:px-5 py-2 md:py-2.5 text-right">
-                        <input type="number" value="0" min="0"
-                            class="w-28 px-2 py-1 text-xs border border-table-border rounded text-right focus:outline-none focus:ring-1 focus:ring-primary/40"/>
-                    </td>
-                    <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums font-semibold text-table-strong">Rp 0</td>
-                    <td class="px-3 md:px-5 py-2 md:py-2.5 text-center text-table-muted">—</td>
-                    <td class="px-3 md:px-5 py-2 md:py-2.5 text-center">
-                        <button class="remove-row-btn text-red-400 hover:text-red-600 transition-colors p-1 rounded" title="Hapus">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                            </svg>
-                        </button>
-                    </td>`;
-
-                // Remove placeholder row if first item
-                if (existing === 0 && placeholder) placeholder.remove();
-
-                // Insert before the category's Tambah button row
-                const catHeaderRow = btn.closest('tr');
-                catHeaderRow.after(newRow);
-
-                // Bind remove button
-                newRow.querySelector('.remove-row-btn').addEventListener('click', () => newRow.remove());
-
-                // Focus uraian input
-                newRow.querySelector('input[type="text"]').focus();
+            btn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                const catId = btn.dataset.cat;
+                // Store which category triggered this so tambah-ahs can pre-filter
+                try { sessionStorage.setItem('rab_tambah_ahs_cat', catId); } catch (_) {}
+                const url = (window.RAB_INIT && window.RAB_INIT.tambahAhsUrl)
+                    ? window.RAB_INIT.tambahAhsUrl
+                    : '/menu-rap/tambah-ahs';
+                window.location.href = url;
             });
         });
 
