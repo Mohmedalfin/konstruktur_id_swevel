@@ -1,357 +1,491 @@
 /**
- * ajax_ahs.js
- * To connect to a real CI4 endpoint, replace fetchAhsData() with:
- *   const res  = await fetch(`/api/ahs/${id}`);
- *   return res.json();
+ * ajax_ahs.js — Rincian AHS (Input oleh Kontraktor)
+ * Fitur:
+ *  1. Input manual (Tambah Bahan / Alat / Upah)
+ *  2. Autocomplete inline saat mengetik di kolom Uraian
+ *  3. Modal "Pilih dari Daftar AHS" — search, filter tipe, multiselect
  */
+
 (function () {
+
     'use strict';
 
     /* ============================================================
        DOM REFERENCES
     ============================================================ */
-    const tbody      = document.getElementById('ahs-tbody');
-    const totalRab   = document.getElementById('ahs-total-rab');
-    const totalRap   = document.getElementById('ahs-total-rap');
-    const titleEl    = document.querySelector('#ahs-table')
-                           ? document.querySelector('[id="ahs-table"]')
-                               ?.closest('div')
-                               ?.previousElementSibling
-                               ?.querySelector('h2')
-                           : null;
+    const tbody          = document.getElementById('ahs-tbody');
+    const itemLabel      = document.getElementById('ahs-item-label');
+    const addBahanBtn    = document.getElementById('ahs-add-bahan-btn');
+    const addAlatBtn     = document.getElementById('ahs-add-alat-btn');
+    const addUpahBtn     = document.getElementById('ahs-add-upah-btn');
+    const simpanBtn      = document.getElementById('ahs-simpan-btn');
+    const totalBahanEl   = document.getElementById('ahs-total-bahan');
+    const totalAlatEl    = document.getElementById('ahs-total-alat');
+    const totalUpahEl    = document.getElementById('ahs-total-upah');
+    const totalKeselEl   = document.getElementById('ahs-total-keseluruhan');
+
+    // Modal elements
+    const modalOverlay   = document.getElementById('ahs-modal-overlay');
+    const modalClose     = document.getElementById('ahs-modal-close');
+    const modalCancel    = document.getElementById('ahs-modal-cancel');
+    const modalConfirm   = document.getElementById('ahs-modal-confirm');
+    const modalSearch    = document.getElementById('ahs-modal-search');
+    const modalTbody     = document.getElementById('ahs-modal-tbody');
+    const modalCheckAll  = document.getElementById('ahs-modal-check-all');
+    const modalCountEl   = document.getElementById('ahs-modal-selected-count');
+    const fromDbBtn      = document.getElementById('ahs-from-db-btn');
+    const filterBtns     = document.querySelectorAll('.ahs-modal-filter-btn');
 
     if (!tbody) return;
 
     /* ============================================================
-       DUMMY DATA  (replace fetchAhsData with a real fetch() call)
+       STATE
     ============================================================ */
-    const dummyDatabase = {
-        // keyed by item/pekerjaan ID (passed via window.AHS_INIT.id)
-        1: {
-            itemName: 'Pembuatan gudang semen dan peralatan',
-            jasaPct:  10,
-            categories: [
-                {
-                    id:    'bahan',
-                    label: 'A',
-                    name:  'Bahan',
-                    items: [
-                        { no: 1, uraian: 'Kayu Kaso 5/7 Kelas II',      koefisien: 0.31,   satuan: 'm³', hargaDasar: 1514255.71, hargaSatuan: 1570000.00, merk: 'Kamper',  spesifikasi: 'Standar' },
-                        { no: 2, uraian: 'Paku usuk 5 cm',               koefisien: 0.50,   satuan: 'kg', hargaDasar:   18000.00, hargaSatuan:   18000.00, merk: '-',       spesifikasi: '-'       },
-                        { no: 3, uraian: 'Seng gelombang BJLS 0.20 mm',  koefisien: 1.10,   satuan: 'm²', hargaDasar:   89000.00, hargaSatuan:   89000.00, merk: '-',       spesifikasi: '-'       }
-                    ]
-                },
-                {
-                    id:    'upah',
-                    label: 'B',
-                    name:  'Upah',
-                    items: [
-                        { no: 1, uraian: 'Pekerja',     koefisien: 0.10,  satuan: 'Oh', hargaDasar: 85000.00,  hargaSatuan: 85000.00,  merk: '-', spesifikasi: '-' },
-                        { no: 2, uraian: 'Tukang kayu', koefisien: 0.05,  satuan: 'Oh', hargaDasar: 100000.00, hargaSatuan: 100000.00, merk: '-', spesifikasi: '-' },
-                        { no: 3, uraian: 'Kepala tukang', koefisien: 0.005, satuan: 'Oh', hargaDasar: 115000.00, hargaSatuan: 115000.00, merk: '-', spesifikasi: '-' }
-                    ]
-                },
-                {
-                    id:    'alat',
-                    label: 'C',
-                    name:  'Alat',
-                    items: [
-                        { no: 1, uraian: 'Palu', koefisien: 0.01, satuan: 'bh', hargaDasar: 35000.00, hargaSatuan: 35000.00, merk: '-', spesifikasi: '-' }
-                    ]
-                }
-            ]
-        }
-    };
+    let rowCounter      = 0;
+    let activeFilter    = 'all';
+    let modalSelected   = new Set(); // ids dari DB AHS
+    let autocompleteActive = null;   // input yang sedang punya autocomplete
 
-    /**
-     * Simulate AJAX fetch — swap with a real endpoint when ready:
-     *   const res = await fetch(`/api/ahs/${id}`);
-     *   return res.json();
-     */
-    function fetchAhsData(id) {
-        return new Promise(function (resolve) {
-            setTimeout(function () {
-                resolve(dummyDatabase[id] || { itemName: '', jasaPct: 10, categories: [] });
-            }, 350);
-        });
-    }
+    /* ============================================================
+       DUMMY DATA — rows yang sudah ada di tabel AHS (editable)
+    ============================================================ */
+    const dummyRows = [
+        { id: 1, tipe: 'bahan', uraian: 'Semen Portland',         koefisien: 7.275, satuan: 'sak',  hargaSatuan: 62000  },
+        { id: 2, tipe: 'bahan', uraian: 'Pasir beton',            koefisien: 0.520, satuan: 'm³',   hargaSatuan: 185000 },
+        { id: 3, tipe: 'bahan', uraian: 'Kerikil / split 2–3 cm', koefisien: 0.780, satuan: 'm³',   hargaSatuan: 210000 },
+        { id: 4, tipe: 'alat',  uraian: 'Molen / concrete mixer', koefisien: 0.250, satuan: 'jam',  hargaSatuan: 180000 },
+        { id: 5, tipe: 'alat',  uraian: 'Vibrator beton',         koefisien: 0.250, satuan: 'jam',  hargaSatuan: 95000  },
+        { id: 6, tipe: 'upah',  uraian: 'Mandor',                 koefisien: 0.083, satuan: 'OH',   hargaSatuan: 120000 },
+        { id: 7, tipe: 'upah',  uraian: 'Tukang batu',            koefisien: 0.275, satuan: 'OH',   hargaSatuan: 110000 },
+        { id: 8, tipe: 'upah',  uraian: 'Pekerja',                koefisien: 0.825, satuan: 'OH',   hargaSatuan: 90000  },
+    ];
+
+    /* ============================================================
+       DB AHS — sumber dari database (dummy), gabungan bahan/alat/upah
+    ============================================================ */
+    const ahsDatabase = [
+        // Bahan
+        { id: 'db-1',  tipe: 'bahan', uraian: 'Semen Portland (50 kg)',   satuan: 'sak',  hargaSatuan: 62000  },
+        { id: 'db-2',  tipe: 'bahan', uraian: 'Semen Putih',              satuan: 'kg',   hargaSatuan: 4500   },
+        { id: 'db-3',  tipe: 'bahan', uraian: 'Pasir beton',              satuan: 'm³',   hargaSatuan: 185000 },
+        { id: 'db-4',  tipe: 'bahan', uraian: 'Pasir halus',              satuan: 'm³',   hargaSatuan: 165000 },
+        { id: 'db-5',  tipe: 'bahan', uraian: 'Kerikil / split 2–3 cm',  satuan: 'm³',   hargaSatuan: 210000 },
+        { id: 'db-6',  tipe: 'bahan', uraian: 'Bata merah 5x11x22 cm',   satuan: 'bh',   hargaSatuan: 900    },
+        { id: 'db-7',  tipe: 'bahan', uraian: 'Besi beton polos D10',     satuan: 'kg',   hargaSatuan: 14500  },
+        { id: 'db-8',  tipe: 'bahan', uraian: 'Besi beton ulir D16',      satuan: 'kg',   hargaSatuan: 15200  },
+        { id: 'db-9',  tipe: 'bahan', uraian: 'Kawat beton',              satuan: 'kg',   hargaSatuan: 22000  },
+        { id: 'db-10', tipe: 'bahan', uraian: 'Papan bekisting',          satuan: 'm²',   hargaSatuan: 95000  },
+        { id: 'db-11', tipe: 'bahan', uraian: 'Multiplek 9mm',            satuan: 'lbr',  hargaSatuan: 185000 },
+        { id: 'db-12', tipe: 'bahan', uraian: 'Cat tembok (5 kg)',        satuan: 'klg',  hargaSatuan: 115000 },
+        // Alat
+        { id: 'db-13', tipe: 'alat',  uraian: 'Molen / concrete mixer',  satuan: 'jam',  hargaSatuan: 180000 },
+        { id: 'db-14', tipe: 'alat',  uraian: 'Vibrator beton',          satuan: 'jam',  hargaSatuan: 95000  },
+        { id: 'db-15', tipe: 'alat',  uraian: 'Pompa air',               satuan: 'jam',  hargaSatuan: 75000  },
+        { id: 'db-16', tipe: 'alat',  uraian: 'Stamper tanah',           satuan: 'jam',  hargaSatuan: 110000 },
+        { id: 'db-17', tipe: 'alat',  uraian: 'Excavator',               satuan: 'jam',  hargaSatuan: 650000 },
+        { id: 'db-18', tipe: 'alat',  uraian: 'Dump truck 8 ton',        satuan: 'rit',  hargaSatuan: 450000 },
+        { id: 'db-19', tipe: 'alat',  uraian: 'Scaffolding (sewa)',       satuan: 'set',  hargaSatuan: 85000  },
+        // Upah
+        { id: 'db-20', tipe: 'upah',  uraian: 'Mandor',                  satuan: 'OH',   hargaSatuan: 120000 },
+        { id: 'db-21', tipe: 'upah',  uraian: 'Kepala tukang batu',      satuan: 'OH',   hargaSatuan: 115000 },
+        { id: 'db-22', tipe: 'upah',  uraian: 'Tukang batu',             satuan: 'OH',   hargaSatuan: 110000 },
+        { id: 'db-23', tipe: 'upah',  uraian: 'Tukang besi',             satuan: 'OH',   hargaSatuan: 110000 },
+        { id: 'db-24', tipe: 'upah',  uraian: 'Tukang kayu',             satuan: 'OH',   hargaSatuan: 108000 },
+        { id: 'db-25', tipe: 'upah',  uraian: 'Tukang cat',              satuan: 'OH',   hargaSatuan: 100000 },
+        { id: 'db-26', tipe: 'upah',  uraian: 'Pekerja',                 satuan: 'OH',   hargaSatuan: 90000  },
+        { id: 'db-27', tipe: 'upah',  uraian: 'Pekerja terampil',        satuan: 'OH',   hargaSatuan: 95000  },
+    ];
 
     /* ============================================================
        FORMAT HELPERS
     ============================================================ */
-    const fmt = function (n) {
-        return 'Rp ' + Number(n).toLocaleString('id-ID', { minimumFractionDigits: 2 });
+    const fmt = n => 'Rp ' + Number(n).toLocaleString('id-ID', { minimumFractionDigits: 2 });
+
+    function escHtml(str) {
+        return String(str)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    /* ============================================================
+       TIPE CONFIG
+    ============================================================ */
+    const tipeConfig = {
+        bahan: { label: 'Bahan', badge: 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-300' },
+        alat:  { label: 'Alat',  badge: 'bg-blue-100 text-blue-700 ring-1 ring-blue-300'          },
+        upah:  { label: 'Upah',  badge: 'bg-violet-100 text-violet-700 ring-1 ring-violet-300'    },
     };
 
     /* ============================================================
-       RENDER — LOADING SPINNER
+       RENDER TABLE ROW (main table)
     ============================================================ */
-    function renderLoading() {
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="8" class="text-center py-10 text-table-subtle text-xs tracking-wide">
-                    <svg class="animate-spin w-5 h-5 mx-auto mb-2 text-table-muted" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+    function renderRow(rowData, isNew = false) {
+        rowCounter++;
+        const cfg    = tipeConfig[rowData.tipe] || tipeConfig.bahan;
+        const jumlah = (parseFloat(rowData.koefisien) || 0) * (parseFloat(rowData.hargaSatuan) || 0);
+        const tr     = document.createElement('tr');
+        tr.dataset.id   = rowData.id;
+        tr.dataset.tipe = rowData.tipe;
+        tr.className    = 'ahs-row border-b border-table-border hover:bg-slate-50 transition-colors duration-100';
+
+        tr.innerHTML = `
+            <td class="px-3 md:px-4 py-2 md:py-2.5 text-center text-table-subtle">
+                <span class="ahs-rownum">${rowCounter}</span>
+            </td>
+            <td class="px-3 md:px-4 py-2 md:py-2.5 text-center">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] md:text-[11px] font-semibold ${cfg.badge}">
+                    ${cfg.label}
+                </span>
+            </td>
+            <td class="px-3 md:px-4 py-2 md:py-2.5 relative">
+                <input type="text" value="${escHtml(rowData.uraian)}"
+                    placeholder="Nama bahan / alat / pekerja"
+                    class="ahs-uraian w-full bg-transparent border-b border-transparent hover:border-table-border focus:border-primary text-[11px] md:text-[13px] text-table-medium placeholder-table-subtle focus:outline-none transition-colors py-0.5"
+                    data-id="${rowData.id}" autocomplete="off"/>
+                <ul class="ahs-autocomplete hidden absolute left-0 right-0 top-full mt-1 bg-white border border-table-border rounded-lg shadow-xl z-30 max-h-48 overflow-y-auto text-[12px]"></ul>
+            </td>
+            <td class="px-3 md:px-4 py-2 md:py-2.5 text-center">
+                <input type="number" min="0" step="any" value="${rowData.koefisien}"
+                    class="ahs-koef w-20 px-2 py-1 text-[11px] md:text-[13px] border border-table-border rounded text-center focus:outline-none focus:ring-1 focus:ring-primary/40 focus:border-primary tabular-nums bg-white"
+                    data-id="${rowData.id}"/>
+            </td>
+            <td class="px-3 md:px-4 py-2 md:py-2.5 text-center">
+                <input type="text" value="${escHtml(rowData.satuan)}" placeholder="m³"
+                    class="ahs-satuan w-16 px-2 py-1 text-[11px] md:text-[13px] border border-table-border rounded text-center focus:outline-none focus:ring-1 focus:ring-primary/40 focus:border-primary bg-white"
+                    data-id="${rowData.id}"/>
+            </td>
+            <td class="px-3 md:px-4 py-2 md:py-2.5 text-right">
+                <input type="number" min="0" step="any" value="${rowData.hargaSatuan}"
+                    class="ahs-harga-satuan w-32 px-2 py-1 text-[11px] md:text-[13px] border border-table-border rounded text-right focus:outline-none focus:ring-1 focus:ring-primary/40 focus:border-primary tabular-nums bg-white"
+                    data-id="${rowData.id}"/>
+            </td>
+            <td class="px-3 md:px-4 py-2 md:py-2.5 text-right tabular-nums font-semibold text-table-strong text-[11px] md:text-[13px]">
+                <span class="ahs-jumlah-cell">${fmt(jumlah)}</span>
+            </td>
+            <td class="px-3 md:px-4 py-2 md:py-2.5 text-center">
+                <button type="button" class="ahs-del-btn inline-flex items-center justify-center w-6 h-6 rounded-md text-table-subtle hover:text-red-500 hover:bg-red-50 transition-colors focus:outline-none" title="Hapus">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                     </svg>
-                    Memuat data…
-                </td>
-            </tr>`;
-        updateTotals(0, 0);
+                </button>
+            </td>`;
+
+        tbody.appendChild(tr);
+        bindRowInputs(tr);
+        if (isNew) setTimeout(() => tr.querySelector('.ahs-uraian')?.focus(), 50);
     }
 
     /* ============================================================
-       RENDER — FULL TABLE BODY
+       BIND ROW INPUTS
     ============================================================ */
-    function renderAhs(data) {
-        const categories = data.categories || [];
-        const jasaPct    = Number(data.jasaPct || 10) / 100;
+    function bindRowInputs(tr) {
+        const koefInput  = tr.querySelector('.ahs-koef');
+        const hargaInput = tr.querySelector('.ahs-harga-satuan');
+        const jumlahCell = tr.querySelector('.ahs-jumlah-cell');
+        const uraianInput = tr.querySelector('.ahs-uraian');
+        const acList      = tr.querySelector('.ahs-autocomplete');
+        const tipe        = tr.dataset.tipe;
 
-        if (categories.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="8" class="text-center py-10 text-table-subtle text-xs">Tidak ada data AHS.</td></tr>`;
-            updateTotals(0, 0);
+        function recalcRow() {
+            const koef = parseFloat(koefInput?.value) || 0;
+            const harga = parseFloat(hargaInput?.value) || 0;
+            if (jumlahCell) jumlahCell.textContent = fmt(koef * harga);
+            recalcTotals();
+        }
+        koefInput?.addEventListener('input', recalcRow);
+        hargaInput?.addEventListener('input', recalcRow);
+
+        // Delete
+        tr.querySelector('.ahs-del-btn')?.addEventListener('click', function () {
+            tr.remove();
+            renumberRows();
+            recalcTotals();
+        });
+
+        // ── Autocomplete ──────────────────────────────────────────
+        uraianInput?.addEventListener('input', function () {
+            const q = uraianInput.value.trim().toLowerCase();
+            if (!q) { hideAutocomplete(acList); return; }
+
+            const matches = ahsDatabase.filter(item =>
+                item.tipe === tipe && item.uraian.toLowerCase().includes(q)
+            ).slice(0, 8);
+
+            if (matches.length === 0) { hideAutocomplete(acList); return; }
+
+            acList.innerHTML = matches.map(m => `
+                <li class="flex items-center justify-between px-3 py-2 hover:bg-primary/5 cursor-pointer transition-colors gap-2"
+                    data-uraian="${escHtml(m.uraian)}"
+                    data-satuan="${escHtml(m.satuan)}"
+                    data-harga="${m.hargaSatuan}">
+                    <span class="flex-1 text-table-medium truncate">${escHtml(m.uraian)}</span>
+                    <span class="text-table-subtle shrink-0">${escHtml(m.satuan)} · ${fmt(m.hargaSatuan)}</span>
+                </li>`).join('');
+
+            acList.querySelectorAll('li').forEach(li => {
+                li.addEventListener('mousedown', function (e) {
+                    e.preventDefault(); // jangan trigger blur dulu
+                    uraianInput.value = li.dataset.uraian;
+                    if (tr.querySelector('.ahs-satuan'))
+                        tr.querySelector('.ahs-satuan').value = li.dataset.satuan;
+                    if (hargaInput) hargaInput.value = li.dataset.harga;
+                    recalcRow();
+                    hideAutocomplete(acList);
+                });
+            });
+
+            acList.classList.remove('hidden');
+            autocompleteActive = acList;
+        });
+
+        uraianInput?.addEventListener('blur', function () {
+            setTimeout(() => hideAutocomplete(acList), 150);
+        });
+        uraianInput?.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') hideAutocomplete(acList);
+        });
+    }
+
+    function hideAutocomplete(list) {
+        if (list) list.classList.add('hidden');
+        autocompleteActive = null;
+    }
+
+    /* ============================================================
+       RECALC TOTALS
+    ============================================================ */
+    function recalcTotals() {
+        const t = { bahan: 0, alat: 0, upah: 0 };
+        tbody.querySelectorAll('.ahs-row').forEach(function (tr) {
+            const tipe  = tr.dataset.tipe;
+            const koef  = parseFloat(tr.querySelector('.ahs-koef')?.value) || 0;
+            const harga = parseFloat(tr.querySelector('.ahs-harga-satuan')?.value) || 0;
+            if (t[tipe] !== undefined) t[tipe] += koef * harga;
+        });
+        if (totalBahanEl) totalBahanEl.textContent = fmt(t.bahan);
+        if (totalAlatEl)  totalAlatEl.textContent  = fmt(t.alat);
+        if (totalUpahEl)  totalUpahEl.textContent  = fmt(t.upah);
+        if (totalKeselEl) totalKeselEl.textContent = fmt(t.bahan + t.alat + t.upah);
+    }
+
+    function renumberRows() {
+        let n = 0;
+        tbody.querySelectorAll('.ahs-row .ahs-rownum').forEach(el => el.textContent = ++n);
+        rowCounter = n;
+    }
+
+    function addRow(tipe) {
+        document.getElementById('ahs-empty-row')?.remove();
+        renderRow({ id: Date.now(), tipe, uraian: '', koefisien: 1, satuan: '', hargaSatuan: 0 }, true);
+        recalcTotals();
+    }
+
+    /* ============================================================
+       MODAL — Pilih dari Daftar AHS
+    ============================================================ */
+    function openModal() {
+        if (!modalOverlay) return;
+        modalSelected.clear();
+        updateModalCount();
+        renderModalRows(ahsDatabase);
+        modalOverlay.classList.remove('hidden');
+        modalOverlay.classList.add('flex');
+        setTimeout(() => modalSearch?.focus(), 100);
+    }
+
+    function closeModal() {
+        if (!modalOverlay) return;
+        modalOverlay.classList.add('hidden');
+        modalOverlay.classList.remove('flex');
+        if (modalSearch) modalSearch.value = '';
+        if (modalCheckAll) modalCheckAll.checked = false;
+        activeFilter = 'all';
+        syncFilterButtons();
+    }
+
+    function renderModalRows(items) {
+        if (!modalTbody) return;
+        if (items.length === 0) {
+            modalTbody.innerHTML = `
+                <tr><td colspan="5" class="text-center py-8 text-table-subtle text-xs italic">
+                    Tidak ada item ditemukan.
+                </td></tr>`;
             return;
         }
+        modalTbody.innerHTML = items.map(item => {
+            const cfg     = tipeConfig[item.tipe] || tipeConfig.bahan;
+            const checked = modalSelected.has(item.id);
+            return `
+            <tr class="modal-item-row border-b border-table-border hover:bg-slate-50 transition-colors cursor-pointer ${checked ? 'bg-primary/5' : ''}"
+                data-id="${item.id}">
+                <td class="px-4 py-2.5 text-center">
+                    <input type="checkbox" class="modal-item-cb w-3.5 h-3.5 rounded accent-primary cursor-pointer"
+                        data-id="${item.id}" ${checked ? 'checked' : ''}/>
+                </td>
+                <td class="px-4 py-2.5 text-center">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-semibold ${cfg.badge}">
+                        ${cfg.label}
+                    </span>
+                </td>
+                <td class="px-4 py-2.5 text-[12px] text-table-medium">${escHtml(item.uraian)}</td>
+                <td class="px-4 py-2.5 text-center text-[12px] text-table-subtle">${escHtml(item.satuan)}</td>
+                <td class="px-4 py-2.5 text-right text-[12px] tabular-nums text-table-strong">${fmt(item.hargaSatuan)}</td>
+            </tr>`;
+        }).join('');
 
-        // Update page title if element found
-        if (titleEl && data.itemName) {
-            titleEl.textContent = 'Rincian AHS — ' + data.itemName;
-        }
+        // Bind row click + checkbox
+        modalTbody.querySelectorAll('.modal-item-row').forEach(row => {
+            row.addEventListener('click', function (e) {
+                if (e.target.type === 'checkbox') return;
+                const cb = row.querySelector('.modal-item-cb');
+                if (cb) { cb.checked = !cb.checked; cb.dispatchEvent(new Event('change')); }
+            });
+        });
+        modalTbody.querySelectorAll('.modal-item-cb').forEach(cb => {
+            cb.addEventListener('change', function () {
+                const id = cb.dataset.id;
+                if (cb.checked) {
+                    modalSelected.add(id);
+                    cb.closest('tr')?.classList.add('bg-primary/5');
+                } else {
+                    modalSelected.delete(id);
+                    cb.closest('tr')?.classList.remove('bg-primary/5');
+                }
+                updateModalCount();
+            });
+        });
+    }
 
-        let grandRab = 0;
-        let html = '';
+    function updateModalCount() {
+        const n = modalSelected.size;
+        if (modalCountEl) modalCountEl.textContent = n > 0 ? `${n} item dipilih` : 'Belum ada item dipilih';
+        if (modalConfirm) modalConfirm.disabled = n === 0;
+    }
 
-        categories.forEach(function (cat) {
-            const catRab = cat.items.reduce(function (s, i) {
-                return s + Number(i.koefisien) * Number(i.hargaDasar);
-            }, 0);
-            const catJasa    = catRab * jasaPct;
-            const catTotalRab = catRab + catJasa;
-            grandRab += catTotalRab;
+    function filterAndSearch() {
+        const q = (modalSearch?.value || '').trim().toLowerCase();
+        const filtered = ahsDatabase.filter(item => {
+            const matchTipe  = activeFilter === 'all' || item.tipe === activeFilter;
+            const matchQuery = !q || item.uraian.toLowerCase().includes(q);
+            return matchTipe && matchQuery;
+        });
+        renderModalRows(filtered);
+    }
 
-            // ── Category header row ──
-            html += `
-                <tr class="ahs-category bg-table-category text-white hover:bg-table-category-hover cursor-pointer select-none transition-colors duration-200"
-                    data-cat="${cat.id}" role="button" tabindex="0">
-                    <td class="px-3 md:px-5 py-2.5 md:py-3 text-center">
-                        <div class="relative flex items-center justify-center w-5 h-5 mx-auto">
-                            <svg class="cat-icon-minus absolute w-4 h-4 md:w-5 md:h-5 opacity-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                            <svg class="cat-icon-plus absolute w-4 h-4 md:w-5 md:h-5 opacity-90 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                        </div>
-                    </td>
-                    <td colspan="6" class="px-3 md:px-5 py-2.5 md:py-3 font-semibold text-[10px] md:text-xs uppercase tracking-widest">
-                        <span class="flex items-center gap-2">
-                            <span class="w-1 h-3.5 md:h-4 bg-secondary rounded-full"></span>
-                            ${cat.label}. ${cat.name}
-                        </span>
-                    </td>
-                    <td class="px-3 md:px-5 py-2.5 md:py-3 text-center">
-                        <svg class="cat-chevron w-3.5 h-3.5 md:w-4 md:h-4 mx-auto opacity-60 transition-transform duration-300"
-                             fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
-                        </svg>
-                    </td>
-                </tr>`;
+    function syncFilterButtons() {
+        filterBtns.forEach(btn => {
+            const isActive = btn.dataset.filter === activeFilter;
+            btn.className = 'ahs-modal-filter-btn px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-150 focus:outline-none ' +
+                (isActive
+                    ? 'bg-primary text-white shadow-sm'
+                    : 'bg-white border border-table-border text-table-body hover:bg-slate-50');
+        });
+    }
 
-            if (cat.items.length === 0) {
-                html += `
-                    <tr class="subrow-${cat.id} bg-table-row border-b border-table-border">
-                        <td colspan="8" class="px-5 py-3 text-center text-table-subtle text-xs italic">Belum ada item.</td>
-                    </tr>`;
-            } else {
-                cat.items.forEach(function (item) {
-                    const hargaSatuan = Number(item.koefisien) * Number(item.hargaDasar);
+    function confirmModalSelection() {
+        document.getElementById('ahs-empty-row')?.remove();
+        const selectedItems = ahsDatabase.filter(item => modalSelected.has(item.id));
+        selectedItems.forEach(item => {
+            renderRow({
+                id: Date.now() + Math.random(),
+                tipe: item.tipe,
+                uraian: item.uraian,
+                koefisien: 1,
+                satuan: item.satuan,
+                hargaSatuan: item.hargaSatuan,
+            });
+        });
+        recalcTotals();
+        closeModal();
+    }
 
-                    // ── Item name row ──
-                    html += `
-                        <tr class="subrow-${cat.id} bg-table-row border-b border-table-border/30">
-                            <td class="px-3 md:px-5 py-2 md:py-2.5 text-center text-table-subtle font-medium">${item.no}</td>
-                            <td class="px-3 md:px-5 py-2 md:py-2.5 font-semibold text-table-strong" title="${item.uraian}">${item.uraian}</td>
-                            <td colspan="6" class="px-3 md:px-5 py-2 md:py-2.5"></td>
-                        </tr>`;
+    /* ============================================================
+       INIT
+    ============================================================ */
+    document.addEventListener('DOMContentLoaded', function () {
 
-                    // ── RAB (read-only) row ──
-                    html += `
-                        <tr class="subrow-${cat.id} bg-table-row border-b border-table-border/40 hover:bg-white transition-colors duration-150">
-                            <td class="px-3 md:px-5 py-2 md:py-2.5"></td>
-                            <td class="px-3 md:px-5 py-2 md:py-2.5 pl-4 font-semibold text-table-muted text-[10px] md:text-xs">RAB</td>
-                            <td class="px-4 md:px-6 py-2 md:py-2.5 text-center tabular-nums">${Number(item.koefisien).toFixed(4)}</td>
-                            <td class="px-4 md:px-6 py-2 md:py-2.5 text-center text-table-subtle">${item.satuan}</td>
-                            <td class="px-4 md:px-6 py-2 md:py-2.5 text-right tabular-nums text-table-medium">${fmt(item.hargaDasar)}</td>
-                            <td class="px-4 md:px-6 py-2 md:py-2.5 text-right tabular-nums font-semibold text-table-strong">${fmt(hargaSatuan)}</td>
-                            <td class="px-4 md:px-6 py-2 md:py-2.5 text-center text-table-subtle">${item.merk || '—'}</td>
-                            <td class="px-4 md:px-6 py-2 md:py-2.5 text-center text-table-subtle">${item.spesifikasi || '—'}</td>
-                        </tr>`;
+        // Label item BOQ dari sessionStorage
+        try {
+            const namaItem = sessionStorage.getItem('ahs_item_label') || '—';
+            if (itemLabel) itemLabel.textContent = namaItem.toUpperCase();
+        } catch (_) {}
 
-                    // ── RAP Rencana (editable inputs) row ──
-                    html += `
-                        <tr class="subrow-${cat.id} bg-white border-b border-table-border hover:bg-white transition-colors duration-150">
-                            <td class="px-3 md:px-5 py-2 md:py-2.5"></td>
-                            <td class="px-3 md:px-5 py-2 md:py-2.5 pl-4 font-semibold text-primary text-[10px] md:text-xs">RAP Rencana</td>
-                            <td class="px-4 md:px-6 py-2 md:py-2.5">
-                                <input type="text" placeholder="${Number(item.koefisien).toFixed(4)}"
-                                    class="w-full px-2 py-1.5 text-[10px] md:text-xs border border-table-border rounded text-center focus:outline-none focus:ring-1 focus:ring-primary/40 focus:border-primary text-table-medium bg-white"
-                                    data-field="koefisien" data-cat="${cat.id}" data-item="${item.no}" />
-                            </td>
-                            <td class="px-4 md:px-6 py-2 md:py-2.5">
-                                <input type="text" placeholder="${item.satuan}"
-                                    class="w-full px-2 py-1.5 text-[10px] md:text-xs border border-table-border rounded text-center focus:outline-none focus:ring-1 focus:ring-primary/40 focus:border-primary text-table-medium bg-white"
-                                    data-field="satuan" data-cat="${cat.id}" data-item="${item.no}" />
-                            </td>
-                            <td class="px-4 md:px-6 py-2 md:py-2.5">
-                                <div class="relative">
-                                    <span class="absolute left-2 top-1/2 -translate-y-1/2 text-table-subtle text-[10px]">Rp</span>
-                                    <input type="text" placeholder="0"
-                                        class="w-full pl-7 pr-2 py-1.5 text-[10px] md:text-xs border border-table-border rounded text-right focus:outline-none focus:ring-1 focus:ring-primary/40 focus:border-primary text-table-medium bg-white"
-                                        data-field="hargaDasar" data-cat="${cat.id}" data-item="${item.no}" />
-                                </div>
-                            </td>
-                            <td class="px-4 md:px-6 py-2 md:py-2.5">
-                                <div class="relative">
-                                    <span class="absolute left-2 top-1/2 -translate-y-1/2 text-table-subtle text-[10px]">Rp</span>
-                                    <input type="text" placeholder="0"
-                                        class="w-full pl-7 pr-2 py-1.5 text-[10px] md:text-xs border border-table-border rounded text-right focus:outline-none focus:ring-1 focus:ring-primary/40 focus:border-primary text-table-medium bg-white"
-                                        data-field="hargaSatuan" data-cat="${cat.id}" data-item="${item.no}" />
-                                </div>
-                            </td>
-                            <td class="px-4 md:px-6 py-2 md:py-2.5">
-                                <input type="text" placeholder="—"
-                                    class="w-full px-2 py-1.5 text-[10px] md:text-xs border border-table-border rounded text-center focus:outline-none focus:ring-1 focus:ring-primary/40 focus:border-primary text-table-medium bg-white"
-                                    data-field="merk" data-cat="${cat.id}" data-item="${item.no}" />
-                            </td>
-                            <td class="px-4 md:px-6 py-2 md:py-2.5">
-                                <input type="text" placeholder="—"
-                                    class="w-full px-2 py-1.5 text-[10px] md:text-xs border border-table-border rounded text-center focus:outline-none focus:ring-1 focus:ring-primary/40 focus:border-primary text-table-medium bg-white"
-                                    data-field="spesifikasi" data-cat="${cat.id}" data-item="${item.no}" />
-                            </td>
-                        </tr>`;
+        // Render dummy rows
+        dummyRows.length === 0
+            ? (tbody.innerHTML = `<tr id="ahs-empty-row"><td colspan="8" class="text-center py-10 text-table-subtle text-xs italic">Belum ada rincian AHS. Tambahkan item untuk memulai.</td></tr>`)
+            : dummyRows.forEach(r => renderRow(r));
+        recalcTotals();
+
+        // ── Toolbar event handlers ──
+        addBahanBtn?.addEventListener('click', () => addRow('bahan'));
+        addAlatBtn?.addEventListener('click',  () => addRow('alat'));
+        addUpahBtn?.addEventListener('click',  () => addRow('upah'));
+        fromDbBtn?.addEventListener('click',   () => openModal());
+
+        // Modal open/close
+        modalClose?.addEventListener('click',   closeModal);
+        modalCancel?.addEventListener('click',  closeModal);
+        modalOverlay?.addEventListener('click', function (e) {
+            if (e.target === modalOverlay) closeModal();
+        });
+
+        // Modal confirm
+        modalConfirm?.addEventListener('click', confirmModalSelection);
+
+        // Modal search
+        modalSearch?.addEventListener('input', filterAndSearch);
+
+        // Modal filter buttons
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', function () {
+                activeFilter = btn.dataset.filter;
+                syncFilterButtons();
+                filterAndSearch();
+            });
+        });
+        syncFilterButtons();
+
+        // Check all
+        modalCheckAll?.addEventListener('change', function () {
+            const visible = modalTbody?.querySelectorAll('.modal-item-cb') || [];
+            visible.forEach(cb => {
+                cb.checked = modalCheckAll.checked;
+                const id = cb.dataset.id;
+                if (modalCheckAll.checked) {
+                    modalSelected.add(id);
+                    cb.closest('tr')?.classList.add('bg-primary/5');
+                } else {
+                    modalSelected.delete(id);
+                    cb.closest('tr')?.classList.remove('bg-primary/5');
+                }
+            });
+            updateModalCount();
+        });
+
+        // Simpan
+        simpanBtn?.addEventListener('click', function () {
+            const payload = [];
+            tbody.querySelectorAll('.ahs-row').forEach(tr => {
+                payload.push({
+                    tipe:        tr.dataset.tipe,
+                    uraian:      tr.querySelector('.ahs-uraian')?.value || '',
+                    koefisien:   parseFloat(tr.querySelector('.ahs-koef')?.value) || 0,
+                    satuan:      tr.querySelector('.ahs-satuan')?.value || '',
+                    hargaSatuan: parseFloat(tr.querySelector('.ahs-harga-satuan')?.value) || 0,
                 });
+            });
+            console.info('[AHS Simpan]', payload);
+            alert('Data AHS berhasil dikumpulkan (' + payload.length + ' baris).\nEndpoint CI4 segera diimplementasi.');
+        });
+
+        // Tutup autocomplete jika klik di luar
+        document.addEventListener('click', function (e) {
+            if (autocompleteActive && !e.target.closest('.ahs-uraian') && !e.target.closest('.ahs-autocomplete')) {
+                hideAutocomplete(autocompleteActive);
             }
-
-            // ── Per-category sub-total rows ──
-            // Layout: col1 empty | col2 label (=Uraian col) | colspan=3 empty | col6 value (=Harga Satuan) | colspan=2 empty
-            html += `
-                <tr class="subrow-${cat.id} bg-table-row border-b border-table-border/50">
-                    <td class="px-3 md:px-5 py-2 md:py-2.5"></td>
-                    <td class="px-3 md:px-5 py-2 md:py-2.5 pl-4 text-[10px] md:text-xs font-bold uppercase tracking-wide text-table-muted whitespace-nowrap">Jumlah Harga RAB</td>
-                    <td colspan="3" class="px-4 md:px-6 py-2 md:py-2.5"></td>
-                    <td class="px-4 md:px-6 py-2 md:py-2.5 text-right text-[10px] md:text-xs font-bold tabular-nums text-table-strong whitespace-nowrap">${fmt(catRab)}</td>
-                    <td colspan="2" class="px-4 md:px-6 py-2 md:py-2.5"></td>
-                </tr>
-                <tr class="subrow-${cat.id} border-b border-table-border/30" style="background:color-mix(in srgb,var(--color-table-category,#475569) 8%,white)">
-                    <td class="px-3 md:px-5 py-2 md:py-2.5"></td>
-                    <td class="px-3 md:px-5 py-2 md:py-2.5 pl-4 text-[10px] md:text-xs font-semibold uppercase tracking-wide text-table-muted whitespace-nowrap">Jasa ${data.jasaPct}%</td>
-                    <td colspan="3" class="px-4 md:px-6 py-2 md:py-2.5"></td>
-                    <td class="px-4 md:px-6 py-2 md:py-2.5 text-right text-[10px] md:text-xs font-semibold tabular-nums text-table-muted whitespace-nowrap">${fmt(catJasa)}</td>
-                    <td colspan="2" class="px-4 md:px-6 py-2 md:py-2.5"></td>
-                </tr>
-                <tr class="subrow-${cat.id} bg-table-row border-b border-table-border">
-                    <td class="px-3 md:px-5 py-2 md:py-2.5"></td>
-                    <td class="px-3 md:px-5 py-2 md:py-2.5 pl-4 text-[10px] md:text-xs font-bold uppercase tracking-wide text-table-strong whitespace-nowrap">Total Harga RAB</td>
-                    <td colspan="3" class="px-4 md:px-6 py-2 md:py-2.5"></td>
-                    <td class="px-4 md:px-6 py-2 md:py-2.5 text-right text-[10px] md:text-xs font-bold tabular-nums text-table-strong whitespace-nowrap">${fmt(catTotalRab)}</td>
-                    <td colspan="2" class="px-4 md:px-6 py-2 md:py-2.5"></td>
-                </tr>
-                <tr class="subrow-${cat.id} bg-white border-b border-table-border/50">
-                    <td class="px-3 md:px-5 py-2 md:py-2.5"></td>
-                    <td class="px-3 md:px-5 py-2 md:py-2.5 pl-4 text-[10px] md:text-xs font-bold uppercase tracking-wide text-primary whitespace-nowrap">Jumlah Harga RAP Rencana</td>
-                    <td colspan="3" class="px-4 md:px-6 py-2 md:py-2.5"></td>
-                    <td class="ahs-cat-rap-jumlah-${cat.id} px-4 md:px-6 py-2 md:py-2.5 text-right text-[10px] md:text-xs font-bold tabular-nums text-table-subtle whitespace-nowrap">Rp 0</td>
-                    <td colspan="2" class="px-4 md:px-6 py-2 md:py-2.5"></td>
-                </tr>
-                <tr class="subrow-${cat.id} border-b border-table-border/30" style="background:color-mix(in srgb,var(--color-primary,#0ea5e9) 6%,white)">
-                    <td class="px-3 md:px-5 py-2 md:py-2.5"></td>
-                    <td class="px-3 md:px-5 py-2 md:py-2.5 pl-4 text-[10px] md:text-xs font-semibold uppercase tracking-wide text-primary/70 whitespace-nowrap">Jasa ${data.jasaPct}%</td>
-                    <td colspan="3" class="px-4 md:px-6 py-2 md:py-2.5"></td>
-                    <td class="ahs-cat-rap-jasa-${cat.id} px-4 md:px-6 py-2 md:py-2.5 text-right text-[10px] md:text-xs font-semibold tabular-nums text-table-subtle whitespace-nowrap">Rp 0</td>
-                    <td colspan="2" class="px-4 md:px-6 py-2 md:py-2.5"></td>
-                </tr>
-                <tr class="subrow-${cat.id} bg-white border-b-2 border-table-border">
-                    <td class="px-3 md:px-5 py-2 md:py-2.5"></td>
-                    <td class="px-3 md:px-5 py-2 md:py-2.5 pl-4 text-[10px] md:text-xs font-bold uppercase tracking-wide text-primary whitespace-nowrap">Total Harga RAP Rencana</td>
-                    <td colspan="3" class="px-4 md:px-6 py-2 md:py-2.5"></td>
-                    <td class="ahs-cat-rap-total-${cat.id} px-4 md:px-6 py-2 md:py-2.5 text-right text-[10px] md:text-xs font-bold tabular-nums text-table-subtle whitespace-nowrap">Rp 0</td>
-                    <td colspan="2" class="px-4 md:px-6 py-2 md:py-2.5"></td>
-                </tr>`;
         });
-
-        tbody.innerHTML = html;
-        updateTotals(grandRab, 0);
-        bindCategoryToggle();
-    }
-
-    /* ============================================================
-       FOOTER TOTALS
-    ============================================================ */
-    function updateTotals(rab, rap) {
-        if (totalRab) totalRab.textContent = fmt(rab);
-        if (totalRap) totalRap.textContent = fmt(rap);
-    }
-
-    /* ============================================================
-       ACCORDION TOGGLE
-    ============================================================ */
-    function bindCategoryToggle() {
-        tbody.querySelectorAll('.ahs-category[data-cat]').forEach(function (row) {
-            row.addEventListener('click', function () {
-                const catId   = row.dataset.cat;
-                const subRows = tbody.querySelectorAll('.subrow-' + catId);
-                const minus   = row.querySelector('.cat-icon-minus');
-                const plus    = row.querySelector('.cat-icon-plus');
-                const chevron = row.querySelector('.cat-chevron');
-                const isHidden = subRows.length && subRows[0].classList.contains('hidden');
-
-                subRows.forEach(function (r) { r.classList.toggle('hidden', !isHidden); });
-
-                if (minus)   minus.classList.toggle('hidden',  !isHidden);
-                if (plus)    plus.classList.toggle('hidden',    isHidden);
-                if (chevron) chevron.classList.toggle('rotate-180', !isHidden);
-            });
-
-            row.addEventListener('keydown', function (e) {
-                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); row.click(); }
-            });
-        });
-    }
-
-    /* ============================================================
-       SEARCH FILTER
-    ============================================================ */
-    const searchInput = document.getElementById('ahs-search');
-    if (searchInput) {
-        searchInput.addEventListener('input', function () {
-            const q = searchInput.value.toLowerCase().trim();
-            tbody.querySelectorAll('tr').forEach(function (row) {
-                if (row.classList.contains('ahs-category')) return; // always show category rows
-                const text = row.textContent.toLowerCase();
-                row.classList.toggle('hidden', q !== '' && !text.includes(q));
-            });
-        });
-    }
-
-    /* ============================================================
-       AUTO-INIT from window.AHS_INIT (set by rincian-ahs.php)
-       window.AHS_INIT = { id: <number> }
-       Replace fetchAhsData with a real endpoint when the API is ready.
-    ============================================================ */
-    async function init() {
-        const cfg = window.AHS_INIT || {};
-        const id  = cfg.id || 1;  // fall back to id=1 for dummy data
-
-        renderLoading();
-
-        const data = await fetchAhsData(id);
-        renderAhs(data);
-    }
-
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
-    } else {
-        init();
-    }
+    });
 
 })();

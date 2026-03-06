@@ -6,7 +6,7 @@
 
   <nav class="relative max-w-[85rem] w-full mx-auto md:flex md:items-center md:justify-between md:gap-3 py-2 px-4 sm:px-6 lg:px-8">
     <div class="flex justify-between items-center gap-x-1">
-      <a class="flex-none font-semibold text-xl text-foreground focus:outline-hidden focus:opacity-80" href="#" aria-label="Brand">
+      <a class="flex-none font-semibold text-xl text-foreground focus:outline-hidden focus:opacity-80" href="<?= base_url('proyek') ?>" aria-label="Brand">
          <div class="flex items-center gap-2">
             <img src="<?= base_url('assets/images/logoKonstruktor.png') ?>" alt="Kontraktor.id Logo"
                 class="h-7 md:h-8 w-auto object-contain">

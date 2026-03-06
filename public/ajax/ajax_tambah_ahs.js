@@ -35,8 +35,8 @@
     const state = {
         page:     1,
         query:    '',
-        sources:  [],    // active source filters
-        selected: {},    // { id: item } — checked items
+        sources:  [],    
+        selected: {},   
     };
 
     /* ============================================================
@@ -452,26 +452,61 @@
 
     /* ============================================================
        SUBMIT — "Tambah ke AHS"
-       Stub: replace with a real POST to your CI4 endpoint.
+       Menyimpan item terpilih ke sessionStorage lalu balik ke RAB.
     ============================================================ */
     if (submitBtn) {
         submitBtn.addEventListener('click', function () {
             const items = Object.values(state.selected);
             if (items.length === 0) return;
 
-            // TODO: POST items to /api/ahs/add-item
-            console.log('[tambah-ahs] Items to add:', items);
+            // Baca kategori yang memicu panel ini (disimpan oleh ajax_rab.js)
+            let catId   = '';
+            let catName = '';
+            try {
+                catId   = sessionStorage.getItem('rab_tambah_ahs_cat')     || '';
+                catName = sessionStorage.getItem('rab_tambah_ahs_catname') || '';
+            } catch (_) {}
 
-            // Visual feedback (replace with actual navigation / toast)
+            // Simpan pending items ke sessionStorage agar ajax_rab.js bisa membacanya
+            try {
+                const payload = {
+                    catId:   catId,
+                    catName: catName,
+                    items:   items
+                };
+                // Gabungkan dengan pending items yang sudah ada (dari kategori lain)
+                let existing = [];
+                try {
+                    const raw = sessionStorage.getItem('rab_pending_items');
+                    if (raw) existing = JSON.parse(raw);
+                } catch (_) {}
+
+                // Hapus entry lama untuk catId yang sama (replace)
+                existing = existing.filter(function (g) { return g.catId !== catId; });
+                existing.push(payload);
+                sessionStorage.setItem('rab_pending_items', JSON.stringify(existing));
+            } catch (_) {}
+
+            // Visual feedback singkat lalu redirect ke halaman RAB
             submitBtn.textContent = 'Menambahkan…';
             submitBtn.disabled    = true;
+
             setTimeout(function () {
-                submitBtn.textContent = 'Tambah ke AHS';
-                submitBtn.disabled    = false;
-                state.selected        = {};
-                updateSubmitBar();
-                load(); // Refresh to uncheck rows
-            }, 800);
+                // Coba dapatkan URL RAB dari sessionStorage, fallback ke referrer atau default
+                let rabUrl = '';
+                try { rabUrl = sessionStorage.getItem('rab_return_url') || ''; } catch (_) {}
+                if (!rabUrl) {
+                    // Gunakan document.referrer jika masih di domain yang sama
+                    try {
+                        const ref = document.referrer;
+                        if (ref && new URL(ref).origin === window.location.origin) {
+                            rabUrl = ref;
+                        }
+                    } catch (_) {}
+                }
+                if (!rabUrl) rabUrl = '/menu-rap?mode=new';
+                window.location.href = rabUrl;
+            }, 600);
         });
     }
 

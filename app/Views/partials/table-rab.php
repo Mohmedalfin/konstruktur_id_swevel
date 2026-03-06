@@ -17,6 +17,34 @@ $wrapperClass = $tableVisible ? '' : 'hidden';
             </svg>
         </div>
 
+        <!-- BOQ Actions -->
+        <div class="flex items-center gap-2 shrink-0">
+
+            <!-- Download Template -->
+            <button id="boq-download-template-btn" type="button"
+                class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-amber-400 hover:bg-amber-500 text-black text-xs font-semibold transition-all duration-150 focus:outline-none active:scale-95 shadow-sm">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                </svg>
+                Template
+            </button>
+
+            <!-- Import BOQ -->
+            <button id="boq-import-btn" type="button"
+                class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-primary hover:bg-primary-hover text-white text-xs font-semibold transition-all duration-150 focus:outline-none active:scale-95 shadow-sm">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                </svg>
+                Import BOQ
+            </button>
+
+            <!-- Hidden file input -->
+            <input id="boq-file-input" type="file" accept=".xlsx,.xls,.csv" class="hidden" />
+
+        </div>
+
     </div>
 
     <!-- Table Container -->
@@ -29,9 +57,10 @@ $wrapperClass = $tableVisible ? '' : 'hidden';
                 <col>                           <!-- Uraian Pekerjaan (flexible) -->
                 <col style="width: 5rem">       <!-- Volume -->
                 <col style="width: 5rem">       <!-- Satuan -->
-                <col style="width: 9rem">       <!-- Harga Dasar -->
-                <col style="width: 9rem">       <!-- Harga -->
-                <col style="width: 4rem">       <!-- % -->
+                <col style="width: 9rem">       <!-- Harga Bahan -->
+                <col style="width: 9rem">       <!-- Harga Alat -->
+                <col style="width: 9rem">       <!-- Harga Upah -->
+                <col style="width: 9rem">       <!-- Harga Keseluruhan -->
                 <col style="width: 7rem">       <!-- Aksi -->
             </colgroup>
 
@@ -42,9 +71,10 @@ $wrapperClass = $tableVisible ? '' : 'hidden';
                     <th scope="col" class="px-3 md:px-5 py-3 md:py-3.5 text-[10px] md:text-xs font-semibold uppercase tracking-wider">Uraian Pekerjaan</th>
                     <th scope="col" class="px-3 md:px-5 py-3 md:py-3.5 text-center text-[10px] md:text-xs font-semibold uppercase tracking-wider w-16 md:w-20">Volume</th>
                     <th scope="col" class="px-3 md:px-5 py-3 md:py-3.5 text-center text-[10px] md:text-xs font-semibold uppercase tracking-wider w-16 md:w-20">Satuan</th>
-                    <th scope="col" class="px-3 md:px-5 py-3 md:py-3.5 text-right text-[10px] md:text-xs font-semibold uppercase tracking-wider">Harga Dasar</th>
-                    <th scope="col" class="px-3 md:px-5 py-3 md:py-3.5 text-right text-[10px] md:text-xs font-semibold uppercase tracking-wider">Harga</th>
-                    <th scope="col" class="px-3 md:px-5 py-3 md:py-3.5 text-center text-[10px] md:text-xs font-semibold uppercase tracking-wider w-12 md:w-16">%</th>
+                    <th scope="col" class="px-3 md:px-5 py-3 md:py-3.5 text-right text-[10px] md:text-xs font-semibold uppercase tracking-wider">Harga Bahan</th>
+                    <th scope="col" class="px-3 md:px-5 py-3 md:py-3.5 text-right text-[10px] md:text-xs font-semibold uppercase tracking-wider">Harga Alat</th>
+                    <th scope="col" class="px-3 md:px-5 py-3 md:py-3.5 text-right text-[10px] md:text-xs font-semibold uppercase tracking-wider">Harga Upah</th>
+                    <th scope="col" class="px-3 md:px-5 py-3 md:py-3.5 text-right text-[10px] md:text-xs font-semibold uppercase tracking-wider">Harga Keseluruhan</th>
                     <th scope="col" class="px-3 md:px-5 py-3 md:py-3.5 text-center text-[10px] md:text-xs font-semibold uppercase tracking-wider w-20 md:w-24">Aksi</th>
                 </tr>
             </thead>
@@ -57,21 +87,18 @@ $wrapperClass = $tableVisible ? '' : 'hidden';
             <!-- Table Footer — updated by ajax_rab.js -->
             <tfoot id="rab-tfoot">
                 <tr class="bg-table-category text-white">
-                    <td colspan="5" class="px-3 md:px-5 py-1.5 md:py-2 text-center text-[10px] md:text-xs font-bold uppercase tracking-wide whitespace-nowrap">Jumlah Harga</td>
+                    <td colspan="7" class="px-3 md:px-5 py-1.5 md:py-2 text-center text-[10px] md:text-xs font-bold uppercase tracking-wide whitespace-nowrap">Jumlah Harga</td>
                     <td id="rab-total-jumlah" class="px-3 md:px-5 py-1.5 md:py-2 text-right text-[10px] md:text-xs font-bold tabular-nums whitespace-nowrap">Rp 0</td>
-                    <td class="px-3 md:px-5 py-1.5 md:py-2 text-center text-[10px] md:text-xs font-bold tabular-nums whitespace-nowrap">—</td>
                     <td class="px-3 md:px-5 py-1.5 md:py-2"></td>
                 </tr>
                 <tr class="bg-table-category-hover text-white">
-                    <td colspan="5" class="px-3 md:px-5 py-1.5 md:py-2 text-center text-[10px] md:text-xs font-bold uppercase tracking-wide whitespace-nowrap">PPN 11%</td>
+                    <td colspan="7" class="px-3 md:px-5 py-1.5 md:py-2 text-center text-[10px] md:text-xs font-bold uppercase tracking-wide whitespace-nowrap">PPN 11%</td>
                     <td id="rab-total-ppn" class="px-3 md:px-5 py-1.5 md:py-2 text-right text-[10px] md:text-xs font-bold tabular-nums whitespace-nowrap">Rp 0</td>
-                    <td class="px-3 md:px-5 py-1.5 md:py-2"></td>
                     <td class="px-3 md:px-5 py-1.5 md:py-2"></td>
                 </tr>
                 <tr class="bg-table-category text-white">
-                    <td colspan="5" class="px-3 md:px-5 py-1.5 md:py-2 text-center text-[10px] md:text-xs font-bold uppercase tracking-wide whitespace-nowrap">Total Harga</td>
+                    <td colspan="7" class="px-3 md:px-5 py-1.5 md:py-2 text-center text-[10px] md:text-xs font-bold uppercase tracking-wide whitespace-nowrap">Total Harga</td>
                     <td id="rab-total-final" class="px-3 md:px-5 py-1.5 md:py-2 text-right text-[10px] md:text-xs font-bold tabular-nums whitespace-nowrap">Rp 0</td>
-                    <td class="px-3 md:px-5 py-1.5 md:py-2"></td>
                     <td class="px-3 md:px-5 py-1.5 md:py-2"></td>
                 </tr>
             </tfoot>

@@ -113,7 +113,7 @@ $wrapperClass = $wrapperClass ?? 'w-full';
         <button id="tambah-ahs-submit-btn"
             class="bg-primary hover:bg-primary/90 active:scale-95 disabled:opacity-50 disabled:pointer-events-none text-white px-8 py-2.5 rounded-lg text-xs md:text-sm font-semibold tracking-wide shadow-md transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary/40"
             disabled>
-            Tambah ke AHS
+            Tambah ke RAB
         </button>
     </div>
 

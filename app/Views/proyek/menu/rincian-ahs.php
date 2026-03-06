@@ -13,9 +13,9 @@
     <?php echo view('partials/table-ahs', ['wrapperClass' => 'w-full']); ?>
 
 
-    <script src="<?= base_url('ajax/ajax_ahs.js') ?>"></script>
     <script src="<?= base_url('assets/js/preline.js') ?>"></script>
     <script src="<?= base_url('node_modules/preline/dist/preline.js') ?>"></script>
+    <script src="<?= base_url('ajax/ajax_ahs.js') ?>"></script>
     <script src="<?= base_url('assets/js/partials/navbar.js') ?>"></script>
 </body>
 </html>
