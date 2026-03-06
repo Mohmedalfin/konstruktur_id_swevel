@@ -16,7 +16,12 @@ $userRole = session()->get('kategori_akun') ?? session()->get('role') ?? 'Kontra
             </a>
 
             <!-- Collapse Button -->
-            <button type="button" class="hs-collapse-toggle md:hidden relative size-9 flex justify-center items-center font-medium text-sm rounded-lg bg-transparent border border-transparent text-white focus:outline-hidden disabled:opacity-50 disabled:pointer-events-none" id="hs-header-base-collapse" aria-expanded="false" aria-controls="hs-header-base" aria-label="Toggle navigation" data-hs-collapse="#hs-header-base">
+            <button type="button"
+                class="md:hidden relative size-9 flex justify-center items-center font-medium text-sm rounded-lg bg-transparent border border-transparent text-white focus:outline-hidden disabled:opacity-50 disabled:pointer-events-none"
+                id="hs-header-base-collapse"
+                aria-expanded="false"
+                aria-controls="hs-header-base"
+                aria-label="Toggle navigation">
                 <!-- Hamburger icon -->
                 <svg id="nav-icon-hamburger" class="size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="3" x2="21" y1="6" y2="6" />
@@ -34,13 +39,13 @@ $userRole = session()->get('kategori_akun') ?? session()->get('role') ?? 'Kontra
         </div>
 
         <!-- Collapse -->
-        <div id="hs-header-base" class="hs-collapse hidden overflow-hidden transition-all duration-300 basis-full grow md:block" aria-labelledby="hs-header-base-collapse">
+        <div id="hs-header-base" class="hidden overflow-hidden transition-all duration-300 basis-full grow md:block" aria-labelledby="hs-header-base-collapse">
             <div class="overflow-hidden overflow-y-auto max-h-[75vh] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-none [&::-webkit-scrollbar-track]:bg-scrollbar-track [&::-webkit-scrollbar-thumb]:bg-scrollbar-thumb">
                 <div class="py-2 md:py-0 flex flex-col md:flex-row md:items-stretch gap-0.5 md:gap-0">
                     <div class="grow">
-                        <div class="flex flex-col md:flex-row md:justify-end md:items-stretch gap-0.5 md:gap-0">
-                            <a class="px-3 py-2 md:py-0 md:w-28 md:justify-center flex items-center text-sm bg-white text-primary md:rounded-none focus:outline-hidden" href="#" aria-current="page">
-                                <svg class="shrink-0 size-4 me-3 md:me-2 block md:hidden" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <div class="flex flex-col md:flex-row md:justify-end md:items-stretch gap-0 md:gap-0">
+                            <a class="px-4 h-14 md:py-0 md:w-28 md:justify-center flex items-center gap-3 text-sm bg-white text-primary md:rounded-none focus:outline-hidden" href="#" aria-current="page">
+                                <svg class="shrink-0 size-4 block md:hidden" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
                                     <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
                                 </svg>
@@ -50,26 +55,23 @@ $userRole = session()->get('kategori_akun') ?? session()->get('role') ?? 'Kontra
                             <!-- Dropdown (User Profile) -->
                             <div class="hs-dropdown [--strategy:static] md:[--strategy:fixed] [--adaptive:none] md:[--adaptive:adaptive] [--is-collapse:true] md:[--is-collapse:false]">
                                 <button id="hs-header-base-dropdown" type="button"
-                                    class="hs-dropdown-toggle w-full h-14 p-2 md:px-3 md:justify-center flex items-center text-sm text-navbar-nav-foreground hover:bg-navbar-nav-hover focus:outline-hidden focus:bg-navbar-nav-focus"
+                                    class="hs-dropdown-toggle w-full h-14 px-4 md:px-3 md:justify-center flex items-center gap-3 text-sm text-navbar-nav-foreground hover:bg-navbar-nav-hover focus:outline-hidden focus:bg-navbar-nav-focus"
                                     aria-haspopup="menu" aria-expanded="false" aria-label="Dropdown">
- 
-                                    <div class="flex items-center p-2 gap-x-3">
-    
-                                        <div class="shrink-0">
-                                            <i class="text-white fa-solid fa-user text-md drop-shadow-[0_0_5px_rgba(255,255,255,0.5)]"></i>
-                                        </div>
 
-                                        <div class="leading-tight text-left">
-                                            <div class="text-sm font-medium text-white"><?= esc($userName) ?></div>
-                                            <div class="text-xs text-secondary opacity-80"><?= esc($userRole) ?></div>
-                                        </div>
-
-                                        <svg class="text-white hs-dropdown-open:-rotate-180 duration-300 shrink-0 size-4 ms-auto md:ms-1 group-hover:translate-y-0.5" 
-                                            xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" 
-                                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="m6 9 6 6 6-6" />
-                                        </svg>
+                                    <div class="shrink-0">
+                                        <i class="text-white fa-solid fa-user text-md drop-shadow-[0_0_5px_rgba(255,255,255,0.5)]"></i>
                                     </div>
+
+                                    <div class="leading-tight text-left">
+                                        <div class="text-sm font-medium text-white"><?= esc($userName) ?></div>
+                                        <div class="text-xs text-secondary opacity-80"><?= esc($userRole) ?></div>
+                                    </div>
+
+                                    <svg class="text-white hs-dropdown-open:-rotate-180 duration-300 shrink-0 size-4 ms-auto md:ms-1 group-hover:translate-y-0.5" 
+                                        xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" 
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="m6 9 6 6 6-6" />
+                                    </svg>
                                 </button>
 
                                 <div class="hs-dropdown-menu transition-[opacity,margin] duration-[0.1ms] md:duration-[150ms] hs-dropdown-open:opacity-100 opacity-0 relative w-full md:w-52 hidden z-10 top-full ps-7 md:ps-0 md:bg-white md:border md:border-gray-200 md:shadow-md before:absolute before:-top-4 before:start-0 before:w-full before:h-5 md:after:hidden after:absolute after:top-1 after:start-4.5 after:h-[calc(100%-4px)] after:border-s after:border-white/20"

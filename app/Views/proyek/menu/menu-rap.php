@@ -28,7 +28,8 @@ if (! in_array($rabMode, ['readonly', 'new'], true)) {
         window.RAB_INIT = {
             mode:          <?= $rabMode ? json_encode($rabMode) : 'null' ?>,
             id:            <?= $rabId   ? json_encode($rabId)   : 'null' ?>,
-            rincianAhsUrl: <?= json_encode(base_url('menu-rap/rincian-ahs')) ?>
+            rincianAhsUrl: <?= json_encode(base_url('menu-rap/rincian-ahs')) ?>,
+            tambahAhsUrl:  <?= json_encode(base_url('menu-rap/tambah-ahs')) ?>
         };
     </script>
 

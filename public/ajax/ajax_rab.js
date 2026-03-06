@@ -1,6 +1,6 @@
 /**
  * Data structure:
- *   { categories: [ { id, name, items: [ { no, uraian, volume, satuan, hargaDasar, harga } ] } ] }
+ *   { categories: [ { id, name, items: [ { no, uraian, volume, satuan, hargaBahan, hargaAlat, hargaUpah, hargaKeseluruhan } ] } ] }
  * Modes:
  *  'readonly' — card clicked → category headers + sub-rows, accordion collapsible, Detail button
  *  'editable' — Add RAB clicked → category headers only, "+ Tambah Item" per category
@@ -22,16 +22,19 @@
     /* ============================================================
        DOM REFERENCES
     ============================================================ */
-    const wrapper     = document.getElementById('rab-table-wrapper');
-    const tbody       = document.getElementById('rab-tbody');
-    const addRowBtn   = document.getElementById('rab-add-row-btn');
-    const totalJumlah = document.getElementById('rab-total-jumlah');
-    const totalPpn    = document.getElementById('rab-total-ppn');
-    const totalFinal  = document.getElementById('rab-total-final');
-    const addRabBtn   = document.getElementById('addRabBtn');
-    const cards       = document.querySelectorAll('.rab-card');
+    const wrapper              = document.getElementById('rab-table-wrapper');
+    const tbody                = document.getElementById('rab-tbody');
+    const addRowBtn            = document.getElementById('rab-add-row-btn');
+    const totalJumlah          = document.getElementById('rab-total-jumlah');
+    const totalPpn             = document.getElementById('rab-total-ppn');
+    const totalFinal           = document.getElementById('rab-total-final');
+    const addRabBtn            = document.getElementById('addRabBtn');
+    const cards                = document.querySelectorAll('.rab-card');
+    const boqImportBtn         = document.getElementById('boq-import-btn');
+    const boqFileInput         = document.getElementById('boq-file-input');
+    const boqDownloadTplBtn    = document.getElementById('boq-download-template-btn');
 
-    if (!wrapper || !tbody) return; 
+    if (!wrapper || !tbody) return;
 
     /* ============================================================
        DUMMY DATA  (replace with real CI4 AJAX endpoints later)
@@ -44,25 +47,25 @@
                     id: 'persiapan',
                     name: 'Pekerjaan Persiapan',
                     items: [
-                        { no: 1, uraian: 'Pembuatan gudang semen dan peralatan', volume: 1,    satuan: 'm²', hargaDasar: 32621.60,  harga: 32621.60  },
-                        { no: 2, uraian: 'Buangan tanah galian',                 volume: 12.5, satuan: 'm³', hargaDasar: 45000.00,  harga: 562500.00 }
+                        { no: 1, uraian: 'Pembuatan gudang semen dan peralatan', volume: 1,    satuan: 'm²', hargaBahan: 18000.00,  hargaAlat: 5000.00,  hargaUpah: 9621.60,  hargaKeseluruhan: 32621.60  },
+                        { no: 2, uraian: 'Buangan tanah galian',                 volume: 12.5, satuan: 'm³', hargaBahan: 0,         hargaAlat: 25000.00, hargaUpah: 20000.00, hargaKeseluruhan: 562500.00 }
                     ]
                 },
                 {
                     id: 'struktur',
                     name: 'Pekerjaan Struktur',
                     items: [
-                        { no: 1, uraian: 'Pengecoran pondasi beton',    volume: 5,   satuan: 'm³', hargaDasar: 950000.00,  harga: 4750000.00  },
-                        { no: 2, uraian: 'Pemasangan besi tulangan D16', volume: 200, satuan: 'kg', hargaDasar: 14500.00,   harga: 2900000.00  },
-                        { no: 3, uraian: 'Bekisting kolom',             volume: 30,  satuan: 'm²', hargaDasar: 125000.00,  harga: 3750000.00  }
+                        { no: 1, uraian: 'Pengecoran pondasi beton',    volume: 5,   satuan: 'm³', hargaBahan: 600000.00, hargaAlat: 150000.00, hargaUpah: 200000.00, hargaKeseluruhan: 4750000.00  },
+                        { no: 2, uraian: 'Pemasangan besi tulangan D16', volume: 200, satuan: 'kg', hargaBahan: 10000.00,  hargaAlat: 1500.00,   hargaUpah: 3000.00,   hargaKeseluruhan: 2900000.00  },
+                        { no: 3, uraian: 'Bekisting kolom',             volume: 30,  satuan: 'm²', hargaBahan: 70000.00,  hargaAlat: 20000.00,  hargaUpah: 35000.00,  hargaKeseluruhan: 3750000.00  }
                     ]
                 },
                 {
                     id: 'arsitektur',
                     name: 'Pekerjaan Arsitektur',
                     items: [
-                        { no: 1, uraian: 'Pasangan dinding bata merah 1:4', volume: 80,  satuan: 'm²', hargaDasar: 185000.00, harga: 14800000.00 },
-                        { no: 2, uraian: 'Plesteran & acian dinding',       volume: 160, satuan: 'm²', hargaDasar: 72000.00,  harga: 11520000.00 }
+                        { no: 1, uraian: 'Pasangan dinding bata merah 1:4', volume: 80,  satuan: 'm²', hargaBahan: 110000.00, hargaAlat: 15000.00, hargaUpah: 60000.00, hargaKeseluruhan: 14800000.00 },
+                        { no: 2, uraian: 'Plesteran & acian dinding',       volume: 160, satuan: 'm²', hargaBahan: 40000.00,  hargaAlat: 8000.00,  hargaUpah: 24000.00, hargaKeseluruhan: 11520000.00 }
                     ]
                 }
             ]
@@ -73,15 +76,15 @@
                     id: 'persiapan',
                     name: 'Pekerjaan Persiapan',
                     items: [
-                        { no: 1, uraian: 'Pembongkaran atap lama', volume: 1, satuan: 'ls', hargaDasar: 2500000.00, harga: 2500000.00 }
+                        { no: 1, uraian: 'Pembongkaran atap lama', volume: 1, satuan: 'ls', hargaBahan: 500000.00, hargaAlat: 800000.00, hargaUpah: 1200000.00, hargaKeseluruhan: 2500000.00 }
                     ]
                 },
                 {
                     id: 'struktur',
                     name: 'Pekerjaan Struktur',
                     items: [
-                        { no: 1, uraian: 'Perkuatan balok eksisting', volume: 8, satuan: 'm',  hargaDasar: 450000.00, harga: 3600000.00 },
-                        { no: 2, uraian: 'Cor plat lantai t=12cm',    volume: 6, satuan: 'm²', hargaDasar: 780000.00, harga: 4680000.00 }
+                        { no: 1, uraian: 'Perkuatan balok eksisting', volume: 8, satuan: 'm',  hargaBahan: 250000.00, hargaAlat: 80000.00, hargaUpah: 120000.00, hargaKeseluruhan: 3600000.00 },
+                        { no: 2, uraian: 'Cor plat lantai t=12cm',    volume: 6, satuan: 'm²', hargaBahan: 450000.00, hargaAlat: 130000.00, hargaUpah: 200000.00, hargaKeseluruhan: 4680000.00 }
                     ]
                 }
             ]
@@ -112,7 +115,6 @@
        FORMAT HELPERS
     ============================================================ */
     const fmt = n => 'Rp ' + Number(n).toLocaleString('id-ID', { minimumFractionDigits: 2 });
-    const pct = (a, total) => total ? ((a / total) * 100).toFixed(2) + '%' : '0.00%';
 
     /* ============================================================
        RENDER — LOADING
@@ -120,7 +122,7 @@
     function renderLoading() {
         tbody.innerHTML = `
             <tr>
-                <td colspan="8" class="text-center py-10 text-table-subtle text-xs tracking-wide">
+                <td colspan="9" class="text-center py-10 text-table-subtle text-xs tracking-wide">
                     <svg class="animate-spin w-5 h-5 mx-auto mb-2 text-table-muted" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
@@ -137,11 +139,11 @@
     function renderReadonly(data) {
         const categories = data.categories || [];
         const grandTotal = categories.reduce(
-            (sum, cat) => sum + cat.items.reduce((s, i) => s + Number(i.harga), 0), 0
+            (sum, cat) => sum + cat.items.reduce((s, i) => s + Number(i.hargaKeseluruhan), 0), 0
         );
 
         if (categories.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="8" class="text-center py-10 text-table-subtle text-xs">Tidak ada data pekerjaan.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="9" class="text-center py-10 text-table-subtle text-xs">Tidak ada data pekerjaan.</td></tr>`;
             updateTotals(0);
             return;
         }
@@ -149,7 +151,7 @@
         let html = '';
 
         categories.forEach(cat => {
-            const catTotal   = cat.items.reduce((s, i) => s + Number(i.harga), 0);
+            const catTotal   = cat.items.reduce((s, i) => s + Number(i.hargaKeseluruhan), 0);
             const isOpen     = !state.collapsed[cat.id];
             const subClass   = isOpen ? '' : 'hidden';
             const chevronRot = isOpen ? '' : 'rotate-180';
@@ -176,17 +178,15 @@
                         </div>
                     </td>
                     <!-- Col 2-5: Category name -->
-                    <td colspan="4" class="px-3 md:px-5 py-2.5 md:py-3 font-semibold text-[10px] md:text-xs uppercase tracking-widest">
+                    <td colspan="6" class="px-3 md:px-5 py-2.5 md:py-3 font-semibold text-[10px] md:text-xs uppercase tracking-widest">
                         <span class="flex items-center gap-2">
                             <span class="w-1 h-3.5 md:h-4 bg-secondary rounded-full"></span>
                             ${cat.name}
                         </span>
                     </td>
-                    <!-- Col 6: Harga sub-total -->
+                    <!-- Col 8: Harga Keseluruhan sub-total -->
                     <td class="px-3 md:px-5 py-2.5 md:py-3 text-right text-[10px] md:text-xs tabular-nums opacity-80">${fmt(catTotal)}</td>
-                    <!-- Col 7: % of grand total -->
-                    <td class="px-3 md:px-5 py-2.5 md:py-3 text-center text-[10px] md:text-xs tabular-nums opacity-70">${pct(catTotal, grandTotal)}</td>
-                    <!-- Col 8: Chevron (right end) -->
+                    <!-- Col 9: Chevron (right end) -->
                     <td class="w-20 md:w-24 px-3 md:px-5 py-2.5 md:py-3 text-center">
                         <svg class="cat-chevron w-3.5 h-3.5 md:w-4 md:h-4 mx-auto opacity-60 transition-transform duration-300 ${chevronRot}"
                              fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -199,7 +199,7 @@
             if (cat.items.length === 0) {
                 html += `
                     <tr class="subrow-${cat.id} ${subClass} bg-table-row border-b border-table-border">
-                        <td colspan="8" class="px-5 py-3 text-center text-table-subtle text-xs italic">
+                        <td colspan="9" class="px-5 py-3 text-center text-table-subtle text-xs italic">
                             Belum ada item pekerjaan.
                         </td>
                     </tr>`;
@@ -209,21 +209,40 @@
                         <tr class="subrow-${cat.id} ${subClass} bg-table-row border-b border-table-border hover:bg-white transition-colors duration-150">
                             <td class="px-3 md:px-5 py-2 md:py-2.5 text-center text-table-subtle">${item.no}</td>
                             <td class="px-3 md:px-5 py-2 md:py-2.5 font-medium text-table-medium max-w-0 truncate" title="${item.uraian}">${item.uraian}</td>
-                            <td class="px-3 md:px-5 py-2 md:py-2.5 text-center">
-                                <input type="number" min="0" step="any"
-                                    value="${item.volume}"
-                                    class="w-20 px-2 py-1 text-xs border border-table-border rounded text-center focus:outline-none focus:ring-1 focus:ring-primary/40 focus:border-primary tabular-nums bg-white"
-                                    data-field="volume" data-cat="${cat.id}" data-item="${item.no}"
-                                    data-harga-dasar="${item.hargaDasar}" />
-                            </td>
+                            <td class="px-3 md:px-5 py-2 md:py-2.5 text-center tabular-nums">${item.volume}</td>
                             <td class="px-3 md:px-5 py-2 md:py-2.5 text-center text-table-subtle">${item.satuan}</td>
-                            <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums">${fmt(item.hargaDasar)}</td>
-                            <td class="rab-harga-cell-${cat.id}-${item.no} px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums font-semibold text-table-strong">${fmt(item.harga)}</td>
-                            <td class="px-3 md:px-5 py-2 md:py-2.5 text-center text-table-muted">${pct(item.harga, grandTotal)}</td>
+                            <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums">${fmt(item.hargaBahan)}</td>
+                            <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums">${fmt(item.hargaAlat)}</td>
+                            <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums">${fmt(item.hargaUpah)}</td>
+                            <td class="rab-harga-cell-${cat.id}-${item.no} px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums font-semibold text-table-strong">${fmt(item.hargaKeseluruhan)}</td>
                             <td class="px-3 md:px-5 py-2 md:py-2.5 text-center">
-                                <button onclick="window.location.href=(window.RAB_INIT&&window.RAB_INIT.rincianAhsUrl)||'/menu-rap/rincian-ahs'" class="cursor-pointer bg-primary hover:bg-primary-hover active:scale-95 text-white px-2.5 md:px-3.5 py-1 rounded-md text-[10px] md:text-xs font-medium transition-all duration-150 focus:outline-none">
-                                    Detail
-                                </button>
+                                <div class="hs-dropdown relative inline-flex">
+                                    <button type="button"
+                                        class="hs-dropdown-toggle inline-flex items-center justify-center w-7 h-7 rounded-lg bg-white hover:bg-slate-50 border border-table-border text-table-subtle hover:text-table-body transition-colors focus:outline-none"
+                                        title="Opsi">
+                                        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M10 6a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4z"/>
+                                        </svg>
+                                    </button>
+                                    <div class="hs-dropdown-menu hidden z-50 mt-1 w-44 overflow-hidden rounded-xl bg-white shadow-xl ring-1 ring-black/10 end-0" role="menu">
+                                        <button type="button"
+                                            class="readonly-item-detail flex w-full items-center gap-2.5 px-4 py-2.5 text-xs text-slate-700 hover:bg-slate-50 transition-colors"
+                                            data-url="${(window.RAB_INIT && window.RAB_INIT.rincianAhsUrl) || '/menu-rap/rincian-ahs'}">
+                                            <svg class="w-3.5 h-3.5 text-primary shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                            </svg>
+                                            Input Rincian AHS
+                                        </button>
+                                        <div class="border-t border-table-border my-1"></div>
+                                        <button type="button"
+                                            class="readonly-item-delete flex w-full items-center gap-2.5 px-4 py-2.5 text-xs text-red-500 hover:bg-red-50 transition-colors">
+                                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                            </svg>
+                                            Hapus
+                                        </button>
+                                    </div>
+                                </div>
                             </td>
                         </tr>`;
 
@@ -234,45 +253,16 @@
         tbody.innerHTML = html;
         updateTotals(grandTotal);
         bindCategoryToggle();
-        bindVolumeInputs();
+        bindReadonlyDropdowns();
+        try { window.HSStaticMethods?.autoInit(['dropdown']); } catch (_) {}
     }
-
-    /* ============================================================
-       VOLUME INPUT — live recalculation of Harga & footer totals
-    ============================================================ */
-    function bindVolumeInputs() {
-        tbody.querySelectorAll('input[data-field="volume"]').forEach(function (input) {
-            input.addEventListener('input', function () {
-                const volume     = parseFloat(input.value) || 0;
-                const hargaDasar = parseFloat(input.dataset.hargaDasar) || 0;
-                const newHarga   = volume * hargaDasar;
-
-                // Update the paired Harga cell
-                const catId  = input.dataset.cat;
-                const itemNo = input.dataset.item;
-                const cell   = tbody.querySelector('.rab-harga-cell-' + catId + '-' + itemNo);
-                if (cell) cell.textContent = fmt(newHarga);
-
-                // Recompute grand total from all current volume inputs
-                let total = 0;
-                tbody.querySelectorAll('input[data-field="volume"]').forEach(function (inp) {
-                    const v = parseFloat(inp.value) || 0;
-                    const h = parseFloat(inp.dataset.hargaDasar) || 0;
-                    total  += v * h;
-                });
-                updateTotals(total);
-            });
-        });
-    }
-
-
 
     /* ============================================================
        RENDER — EDITABLE (category headers only + Add Item per cat)
     ============================================================ */
     function renderEditable(categories) {
         if (categories.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="8" class="text-center py-10 text-table-subtle text-xs">Tidak ada kategori.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="9" class="text-center py-10 text-table-subtle text-xs">Tidak ada kategori.</td></tr>`;
             updateTotals(0);
             return;
         }
@@ -302,13 +292,13 @@
                             </svg>
                         </button>
                     </td>
-                    <td colspan="6" class="px-3 md:px-5 py-2.5 md:py-3 font-semibold text-[10px] md:text-xs uppercase tracking-widest">
+                    <td colspan="7" class="px-3 md:px-5 py-2.5 md:py-3 font-semibold text-[10px] md:text-xs uppercase tracking-widest">
                         <span class="flex items-center gap-2">
                             <span class="w-1 h-3.5 md:h-4 bg-secondary rounded-full"></span>
                             ${cat.name}
                         </span>
                     </td>
-                    <!-- Col 8: Tambah AHS + Hapus buttons (right) -->
+                    <!-- Col 9: Tambah AHS + Hapus buttons (right) -->
                     <td class="px-2 md:px-3 py-2.5 md:py-3 text-center">
                         <div class="inline-flex items-center gap-1">
                             <button
@@ -330,7 +320,7 @@
                     </td>
                 </tr>
                 <tr class="subrow-placeholder-${cat.id} bg-table-row border-b border-table-border">
-                    <td colspan="8" class="px-5 py-2.5 text-center text-table-subtle text-xs italic">
+                    <td colspan="9" class="px-5 py-2.5 text-center text-table-subtle text-xs italic">
                         Belum ada item — klik Tambah untuk menambahkan.
                     </td>
                 </tr>`;
@@ -340,6 +330,8 @@
         updateTotals(0);
         bindAddSubItem();
         bindEditableCategoryToggle();
+        // Inject items yang menunggu (dari sessionStorage setelah redirect tambah-ahs)
+        injectPendingItems();
     }
 
     /* ============================================================
@@ -394,15 +386,48 @@
     }
 
     /* ============================================================
+       DROPDOWN ACTIONS — readonly sub-rows
+    ============================================================ */
+    function bindReadonlyDropdowns() {
+        // "Input Rincian AHS" — navigate
+        tbody.querySelectorAll('.readonly-item-detail').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                const url = btn.dataset.url || '/menu-rap/rincian-ahs';
+                window.location.href = url;
+            });
+        });
+
+        // "Hapus" — remove row & recompute totals
+        tbody.querySelectorAll('.readonly-item-delete').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                const row = btn.closest('tr');
+                if (row) row.remove();
+                // Recompute grand total dari harga-cell yang tersisa
+                let total = 0;
+                tbody.querySelectorAll('[class*="rab-harga-cell-"]').forEach(function (cell) {
+                    const val = cell.textContent.replace(/[^\d,]/g, '').replace(',', '.');
+                    total += parseFloat(val) || 0;
+                });
+                updateTotals(total);
+            });
+        });
+    }
+
+    /* ============================================================
        ADD SUBITEM BUTTON (editable) — navigates to Tambah AHS
     ============================================================ */
     function bindAddSubItem() {
         tbody.querySelectorAll('.add-subitem-btn').forEach(btn => {
             btn.addEventListener('click', function (e) {
                 e.stopPropagation();
-                const catId = btn.dataset.cat;
-                // Store which category triggered this so tambah-ahs can pre-filter
-                try { sessionStorage.setItem('rab_tambah_ahs_cat', catId); } catch (_) {}
+                const catId   = btn.dataset.cat;
+                const catName = btn.dataset.catname || '';
+                // Simpan kategori asal & URL kembali agar tambah-ahs.js dapat info ini
+                try {
+                    sessionStorage.setItem('rab_tambah_ahs_cat',     catId);
+                    sessionStorage.setItem('rab_tambah_ahs_catname', catName);
+                    sessionStorage.setItem('rab_return_url', window.location.href);
+                } catch (_) {}
                 const url = (window.RAB_INIT && window.RAB_INIT.tambahAhsUrl)
                     ? window.RAB_INIT.tambahAhsUrl
                     : '/menu-rap/tambah-ahs';
@@ -423,7 +448,7 @@
                 if (!tbody.querySelector(`.subrow-placeholder-${catId}`)) {
                     const placeholder = document.createElement('tr');
                     placeholder.className = `subrow-placeholder-${catId} bg-table-row border-b border-table-border`;
-                    placeholder.innerHTML = `<td colspan="8" class="px-5 py-2.5 text-center text-table-subtle text-xs italic">
+                    placeholder.innerHTML = `<td colspan="9" class="px-5 py-2.5 text-center text-table-subtle text-xs italic">
                         Belum ada item — klik Tambah untuk menambahkan.
                     </td>`;
                     catHeader.after(placeholder);
@@ -431,6 +456,149 @@
             });
         });
     }
+
+    /* ============================================================
+       INJECT PENDING ITEMS (dari sessionStorage setelah redirect)
+       Membaca rab_pending_items dan menyisipkan sub-rows ke tabel
+       editable dengan style mirip sub-rows pada mode readonly.
+    ============================================================ */
+    function injectPendingItems() {
+        let groups = [];
+        try {
+            const raw = sessionStorage.getItem('rab_pending_items');
+            if (raw) groups = JSON.parse(raw);
+        } catch (_) { return; }
+        if (!groups || groups.length === 0) return;
+
+        let grandHarga = 0;
+
+        groups.forEach(function (group) {
+            const catId = group.catId;
+            const items = group.items || [];
+            if (items.length === 0) return;
+
+            // Hapus placeholder jika ada
+            const placeholder = tbody.querySelector('.subrow-placeholder-' + catId);
+            if (placeholder) placeholder.remove();
+
+            // Cari category header row sebagai anchor
+            const catHeader = tbody.querySelector('.rab-category [data-cat="' + catId + '"]');
+            const anchorRow = catHeader ? catHeader.closest('tr') : null;
+
+            // Hapus item rows lama untuk catId ini (hasil inject sebelumnya)
+            tbody.querySelectorAll('.subrow-item-' + catId).forEach(function (r) { r.remove(); });
+
+            // Hitung mulai dari berapa item sudah ada di kategori ini
+            let rowNum      = 0;
+            let lastInserted = anchorRow; 
+
+            items.forEach(function (item) {
+                rowNum++;
+                const hargaBahan = parseFloat(item.hargaBahan) || 0;
+                const hargaAlat  = parseFloat(item.hargaAlat)  || 0;
+                const hargaUpah  = parseFloat(item.hargaUpah)  || 0;
+                const hargaKsl   = parseFloat(item.hargaKeseluruhan) || (hargaBahan + hargaAlat + hargaUpah);
+                grandHarga      += hargaKsl;
+                const itemRow    = document.createElement('tr');
+                itemRow.className = 'subrow-item-' + catId + ' subrow-' + catId + ' bg-table-row border-b border-table-border hover:bg-white transition-colors duration-150';
+                itemRow.innerHTML = `
+                    <td class="px-3 md:px-5 py-2 md:py-2.5 text-center text-table-subtle">${rowNum}</td>
+                    <td class="px-3 md:px-5 py-2 md:py-2.5 font-medium text-table-medium max-w-0 truncate" title="${escHtml(item.nama)}">${escHtml(item.nama)}</td>
+                    <td class="px-3 md:px-5 py-2 md:py-2.5 text-center tabular-nums">${escHtml(String(item.volume ?? 1))}</td>
+                    <td class="px-3 md:px-5 py-2 md:py-2.5 text-center text-table-subtle">${escHtml(item.satuan)}</td>
+                    <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums">${fmt(hargaBahan)}</td>
+                    <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums">${fmt(hargaAlat)}</td>
+                    <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums">${fmt(hargaUpah)}</td>
+                    <td class="rab-harga-cell-${escHtml(catId)}-pending-${escHtml(String(item.id))} px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums font-semibold text-table-strong">${fmt(hargaKsl)}</td>
+                    <td class="px-3 md:px-5 py-2 md:py-2.5 text-center">
+                        <div class="hs-dropdown relative inline-flex">
+                            <button type="button"
+                                class="hs-dropdown-toggle inline-flex items-center justify-center w-7 h-7 rounded-lg bg-white hover:bg-slate-50 border border-table-border text-table-subtle hover:text-table-body transition-colors focus:outline-none"
+                                title="Opsi">
+                                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M10 6a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4z"/>
+                                </svg>
+                            </button>
+                            <div class="hs-dropdown-menu hidden z-50 mt-1 w-44 overflow-hidden rounded-xl bg-white shadow-xl ring-1 ring-black/10 end-0" role="menu">
+                                <button type="button"
+                                    class="pending-item-edit flex w-full items-center gap-2.5 px-4 py-2.5 text-xs text-slate-700 hover:bg-slate-50 transition-colors">
+                                    <svg class="w-3.5 h-3.5 text-primary shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                    </svg>
+                                    Input Rincian AHS
+                                </button>
+                                <div class="border-t border-table-border my-1"></div>
+                                <button type="button"
+                                    class="del-pending-item flex w-full items-center gap-2.5 px-4 py-2.5 text-xs text-red-500 hover:bg-red-50 transition-colors">
+                                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                    </svg>
+                                    Hapus
+                                </button>
+                            </div>
+                        </div>
+                    </td>`;
+
+                // Sisipkan setelah lastInserted agar urutan tetap benar
+                if (lastInserted && lastInserted.parentNode) {
+                    lastInserted.parentNode.insertBefore(itemRow, lastInserted.nextSibling);
+                } else {
+                    tbody.appendChild(itemRow);
+                }
+                lastInserted = itemRow; // geser anchor ke row yang baru ditambahkan
+
+                // Bind hapus item
+                itemRow.querySelector('.del-pending-item').addEventListener('click', function () {
+                    itemRow.remove();
+                    recomputePendingTotals();
+                });
+
+                // Bind Input Rincian AHS — navigate ke rincian-ahs dengan context nama item
+                itemRow.querySelector('.pending-item-edit').addEventListener('click', function () {
+                    try {
+                        sessionStorage.setItem('ahs_item_label', item.nama || '');
+                        sessionStorage.setItem('rab_return_url', window.location.href);
+                    } catch (_) {}
+                    const url = (window.RAB_INIT && window.RAB_INIT.rincianAhsUrl)
+                        ? window.RAB_INIT.rincianAhsUrl
+                        : '/menu-rap/rincian-ahs';
+                    window.location.href = url;
+                });
+
+
+            });
+        });
+
+        // Perbarui footer totals
+        recomputePendingTotals();
+
+        // Bersihkan sessionStorage setelah berhasil di-inject
+        try { sessionStorage.removeItem('rab_pending_items'); } catch (_) {}
+
+        // Re-init Preline agar hs-dropdown pada rows baru berfungsi
+        try { window.HSStaticMethods?.autoInit(['dropdown']); } catch (_) {}
+    }
+
+    /* ── Hitung ulang total dari semua hargaKeseluruhan cell (editable mode) ── */
+    function recomputePendingTotals() {
+        let total = 0;
+        tbody.querySelectorAll('[class*="rab-harga-cell-"]').forEach(function (cell) {
+            const val = cell.textContent.replace(/[^0-9,]/g, '').replace(',', '.');
+            total += parseFloat(val) || 0;
+        });
+        updateTotals(total);
+    }
+
+    /* ── Escape HTML helper ── */
+    function escHtml(str) {
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
 
     /* ============================================================
        EDITABLE CATEGORY TOGGLE (plus/minus in left column)
@@ -517,7 +685,84 @@
             state.currentId = null;
             showTable('editable');
             renderEditable(defaultCategories);
+            // injectPendingItems dipanggil di dalam renderEditable
         }
     });
+
+    /* ============================================================
+       IMPORT BOQ — trigger file picker
+    ============================================================ */
+    if (boqImportBtn && boqFileInput) {
+        boqImportBtn.addEventListener('click', function () {
+            boqFileInput.value = ''; // reset agar file sama bisa dipick ulang
+            boqFileInput.click();
+        });
+
+        boqFileInput.addEventListener('change', function () {
+            const file = boqFileInput.files[0];
+            if (!file) return;
+
+            const maxMb = 5;
+            if (file.size > maxMb * 1024 * 1024) {
+                alert('Ukuran file terlalu besar. Maksimal ' + maxMb + ' MB.');
+                return;
+            }
+
+            // TODO: kirim ke endpoint CI4 untuk di-parse PhpSpreadsheet
+            // Sementara: tampilkan nama file sebagai konfirmasi
+            const label = boqImportBtn.querySelector('span.boq-import-label') || (() => {
+                const s = document.createElement('span');
+                s.className = 'boq-import-label';
+                boqImportBtn.appendChild(s);
+                return s;
+            })();
+
+            console.info('[BOQ Import] File dipilih:', file.name, '(' + (file.size / 1024).toFixed(1) + ' KB)');
+
+            // Tampilkan notifikasi sementara di tombol
+            const originalHTML = boqImportBtn.innerHTML;
+            boqImportBtn.innerHTML = `
+                <svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+                </svg>
+                Memproses...`;
+            boqImportBtn.disabled = true;
+
+            // Simulasi proses (ganti dengan fetch ke endpoint saat sudah ada)
+            setTimeout(function () {
+                boqImportBtn.innerHTML = originalHTML;
+                boqImportBtn.disabled = false;
+                alert('File "' + file.name + '" siap diproses.\n\n(Endpoint import belum tersedia — segera diimplementasi)');
+            }, 1000);
+        });
+    }
+
+    /* ============================================================
+       DOWNLOAD TEMPLATE BOQ
+    ============================================================ */
+    if (boqDownloadTplBtn) {
+        boqDownloadTplBtn.addEventListener('click', function () {
+            // Generate CSV template sederhana
+            const headers = ['No', 'Uraian Pekerjaan', 'Volume', 'Satuan'];
+            const examples = [
+                ['1', 'Contoh: Pembuatan gudang semen', '1', 'm²'],
+                ['2', 'Contoh: Pengecoran pondasi', '5', 'm³'],
+            ];
+            const csvRows = [headers, ...examples]
+                .map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(','))
+                .join('\r\n');
+
+            const blob = new Blob([csvRows], { type: 'text/csv;charset=utf-8;' });
+            const url  = URL.createObjectURL(blob);
+            const a    = document.createElement('a');
+            a.href     = url;
+            a.download = 'template_boq.csv';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+    }
 
 })();
