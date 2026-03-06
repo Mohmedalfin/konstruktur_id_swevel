@@ -7,7 +7,7 @@ $userRole = session()->get('kategori_akun') ?? session()->get('role') ?? 'Kontra
 <header class="flex flex-wrap md:justify-start md:flex-nowrap z-50 bg-navbar border-b border-navbar-line sticky top-0 transition-all duration-500 ease-in-out">
     <nav class="relative max-w-[85rem] w-full mx-auto md:flex md:items-center md:justify-between md:gap-3 py-2 px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center gap-x-1">
-            <a class="flex-none font-semibold text-xl text-foreground focus:outline-hidden focus:opacity-80" href="#" aria-label="Brand">
+            <a class="flex-none font-semibold text-xl text-foreground focus:outline-hidden focus:opacity-80" href="<?= base_url('proyek') ?>" href="#" aria-label="Brand">
                 <div class="flex items-center gap-2">
                     <img src="<?= base_url('assets/images/logoKonstruktor.png') ?>" alt="Kontraktor.id Logo"
                         class="h-7 md:h-8 w-auto object-contain">
@@ -52,9 +52,9 @@ $userRole = session()->get('kategori_akun') ?? session()->get('role') ?? 'Kontra
                                 <button id="hs-header-base-dropdown" type="button"
                                     class="hs-dropdown-toggle w-full h-14 p-2 md:px-3 md:justify-center flex items-center text-sm text-navbar-nav-foreground hover:bg-navbar-nav-hover focus:outline-hidden focus:bg-navbar-nav-focus"
                                     aria-haspopup="menu" aria-expanded="false" aria-label="Dropdown">
- 
+
                                     <div class="flex items-center p-2 gap-x-3">
-    
+
                                         <div class="shrink-0">
                                             <i class="text-white fa-solid fa-user text-md drop-shadow-[0_0_5px_rgba(255,255,255,0.5)]"></i>
                                         </div>
@@ -64,8 +64,8 @@ $userRole = session()->get('kategori_akun') ?? session()->get('role') ?? 'Kontra
                                             <div class="text-xs text-secondary opacity-80"><?= esc($userRole) ?></div>
                                         </div>
 
-                                        <svg class="text-white hs-dropdown-open:-rotate-180 duration-300 shrink-0 size-4 ms-auto md:ms-1 group-hover:translate-y-0.5" 
-                                            xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" 
+                                        <svg class="text-white hs-dropdown-open:-rotate-180 duration-300 shrink-0 size-4 ms-auto md:ms-1 group-hover:translate-y-0.5"
+                                            xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                                             fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                             <path d="m6 9 6 6 6-6" />
                                         </svg>
@@ -102,4 +102,3 @@ $userRole = session()->get('kategori_akun') ?? session()->get('role') ?? 'Kontra
 <!-- ========== END HEADER ========== -->
 
 <script src="<?= base_url('assets/js/partials/header.js') ?>"></script>
-
