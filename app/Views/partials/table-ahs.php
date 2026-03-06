@@ -59,15 +59,18 @@ $wrapperClass = $wrapperClass ?? 'w-full';
 
     <!-- ── Table Container ──────────────────────────────────────────── -->
     <div class="overflow-x-auto rounded-xl shadow-md border border-table-border bg-white">
-        <table class="w-full text-left border-collapse min-w-[860px]" id="ahs-table">
+        <table class="w-full text-left border-collapse min-w-[1300px]" id="ahs-table">
 
             <colgroup>
                 <col style="width: 3rem">
                 <col style="width: 6rem">
-                <col>
+                <col style="min-width: 18rem">
+                <col style="width: 8rem">
+                <col style="width: 10rem">
                 <col style="width: 7rem">
                 <col style="width: 6rem">
                 <col style="width: 10rem">
+                <col style="width: 8rem">
                 <col style="width: 10rem">
                 <col style="width: 4rem">
             </colgroup>
@@ -77,9 +80,12 @@ $wrapperClass = $wrapperClass ?? 'w-full';
                     <th scope="col" class="px-3 md:px-4 py-3 md:py-3.5 text-center text-[10px] md:text-xs font-semibold uppercase tracking-wider">No</th>
                     <th scope="col" class="px-3 md:px-4 py-3 md:py-3.5 text-center text-[10px] md:text-xs font-semibold uppercase tracking-wider">Tipe</th>
                     <th scope="col" class="px-3 md:px-4 py-3 md:py-3.5 text-[10px] md:text-xs font-semibold uppercase tracking-wider">Uraian</th>
+                    <th scope="col" class="px-3 md:px-4 py-3 md:py-3.5 text-[10px] md:text-xs font-semibold uppercase tracking-wider">Merk</th>
+                    <th scope="col" class="px-3 md:px-4 py-3 md:py-3.5 text-[10px] md:text-xs font-semibold uppercase tracking-wider">Spesifikasi</th>
                     <th scope="col" class="px-3 md:px-4 py-3 md:py-3.5 text-center text-[10px] md:text-xs font-semibold uppercase tracking-wider">Koefisien</th>
                     <th scope="col" class="px-3 md:px-4 py-3 md:py-3.5 text-center text-[10px] md:text-xs font-semibold uppercase tracking-wider">Satuan</th>
                     <th scope="col" class="px-3 md:px-4 py-3 md:py-3.5 text-right text-[10px] md:text-xs font-semibold uppercase tracking-wider">Harga Satuan</th>
+                    <th scope="col" class="px-3 md:px-4 py-3 md:py-3.5 text-[10px] md:text-xs font-semibold uppercase tracking-wider">Sumber</th>
                     <th scope="col" class="px-3 md:px-4 py-3 md:py-3.5 text-right text-[10px] md:text-xs font-semibold uppercase tracking-wider">Jumlah Harga</th>
                     <th scope="col" class="px-3 md:px-4 py-3 md:py-3.5 text-center text-[10px] md:text-xs font-semibold uppercase tracking-wider">Aksi</th>
                 </tr>
@@ -91,22 +97,22 @@ $wrapperClass = $wrapperClass ?? 'w-full';
 
             <tfoot id="ahs-tfoot">
                 <tr class="bg-emerald-50 border-t border-emerald-200">
-                    <td colspan="6" class="px-3 md:px-4 py-1.5 text-right text-[10px] md:text-xs font-semibold text-emerald-700 uppercase tracking-wide whitespace-nowrap">Total Bahan</td>
+                    <td colspan="9" class="px-3 md:px-4 py-1.5 text-right text-[10px] md:text-xs font-semibold text-emerald-700 uppercase tracking-wide whitespace-nowrap">Total Bahan</td>
                     <td id="ahs-total-bahan" class="px-3 md:px-4 py-1.5 text-right text-[10px] md:text-xs font-bold tabular-nums text-emerald-700 whitespace-nowrap">Rp 0</td>
                     <td class="px-3 md:px-4 py-1.5"></td>
                 </tr>
                 <tr class="bg-blue-50 border-t border-blue-200">
-                    <td colspan="6" class="px-3 md:px-4 py-1.5 text-right text-[10px] md:text-xs font-semibold text-blue-700 uppercase tracking-wide whitespace-nowrap">Total Alat</td>
+                    <td colspan="9" class="px-3 md:px-4 py-1.5 text-right text-[10px] md:text-xs font-semibold text-blue-700 uppercase tracking-wide whitespace-nowrap">Total Alat</td>
                     <td id="ahs-total-alat" class="px-3 md:px-4 py-1.5 text-right text-[10px] md:text-xs font-bold tabular-nums text-blue-700 whitespace-nowrap">Rp 0</td>
                     <td class="px-3 md:px-4 py-1.5"></td>
                 </tr>
                 <tr class="bg-violet-50 border-t border-violet-200">
-                    <td colspan="6" class="px-3 md:px-4 py-1.5 text-right text-[10px] md:text-xs font-semibold text-violet-700 uppercase tracking-wide whitespace-nowrap">Total Upah</td>
+                    <td colspan="9" class="px-3 md:px-4 py-1.5 text-right text-[10px] md:text-xs font-semibold text-violet-700 uppercase tracking-wide whitespace-nowrap">Total Upah</td>
                     <td id="ahs-total-upah" class="px-3 md:px-4 py-1.5 text-right text-[10px] md:text-xs font-bold tabular-nums text-violet-700 whitespace-nowrap">Rp 0</td>
                     <td class="px-3 md:px-4 py-1.5"></td>
                 </tr>
                 <tr class="bg-table-category text-white">
-                    <td colspan="6" class="px-3 md:px-4 py-2 text-center text-[10px] md:text-xs font-bold uppercase tracking-wide whitespace-nowrap">Total Keseluruhan</td>
+                    <td colspan="9" class="px-3 md:px-4 py-2 text-center text-[10px] md:text-xs font-bold uppercase tracking-wide whitespace-nowrap">Total Keseluruhan</td>
                     <td id="ahs-total-keseluruhan" class="px-3 md:px-4 py-2 text-right text-[10px] md:text-xs font-bold tabular-nums whitespace-nowrap">Rp 0</td>
                     <td class="px-3 md:px-4 py-2"></td>
                 </tr>
@@ -180,13 +186,16 @@ $wrapperClass = $wrapperClass ?? 'w-full';
 
         <!-- Table List AHS (scrollable) -->
         <div class="flex-1 overflow-auto">
-            <table class="w-full text-left border-collapse table-fixed min-w-[600px]" id="ahs-modal-table">
+            <table class="w-full text-left border-collapse table-fixed min-w-[1200px]" id="ahs-modal-table">
                 <colgroup>
                     <col style="width: 3rem">     <!-- Checkbox -->
                     <col style="width: 5.5rem">   <!-- Tipe -->
-                    <col>                         <!-- Uraian (flexible) -->
+                    <col style="min-width: 16rem"> <!-- Uraian (flexible) -->
+                    <col style="width: 8rem">     <!-- Merk -->
+                    <col style="width: 10rem">    <!-- Spesifikasi -->
                     <col style="width: 5.5rem">   <!-- Satuan -->
                     <col style="width: 8rem">     <!-- Harga Satuan -->
+                    <col style="width: 8rem">     <!-- Sumber -->
                 </colgroup>
                 <thead class="sticky top-0 bg-slate-100 z-10">
                     <tr>
@@ -195,8 +204,11 @@ $wrapperClass = $wrapperClass ?? 'w-full';
                         </th>
                         <th class="px-4 py-2.5 text-center text-[10px] font-semibold uppercase tracking-wider text-table-subtle w-16">Tipe</th>
                         <th class="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-table-subtle">Uraian</th>
+                        <th class="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-table-subtle">Merk</th>
+                        <th class="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-table-subtle">Spesifikasi</th>
                         <th class="px-4 py-2.5 text-center text-[10px] font-semibold uppercase tracking-wider text-table-subtle w-16">Satuan</th>
                         <th class="px-4 py-2.5 text-right text-[10px] font-semibold uppercase tracking-wider text-table-subtle w-28">Harga Satuan</th>
+                        <th class="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-table-subtle">Sumber</th>
                     </tr>
                 </thead>
                 <tbody id="ahs-modal-tbody" class="text-[11px] md:text-[13px] text-table-body">

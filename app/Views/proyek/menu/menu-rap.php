@@ -19,7 +19,7 @@ if (! in_array($rabMode, ['readonly', 'new'], true)) {
 </head>
 <body class="bg-gray-50 min-h-screen">
     <?php echo view('partials/navbar'); ?>
-    <?php echo view('partials/topbar', ['title' => 'RAB & RAP', 'subtitle' => '']); ?>
+    <?php echo view('partials/topbar', ['title' => 'RAP Realisasi', 'subtitle' => '']); ?>
 
     <?php echo view('partials/table-rab', ['tableVisible' => true]); ?>
 

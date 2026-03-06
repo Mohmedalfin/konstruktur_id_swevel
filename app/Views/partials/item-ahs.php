@@ -76,7 +76,7 @@ $wrapperClass = $wrapperClass ?? 'w-full';
                 <col style="width: 3.25rem">   <!-- No -->
                 <col>                           <!-- Nama Pekerjaan -->
                 <col style="width: 6rem">       <!-- Satuan -->
-                <col style="width: 12rem">      <!-- Sumber + Harga -->
+                <col style="width: 10rem">      <!-- Sumber -->
                 <col style="width: 5.5rem">     <!-- Aksi -->
             </colgroup>
 
@@ -86,7 +86,7 @@ $wrapperClass = $wrapperClass ?? 'w-full';
                     <th scope="col" class="px-3 md:px-5 py-3 md:py-3.5 text-center text-[10px] md:text-xs font-semibold uppercase tracking-wider">No</th>
                     <th scope="col" class="px-3 md:px-5 py-3 md:py-3.5 text-[10px] md:text-xs font-semibold uppercase tracking-wider">Nama Pekerjaan</th>
                     <th scope="col" class="px-3 md:px-5 py-3 md:py-3.5 text-center text-[10px] md:text-xs font-semibold uppercase tracking-wider">Satuan</th>
-                    <th scope="col" class="px-3 md:px-5 py-3 md:py-3.5 text-right text-[10px] md:text-xs font-semibold uppercase tracking-wider">Harga Satuan</th>
+                    <th scope="col" class="px-3 md:px-5 py-3 md:py-3.5 text-center text-[10px] md:text-xs font-semibold uppercase tracking-wider">Sumber</th>
                     <th scope="col" class="px-3 md:px-5 py-3 md:py-3.5 text-center text-[10px] md:text-xs font-semibold uppercase tracking-wider">Pilih</th>
                 </tr>
             </thead>

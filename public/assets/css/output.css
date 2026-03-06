@@ -800,6 +800,24 @@
   .min-w-\[860px\] {
     min-width: 860px;
   }
+  .min-w-\[1000px\] {
+    min-width: 1000px;
+  }
+  .min-w-\[1200px\] {
+    min-width: 1200px;
+  }
+  .min-w-\[1300px\] {
+    min-width: 1300px;
+  }
+  .min-w-\[1350px\] {
+    min-width: 1350px;
+  }
+  .min-w-\[1400px\] {
+    min-width: 1400px;
+  }
+  .min-w-\[1500px\] {
+    min-width: 1500px;
+  }
   .flex-1 {
     flex: 1;
   }
@@ -1102,6 +1120,10 @@
   .border-b-2 {
     border-bottom-style: var(--tw-border-style);
     border-bottom-width: 2px;
+  }
+  .border-dashed {
+    --tw-border-style: dashed;
+    border-style: dashed;
   }
   .border-none {
     --tw-border-style: none;
@@ -1431,6 +1453,9 @@
   .py-10 {
     padding-block: calc(var(--spacing) * 10);
   }
+  .py-12 {
+    padding-block: calc(var(--spacing) * 12);
+  }
   .py-\[7px\] {
     padding-block: 7px;
   }
@@ -1661,6 +1686,12 @@
   }
   .text-primary {
     color: var(--color-primary);
+  }
+  .text-primary\/40 {
+    color: var(--color-primary);
+    @supports (color: color-mix(in lab, red, red)) {
+      color: color-mix(in oklab, var(--color-primary) 40%, transparent);
+    }
   }
   .text-red-500 {
     color: var(--color-red-500);
@@ -2609,6 +2640,11 @@
       }
     }
   }
+  .sm\:col-span-3 {
+    @media (width >= 40rem) {
+      grid-column: span 3 / span 3;
+    }
+  }
   .sm\:mx-6 {
     @media (width >= 40rem) {
       margin-inline: calc(var(--spacing) * 6);
@@ -3134,6 +3170,11 @@
       }
     }
   }
+  .lg\:col-span-4 {
+    @media (width >= 64rem) {
+      grid-column: span 4 / span 4;
+    }
+  }
   .lg\:mx-10 {
     @media (width >= 64rem) {
       margin-inline: calc(var(--spacing) * 10);
@@ -3173,6 +3214,11 @@
   .lg\:text-\[20px\] {
     @media (width >= 64rem) {
       font-size: 20px;
+    }
+  }
+  .xl\:col-span-5 {
+    @media (width >= 80rem) {
+      grid-column: span 5 / span 5;
     }
   }
   .xl\:grid-cols-5 {
