@@ -145,6 +145,16 @@
                     data-id="${rowData.id}" autocomplete="off"/>
                 <ul class="ahs-autocomplete hidden absolute left-0 right-0 top-full mt-1 bg-white border border-table-border rounded-lg shadow-xl z-30 max-h-48 overflow-y-auto text-[12px]"></ul>
             </td>
+            <td class="px-3 md:px-4 py-2 md:py-2.5">
+                <input type="text" value="${escHtml(rowData.merk || '')}" placeholder="Merk"
+                    class="ahs-merk w-full bg-transparent border-b border-transparent hover:border-table-border focus:border-primary text-[11px] md:text-[13px] text-table-medium placeholder-table-subtle focus:outline-none transition-colors py-0.5"
+                    data-id="${rowData.id}"/>
+            </td>
+            <td class="px-3 md:px-4 py-2 md:py-2.5">
+                <input type="text" value="${escHtml(rowData.spesifikasi || '')}" placeholder="Spesifikasi"
+                    class="ahs-spesifikasi w-full bg-transparent border-b border-transparent hover:border-table-border focus:border-primary text-[11px] md:text-[13px] text-table-medium placeholder-table-subtle focus:outline-none transition-colors py-0.5"
+                    data-id="${rowData.id}"/>
+            </td>
             <td class="px-3 md:px-4 py-2 md:py-2.5 text-center">
                 <input type="number" min="0" step="any" value="${rowData.koefisien}"
                     class="ahs-koef w-20 px-2 py-1 text-[11px] md:text-[13px] border border-table-border rounded text-center focus:outline-none focus:ring-1 focus:ring-primary/40 focus:border-primary tabular-nums bg-white"
@@ -158,6 +168,11 @@
             <td class="px-3 md:px-4 py-2 md:py-2.5 text-right">
                 <input type="number" min="0" step="any" value="${rowData.hargaSatuan}"
                     class="ahs-harga-satuan w-32 px-2 py-1 text-[11px] md:text-[13px] border border-table-border rounded text-right focus:outline-none focus:ring-1 focus:ring-primary/40 focus:border-primary tabular-nums bg-white"
+                    data-id="${rowData.id}"/>
+            </td>
+            <td class="px-3 md:px-4 py-2 md:py-2.5">
+                <input type="text" value="${escHtml(rowData.sumber || '')}" placeholder="Sumber"
+                    class="ahs-sumber w-full bg-transparent border-b border-transparent hover:border-table-border focus:border-primary text-[11px] md:text-[13px] text-table-medium placeholder-table-subtle focus:outline-none transition-colors py-0.5"
                     data-id="${rowData.id}"/>
             </td>
             <td class="px-3 md:px-4 py-2 md:py-2.5 text-right tabular-nums font-semibold text-table-strong text-[11px] md:text-[13px]">
@@ -278,7 +293,7 @@
 
     function addRow(tipe) {
         document.getElementById('ahs-empty-row')?.remove();
-        renderRow({ id: Date.now(), tipe, uraian: '', koefisien: 1, satuan: '', hargaSatuan: 0 }, true);
+        renderRow({ id: Date.now(), tipe, uraian: '', merk: '', spesifikasi: '', koefisien: 1, satuan: '', hargaSatuan: 0, sumber: '' }, true);
         recalcTotals();
     }
 
@@ -330,8 +345,11 @@
                     </span>
                 </td>
                 <td class="px-4 py-2.5 text-[12px] text-table-medium">${escHtml(item.uraian)}</td>
+                <td class="px-4 py-2.5 text-[12px] text-table-medium">${escHtml(item.merk || '-')}</td>
+                <td class="px-4 py-2.5 text-[12px] text-table-medium">${escHtml(item.spesifikasi || '-')}</td>
                 <td class="px-4 py-2.5 text-center text-[12px] text-table-subtle">${escHtml(item.satuan)}</td>
                 <td class="px-4 py-2.5 text-right text-[12px] tabular-nums text-table-strong">${fmt(item.hargaSatuan)}</td>
+                <td class="px-4 py-2.5 text-[12px] text-table-medium">${escHtml(item.sumber || '-')}</td>
             </tr>`;
         }).join('');
 
@@ -392,9 +410,12 @@
                 id: Date.now() + Math.random(),
                 tipe: item.tipe,
                 uraian: item.uraian,
+                merk: item.merk || '',
+                spesifikasi: item.spesifikasi || '',
                 koefisien: 1,
                 satuan: item.satuan,
                 hargaSatuan: item.hargaSatuan,
+                sumber: item.sumber || '',
             });
         });
         recalcTotals();
@@ -471,9 +492,12 @@
                 payload.push({
                     tipe:        tr.dataset.tipe,
                     uraian:      tr.querySelector('.ahs-uraian')?.value || '',
+                    merk:        tr.querySelector('.ahs-merk')?.value || '',
+                    spesifikasi: tr.querySelector('.ahs-spesifikasi')?.value || '',
                     koefisien:   parseFloat(tr.querySelector('.ahs-koef')?.value) || 0,
                     satuan:      tr.querySelector('.ahs-satuan')?.value || '',
                     hargaSatuan: parseFloat(tr.querySelector('.ahs-harga-satuan')?.value) || 0,
+                    sumber:      tr.querySelector('.ahs-sumber')?.value || '',
                 });
             });
             console.info('[AHS Simpan]', payload);

@@ -186,11 +186,8 @@
                     <td class="px-3 md:px-5 py-2.5 md:py-3 text-center text-table-subtle font-medium tabular-nums">${rowNum}</td>
                     <td class="px-3 md:px-5 py-2.5 md:py-3 font-semibold text-table-strong max-w-0 truncate" title="${item.nama}">${item.nama}</td>
                     <td class="px-3 md:px-5 py-2.5 md:py-3 text-center text-table-subtle">${item.satuan}</td>
-                    <td class="px-3 md:px-5 py-2.5 md:py-3 text-right">
-                        <div class="flex flex-col items-end gap-1">
-                            <span class="tabular-nums font-semibold text-table-strong">${fmt(item.harga)}</span>
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] md:text-[10px] font-semibold ${badgeCls}">${item.sumber}</span>
-                        </div>
+                    <td class="px-3 md:px-5 py-2.5 md:py-3 text-center">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] md:text-[10px] font-semibold ${badgeCls}">${item.sumber}</span>
                     </td>
                     <td class="px-3 md:px-5 py-2.5 md:py-3 text-center">
                         <input type="checkbox"
@@ -401,11 +398,8 @@
                         class="w-full px-2 py-1.5 text-xs border border-table-border rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary bg-white text-table-medium"/>
                 </td>
                 <td class="px-3 md:px-5 py-2.5">
-                    <div class="relative">
-                        <span class="absolute left-2 top-1/2 -translate-y-1/2 text-table-subtle text-[10px] pointer-events-none">Rp</span>
-                        <input type="number" min="0" step="100" data-field="harga" placeholder="0"
-                            class="w-full pl-7 pr-2 py-1.5 text-xs border border-table-border rounded-lg text-right focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary bg-white text-table-strong tabular-nums"/>
-                    </div>
+                    <input type="text" data-field="sumber" placeholder="Sumber…" value="Manual"
+                        class="w-full px-2 py-1.5 text-xs border border-table-border rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary bg-white text-table-medium"/>
                 </td>
                 <td class="px-3 md:px-5 py-2.5 text-center">
                     <div class="flex items-center justify-center gap-1.5">
@@ -434,7 +428,8 @@
             customRow.querySelector('.custom-add-confirm').addEventListener('click', function () {
                 const nama   = customRow.querySelector('[data-field="nama"]').value.trim();
                 const satuan = customRow.querySelector('[data-field="satuan"]').value.trim() || 'm²';
-                const harga  = parseFloat(customRow.querySelector('[data-field="harga"]').value) || 0;
+                const sumber = customRow.querySelector('[data-field="sumber"]').value.trim() || 'Manual';
+                const harga  = 0;
 
                 if (!nama) {
                     customRow.querySelector('[data-field="nama"]').focus();
@@ -443,7 +438,7 @@
 
                 // Generate a temporary negative ID to avoid clashes with real DB IDs
                 const tempId = 'custom-' + Date.now();
-                state.selected[tempId] = { id: tempId, nama, satuan, harga, sumber: 'Manual' };
+                state.selected[tempId] = { id: tempId, nama, satuan, harga, sumber };
                 customRow.remove();
                 updateSubmitBar();
             });
