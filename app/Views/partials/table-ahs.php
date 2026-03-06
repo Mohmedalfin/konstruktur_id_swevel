@@ -179,8 +179,8 @@ $wrapperClass = $wrapperClass ?? 'w-full';
         </div>
 
         <!-- Table List AHS (scrollable) -->
-        <div class="flex-1 overflow-y-auto">
-            <table class="w-full text-left border-collapse table-fixed" id="ahs-modal-table">
+        <div class="flex-1 overflow-auto">
+            <table class="w-full text-left border-collapse table-fixed min-w-[600px]" id="ahs-modal-table">
                 <colgroup>
                     <col style="width: 3rem">     <!-- Checkbox -->
                     <col style="width: 5.5rem">   <!-- Tipe -->
@@ -217,7 +217,7 @@ $wrapperClass = $wrapperClass ?? 'w-full';
                 </button>
                 <button id="ahs-modal-confirm" type="button" disabled
                     class="px-5 py-2 rounded-lg bg-primary hover:bg-primary-hover text-white text-xs font-semibold tracking-wide shadow-sm transition-all duration-150 focus:outline-none active:scale-95 disabled:opacity-40 disabled:pointer-events-none">
-                    Tambahkan ke AHS
+                    Tambahkan AHS
                 </button>
             </div>
         </div>
