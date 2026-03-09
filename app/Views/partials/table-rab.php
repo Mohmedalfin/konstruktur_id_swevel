@@ -104,4 +104,86 @@ $wrapperClass = $tableVisible ? '' : 'hidden';
             </tfoot>
         </table>
     </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         MODAL — Preview Import BOQ Excel
+    ════════════════════════════════════════════════════════════════ -->
+    <div id="import-rab-modal-overlay" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-5xl h-[600px] flex flex-col overflow-hidden">
+            
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between px-6 py-4 border-b border-table-border bg-primary text-white rounded-t-2xl shrink-0">
+                <div class="flex items-center gap-3">
+                    <svg class="w-5 h-5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                    </svg>
+                    <div>
+                        <h3 class="text-sm font-bold tracking-wide">Preview Data Import BOQ</h3>
+                        <p class="text-[11px] text-white/60">Tinjau data pekerjaan dari Excel sebelum disimpan ke RAB</p>
+                    </div>
+                </div>
+                <button id="import-rab-modal-close" type="button" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 transition-colors focus:outline-none">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Table Preview (scrollable) -->
+            <div class="flex-1 overflow-auto bg-slate-50 p-4">
+                <div class="rounded-xl shadow-sm border border-table-border bg-white overflow-hidden h-full flex flex-col">
+                    <div class="overflow-auto flex-1">
+                        <table class="w-full text-left border-collapse table-fixed min-w-[1000px]" id="import-rab-modal-table">
+                            <colgroup>
+                                <col style="width: 3.5rem">     <!-- No -->
+                                <col>                           <!-- Uraian Pekerjaan -->
+                                <col style="width: 6rem">       <!-- Volume -->
+                                <col style="width: 6rem">       <!-- Satuan -->
+                                <col style="width: 8rem">       <!-- Harga Bahan -->
+                                <col style="width: 8rem">       <!-- Harga Alat -->
+                                <col style="width: 8rem">       <!-- Harga Upah -->
+                                <col style="width: 10rem">      <!-- Kategori -->
+                            </colgroup>
+                            <thead class="sticky top-0 bg-slate-100 z-10 shadow-sm">
+                                <tr>
+                                    <th class="px-4 py-2.5 text-center text-[10px] font-semibold uppercase tracking-wider text-table-subtle w-12">No</th>
+                                    <th class="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-table-subtle">Uraian Pekerjaan</th>
+                                    <th class="px-4 py-2.5 text-center text-[10px] font-semibold uppercase tracking-wider text-table-subtle w-24">Volume</th>
+                                    <th class="px-4 py-2.5 text-center text-[10px] font-semibold uppercase tracking-wider text-table-subtle w-24">Satuan</th>
+                                    <th class="px-4 py-2.5 text-right text-[10px] font-semibold uppercase tracking-wider text-table-subtle w-32">Harga Bahan</th>
+                                    <th class="px-4 py-2.5 text-right text-[10px] font-semibold uppercase tracking-wider text-table-subtle w-32">Harga Alat</th>
+                                    <th class="px-4 py-2.5 text-right text-[10px] font-semibold uppercase tracking-wider text-table-subtle w-32">Harga Upah</th>
+                                    <th class="px-4 py-2.5 text-center text-[10px] font-semibold uppercase tracking-wider text-table-subtle w-40">Kategori</th>
+                                </tr>
+                            </thead>
+                            <tbody id="import-rab-modal-tbody" class="text-[11px] md:text-[13px] text-table-body">
+                                <!-- injected by JS -->
+                                <tr>
+                                    <td colspan="8" class="text-center py-10 text-table-subtle text-xs italic">
+                                        Memproses data Excel...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="flex items-center justify-between px-6 py-4 border-t border-table-border bg-white shrink-0 rounded-b-2xl shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+                <p id="import-rab-modal-count" class="text-xs text-table-subtle font-medium">
+                    0 baris terdeteksi
+                </p>
+                <div class="flex items-center gap-2">
+                    <button id="import-rab-modal-cancel" type="button" class="px-4 py-2 rounded-lg border border-table-border bg-white hover:bg-slate-50 text-table-body text-xs font-medium transition-all focus:outline-none active:scale-95">
+                        Batal
+                    </button>
+                    <button id="import-rab-modal-confirm" type="button" class="px-5 py-2 rounded-lg bg-primary hover:bg-primary-hover text-white text-xs font-semibold tracking-wide shadow-sm transition-all duration-150 focus:outline-none active:scale-95">
+                        Tambahkan ke RAB
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
