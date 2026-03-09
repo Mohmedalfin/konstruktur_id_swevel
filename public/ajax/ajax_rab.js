@@ -577,6 +577,25 @@
 
         // Re-init Preline agar hs-dropdown pada rows baru berfungsi
         try { window.HSStaticMethods?.autoInit(['dropdown']); } catch (_) {}
+
+        // Sembunyikan kategori yang tidak memiliki item (masih ada placeholder)
+        tbody.querySelectorAll('.rab-category').forEach(function(catHeaderRow) {
+            const catBtn = catHeaderRow.querySelector('.edit-cat-toggle-btn');
+            if (catBtn) {
+                const checkCatId = catBtn.dataset.cat;
+                // Jika kategori ini tidak punya item sama sekali
+                if (tbody.querySelectorAll('.subrow-item-' + checkCatId).length === 0) {
+                    catHeaderRow.classList.add('hidden');
+                    const placeholder = tbody.querySelector('.subrow-placeholder-' + checkCatId);
+                    if (placeholder) placeholder.classList.add('hidden');
+                } else {
+                    catHeaderRow.classList.remove('hidden');
+                    const placeholder = tbody.querySelector('.subrow-placeholder-' + checkCatId);
+                    // jika ada placeholder (seharusnya sudah dihapus saat inject item, tapi just in case)
+                    if (placeholder) placeholder.classList.add('hidden'); 
+                }
+            }
+        });
     }
 
     /* ── Hitung ulang total dari semua hargaKeseluruhan cell (editable mode) ── */
@@ -690,53 +709,64 @@
     });
 
     /* ============================================================
-       IMPORT BOQ — trigger file picker
+       IMPORT BOQ — listen to custom event from ajax_import_rab.js
     ============================================================ */
-    if (boqImportBtn && boqFileInput) {
-        boqImportBtn.addEventListener('click', function () {
-            boqFileInput.value = ''; // reset agar file sama bisa dipick ulang
-            boqFileInput.click();
+    // Tombol klik import di-handle sepenuhnya oleh ajax_import_rab.js (melempar event file popup)
+    
+    // Tangkap data yang sudah di-parsing dan dikonfirmasi dari modal preview
+    window.addEventListener('rabDataImported', function (e) {
+        const importedItems = e.detail;
+        if (!importedItems || importedItems.length === 0) return;
+
+        // Cek mode table
+        if (state.mode === 'readonly') {
+            alert("RAB dalam mode Read-Only. Tidak bisa mengimpor data ke sini.");
+            return;
+        }
+
+        // Susun item supaya match dengan format pending items
+        const newItems = importedItems.map(item => ({
+            id: item.id,
+            nama: item.uraian,
+            volume: item.volume,
+            satuan: item.satuan,
+            hargaBahan: item.harga_bahan,
+            hargaAlat: item.harga_alat,
+            hargaUpah: item.harga_upah,
+            hargaKeseluruhan: (item.volume || 1) * (item.harga_bahan + item.harga_alat + item.harga_upah),
+            kategori: item.kategori || 'persiapan'
+        }));
+
+        // Group items by category (kategori)
+        const groupedItems = {};
+        newItems.forEach(item => {
+            const catId = item.kategori;
+            if (!groupedItems[catId]) groupedItems[catId] = [];
+            groupedItems[catId].push(item);
         });
 
-        boqFileInput.addEventListener('change', function () {
-            const file = boqFileInput.files[0];
-            if (!file) return;
+        // Insert into sessionStorage
+        try {
+            let existing = sessionStorage.getItem('rab_pending_items');
+            let parsed = existing ? JSON.parse(existing) : [];
+            
+            Object.keys(groupedItems).forEach(catId => {
+                let foundCat = parsed.find(g => g.catId === catId);
+                if (foundCat) {
+                    foundCat.items.push(...groupedItems[catId]);
+                } else {
+                    parsed.push({ catId: catId, items: groupedItems[catId] });
+                }
+            });
 
-            const maxMb = 5;
-            if (file.size > maxMb * 1024 * 1024) {
-                alert('Ukuran file terlalu besar. Maksimal ' + maxMb + ' MB.');
-                return;
-            }
+            sessionStorage.setItem('rab_pending_items', JSON.stringify(parsed));
+        } catch (_) {}
 
-            // TODO: kirim ke endpoint CI4 untuk di-parse PhpSpreadsheet
-            // Sementara: tampilkan nama file sebagai konfirmasi
-            const label = boqImportBtn.querySelector('span.boq-import-label') || (() => {
-                const s = document.createElement('span');
-                s.className = 'boq-import-label';
-                boqImportBtn.appendChild(s);
-                return s;
-            })();
-
-            console.info('[BOQ Import] File dipilih:', file.name, '(' + (file.size / 1024).toFixed(1) + ' KB)');
-
-            // Tampilkan notifikasi sementara di tombol
-            const originalHTML = boqImportBtn.innerHTML;
-            boqImportBtn.innerHTML = `
-                <svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
-                </svg>
-                Memproses...`;
-            boqImportBtn.disabled = true;
-
-            // Simulasi proses (ganti dengan fetch ke endpoint saat sudah ada)
-            setTimeout(function () {
-                boqImportBtn.innerHTML = originalHTML;
-                boqImportBtn.disabled = false;
-                alert('File "' + file.name + '" siap diproses.\n\n(Endpoint import belum tersedia — segera diimplementasi)');
-            }, 1000);
-        });
-    }
+        // Panggil fungsi inject untuk merender baris-baris baru ini ke tabel RAB
+        injectPendingItems();
+        
+        alert(`Berhasil menambahkan ${importedItems.length} item pekerjaan dari Excel.`);
+    });
 
     /* ============================================================
        DOWNLOAD TEMPLATE BOQ

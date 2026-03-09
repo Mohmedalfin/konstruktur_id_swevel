@@ -12,6 +12,7 @@
     "tailwindcss": "^4.2.1"
   },
   "dependencies": {
+    "exceljs": "^4.4.0",
     "preline": "^2.0.0"
   }
 }
