@@ -192,4 +192,76 @@ $wrapperClass = $tableVisible ? '' : 'hidden';
         </div>
     </div>
 
+    <!-- ═══════════════════════════════════════════════════════════════
+         MODAL — Tambah Kategori Pekerjaan
+    ════════════════════════════════════════════════════════════════ -->
+    <div id="tambah-kategori-modal" class="hs-overlay hidden w-full h-full fixed top-0 start-0 z-[80] overflow-x-hidden overflow-y-auto pointer-events-none backdrop-blur-sm bg-black/50 transition-all duration-200">
+        <div class="hs-overlay-open:mt-10 hs-overlay-open:opacity-100 hs-overlay-open:duration-200 mt-0 opacity-0 ease-out transition-all sm:max-w-xl sm:w-full m-3 sm:mx-auto">
+            <div class="flex flex-col bg-white border border-table-border shadow-2xl rounded-2xl pointer-events-auto overflow-hidden">
+                
+                <!-- Modal Header -->
+                <div class="flex justify-between items-center py-3.5 px-5 bg-white border-b border-table-border">
+                    <h3 class="font-bold text-table-strong text-sm">
+                        Tambah Kategori Pekerjaan
+                    </h3>
+                    <button type="button" class="flex justify-center items-center w-7 h-7 text-sm font-semibold rounded-lg border border-transparent text-table-subtle hover:bg-slate-100 transition-colors disabled:opacity-50 disabled:pointer-events-none focus:outline-none" data-hs-overlay="#tambah-kategori-modal">
+                        <span class="sr-only">Close</span>
+                        <svg class="shrink-0 w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                    </button>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="p-5 sm:p-6 bg-slate-50/50">
+                    
+                    <!-- Context Banner (Style like item-ahs) -->
+                    <div class="flex items-center gap-3 bg-primary text-white px-4 py-3 rounded-xl text-sm shadow-sm mb-6">
+                        <svg class="w-4 h-4 shrink-0 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        </svg>
+                        <span class="text-white/80 text-xs font-medium tracking-wide">Pilih atau buat kategori untuk menyusun RAB.</span>
+                    </div>
+
+                    <!-- Select Existing/Default Category -->
+                    <div class="mb-5 bg-white border border-table-border rounded-xl p-4 shadow-sm">
+                        <label for="select-kategori" class="block text-xs font-bold text-table-body mb-2">Pilih Kategori Sistem</label>
+                        <select id="select-kategori" class="py-2.5 px-3 block w-full border border-table-border rounded-lg text-sm text-table-medium focus:border-primary focus:ring-primary focus:outline-none focus:ring-1 transition-shadow shadow-sm cursor-pointer">
+                            <option value="persiapan">Pekerjaan Persiapan</option>
+                            <option value="tanah">Pekerjaan Tanah</option>
+                            <option value="struktur">Pekerjaan Struktur</option>
+                            <option value="arsitektur">Pekerjaan Arsitektur</option>
+                            <option value="mep">Pekerjaan MEP</option>
+                            <option value="finishing">Pekerjaan Finishing</option>
+                            <option disabled>──────────</option>
+                            <option value="custom" class="font-bold text-primary">+ Buat Kategori Custom Baru</option>
+                        </select>
+                    </div>
+
+                    <!-- Input Custom Category (Hidden by Default) -->
+                    <div id="container-custom-kategori" class="hidden animate-fade-in bg-white border border-table-border rounded-xl p-4 shadow-sm border-l-4 border-l-primary/60">
+                        <label for="input-custom-kategori" class="block text-xs font-bold text-table-body mb-2">Nama Kategori Custom</label>
+                        <input type="text" id="input-custom-kategori" placeholder="Cth: Pekerjaan Taman Depan" class="py-2.5 px-3 block w-full border border-table-border rounded-lg text-sm text-table-medium placeholder-table-subtle focus:border-primary focus:ring-primary focus:outline-none focus:ring-1 transition-shadow shadow-sm">
+                        <p class="text-[11px] text-table-subtle mt-2 flex items-start gap-1.5">
+                            <svg class="w-3.5 h-3.5 shrink-0 mt-0.5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            Kategori ini hanya akan tersimpan dan tampil khusus di proyek ini saja.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="flex justify-between items-center py-4 px-5 border-t border-table-border bg-white">
+                    <button type="button" class="py-2 px-4 inline-flex items-center gap-x-2 text-xs font-medium rounded-lg border border-table-border bg-white text-table-body shadow-sm hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:pointer-events-none focus:outline-none" data-hs-overlay="#tambah-kategori-modal">
+                        Batal
+                    </button>
+                    <button type="button" id="btn-simpan-kategori" class="py-2 px-6 inline-flex items-center gap-x-2 text-xs font-bold rounded-lg border border-transparent bg-primary text-white hover:bg-primary/90 shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary/20">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        </svg>
+                        Tambahkan Kategori
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
