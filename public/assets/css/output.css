@@ -811,9 +811,6 @@
   .min-w-\[700px\] {
     min-width: 700px;
   }
-  .min-w-\[800px\] {
-    min-width: 800px;
-  }
   .min-w-\[1000px\] {
     min-width: 1000px;
   }
@@ -1640,9 +1637,6 @@
   }
   .whitespace-nowrap {
     white-space: nowrap;
-  }
-  .text-amber-600 {
-    color: var(--color-amber-600);
   }
   .text-amber-700 {
     color: var(--color-amber-700);
@@ -2895,11 +2889,6 @@
   .md\:w-14 {
     @media (width >= 48rem) {
       width: calc(var(--spacing) * 14);
-    }
-  }
-  .md\:w-20 {
-    @media (width >= 48rem) {
-      width: calc(var(--spacing) * 20);
     }
   }
   .md\:w-24 {

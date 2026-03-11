@@ -7,7 +7,6 @@
  */
 
 (function () {
-
     'use strict';
 
     /* ============================================================
@@ -233,7 +232,7 @@
             recalcTotals();
         });
 
-        // ── Autocomplete ──────────────────────────────────────────
+        // ── Autocomplete 
         uraianInput?.addEventListener('input', function () {
             const q = uraianInput.value.trim().toLowerCase();
             if (!q) { hideAutocomplete(acList); return; }
@@ -423,7 +422,7 @@
             modalTbody.innerHTML = '<tr><td colspan="8" class="text-center py-8 text-table-subtle text-xs italic">Mencari...</td></tr>';
             await fetchAhsDatabase(1, q, false);
             filterAndRenderClientSide();
-        }, 500); // 500ms debounce
+        }, 500); 
     }
 
     function syncFilterButtons() {
@@ -514,11 +513,9 @@
         const modalBodyWrap = document.querySelector('#ahs-modal-table')?.parentElement;
         if (modalBodyWrap) {
             modalBodyWrap.addEventListener('scroll', async function () {
-                // Beri margin sedikit (10px) agar lebih cepat trigger
                 if (modalBodyWrap.scrollTop + modalBodyWrap.clientHeight >= modalBodyWrap.scrollHeight - 10) {
                     if (!isFetching && hasMoreData) {
                         const q = (modalSearch?.value || '').trim();
-                        // Loading indicator
                         const trLoad = document.createElement('tr');
                         trLoad.id = 'ahs-load-more';
                         trLoad.innerHTML = '<td colspan="8" class="text-center py-2 text-table-subtle text-xs italic">Memuat lebih banyak data...</td>';

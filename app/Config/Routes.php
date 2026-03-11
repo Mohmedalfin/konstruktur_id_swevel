@@ -5,33 +5,41 @@ use CodeIgniter\Router\RouteCollection;
 /**
  * @var RouteCollection $routes
  */
-// login & register
-$routes->get('/', 'Home::login');
-$routes->get('Register', 'Home::register');
+// --------------------------------------------------------------------
+// RUTE WEB (Menangani Tampilan / HTML / View)
+// --------------------------------------------------------------------
+$routes->group('', function ($routes) {
+    
+    // Auth & Registrasi
+    $routes->get('/', 'Home::login');
+    $routes->get('Register', 'Home::register');
+    $routes->get('registrasi', 'Registrasi::index');
+    $routes->post('registrasi/simpan', 'Registrasi::simpan');
 
-$routes->get('registrasi', 'Registrasi::index');
-$routes->post('registrasi/simpan', 'Registrasi::simpan');
+    // Proyek
+    $routes->get('data-empiris', 'Proyek::dataEmpiris');
+    $routes->get('/proyek', 'ProyekController::index');
+    $routes->get('/proyek/create', 'ProyekController::create');
+    $routes->post('/proyek/store', 'ProyekController::store');
 
-$routes->get('data-empiris', 'Proyek::dataEmpiris');
+    // Dashboard
+    $routes->get('/dashboard', 'menu\DashboardController::index');
 
-$routes->get('/proyek', 'ProyekController::index');
-$routes->get('/proyek/create', 'ProyekController::create');
-$routes->post('/proyek/store', 'ProyekController::store');
+    // Menu RAP (RAB & RAP)
+    $routes->get('/menu-rap', 'menu\MenuRapController::index');
+    $routes->get('/menu-rap/rincian-ahs', 'menu\MenuRapController::rincianAHS');
+    $routes->get('/menu-rap/tambah-ahs', 'menu\MenuRapController::tambahAHS');
 
-// dashboard
-$routes->get('/dashboard', 'menu\DashboardController::index');
+    // Schedule & Monitoring
+    $routes->get('/schedule', 'ScheduleController::index');
+    $routes->get('/monitoring', 'MonitoringController::index');
+});
 
-// menu rap (RAB & RAP)
-$routes->get('/menu-rap', 'menu\MenuRapController::index');
-$routes->get('/menu-rap/rincian-ahs', 'menu\MenuRapController::rincianAHS');
-$routes->get('/menu-rap/tambah-ahs', 'menu\MenuRapController::tambahAHS');
 
-// schedule
-$routes->get('/schedule', 'ScheduleController::index');
-
-// monitoring
-$routes->get('/monitoring', 'MonitoringController::index');
-
-// Api
-$routes->get('/api/pekerjaan', 'Api\PekerjaanController::index');
-$routes->get('/api/ahs', 'Api\AhsController::index');
+// --------------------------------------------------------------------
+// RUTE API (Menangani Data Mentah JSON)
+// --------------------------------------------------------------------
+$routes->group('api', ['namespace' => 'App\Controllers\Api'], function ($routes) {
+    $routes->get('pekerjaan', 'PekerjaanController::index');
+    $routes->get('ahs', 'AhsController::index');
+});

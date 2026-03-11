@@ -170,14 +170,12 @@ document.addEventListener('DOMContentLoaded', () => {
             // Kita bisa men-dispatch custom event atau menyimpan di sessionStorage jika mau
             // Untuk preview ini (berhubung rabItems bersifat global atau ada di file lain),
             // kita gunakan custom event agar ditangkap oleh ajax_rab.js
-            
             const event = new CustomEvent('rabDataImported', {
                 detail: parsedData
             });
             window.dispatchEvent(event);
 
             closeModal();
-            // Optional: reset file input
             if (fileInput) fileInput.value = '';
         });
     }
@@ -201,5 +199,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (modalClose) modalClose.addEventListener('click', closeModal);
     if (modalCancel) modalCancel.addEventListener('click', closeModal);
-
 });
