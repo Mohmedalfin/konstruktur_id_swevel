@@ -449,7 +449,6 @@
                     if (raw) existing = JSON.parse(raw);
                 } catch (_) {}
 
-                // Hapus entry lama untuk catId yang sama (replace)
                 existing = existing.filter(function (g) { return g.catId !== catId; });
                 existing.push(payload);
                 sessionStorage.setItem('rab_pending_items', JSON.stringify(existing));
@@ -460,11 +459,9 @@
             submitBtn.disabled    = true;
 
             setTimeout(function () {
-                // Coba dapatkan URL RAB dari sessionStorage, fallback ke referrer atau default
                 let rabUrl = '';
                 try { rabUrl = sessionStorage.getItem('rab_return_url') || ''; } catch (_) {}
                 if (!rabUrl) {
-                    // Gunakan document.referrer jika masih di domain yang sama
                     try {
                         const ref = document.referrer;
                         if (ref && new URL(ref).origin === window.location.origin) {
