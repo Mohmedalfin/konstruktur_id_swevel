@@ -177,8 +177,8 @@
                             </svg>
                         </div>
                     </td>
-                    <!-- Col 2-5: Category name -->
-                    <td colspan="6" class="px-3 md:px-5 py-2.5 md:py-3 font-semibold text-[10px] md:text-xs uppercase tracking-widest">
+                    <!-- Col 2-8: Category name -->
+                    <td colspan="9" class="px-3 md:px-5 py-2.5 md:py-3 font-semibold text-[10px] md:text-xs uppercase tracking-widest">
                         <span class="flex items-center gap-2">
                             <span class="w-1 h-3.5 md:h-4 bg-secondary rounded-full"></span>
                             ${cat.name}
@@ -199,7 +199,7 @@
             if (cat.items.length === 0) {
                 html += `
                     <tr class="subrow-${cat.id} ${subClass} bg-table-row border-b border-table-border">
-                        <td colspan="9" class="px-5 py-3 text-center text-table-subtle text-xs italic">
+                        <td colspan="12" class="px-5 py-3 text-center text-table-subtle text-xs italic">
                             Belum ada item pekerjaan.
                         </td>
                     </tr>`;
@@ -208,13 +208,16 @@
                     html += `
                         <tr class="subrow-${cat.id} ${subClass} bg-table-row border-b border-table-border hover:bg-white transition-colors duration-150">
                             <td class="px-3 md:px-5 py-2 md:py-2.5 text-center text-table-subtle">${item.no}</td>
-                            <td class="px-3 md:px-5 py-2 md:py-2.5 font-medium text-table-medium max-w-0 truncate" title="${item.uraian}">${item.uraian}</td>
+                            <td class="px-3 md:px-5 py-2 md:py-2.5 font-medium text-table-medium min-w-[250px] lg:min-w-[350px] whitespace-normal leading-relaxed">${escHtml(item.uraian)}</td>
                             <td class="px-3 md:px-5 py-2 md:py-2.5 text-center tabular-nums">${item.volume}</td>
                             <td class="px-3 md:px-5 py-2 md:py-2.5 text-center text-table-subtle">${item.satuan}</td>
-                            <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums">${fmt(item.hargaBahan)}</td>
-                            <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums">${fmt(item.hargaAlat)}</td>
-                            <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums">${fmt(item.hargaUpah)}</td>
-                            <td class="rab-harga-cell-${cat.id}-${item.no} px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums font-semibold text-table-strong">${fmt(item.hargaKeseluruhan)}</td>
+                            <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums whitespace-nowrap">${fmt(item.hargaBahan)}</td>
+                            <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums whitespace-nowrap">${fmt(item.hargaAlat)}</td>
+                            <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums whitespace-nowrap">${fmt(item.hargaUpah)}</td>
+                            <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums whitespace-nowrap font-medium text-table-medium">${fmt(item.hargaBahan * (item.volume || 1))}</td>
+                            <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums whitespace-nowrap font-medium text-table-medium">${fmt(item.hargaAlat * (item.volume || 1))}</td>
+                            <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums whitespace-nowrap font-medium text-table-medium">${fmt(item.hargaUpah * (item.volume || 1))}</td>
+                            <td class="rab-harga-cell-${cat.id}-${item.no} px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums font-semibold text-table-strong whitespace-nowrap">${fmt(item.hargaKeseluruhan)}</td>
                             <td class="px-3 md:px-5 py-2 md:py-2.5 text-center">
                                 <div class="hs-dropdown relative inline-flex">
                                     <button type="button"
@@ -262,7 +265,7 @@
     ============================================================ */
     function renderEditable(categories) {
         if (categories.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="9" class="text-center py-10 text-table-subtle text-xs">Tidak ada kategori.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="12" class="text-center py-10 text-table-subtle text-xs">Tidak ada kategori.</td></tr>`;
             updateTotals(0);
             return;
         }
@@ -292,7 +295,7 @@
                             </svg>
                         </button>
                     </td>
-                    <td colspan="7" class="px-3 md:px-5 py-2.5 md:py-3 font-semibold text-[10px] md:text-xs uppercase tracking-widest">
+                    <td colspan="10" class="px-3 md:px-5 py-2.5 md:py-3 font-semibold text-[10px] md:text-xs uppercase tracking-widest">
                         <span class="flex items-center gap-2">
                             <span class="w-1 h-3.5 md:h-4 bg-secondary rounded-full"></span>
                             ${cat.name}
@@ -320,7 +323,7 @@
                     </td>
                 </tr>
                 <tr class="subrow-placeholder-${cat.id} bg-table-row border-b border-table-border">
-                    <td colspan="9" class="px-5 py-2.5 text-center text-table-subtle text-xs italic">
+                    <td colspan="12" class="px-5 py-2.5 text-center text-table-subtle text-xs italic">
                         Belum ada item — klik Tambah untuk menambahkan.
                     </td>
                 </tr>`;
@@ -448,7 +451,7 @@
                 if (!tbody.querySelector(`.subrow-placeholder-${catId}`)) {
                     const placeholder = document.createElement('tr');
                     placeholder.className = `subrow-placeholder-${catId} bg-table-row border-b border-table-border`;
-                    placeholder.innerHTML = `<td colspan="9" class="px-5 py-2.5 text-center text-table-subtle text-xs italic">
+                    placeholder.innerHTML = `<td colspan="12" class="px-5 py-2.5 text-center text-table-subtle text-xs italic">
                         Belum ada item — klik Tambah untuk menambahkan.
                     </td>`;
                     catHeader.after(placeholder);
@@ -503,13 +506,16 @@
                 itemRow.className = 'subrow-item-' + catId + ' subrow-' + catId + ' bg-table-row border-b border-table-border hover:bg-white transition-colors duration-150';
                 itemRow.innerHTML = `
                     <td class="px-3 md:px-5 py-2 md:py-2.5 text-center text-table-subtle">${rowNum}</td>
-                    <td class="px-3 md:px-5 py-2 md:py-2.5 font-medium text-table-medium max-w-0 truncate" title="${escHtml(item.nama)}">${escHtml(item.nama)}</td>
+                    <td class="px-3 md:px-5 py-2 md:py-2.5 font-medium text-table-medium min-w-[250px] lg:min-w-[350px] whitespace-normal leading-relaxed">${escHtml(item.nama)}</td>
                     <td class="px-3 md:px-5 py-2 md:py-2.5 text-center tabular-nums">${escHtml(String(item.volume ?? 1))}</td>
                     <td class="px-3 md:px-5 py-2 md:py-2.5 text-center text-table-subtle">${escHtml(item.satuan)}</td>
-                    <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums">${fmt(hargaBahan)}</td>
-                    <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums">${fmt(hargaAlat)}</td>
-                    <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums">${fmt(hargaUpah)}</td>
-                    <td class="rab-harga-cell-${escHtml(catId)}-pending-${escHtml(String(item.id))} px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums font-semibold text-table-strong">${fmt(hargaKsl)}</td>
+                    <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums whitespace-nowrap">${fmt(hargaBahan)}</td>
+                    <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums whitespace-nowrap">${fmt(hargaAlat)}</td>
+                    <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums whitespace-nowrap">${fmt(hargaUpah)}</td>
+                    <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums whitespace-nowrap font-medium text-table-medium">${fmt(hargaBahan * (item.volume || 1))}</td>
+                    <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums whitespace-nowrap font-medium text-table-medium">${fmt(hargaAlat * (item.volume || 1))}</td>
+                    <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums whitespace-nowrap font-medium text-table-medium">${fmt(hargaUpah * (item.volume || 1))}</td>
+                    <td class="rab-harga-cell-${escHtml(catId)}-pending-${escHtml(String(item.id))} px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums font-semibold text-table-strong whitespace-nowrap">${fmt(hargaKsl)}</td>
                     <td class="px-3 md:px-5 py-2 md:py-2.5 text-center">
                         <div class="hs-dropdown relative inline-flex">
                             <button type="button"

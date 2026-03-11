@@ -202,7 +202,7 @@ $wrapperClass = $wrapperClass ?? 'w-full';
                         <th class="px-4 py-2.5 text-center text-[10px] font-semibold uppercase tracking-wider text-table-subtle w-10">
                             <input id="ahs-modal-check-all" type="checkbox" class="w-3.5 h-3.5 rounded accent-primary cursor-pointer"/>
                         </th>
-                        <th class="px-4 py-2.5 text-center text-[10px] font-semibold uppercase tracking-wider text-table-subtle w-16">Tipe</th>
+                        <th class="px-4 py-2.5 text-center text-[10px] font-semibold uppercase tracking-wider text-table-subtle w-20">ID Item</th>
                         <th class="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-table-subtle">Uraian</th>
                         <th class="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-table-subtle">Merk</th>
                         <th class="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-table-subtle">Spesifikasi</th>

@@ -10,7 +10,7 @@
 <body class="bg-gray-50 min-h-screen">
 
     <?php echo view('partials/navbar'); ?>
-    <?php echo view('partials/topbar', ['title' => 'Tambah AHS', 'subtitle' => '']); ?>
+    <?php echo view('partials/topbar', ['title' => 'Tambah Pekerjaan', 'subtitle' => '']); ?>
 
     <?php echo view('partials/item-ahs'); ?>
 

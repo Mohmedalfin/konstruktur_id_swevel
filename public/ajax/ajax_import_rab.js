@@ -139,9 +139,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     <td class="px-4 py-2 ${textClass}">${item.uraian}</td>
                     <td class="px-4 py-2 text-center tabular-nums">${isHeader ? '' : item.volume}</td>
                     <td class="px-4 py-2 text-center text-table-subtle">${isHeader ? '' : item.satuan}</td>
-                    <td class="px-4 py-2 text-right tabular-nums text-emerald-600">${isHeader ? '' : formatRp(item.harga_bahan)}</td>
-                    <td class="px-4 py-2 text-right tabular-nums text-blue-600">${isHeader ? '' : formatRp(item.harga_alat)}</td>
-                    <td class="px-4 py-2 text-right tabular-nums text-amber-600">${isHeader ? '' : formatRp(item.harga_upah)}</td>
                     <td class="px-4 py-2 text-center">${isHeader ? '' : categorySelect}</td>
                 </tr>
             `;

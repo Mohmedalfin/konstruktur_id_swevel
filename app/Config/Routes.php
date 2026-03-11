@@ -32,3 +32,6 @@ $routes->get('/schedule', 'ScheduleController::index');
 // monitoring
 $routes->get('/monitoring', 'MonitoringController::index');
 
+// Api
+$routes->get('/api/pekerjaan', 'Api\PekerjaanController::index');
+$routes->get('/api/ahs', 'Api\AhsController::index');
