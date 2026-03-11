@@ -17,20 +17,21 @@ $wrapperClass = $tableVisible ? '' : 'hidden';
         </div>
 
         <!-- BOQ Actions -->
-        <div class="flex items-center gap-2 shrink-0">
-            <!-- Tambah Kategori -->
-            <button id="btn-tambah-kategori-header" type="button" data-hs-overlay="#tambah-kategori-modal"
-                class="hidden inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white border border-primary text-primary hover:bg-primary/5 text-xs font-semibold transition-all duration-150 focus:outline-none active:scale-95 shadow-sm">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="flex items-center gap-1.5 md:gap-2 shrink-0">
+
+            <!-- Tambah Kategori (only visible in editable mode) -->
+            <button id="tambah-kategori-btn" type="button" title="Tambah Kategori Pekerjaan"
+                class="hidden inline-flex items-center gap-1 md:gap-1.5 px-2 py-1.5 md:px-3 md:py-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] md:text-xs font-semibold transition-all duration-150 focus:outline-none active:scale-95 shadow-sm">
+                <svg class="w-3 h-3 md:w-3.5 md:h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
-                Tambah Kategori
+                Kategori Pekerjaan
             </button>
 
             <!-- Download Template -->
-            <button id="boq-download-template-btn" type="button"
-                class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-amber-400 hover:bg-amber-500 text-black text-xs font-semibold transition-all duration-150 focus:outline-none active:scale-95 shadow-sm">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button id="boq-download-template-btn" type="button" title="Download Template BOQ"
+                class="inline-flex items-center gap-1 md:gap-1.5 px-2 py-1.5 md:px-3 md:py-2 rounded-lg bg-amber-400 hover:bg-amber-500 text-black text-[10px] md:text-xs font-semibold transition-all duration-150 focus:outline-none active:scale-95 shadow-sm">
+                <svg class="w-3 h-3 md:w-3.5 md:h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                 </svg>
@@ -38,9 +39,9 @@ $wrapperClass = $tableVisible ? '' : 'hidden';
             </button>
 
             <!-- Import BOQ -->
-            <button id="boq-import-btn" type="button"
-                class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-primary hover:bg-primary-hover text-white text-xs font-semibold transition-all duration-150 focus:outline-none active:scale-95 shadow-sm">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button id="boq-import-btn" type="button" title="Import BOQ dari Excel"
+                class="inline-flex items-center gap-1 md:gap-1.5 px-2 py-1.5 md:px-3 md:py-2 rounded-lg bg-primary hover:bg-primary-hover text-white text-[10px] md:text-xs font-semibold transition-all duration-150 focus:outline-none active:scale-95 shadow-sm">
+                <svg class="w-3 h-3 md:w-3.5 md:h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
                 </svg>
@@ -176,15 +177,15 @@ $wrapperClass = $tableVisible ? '' : 'hidden';
             </div>
 
             <!-- Modal Footer -->
-            <div class="flex items-center justify-between px-6 py-4 border-t border-table-border bg-white shrink-0 rounded-b-2xl shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-                <p id="import-rab-modal-count" class="text-xs text-table-subtle font-medium">
+            <div class="flex flex-col-reverse md:flex-row md:items-center md:justify-between gap-2 px-4 md:px-6 py-3 md:py-4 border-t border-table-border bg-white shrink-0 rounded-b-2xl shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+                <p id="import-rab-modal-count" class="text-[10px] md:text-xs text-table-subtle font-medium text-center md:text-left">
                     0 baris terdeteksi
                 </p>
-                <div class="flex items-center gap-2">
-                    <button id="import-rab-modal-cancel" type="button" class="px-4 py-2 rounded-lg border border-table-border bg-white hover:bg-slate-50 text-table-body text-xs font-medium transition-all focus:outline-none active:scale-95">
+                <div class="flex items-center justify-end gap-2">
+                    <button id="import-rab-modal-cancel" type="button" class="whitespace-nowrap px-3 md:px-4 py-1.5 md:py-2 rounded-lg border border-table-border bg-white hover:bg-slate-50 text-table-body text-[10px] md:text-xs font-medium transition-all focus:outline-none active:scale-95">
                         Batal
                     </button>
-                    <button id="import-rab-modal-confirm" type="button" class="px-5 py-2 rounded-lg bg-primary hover:bg-primary-hover text-white text-xs font-semibold tracking-wide shadow-sm transition-all duration-150 focus:outline-none active:scale-95">
+                    <button id="import-rab-modal-confirm" type="button" class="whitespace-nowrap px-3 md:px-5 py-1.5 md:py-2 rounded-lg bg-primary hover:bg-primary-hover text-white text-[10px] md:text-xs font-semibold tracking-wide shadow-sm transition-all duration-150 focus:outline-none active:scale-95">
                         Tambahkan ke RAB
                     </button>
                 </div>
@@ -193,72 +194,42 @@ $wrapperClass = $tableVisible ? '' : 'hidden';
     </div>
 
     <!-- ═══════════════════════════════════════════════════════════════
-         MODAL — Tambah Kategori Pekerjaan
+         MODAL — Pilih Kategori Pekerjaan
     ════════════════════════════════════════════════════════════════ -->
-    <div id="tambah-kategori-modal" class="hs-overlay hidden w-full h-full fixed top-0 start-0 z-[80] overflow-x-hidden overflow-y-auto pointer-events-none backdrop-blur-sm bg-black/50 transition-all duration-200">
-        <div class="hs-overlay-open:mt-10 hs-overlay-open:opacity-100 hs-overlay-open:duration-200 mt-0 opacity-0 ease-out transition-all sm:max-w-xl sm:w-full m-3 sm:mx-auto">
-            <div class="flex flex-col bg-white border border-table-border shadow-2xl rounded-2xl pointer-events-auto overflow-hidden">
-                
-                <!-- Modal Header -->
-                <div class="flex justify-between items-center py-3.5 px-5 bg-white border-b border-table-border">
-                    <h3 class="font-bold text-table-strong text-sm">
-                        Tambah Kategori Pekerjaan
-                    </h3>
-                    <button type="button" class="flex justify-center items-center w-7 h-7 text-sm font-semibold rounded-lg border border-transparent text-table-subtle hover:bg-slate-100 transition-colors disabled:opacity-50 disabled:pointer-events-none focus:outline-none" data-hs-overlay="#tambah-kategori-modal">
-                        <span class="sr-only">Close</span>
-                        <svg class="shrink-0 w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-                    </button>
-                </div>
+    <div id="kategori-modal-overlay" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg flex flex-col overflow-hidden">
 
-                <!-- Modal Body -->
-                <div class="p-5 sm:p-6 bg-slate-50/50">
-                    
-                    <!-- Context Banner (Style like item-ahs) -->
-                    <div class="flex items-center gap-3 bg-primary text-white px-4 py-3 rounded-xl text-sm shadow-sm mb-6">
-                        <svg class="w-4 h-4 shrink-0 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                        </svg>
-                        <span class="text-white/80 text-xs font-medium tracking-wide">Pilih atau buat kategori untuk menyusun RAB.</span>
-                    </div>
-
-                    <!-- Select Existing/Default Category -->
-                    <div class="mb-5 bg-white border border-table-border rounded-xl p-4 shadow-sm">
-                        <label for="select-kategori" class="block text-xs font-bold text-table-body mb-2">Pilih Kategori Sistem</label>
-                        <select id="select-kategori" class="py-2.5 px-3 block w-full border border-table-border rounded-lg text-sm text-table-medium focus:border-primary focus:ring-primary focus:outline-none focus:ring-1 transition-shadow shadow-sm cursor-pointer">
-                            <option value="persiapan">Pekerjaan Persiapan</option>
-                            <option value="tanah">Pekerjaan Tanah</option>
-                            <option value="struktur">Pekerjaan Struktur</option>
-                            <option value="arsitektur">Pekerjaan Arsitektur</option>
-                            <option value="mep">Pekerjaan MEP</option>
-                            <option value="finishing">Pekerjaan Finishing</option>
-                            <option disabled>──────────</option>
-                            <option value="custom" class="font-bold text-primary">+ Buat Kategori Custom Baru</option>
-                        </select>
-                    </div>
-
-                    <!-- Input Custom Category (Hidden by Default) -->
-                    <div id="container-custom-kategori" class="hidden animate-fade-in bg-white border border-table-border rounded-xl p-4 shadow-sm border-l-4 border-l-primary/60">
-                        <label for="input-custom-kategori" class="block text-xs font-bold text-table-body mb-2">Nama Kategori Custom</label>
-                        <input type="text" id="input-custom-kategori" placeholder="Cth: Pekerjaan Taman Depan" class="py-2.5 px-3 block w-full border border-table-border rounded-lg text-sm text-table-medium placeholder-table-subtle focus:border-primary focus:ring-primary focus:outline-none focus:ring-1 transition-shadow shadow-sm">
-                        <p class="text-[11px] text-table-subtle mt-2 flex items-start gap-1.5">
-                            <svg class="w-3.5 h-3.5 shrink-0 mt-0.5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            Kategori ini hanya akan tersimpan dan tampil khusus di proyek ini saja.
-                        </p>
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between px-6 py-4 border-b border-table-border bg-primary text-white rounded-t-2xl shrink-0">
+                <div class="flex items-center gap-3">
+                    <svg class="w-5 h-5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    </svg>
+                    <div>
+                        <h3 class="text-sm font-bold tracking-wide">Pilih Kategori Pekerjaan</h3>
+                        <p class="text-[11px] text-white/60">Centang kategori yang ingin ditambahkan ke RAB</p>
                     </div>
                 </div>
+                <button id="kategori-modal-close" type="button" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 transition-colors focus:outline-none">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
 
-                <!-- Modal Footer -->
-                <div class="flex justify-between items-center py-4 px-5 border-t border-table-border bg-white">
-                    <button type="button" class="py-2 px-4 inline-flex items-center gap-x-2 text-xs font-medium rounded-lg border border-table-border bg-white text-table-body shadow-sm hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:pointer-events-none focus:outline-none" data-hs-overlay="#tambah-kategori-modal">
-                        Batal
-                    </button>
-                    <button type="button" id="btn-simpan-kategori" class="py-2 px-6 inline-flex items-center gap-x-2 text-xs font-bold rounded-lg border border-transparent bg-primary text-white hover:bg-primary/90 shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary/20">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                        </svg>
-                        Tambahkan Kategori
-                    </button>
+            <!-- Modal Body: List Kategori -->
+            <div class="flex-1 overflow-y-auto p-5 bg-slate-50">
+                <ul id="kategori-modal-list" class="space-y-2">
+                    <!-- injected by JS -->
+                </ul>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="flex items-center justify-between px-6 py-4 border-t border-table-border bg-white shrink-0 rounded-b-2xl shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+                <p id="kategori-modal-info" class="text-xs text-table-subtle font-medium">0 kategori dipilih</p>
+                <div class="flex items-center gap-2">
+                    <button id="kategori-modal-cancel" type="button" class="px-4 py-2 rounded-lg border border-table-border bg-white hover:bg-slate-50 text-table-body text-xs font-medium transition-all focus:outline-none active:scale-95">Batal</button>
+                    <button id="kategori-modal-confirm" type="button" class="px-5 py-2 rounded-lg bg-primary hover:bg-primary-hover text-white text-xs font-semibold tracking-wide shadow-sm transition-all duration-150 focus:outline-none active:scale-95">Tambahkan</button>
                 </div>
             </div>
         </div>
