@@ -229,7 +229,7 @@
         updateTotals(grandTotal);
         bindCategoryToggle();
         bindReadonlyDropdowns();
-        try { window.HSStaticMethods?.autoInit(['dropdown']); } catch (_) {}
+        try { window.HSStaticMethods?.autoInit(['dropdown', 'overlay']); } catch (_) {}
     }
 
     function renderEditable(categories) {
@@ -531,7 +531,7 @@
 
         try { sessionStorage.removeItem('rab_pending_items'); } catch (_) {}
 
-        try { window.HSStaticMethods?.autoInit(['dropdown']); } catch (_) {}
+        try { window.HSStaticMethods?.autoInit(['dropdown', 'overlay']); } catch (_) {}
 
         tbody.querySelectorAll('.rab-category').forEach(function(catHeaderRow) {
             const catBtn = catHeaderRow.querySelector('.edit-cat-toggle-btn');
