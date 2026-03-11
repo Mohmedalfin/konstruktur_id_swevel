@@ -7,7 +7,6 @@
  */
 
 (function () {
-
     'use strict';
 
     const state = {
@@ -28,6 +27,7 @@
     const boqFileInput         = document.getElementById('boq-file-input');
     const boqDownloadTplBtn    = document.getElementById('boq-download-template-btn');
     const searchInput          = document.getElementById('rab-search');
+    const btnTambahKategoriHdr = document.getElementById('btn-tambah-kategori-header');
 
     if (!wrapper || !tbody) return;
 
@@ -118,8 +118,10 @@
             (sum, cat) => sum + cat.items.reduce((s, i) => s + Number(i.hargaKeseluruhan), 0), 0
         );
 
+        if (btnTambahKategoriHdr) btnTambahKategoriHdr.classList.add('hidden');
+
         if (categories.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="9" class="text-center py-10 text-table-subtle text-xs">Tidak ada data pekerjaan.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="12" class="text-center py-10 text-table-subtle text-xs">Tidak ada data pekerjaan.</td></tr>`;
             updateTotals(0);
             return;
         }
@@ -231,8 +233,26 @@
     }
 
     function renderEditable(categories) {
+        if (btnTambahKategoriHdr) {
+            btnTambahKategoriHdr.classList.remove('hidden');
+        }
+
         if (categories.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="12" class="text-center py-10 text-table-subtle text-xs">Tidak ada kategori.</td></tr>`;
+            tbody.innerHTML = `
+                <tr id="empty-category-row">
+                    <td colspan="12" class="text-center py-10 bg-slate-50 border-b border-table-border">
+                        <div class="flex flex-col items-center justify-center">
+                            <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-3">
+                                <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                                </svg>
+                            </div>
+                            <h3 class="text-sm font-semibold text-table-strong mb-1">Belum Ada Kategori Pekerjaan</h3>
+                            <p class="text-xs text-table-subtle mb-4 max-w-sm">Silakan mulai dengan menambahkan kategori pekerjaan klik tombol "Tambah Kategori" di pojok kanan atas layar.</p>
+                        </div>
+                    </td>
+                </tr>
+            `;
             updateTotals(0);
             return;
         }
@@ -288,7 +308,7 @@
                 </tr>
                 <tr class="subrow-placeholder-${cat.id} bg-table-row border-b border-table-border">
                     <td colspan="12" class="px-5 py-2.5 text-center text-table-subtle text-xs italic">
-                        Belum ada item — klik Tambah untuk menambahkan.
+                        Belum ada item — klik Tambah AHS untuk menambahkan.
                     </td>
                 </tr>`;
         });
@@ -661,11 +681,12 @@
             state.mode      = 'editable';
             state.currentId = null;
             state.collapsed = {};
+            currentEditableCategories = [];
 
             cards.forEach(c => c.classList.remove('ring-2', 'ring-primary'));
 
             showTable('editable');
-            renderEditable(defaultCategories);
+            renderEditable(currentEditableCategories);
         });
     }
 
@@ -683,8 +704,9 @@
         } else if (init.mode === 'new') {
             state.mode      = 'editable';
             state.currentId = null;
+            currentEditableCategories = [];
             showTable('editable');
-            renderEditable(defaultCategories);
+            renderEditable(currentEditableCategories);
         }
     });
 
@@ -758,6 +780,67 @@
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
         });
+    }
+
+    // Modal UI Logic untuk Tambah Kategori
+    const btnSimpanKategori = document.getElementById('btn-simpan-kategori');
+    const selectKategori = document.getElementById('select-kategori');
+    const inputCustomKategori = document.getElementById('input-custom-kategori');
+    const containerCustomKategori = document.getElementById('container-custom-kategori');
+
+    if (selectKategori && inputCustomKategori) {
+        // Tampilkan input teks jika opsi "custom" dipilih
+        selectKategori.addEventListener('change', function() {
+            if (this.value === 'custom') {
+                containerCustomKategori.classList.remove('hidden');
+                inputCustomKategori.focus();
+            } else {
+                containerCustomKategori.classList.add('hidden');
+                inputCustomKategori.value = '';
+            }
+        });
+
+        // Handle simpan
+        if (btnSimpanKategori) {
+            btnSimpanKategori.addEventListener('click', function() {
+                const isCustom = selectKategori.value === 'custom';
+                const catName = isCustom ? inputCustomKategori.value.trim() : selectKategori.options[selectKategori.selectedIndex].text;
+                let catId = selectKategori.value;
+
+                if (isCustom) {
+                    if (!catName) {
+                        alert('Silakan masukkan nama kategori custom.');
+                        return;
+                    }
+                    // Generate ID untuk kategori custom baru
+                    catId = 'custom_' + Date.now();
+                }
+
+                // Cek apakah kategori sudah ada di array saat ini
+                const exists = currentEditableCategories.some(c => c.id === catId || c.name.toLowerCase() === catName.toLowerCase());
+                if (exists) {
+                    alert('Kategori ini sudah ada di RAB.');
+                    return;
+                }
+
+                // Tambahkan ke state array dan re-render table
+                currentEditableCategories.push({
+                    id: catId,
+                    name: catName
+                });
+                
+                // Tutup modal
+                window.HSOverlay.close(document.getElementById('tambah-kategori-modal'));
+
+                // Render ulang table tanpa menghilangkan item di sessionStorage/DB
+                renderEditable(currentEditableCategories);
+
+                // Reset form
+                selectKategori.value = 'persiapan';
+                containerCustomKategori.classList.add('hidden');
+                inputCustomKategori.value = '';
+            });
+        }
     }
 
 })();
