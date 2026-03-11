@@ -29,7 +29,7 @@ class Database extends Config
         'hostname'     => 'localhost',
         'username'     => '',
         'password'     => '',
-        'database'     => '',
+        'database'     => 'kontraktor_alpha',
         'DBDriver'     => 'MySQLi',
         'DBPrefix'     => '',
         'pConnect'     => false,
@@ -49,6 +49,26 @@ class Database extends Config
             'datetime' => 'Y-m-d H:i:s',
             'time'     => 'H:i:s',
         ],
+    ];
+
+    public array $estimator = [
+        'DSN'      => '',
+        'hostname' => '147.93.19.39',
+        'username' => 'estimator_alpha',
+        'password' => 'mK6si6wYNJypJrfZ',
+        'database' => 'estimator_alpha',
+        'DBDriver' => 'MySQLi',
+        'DBPrefix' => '',
+        'pConnect' => false,
+        'DBDebug'  => true,
+        'charset'  => 'utf8mb4',
+        'DBCollat' => 'utf8mb4_general_ci',
+        'swapPre'  => '',
+        'encrypt'  => false,
+        'compress' => false,
+        'strictOn' => false,
+        'failover' => [],
+        'port'     => 3306,
     ];
 
     //    /**
