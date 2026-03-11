@@ -12,7 +12,7 @@
     /* ============================================================
        CONFIG
     ============================================================ */
-    const PAGE_SIZE = 10;
+    const PAGE_SIZE = 20;
 
     /* ============================================================
        DOM REFERENCES
@@ -40,69 +40,42 @@
     };
 
     /* ============================================================
-       DUMMY DATA
-       Replace fetchTambahAhsData() with a real fetch() to connect the DB.
+       API FETCH
     ============================================================ */
-    const allData = [
-        { id: 1,  nama: 'Pembuatan gudang semen dan peralatan', satuan: 'm²', harga: 32621.60,  sumber: 'Proyek Terkini' },
-        { id: 2,  nama: 'Buangan tanah galian',                 satuan: 'm³', harga: 45000.00,  sumber: 'SNI'            },
-        { id: 3,  nama: 'Pengurugan sirtu padat',               satuan: 'm²', harga: 125000.00, sumber: 'SNI'            },
-        { id: 4,  nama: 'Penggalian tanah biasa',               satuan: 'm³', harga: 38500.00,  sumber: 'PUPR'           },
-        { id: 5,  nama: 'Penggalian tanah keras',               satuan: 'm³', harga: 55000.00,  sumber: 'PUPR'           },
-        { id: 6,  nama: 'Pembersihan lapangan',                 satuan: 'm²', harga: 12000.00,  sumber: 'Empiris'        },
-        { id: 7,  nama: 'Pekerjaan bowplank',                   satuan: 'm\'', harga: 28500.00, sumber: 'Estimator.id'   },
-        { id: 8,  nama: 'Pengecoran pondasi beton K-225',       satuan: 'm³', harga: 950000.00, sumber: 'SNI'            },
-        { id: 9,  nama: 'Pemasangan besi tulangan D16 ulir',    satuan: 'kg', harga: 14500.00,  sumber: 'SNI'            },
-        { id: 10, nama: 'Bekisting kolom struktur',             satuan: 'm²', harga: 125000.00, sumber: 'Proyek Terkini' },
-        { id: 11, nama: 'Pasangan dinding bata merah 1:4',      satuan: 'm²', harga: 185000.00, sumber: 'SNI'            },
-        { id: 12, nama: 'Plesteran & acian dinding',            satuan: 'm²', harga: 72000.00,  sumber: 'SNI'            },
-        { id: 13, nama: 'Pemasangan keramik lantai 40x40 cm',   satuan: 'm²', harga: 145000.00, sumber: 'Estimator.id'   },
-        { id: 14, nama: 'Pekerjaan cat dinding interior',       satuan: 'm²', harga: 55000.00,  sumber: 'Empiris'        },
-        { id: 15, nama: 'Pekerjaan cat dinding eksterior',      satuan: 'm²', harga: 68000.00,  sumber: 'Empiris'        },
-        { id: 16, nama: 'Pemasangan kusen pintu kayu',          satuan: 'bh', harga: 850000.00, sumber: 'Proyek Terkini' },
-        { id: 17, nama: 'Pemasangan daun pintu panel kayu',     satuan: 'bh', harga: 1250000.00,sumber: 'Proyek Terkini' },
-        { id: 18, nama: 'Pekerjaan instalasi listrik titik',    satuan: 'ttk',harga: 185000.00, sumber: 'PUPR'           },
-        { id: 19, nama: 'Pekerjaan instalasi air bersih',       satuan: 'm\'', harga: 95000.00, sumber: 'PUPR'           },
-        { id: 20, nama: 'Saluran drainase beton U-30',          satuan: 'm\'', harga: 320000.00,sumber: 'SNI'            },
-        { id: 21, nama: 'Pengaspalan jalan t=5 cm',             satuan: 'm²', harga: 235000.00, sumber: 'SNI'            },
-        { id: 22, nama: 'Rabatan beton t=7 cm',                 satuan: 'm²', harga: 178000.00, sumber: 'SNI'            },
-        { id: 23, nama: 'Pemasangan paving block',              satuan: 'm²', harga: 165000.00, sumber: 'Estimator.id'   },
-        { id: 24, nama: 'Pekerjaan plafon gypsum board 9 mm',   satuan: 'm²', harga: 145000.00, sumber: 'Estimator.id'   },
-        { id: 25, nama: 'Rangka atap baja ringan',              satuan: 'm²', harga: 225000.00, sumber: 'SNI'            },
-    ];
-
-    /**
-     * Simulate AJAX fetch.
-     * Replace with: const res = await fetch(`/api/pekerjaan?q=...&sumber=...&page=...`);
-     */
-    function fetchTambahAhsData(query, sources, page) {
-        return new Promise(function (resolve) {
-            setTimeout(function () {
-                let filtered = allData;
-
-                // Filter by search query
-                if (query) {
-                    const q = query.toLowerCase();
-                    filtered = filtered.filter(function (item) {
-                        return item.nama.toLowerCase().includes(q)
-                            || item.sumber.toLowerCase().includes(q);
-                    });
-                }
-
-                // Filter by sumber checkboxes
-                if (sources.length > 0) {
-                    filtered = filtered.filter(function (item) {
-                        return sources.includes(item.sumber);
-                    });
-                }
-
-                const total    = filtered.length;
-                const start    = (page - 1) * PAGE_SIZE;
-                const pageData = filtered.slice(start, start + PAGE_SIZE);
-
-                resolve({ total: total, page: page, data: pageData });
-            }, 200); // simulate 200ms network latency
-        });
+    async function fetchTambahAhsData(query, sources, page) {
+        try {
+            const url = new URL('/api/pekerjaan', window.location.origin);
+            url.searchParams.append('page', page);
+            url.searchParams.append('limit', PAGE_SIZE);
+            
+            if (query) {
+                url.searchParams.append('q', query);
+            }
+            
+            if (sources && sources.length > 0) {
+                // Parameter sumber[] untuk CodeIgniter array input
+                sources.forEach(s => url.searchParams.append('sumber[]', s));
+            }
+            
+            const response = await fetch(url.toString());
+            
+            if (!response.ok) {
+                throw new Error('Gagal mengambil data dari server');
+            }
+            
+            const result = await response.json();
+            
+            return { 
+                total: result.total || 0, 
+                page: result.page || 1, 
+                data: result.data || [] 
+            };
+            
+        } catch (error) {
+            console.error('API Fetch Error:', error);
+            // Kembali ke state kosong saat error
+            return { total: 0, page: 1, data: [] };
+        }
     }
 
     /* ============================================================

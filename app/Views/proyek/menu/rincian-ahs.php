@@ -8,7 +8,7 @@
 </head>
 <body class="bg-gray-50 min-h-screen">
     <?php echo view('partials/navbar'); ?>
-    <?php echo view('partials/topbar', ['title' => 'Rincian AHS', 'subtitle' => '']); ?>
+    <?php echo view('partials/topbar', ['title' => 'Tambah Alat, Bahan dan Upah', 'subtitle' => '']); ?>
 
     <?php echo view('partials/table-ahs', ['wrapperClass' => 'w-full']); ?>
 

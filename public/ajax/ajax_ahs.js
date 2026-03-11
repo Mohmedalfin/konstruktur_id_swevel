@@ -43,58 +43,72 @@
     ============================================================ */
     let rowCounter      = 0;
     let activeFilter    = 'all';
-    let modalSelected   = new Set(); // ids dari DB AHS
-    let autocompleteActive = null;   // input yang sedang punya autocomplete
+    let modalSelected   = new Map(); 
+    let autocompleteActive = null;   
 
     /* ============================================================
        DUMMY DATA — rows yang sudah ada di tabel AHS (editable)
     ============================================================ */
-    const dummyRows = [
-        { id: 1, tipe: 'bahan', uraian: 'Semen Portland',         koefisien: 7.275, satuan: 'sak',  hargaSatuan: 62000  },
-        { id: 2, tipe: 'bahan', uraian: 'Pasir beton',            koefisien: 0.520, satuan: 'm³',   hargaSatuan: 185000 },
-        { id: 3, tipe: 'bahan', uraian: 'Kerikil / split 2–3 cm', koefisien: 0.780, satuan: 'm³',   hargaSatuan: 210000 },
-        { id: 4, tipe: 'alat',  uraian: 'Molen / concrete mixer', koefisien: 0.250, satuan: 'jam',  hargaSatuan: 180000 },
-        { id: 5, tipe: 'alat',  uraian: 'Vibrator beton',         koefisien: 0.250, satuan: 'jam',  hargaSatuan: 95000  },
-        { id: 6, tipe: 'upah',  uraian: 'Mandor',                 koefisien: 0.083, satuan: 'OH',   hargaSatuan: 120000 },
-        { id: 7, tipe: 'upah',  uraian: 'Tukang batu',            koefisien: 0.275, satuan: 'OH',   hargaSatuan: 110000 },
-        { id: 8, tipe: 'upah',  uraian: 'Pekerja',                koefisien: 0.825, satuan: 'OH',   hargaSatuan: 90000  },
-    ];
+    const dummyRows = [];
 
     /* ============================================================
-       DB AHS — sumber dari database (dummy), gabungan bahan/alat/upah
+       DB AHS — sumber dari database (dari /api/ahs)
     ============================================================ */
-    const ahsDatabase = [
-        // Bahan
-        { id: 'db-1',  tipe: 'bahan', uraian: 'Semen Portland (50 kg)',   satuan: 'sak',  hargaSatuan: 62000  },
-        { id: 'db-2',  tipe: 'bahan', uraian: 'Semen Putih',              satuan: 'kg',   hargaSatuan: 4500   },
-        { id: 'db-3',  tipe: 'bahan', uraian: 'Pasir beton',              satuan: 'm³',   hargaSatuan: 185000 },
-        { id: 'db-4',  tipe: 'bahan', uraian: 'Pasir halus',              satuan: 'm³',   hargaSatuan: 165000 },
-        { id: 'db-5',  tipe: 'bahan', uraian: 'Kerikil / split 2–3 cm',  satuan: 'm³',   hargaSatuan: 210000 },
-        { id: 'db-6',  tipe: 'bahan', uraian: 'Bata merah 5x11x22 cm',   satuan: 'bh',   hargaSatuan: 900    },
-        { id: 'db-7',  tipe: 'bahan', uraian: 'Besi beton polos D10',     satuan: 'kg',   hargaSatuan: 14500  },
-        { id: 'db-8',  tipe: 'bahan', uraian: 'Besi beton ulir D16',      satuan: 'kg',   hargaSatuan: 15200  },
-        { id: 'db-9',  tipe: 'bahan', uraian: 'Kawat beton',              satuan: 'kg',   hargaSatuan: 22000  },
-        { id: 'db-10', tipe: 'bahan', uraian: 'Papan bekisting',          satuan: 'm²',   hargaSatuan: 95000  },
-        { id: 'db-11', tipe: 'bahan', uraian: 'Multiplek 9mm',            satuan: 'lbr',  hargaSatuan: 185000 },
-        { id: 'db-12', tipe: 'bahan', uraian: 'Cat tembok (5 kg)',        satuan: 'klg',  hargaSatuan: 115000 },
-        // Alat
-        { id: 'db-13', tipe: 'alat',  uraian: 'Molen / concrete mixer',  satuan: 'jam',  hargaSatuan: 180000 },
-        { id: 'db-14', tipe: 'alat',  uraian: 'Vibrator beton',          satuan: 'jam',  hargaSatuan: 95000  },
-        { id: 'db-15', tipe: 'alat',  uraian: 'Pompa air',               satuan: 'jam',  hargaSatuan: 75000  },
-        { id: 'db-16', tipe: 'alat',  uraian: 'Stamper tanah',           satuan: 'jam',  hargaSatuan: 110000 },
-        { id: 'db-17', tipe: 'alat',  uraian: 'Excavator',               satuan: 'jam',  hargaSatuan: 650000 },
-        { id: 'db-18', tipe: 'alat',  uraian: 'Dump truck 8 ton',        satuan: 'rit',  hargaSatuan: 450000 },
-        { id: 'db-19', tipe: 'alat',  uraian: 'Scaffolding (sewa)',       satuan: 'set',  hargaSatuan: 85000  },
-        // Upah
-        { id: 'db-20', tipe: 'upah',  uraian: 'Mandor',                  satuan: 'OH',   hargaSatuan: 120000 },
-        { id: 'db-21', tipe: 'upah',  uraian: 'Kepala tukang batu',      satuan: 'OH',   hargaSatuan: 115000 },
-        { id: 'db-22', tipe: 'upah',  uraian: 'Tukang batu',             satuan: 'OH',   hargaSatuan: 110000 },
-        { id: 'db-23', tipe: 'upah',  uraian: 'Tukang besi',             satuan: 'OH',   hargaSatuan: 110000 },
-        { id: 'db-24', tipe: 'upah',  uraian: 'Tukang kayu',             satuan: 'OH',   hargaSatuan: 108000 },
-        { id: 'db-25', tipe: 'upah',  uraian: 'Tukang cat',              satuan: 'OH',   hargaSatuan: 100000 },
-        { id: 'db-26', tipe: 'upah',  uraian: 'Pekerja',                 satuan: 'OH',   hargaSatuan: 90000  },
-        { id: 'db-27', tipe: 'upah',  uraian: 'Pekerja terampil',        satuan: 'OH',   hargaSatuan: 95000  },
-    ];
+    let ahsDatabase = [];
+    let currentPage = 1;         // Halaman Pagination AHS saat ini
+    let hasMoreData = true;      // Flag apakah masih ada data di server
+    let isFetching  = false;     // Flag agar tidak double fetch
+
+    /**
+     * Mengambil data dari server API CI4 dengan limit dan search.
+     * @param {number} page halaman yang mau diambil
+     * @param {string} q query pencarian
+     * @param {boolean} appendData apakah gabungkan dengan data yang sudah ada (untuk scroll)
+     */
+    async function fetchAhsDatabase(page = 1, q = '', appendData = false) {
+        if (isFetching || !hasMoreData && page > 1) return;
+        isFetching = true;
+
+        try {            
+            const params = new URLSearchParams({
+                page: page,
+                q: q,
+                tipe: activeFilter
+            });
+
+            const res = await fetch('/api/ahs?' + params.toString());
+            if (!res.ok) throw new Error('API Error');
+            const json = await res.json();
+            
+            if (json.status === 'success' && Array.isArray(json.data)) {
+                // Tambahkan _uid langsung saat data datang dari server
+                const processed = json.data.map((item, index) => {
+                    const safeUraian = (item.uraian || '').replace(/\W/g, '').substring(0, 15);
+                    item._uid = item.tipe + '_' + item.id + '_' + safeUraian + '_' + index;
+                    return item;
+                });
+
+                if (appendData) {
+                    ahsDatabase = ahsDatabase.concat(processed);
+                } else {
+                    ahsDatabase = processed;
+                }
+
+                if (json.data.length < 20) {
+                    hasMoreData = false;
+                } else {
+                    hasMoreData = true;
+                }
+                
+                currentPage = page;
+            }
+        } catch (error) {
+            console.error('Gagal mengambil master AHS:', error);
+            if (!appendData) ahsDatabase = [];
+        } finally {
+            isFetching = false;
+        }
+    }
 
     /* ============================================================
        FORMAT HELPERS
@@ -300,13 +314,26 @@
     /* ============================================================
        MODAL — Pilih dari Daftar AHS
     ============================================================ */
-    function openModal() {
+    async function openModal() {
         if (!modalOverlay) return;
         modalSelected.clear();
         updateModalCount();
-        renderModalRows(ahsDatabase);
+        
+        currentPage = 1;
+        hasMoreData = true;
+        ahsDatabase = [];
+        if (modalSearch) modalSearch.value = '';
+        activeFilter = 'all';
+        syncFilterButtons();
+        
+        modalTbody.innerHTML = '<tr><td colspan="8" class="text-center py-8 text-table-subtle text-xs italic">Memuat data...</td></tr>';
+        
         modalOverlay.classList.remove('hidden');
         modalOverlay.classList.add('flex');
+        
+        await fetchAhsDatabase(1, '', false);
+        renderModalRows(ahsDatabase);
+        
         setTimeout(() => modalSearch?.focus(), 100);
     }
 
@@ -331,18 +358,16 @@
         }
         modalTbody.innerHTML = items.map(item => {
             const cfg     = tipeConfig[item.tipe] || tipeConfig.bahan;
-            const checked = modalSelected.has(item.id);
+            const checked = modalSelected.has(item._uid);
             return `
             <tr class="modal-item-row border-b border-table-border hover:bg-slate-50 transition-colors cursor-pointer ${checked ? 'bg-primary/5' : ''}"
-                data-id="${item.id}">
+                data-uid="${item._uid}">
                 <td class="px-4 py-2.5 text-center">
                     <input type="checkbox" class="modal-item-cb w-3.5 h-3.5 rounded accent-primary cursor-pointer"
-                        data-id="${item.id}" ${checked ? 'checked' : ''}/>
+                        data-uid="${item._uid}" ${checked ? 'checked' : ''}/>
                 </td>
-                <td class="px-4 py-2.5 text-center">
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-semibold ${cfg.badge}">
-                        ${cfg.label}
-                    </span>
+                <td class="px-4 py-2.5 text-center text-[10px] md:text-[11px] font-semibold text-table-subtle">
+                    ${escHtml(item.id)}
                 </td>
                 <td class="px-4 py-2.5 text-[12px] text-table-medium">${escHtml(item.uraian)}</td>
                 <td class="px-4 py-2.5 text-[12px] text-table-medium">${escHtml(item.merk || '-')}</td>
@@ -363,12 +388,13 @@
         });
         modalTbody.querySelectorAll('.modal-item-cb').forEach(cb => {
             cb.addEventListener('change', function () {
-                const id = cb.dataset.id;
+                const uid = cb.dataset.uid;
                 if (cb.checked) {
-                    modalSelected.add(id);
+                    const itemData = ahsDatabase.find(x => x._uid === uid);
+                    if (itemData) modalSelected.set(uid, itemData);
                     cb.closest('tr')?.classList.add('bg-primary/5');
                 } else {
-                    modalSelected.delete(id);
+                    modalSelected.delete(uid);
                     cb.closest('tr')?.classList.remove('bg-primary/5');
                 }
                 updateModalCount();
@@ -382,14 +408,22 @@
         if (modalConfirm) modalConfirm.disabled = n === 0;
     }
 
-    function filterAndSearch() {
-        const q = (modalSearch?.value || '').trim().toLowerCase();
-        const filtered = ahsDatabase.filter(item => {
-            const matchTipe  = activeFilter === 'all' || item.tipe === activeFilter;
-            const matchQuery = !q || item.uraian.toLowerCase().includes(q);
-            return matchTipe && matchQuery;
-        });
-        renderModalRows(filtered);
+    // Helper untuk merender langsung ahsDatabase saat ini
+    function filterAndRenderClientSide() {
+        renderModalRows(ahsDatabase);
+    }
+
+    let searchTimeout = null;
+    function handleModalSearchInput() {
+        if (searchTimeout) clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(async () => {
+            const q = (modalSearch?.value || '').trim();
+            currentPage = 1;
+            hasMoreData = true;
+            modalTbody.innerHTML = '<tr><td colspan="8" class="text-center py-8 text-table-subtle text-xs italic">Mencari...</td></tr>';
+            await fetchAhsDatabase(1, q, false);
+            filterAndRenderClientSide();
+        }, 500); // 500ms debounce
     }
 
     function syncFilterButtons() {
@@ -404,8 +438,11 @@
 
     function confirmModalSelection() {
         document.getElementById('ahs-empty-row')?.remove();
-        const selectedItems = ahsDatabase.filter(item => modalSelected.has(item.id));
-        selectedItems.forEach(item => {
+        
+        const uniqueSelectedItems = Array.from(modalSelected.values());
+
+        uniqueSelectedItems.forEach(item => {
+            // Tipe sudah difix saat fetch data, tinggal dimasukkan
             renderRow({
                 id: Date.now() + Math.random(),
                 tipe: item.tipe,
@@ -425,8 +462,8 @@
     /* ============================================================
        INIT
     ============================================================ */
-    document.addEventListener('DOMContentLoaded', function () {
-
+    document.addEventListener('DOMContentLoaded', async function () {
+        // (Autocomplete inline AHS tidak diubah strukturnya, biarkan handle autocomplete bahan spesifik sendiri, atau cukup dengan search string)
         // Label item BOQ dari sessionStorage
         try {
             const namaItem = sessionStorage.getItem('ahs_item_label') || '—';
@@ -435,7 +472,7 @@
 
         // Render dummy rows
         dummyRows.length === 0
-            ? (tbody.innerHTML = `<tr id="ahs-empty-row"><td colspan="8" class="text-center py-10 text-table-subtle text-xs italic">Belum ada rincian AHS. Tambahkan item untuk memulai.</td></tr>`)
+            ? (tbody.innerHTML = `<tr id="ahs-empty-row"><td colspan="11" class="text-center py-10 text-table-subtle text-xs italic">Belum ada rincian AHS. Tambahkan item untuk memulai.</td></tr>`)
             : dummyRows.forEach(r => renderRow(r));
         recalcTotals();
 
@@ -455,17 +492,46 @@
         // Modal confirm
         modalConfirm?.addEventListener('click', confirmModalSelection);
 
-        // Modal search
-        modalSearch?.addEventListener('input', filterAndSearch);
+        // Modal search (Debounced Server fetch)
+        modalSearch?.addEventListener('input', handleModalSearchInput);
 
-        // Modal filter buttons
+        // Modal filter buttons (Server-rendered on switch tab)
         filterBtns.forEach(btn => {
-            btn.addEventListener('click', function () {
+            btn.addEventListener('click', async function () {
                 activeFilter = btn.dataset.filter;
                 syncFilterButtons();
-                filterAndSearch();
+                currentPage = 1;
+                hasMoreData = true;
+                const q = (modalSearch?.value || '').trim();
+                modalTbody.innerHTML = '<tr><td colspan="8" class="text-center py-8 text-table-subtle text-xs italic">Memuat data filter...</td></tr>';
+                await fetchAhsDatabase(1, q, false);
+                filterAndRenderClientSide();
             });
         });
+        
+        // Infinite Scroll Modal List
+        // Harus attach listener ke elemen yang punya class 'overflow-auto'
+        const modalBodyWrap = document.querySelector('#ahs-modal-table')?.parentElement;
+        if (modalBodyWrap) {
+            modalBodyWrap.addEventListener('scroll', async function () {
+                // Beri margin sedikit (10px) agar lebih cepat trigger
+                if (modalBodyWrap.scrollTop + modalBodyWrap.clientHeight >= modalBodyWrap.scrollHeight - 10) {
+                    if (!isFetching && hasMoreData) {
+                        const q = (modalSearch?.value || '').trim();
+                        // Loading indicator
+                        const trLoad = document.createElement('tr');
+                        trLoad.id = 'ahs-load-more';
+                        trLoad.innerHTML = '<td colspan="8" class="text-center py-2 text-table-subtle text-xs italic">Memuat lebih banyak data...</td>';
+                        modalTbody.appendChild(trLoad);
+
+                        await fetchAhsDatabase(currentPage + 1, q, true);
+                        
+                        document.getElementById('ahs-load-more')?.remove();
+                        filterAndRenderClientSide();
+                    }
+                }
+            });
+        }
         syncFilterButtons();
 
         // Check all
@@ -473,12 +539,13 @@
             const visible = modalTbody?.querySelectorAll('.modal-item-cb') || [];
             visible.forEach(cb => {
                 cb.checked = modalCheckAll.checked;
-                const id = cb.dataset.id;
+                const uid = cb.dataset.uid;
                 if (modalCheckAll.checked) {
-                    modalSelected.add(id);
+                    const itemData = ahsDatabase.find(x => x._uid === uid);
+                    if (itemData) modalSelected.set(uid, itemData);
                     cb.closest('tr')?.classList.add('bg-primary/5');
                 } else {
-                    modalSelected.delete(id);
+                    modalSelected.delete(uid);
                     cb.closest('tr')?.classList.remove('bg-primary/5');
                 }
             });

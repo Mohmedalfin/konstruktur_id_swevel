@@ -4,7 +4,6 @@ $wrapperClass = $tableVisible ? '' : 'hidden';
 ?>
 
 <div id="rab-table-wrapper" class="w-full px-3 sm:px-6 lg:px-8 py-4 md:py-8 <?= $wrapperClass ?>">
-
     <!-- Table Toolbar -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
 
@@ -47,35 +46,40 @@ $wrapperClass = $tableVisible ? '' : 'hidden';
 
     </div>
 
-    <!-- Table Container -->
-    <div class="overflow-x-auto rounded-xl shadow-md border border-table-border bg-white">
-        <table class="w-full text-left min-w-[800px] border-collapse" id="rab-table">
+    <div class="overflow-x-auto rounded-xl shadow-md border border-table-border bg-white pb-4 w-full">
+        <table class="w-full text-left min-w-[1400px] border-collapse" id="rab-table">
 
             <!-- Column widths — locked permanently, never shift on open/close -->
             <colgroup>
                 <col style="width: 3.5rem">     <!-- No -->
-                <col>                           <!-- Uraian Pekerjaan (flexible) -->
-                <col style="width: 5rem">       <!-- Volume -->
-                <col style="width: 5rem">       <!-- Satuan -->
-                <col style="width: 9rem">       <!-- Harga Bahan -->
-                <col style="width: 9rem">       <!-- Harga Alat -->
-                <col style="width: 9rem">       <!-- Harga Upah -->
-                <col style="width: 9rem">       <!-- Harga Keseluruhan -->
+                <col class="min-w-[300px]">     <!-- Uraian Pekerjaan (flexible/min-width to force scroll) -->
+                <col style="width: 6rem">       <!-- Volume -->
+                <col style="width: 6rem">       <!-- Satuan -->
+                <col style="width: 10rem">      <!-- Harga Bahan -->
+                <col style="width: 10rem">      <!-- Harga Alat -->
+                <col style="width: 10rem">      <!-- Harga Upah -->
+                <col style="width: 10rem">      <!-- Sub. Bahan -->
+                <col style="width: 10rem">      <!-- Sub. Alat -->
+                <col style="width: 10rem">      <!-- Sub. Upah -->
+                <col style="width: 10rem">      <!-- Harga Keseluruhan -->
                 <col style="width: 7rem">       <!-- Aksi -->
             </colgroup>
 
             <!-- Table Head (static — never changes) -->
             <thead>
                 <tr class="bg-primary text-white">
-                    <th scope="col" class="px-3 md:px-5 py-3 md:py-3.5 text-center text-[10px] md:text-xs font-semibold uppercase tracking-wider w-12 md:w-14">No</th>
-                    <th scope="col" class="px-3 md:px-5 py-3 md:py-3.5 text-[10px] md:text-xs font-semibold uppercase tracking-wider">Uraian Pekerjaan</th>
-                    <th scope="col" class="px-3 md:px-5 py-3 md:py-3.5 text-center text-[10px] md:text-xs font-semibold uppercase tracking-wider w-16 md:w-20">Volume</th>
-                    <th scope="col" class="px-3 md:px-5 py-3 md:py-3.5 text-center text-[10px] md:text-xs font-semibold uppercase tracking-wider w-16 md:w-20">Satuan</th>
-                    <th scope="col" class="px-3 md:px-5 py-3 md:py-3.5 text-right text-[10px] md:text-xs font-semibold uppercase tracking-wider">Harga Bahan</th>
-                    <th scope="col" class="px-3 md:px-5 py-3 md:py-3.5 text-right text-[10px] md:text-xs font-semibold uppercase tracking-wider">Harga Alat</th>
-                    <th scope="col" class="px-3 md:px-5 py-3 md:py-3.5 text-right text-[10px] md:text-xs font-semibold uppercase tracking-wider">Harga Upah</th>
-                    <th scope="col" class="px-3 md:px-5 py-3 md:py-3.5 text-right text-[10px] md:text-xs font-semibold uppercase tracking-wider">Harga Keseluruhan</th>
-                    <th scope="col" class="px-3 md:px-5 py-3 md:py-3.5 text-center text-[10px] md:text-xs font-semibold uppercase tracking-wider w-20 md:w-24">Aksi</th>
+                    <th scope="col" class="px-3 md:px-5 py-3 md:py-3.5 text-center text-[10px] md:text-xs font-semibold uppercase tracking-wider whitespace-nowrap">No</th>
+                    <th scope="col" class="px-3 md:px-5 py-3 md:py-3.5 text-[10px] md:text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Uraian Pekerjaan</th>
+                    <th scope="col" class="px-3 md:px-5 py-3 md:py-3.5 text-center text-[10px] md:text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Volume</th>
+                    <th scope="col" class="px-3 md:px-5 py-3 md:py-3.5 text-center text-[10px] md:text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Satuan</th>
+                    <th scope="col" class="px-3 md:px-5 py-3 md:py-3.5 text-right text-[10px] md:text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Harga Bahan</th>
+                    <th scope="col" class="px-3 md:px-5 py-3 md:py-3.5 text-right text-[10px] md:text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Harga Alat</th>
+                    <th scope="col" class="px-3 md:px-5 py-3 md:py-3.5 text-right text-[10px] md:text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Harga Upah</th>
+                    <th scope="col" class="px-3 md:px-5 py-3 md:py-3.5 text-right text-[10px] md:text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Sub. Bahan</th>
+                    <th scope="col" class="px-3 md:px-5 py-3 md:py-3.5 text-right text-[10px] md:text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Sub. Alat</th>
+                    <th scope="col" class="px-3 md:px-5 py-3 md:py-3.5 text-right text-[10px] md:text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Sub. Upah</th>
+                    <th scope="col" class="px-3 md:px-5 py-3 md:py-3.5 text-right text-[10px] md:text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Harga Keseluruhan</th>
+                    <th scope="col" class="px-3 md:px-5 py-3 md:py-3.5 text-center text-[10px] md:text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Aksi</th>
                 </tr>
             </thead>
 
@@ -87,17 +91,17 @@ $wrapperClass = $tableVisible ? '' : 'hidden';
             <!-- Table Footer — updated by ajax_rab.js -->
             <tfoot id="rab-tfoot">
                 <tr class="bg-table-category text-white">
-                    <td colspan="7" class="px-3 md:px-5 py-1.5 md:py-2 text-center text-[10px] md:text-xs font-bold uppercase tracking-wide whitespace-nowrap">Jumlah Harga</td>
+                    <td colspan="10" class="px-3 md:px-5 py-1.5 md:py-2 text-center text-[10px] md:text-xs font-bold uppercase tracking-wide whitespace-nowrap">Jumlah Harga</td>
                     <td id="rab-total-jumlah" class="px-3 md:px-5 py-1.5 md:py-2 text-right text-[10px] md:text-xs font-bold tabular-nums whitespace-nowrap">Rp 0</td>
                     <td class="px-3 md:px-5 py-1.5 md:py-2"></td>
                 </tr>
                 <tr class="bg-table-category-hover text-white">
-                    <td colspan="7" class="px-3 md:px-5 py-1.5 md:py-2 text-center text-[10px] md:text-xs font-bold uppercase tracking-wide whitespace-nowrap">PPN 11%</td>
+                    <td colspan="10" class="px-3 md:px-5 py-1.5 md:py-2 text-center text-[10px] md:text-xs font-bold uppercase tracking-wide whitespace-nowrap">PPN 11%</td>
                     <td id="rab-total-ppn" class="px-3 md:px-5 py-1.5 md:py-2 text-right text-[10px] md:text-xs font-bold tabular-nums whitespace-nowrap">Rp 0</td>
                     <td class="px-3 md:px-5 py-1.5 md:py-2"></td>
                 </tr>
                 <tr class="bg-table-category text-white">
-                    <td colspan="7" class="px-3 md:px-5 py-1.5 md:py-2 text-center text-[10px] md:text-xs font-bold uppercase tracking-wide whitespace-nowrap">Total Harga</td>
+                    <td colspan="10" class="px-3 md:px-5 py-1.5 md:py-2 text-center text-[10px] md:text-xs font-bold uppercase tracking-wide whitespace-nowrap">Total Harga</td>
                     <td id="rab-total-final" class="px-3 md:px-5 py-1.5 md:py-2 text-right text-[10px] md:text-xs font-bold tabular-nums whitespace-nowrap">Rp 0</td>
                     <td class="px-3 md:px-5 py-1.5 md:py-2"></td>
                 </tr>
@@ -139,9 +143,6 @@ $wrapperClass = $tableVisible ? '' : 'hidden';
                                 <col>                           <!-- Uraian Pekerjaan -->
                                 <col style="width: 6rem">       <!-- Volume -->
                                 <col style="width: 6rem">       <!-- Satuan -->
-                                <col style="width: 8rem">       <!-- Harga Bahan -->
-                                <col style="width: 8rem">       <!-- Harga Alat -->
-                                <col style="width: 8rem">       <!-- Harga Upah -->
                                 <col style="width: 10rem">      <!-- Kategori -->
                             </colgroup>
                             <thead class="sticky top-0 bg-slate-100 z-10 shadow-sm">
@@ -150,16 +151,13 @@ $wrapperClass = $tableVisible ? '' : 'hidden';
                                     <th class="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-table-subtle">Uraian Pekerjaan</th>
                                     <th class="px-4 py-2.5 text-center text-[10px] font-semibold uppercase tracking-wider text-table-subtle w-24">Volume</th>
                                     <th class="px-4 py-2.5 text-center text-[10px] font-semibold uppercase tracking-wider text-table-subtle w-24">Satuan</th>
-                                    <th class="px-4 py-2.5 text-right text-[10px] font-semibold uppercase tracking-wider text-table-subtle w-32">Harga Bahan</th>
-                                    <th class="px-4 py-2.5 text-right text-[10px] font-semibold uppercase tracking-wider text-table-subtle w-32">Harga Alat</th>
-                                    <th class="px-4 py-2.5 text-right text-[10px] font-semibold uppercase tracking-wider text-table-subtle w-32">Harga Upah</th>
                                     <th class="px-4 py-2.5 text-center text-[10px] font-semibold uppercase tracking-wider text-table-subtle w-40">Kategori</th>
                                 </tr>
                             </thead>
                             <tbody id="import-rab-modal-tbody" class="text-[11px] md:text-[13px] text-table-body">
                                 <!-- injected by JS -->
                                 <tr>
-                                    <td colspan="8" class="text-center py-10 text-table-subtle text-xs italic">
+                                    <td colspan="5" class="text-center py-10 text-table-subtle text-xs italic">
                                         Memproses data Excel...
                                     </td>
                                 </tr>
