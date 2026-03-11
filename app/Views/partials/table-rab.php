@@ -29,6 +29,15 @@ $wrapperClass = $tableVisible ? '' : 'hidden';
                 Template
             </button>
 
+            <!-- Tambah Kategori -->
+            <button id="btn-tambah-kategori-header" type="button" data-hs-overlay="#tambah-kategori-modal"
+                class="hidden inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white border border-primary text-primary hover:bg-primary/5 text-xs font-semibold transition-all duration-150 focus:outline-none active:scale-95 shadow-sm">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                Tambah Kategori
+            </button>
+
             <!-- Import BOQ -->
             <button id="boq-import-btn" type="button"
                 class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-primary hover:bg-primary-hover text-white text-xs font-semibold transition-all duration-150 focus:outline-none active:scale-95 shadow-sm">
