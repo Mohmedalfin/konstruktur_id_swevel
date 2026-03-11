@@ -27,6 +27,7 @@
     const boqImportBtn         = document.getElementById('boq-import-btn');
     const boqFileInput         = document.getElementById('boq-file-input');
     const boqDownloadTplBtn    = document.getElementById('boq-download-template-btn');
+    const searchInput          = document.getElementById('rab-search');
 
     if (!wrapper || !tbody) return;
 
@@ -240,7 +241,7 @@
 
         categories.forEach(cat => {
             html += `
-                <tr class="rab-category bg-table-category text-white">
+                <tr class="rab-category bg-table-category text-white" data-cat="${cat.id}">
                     <td class="w-12 md:w-14 px-3 md:px-5 py-2.5 md:py-3 text-center">
                         <button
                             class="edit-cat-toggle-btn relative flex items-center justify-center w-5 h-5 mx-auto focus:outline-none"
@@ -309,6 +310,10 @@
 
     function showTable() {
         wrapper.classList.remove('hidden');
+        if (searchInput) {
+            searchInput.value = '';
+            searchInput.dispatchEvent(new Event('input'));
+        }
         setTimeout(() => wrapper.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
     }
 
@@ -564,6 +569,74 @@
             });
         });
     }
+
+    function bindSearch() {
+        if (!searchInput) return;
+
+        searchInput.addEventListener('input', function (e) {
+            const term = e.target.value.toLowerCase().trim();
+            const categories = tbody.querySelectorAll('.rab-category');
+
+            categories.forEach(catRow => {
+                const catId = catRow.dataset.cat;
+                if (!catId) return;
+
+                const catText = catRow.textContent.toLowerCase();
+                const items = tbody.querySelectorAll(`.subrow-${catId}, .subrow-item-${catId}, .subrow-placeholder-${catId}`);
+
+                let catMatch = term === '' || catText.includes(term);
+                let anyItemMatch = false;
+
+                items.forEach(itemRow => {
+                    const itemText = itemRow.textContent.toLowerCase();
+                    const itemMatch = term === '' || itemText.includes(term);
+
+                    if (itemMatch || catMatch) {
+                        itemRow.style.display = '';
+                        if (term !== '') {
+                            itemRow.classList.remove('hidden');
+                        }
+                        anyItemMatch = true;
+                    } else {
+                        itemRow.style.display = 'none';
+                    }
+                });
+
+                if (catMatch || anyItemMatch) {
+                    catRow.style.display = '';
+                    if (term !== '') {
+                        const plus = catRow.querySelector('.cat-icon-plus, .edit-cat-icon-plus');
+                        const minus = catRow.querySelector('.cat-icon-minus, .edit-cat-icon-minus');
+                        const chevron = catRow.querySelector('.cat-chevron');
+                        if (plus) plus.classList.add('hidden');
+                        if (minus) minus.classList.remove('hidden');
+                        if (chevron) chevron.classList.remove('rotate-180');
+                    }
+                } else {
+                    catRow.style.display = 'none';
+                }
+
+                if (term === '') {
+                    items.forEach(itemRow => {
+                        itemRow.style.display = '';
+                        if (state.mode === 'readonly') {
+                            const isHidden = state.collapsed[catId];
+                            itemRow.classList.toggle('hidden', !!isHidden);
+
+                            const plus = catRow.querySelector('.cat-icon-plus');
+                            const minus = catRow.querySelector('.cat-icon-minus');
+                            const chevron = catRow.querySelector('.cat-chevron');
+                            if (plus) plus.classList.toggle('hidden', !isHidden);
+                            if (minus) minus.classList.toggle('hidden', !!isHidden);
+                            if (chevron) chevron.classList.toggle('rotate-180', !!isHidden);
+                        }
+                    });
+                }
+            });
+        });
+    }
+
+    bindSearch();
 
     cards.forEach(card => {
         card.addEventListener('click', async function () {
