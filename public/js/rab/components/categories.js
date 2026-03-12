@@ -149,20 +149,51 @@ function _bindAddSubItemRow(catTr) {
                 : '/menu-rap/tambah-ahs';
         });
     });
-}
 
-function _bindToggleRow(catTr) {
-    catTr.querySelectorAll('.edit-cat-toggle-btn').forEach(btn => {
-        btn.addEventListener('click', function (e) {
+
+    catTr.querySelectorAll('.del-cat-btn').forEach(btn => {
+        btn.addEventListener('click', async function (e) {
             e.stopPropagation();
+
+            // Get the category name from the row for the dialog
+            const catName = catTr.querySelector('td:nth-child(2) span:last-child')?.textContent.trim()
+                || btn.dataset.cat
+                || 'kategori ini';
+
+            const confirmed = await confirmDeleteCategory(catName);
+            if (!confirmed) return;
+
             const catId = btn.dataset.cat;
-            const plus = btn.querySelector('.edit-cat-icon-plus');
-            const minus = btn.querySelector('.edit-cat-icon-minus');
-            const targets = tbody.querySelectorAll(`.subrow-placeholder-${catId}, .subrow-item-${catId}`);
-            const isOpen = targets.length && !targets[0].classList.contains('hidden');
-            targets.forEach(r => r.classList.toggle('hidden', isOpen));
-            if (plus) plus.classList.toggle('hidden', !isOpen);
-            if (minus) minus.classList.toggle('hidden', isOpen);
+
+            // Remove all sub-items for this category
+            tbody.querySelectorAll('.subrow-item-' + catId).forEach(r => r.remove());
+
+            // Show placeholder if none exists
+            if (!tbody.querySelector('.subrow-placeholder-' + catId)) {
+                const ph = document.createElement('tr');
+                ph.className = `subrow-placeholder-${catId} bg-table-row border-b border-table-border`;
+                ph.innerHTML = `<td colspan="12" class="px-5 py-2.5 text-center text-table-subtle text-xs italic">Belum ada item — klik Tambah untuk menambahkan.</td>`;
+                catTr.after(ph);
+            }
+
+            toast.show(`Semua item di "${catName}" berhasil dihapus`, 'info', 2500);
         });
     });
+
+
+    function _bindToggleRow(catTr) {
+        catTr.querySelectorAll('.edit-cat-toggle-btn').forEach(btn => {
+            btn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                const catId = btn.dataset.cat;
+                const plus = btn.querySelector('.edit-cat-icon-plus');
+                const minus = btn.querySelector('.edit-cat-icon-minus');
+                const targets = tbody.querySelectorAll(`.subrow-placeholder-${catId}, .subrow-item-${catId}`);
+                const isOpen = targets.length && !targets[0].classList.contains('hidden');
+                targets.forEach(r => r.classList.toggle('hidden', isOpen));
+                if (plus) plus.classList.toggle('hidden', !isOpen);
+                if (minus) minus.classList.toggle('hidden', isOpen);
+            });
+        });
+    }
 }

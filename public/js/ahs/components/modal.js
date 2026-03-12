@@ -7,6 +7,7 @@ import { state, modalOverlay, modalClose, modalCancel, modalConfirm,
          modalSearch, modalTbody, modalCheckAll, modalCountEl, filterBtns } from '../core/state.js';
 import { fetchAhsDatabase } from '../core/data.js';
 import { fmt, escHtml } from '../../shared/utils.js';
+import { toast } from '../../shared/ui/toast.js';
 import { tipeConfig, renderRow, recalcTotals } from './render.js';
 
 export function openModal() {
@@ -58,13 +59,13 @@ export function renderModalRows(items) {
                 <input type="checkbox" class="modal-item-cb w-3.5 h-3.5 rounded accent-primary cursor-pointer"
                     data-uid="${item._uid}" ${checked ? 'checked' : ''}/>
             </td>
-            <td class="px-4 py-2.5 text-center text-[10px] md:text-[11px] font-semibold text-table-subtle">${escHtml(item.id)}</td>
+            <td class="px-4 py-2.5 text-center text-[10px] md:text-[11px] font-semibold text-table-subtle whitespace-nowrap">${escHtml(item.id)}</td>
             <td class="px-4 py-2.5 text-[12px] text-table-medium">${escHtml(item.uraian)}</td>
-            <td class="px-4 py-2.5 text-[12px] text-table-medium">${escHtml(item.merk || '-')}</td>
+            <td class="px-4 py-2.5 text-[12px] text-table-medium whitespace-nowrap">${escHtml(item.merk || '-')}</td>
             <td class="px-4 py-2.5 text-[12px] text-table-medium">${escHtml(item.spesifikasi || '-')}</td>
-            <td class="px-4 py-2.5 text-center text-[12px] text-table-subtle">${escHtml(item.satuan)}</td>
-            <td class="px-4 py-2.5 text-right text-[12px] tabular-nums text-table-strong">${fmt(item.hargaSatuan)}</td>
-            <td class="px-4 py-2.5 text-[12px] text-table-medium">${escHtml(item.sumber || '-')}</td>
+            <td class="px-4 py-2.5 text-center text-[12px] text-table-subtle whitespace-nowrap">${escHtml(item.satuan)}</td>
+            <td class="px-4 py-2.5 text-right text-[12px] tabular-nums text-table-strong whitespace-nowrap">${fmt(item.hargaSatuan)}</td>
+            <td class="px-4 py-2.5 text-[12px] text-table-medium whitespace-nowrap" style="min-width:12rem">${escHtml(item.sumber || '-')}</td>
         </tr>`;
     }).join('');
 
@@ -107,6 +108,7 @@ export function syncFilterButtons() {
 
 export function confirmModalSelection() {
     document.getElementById('ahs-empty-row')?.remove();
+    const count = state.modalSelected.size;
     Array.from(state.modalSelected.values()).forEach(item => {
         renderRow({
             id: Date.now() + Math.random(),
@@ -117,6 +119,9 @@ export function confirmModalSelection() {
     });
     recalcTotals();
     closeModal();
+    if (count > 0) {
+        toast.show(`Berhasil menambahkan ${count} item dari database`, 'success', 3000);
+    }
 }
 
 export function bindModalInfiniteScroll() {
