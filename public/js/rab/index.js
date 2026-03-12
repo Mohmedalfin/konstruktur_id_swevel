@@ -7,18 +7,23 @@
  *   hooks/      ← stateful behaviors
  */
 
-import { state, wrapper, tbody, addRabBtn, cards,
-         tambahKategoriBtn, kategoriModalClose, kategoriModalCancel,
-         kategoriModalList, kategoriModalOverlay, kategoriModalConfirm } from './core/state.js';
-import { fetchRabData, dummyKategoriMaster }                             from './core/data.js';
-import { renderLoading, renderReadonly, renderEditable,
-         showTable, setEditableMode }                                    from './components/render.js';
-import { openKategoriModal, closeKategoriModal,
-         updateModalInfo, appendCategoryRow }                            from './components/categories.js';
-import { initImport }                                                    from './components/import.js';
-import { initTemplate }                                                  from './components/template.js';
-import { injectPendingItems, restorePendingCategories }                  from './hooks/pending.js';
-import { bindSearch }                                                    from './hooks/search.js';
+import {
+    state, wrapper, tbody, addRabBtn, cards,
+    tambahKategoriBtn, kategoriModalClose, kategoriModalCancel,
+    kategoriModalList, kategoriModalOverlay, kategoriModalConfirm
+} from './core/state.js';
+import { fetchRabData } from './core/data.js';
+import {
+    renderLoading, renderReadonly, renderEditable,
+    showTable, setEditableMode
+} from './components/render.js';
+import {
+    openKategoriModal, closeKategoriModal,
+    updateModalInfo, appendCategoryRow
+} from './components/categories.js';
+import { initImport } from './components/import.js';
+import { initTemplate } from './components/template.js';
+import { bindSearch } from './hooks/search.js';
 
 // Guard: do nothing if not a RAB page
 if (!wrapper || !tbody) {
@@ -34,25 +39,84 @@ if (!wrapper || !tbody) {
 
     // ── Kategori modal events ─────────────────────────────────────────────────
     if (tambahKategoriBtn) tambahKategoriBtn.addEventListener('click', openKategoriModal);
-    if (kategoriModalClose)  kategoriModalClose.addEventListener('click',  closeKategoriModal);
+    if (kategoriModalClose) kategoriModalClose.addEventListener('click', closeKategoriModal);
     if (kategoriModalCancel) kategoriModalCancel.addEventListener('click', closeKategoriModal);
-    if (kategoriModalList)   kategoriModalList.addEventListener('change',  updateModalInfo);
+    if (kategoriModalList) kategoriModalList.addEventListener('change', updateModalInfo);
     if (kategoriModalOverlay) {
         kategoriModalOverlay.addEventListener('click', e => {
             if (e.target === kategoriModalOverlay) closeKategoriModal();
         });
     }
     if (kategoriModalConfirm) {
-        kategoriModalConfirm.addEventListener('click', function () {
-            if (!kategoriModalList) { closeKategoriModal(); return; }
-            kategoriModalList.querySelectorAll('.kategori-checkbox:not([disabled]):checked').forEach(cb => {
-                const cat = { id: cb.dataset.id, nama: cb.dataset.nama };
-                if (!state.activeCategories.some(c => c.id === cat.id)) {
-                    state.activeCategories.push(cat);
-                    appendCategoryRow(cat);
+        kategoriModalConfirm.addEventListener('click', async function () {
+            try {
+                if (!kategoriModalList) {
+                    closeKategoriModal();
+                    return;
                 }
-            });
-            closeKategoriModal();
+
+                const checked = Array.from(
+                    kategoriModalList.querySelectorAll('.kategori-checkbox:not([disabled]):checked')
+                );
+
+                if (checked.length === 0) {
+                    alert('Pilih minimal 1 kategori.');
+                    return;
+                }
+
+                const idProject = window.RAB_INIT?.idProject || window.RAB_INIT?.id;
+                if (!idProject) {
+                    alert('ID project tidak ditemukan.');
+                    return;
+                }
+
+                const kategoriPayload = checked.map(cb => ({
+                    nama: cb.dataset.nama
+                }));
+
+                // loading state tombol
+                const oldText = kategoriModalConfirm.textContent;
+                kategoriModalConfirm.disabled = true;
+                kategoriModalConfirm.textContent = 'Menambahkan...';
+
+                // tutup modal dulu biar terasa responsif
+                closeKategoriModal();
+
+                const res = await fetch(window.RAB_INIT.apiKategoriUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        id_project: Number(idProject),
+                        kategori: kategoriPayload
+                    }),
+                });
+
+                const json = await res.json();
+
+                if (!res.ok || json.status !== 'success') {
+                    throw new Error(json.message || 'Gagal menyimpan kategori');
+                }
+
+                renderLoading();
+                const data = await fetchRabData(idProject);
+
+                state.activeCategories = (data.categories || []).map(cat => ({
+                    id: String(cat.id),
+                    nama: cat.name
+                }));
+
+                renderReadonly(data);
+
+                kategoriModalConfirm.disabled = false;
+                kategoriModalConfirm.textContent = oldText;
+            } catch (err) {
+                console.error('Gagal tambah kategori:', err);
+                kategoriModalConfirm.disabled = false;
+                kategoriModalConfirm.textContent = 'Tambahkan';
+                alert(err.message || 'Terjadi kesalahan saat menambahkan kategori');
+            }
         });
     }
 
@@ -60,9 +124,9 @@ if (!wrapper || !tbody) {
     cards.forEach(card => {
         card.addEventListener('click', async function () {
             const id = card.dataset.id;
-            state.mode            = 'readonly';
-            state.currentId       = id;
-            state.collapsed       = {};
+            state.mode = 'readonly';
+            state.currentId = id;
+            state.collapsed = {};
             state.activeCategories = [];
 
             cards.forEach(c => c.classList.remove('ring-2', 'ring-primary'));
@@ -78,9 +142,9 @@ if (!wrapper || !tbody) {
     // ── Add RAB button (editable mode) ───────────────────────────────────────
     if (addRabBtn) {
         addRabBtn.addEventListener('click', function () {
-            state.mode            = 'editable';
-            state.currentId       = null;
-            state.collapsed       = {};
+            state.mode = 'editable';
+            state.currentId = null;
+            state.collapsed = {};
             state.activeCategories = [];
             cards.forEach(c => c.classList.remove('ring-2', 'ring-primary'));
             setEditableMode(true);
@@ -95,21 +159,32 @@ if (!wrapper || !tbody) {
         if (!init || !init.mode) return;
 
         if (init.mode === 'readonly' && init.id) {
-            state.mode      = 'readonly';
+            state.mode = 'readonly';
             state.currentId = init.id;
-            setEditableMode(false);
+            setEditableMode(true); // tombol kategori tetap tampil
             showTable();
             renderLoading();
-            renderReadonly(await fetchRabData(init.id));
 
-        } else if (init.mode === 'new') {
-            state.mode            = 'editable';
-            state.currentId       = null;
-            state.activeCategories = [];
+            const data = await fetchRabData(init.id);
+            state.activeCategories = (data.categories || []).map(cat => ({
+                id: String(cat.id),
+                nama: cat.name
+            }));
+            renderReadonly(data);
+
+        } else if (init.mode === 'new' || init.id) {
+            state.mode = 'readonly';
+            state.currentId = init.id;
             setEditableMode(true);
             showTable();
-            renderEditable();
-            restorePendingCategories();
+            renderLoading();
+
+            const data = await fetchRabData(init.id);
+            state.activeCategories = (data.categories || []).map(cat => ({
+                id: String(cat.id),
+                nama: cat.name
+            }));
+            renderReadonly(data);
         }
     });
 
@@ -124,15 +199,15 @@ if (!wrapper || !tbody) {
         }
 
         const newItems = importedItems.map(item => ({
-            id:               item.id,
-            nama:             item.uraian,
-            volume:           item.volume,
-            satuan:           item.satuan,
-            hargaBahan:       item.harga_bahan,
-            hargaAlat:        item.harga_alat,
-            hargaUpah:        item.harga_upah,
+            id: item.id,
+            nama: item.uraian,
+            volume: item.volume,
+            satuan: item.satuan,
+            hargaBahan: item.harga_bahan,
+            hargaAlat: item.harga_alat,
+            hargaUpah: item.harga_upah,
             hargaKeseluruhan: (item.volume || 1) * (item.harga_bahan + item.harga_alat + item.harga_upah),
-            kategori:         item.kategori || 'persiapan'
+            kategori: item.kategori || 'persiapan'
         }));
 
         const grouped = {};
@@ -148,9 +223,9 @@ if (!wrapper || !tbody) {
             let parsed = JSON.parse(sessionStorage.getItem('rab_pending_items') || '[]');
             Object.keys(grouped).forEach(catId => {
                 const catName = nameMap[catId] || catId;
-                const found   = parsed.find(g => g.catId === catId);
+                const found = parsed.find(g => g.catId === catId);
                 if (found) { found.items.push(...grouped[catId]); }
-                else       { parsed.push({ catId, catName, items: grouped[catId] }); }
+                else { parsed.push({ catId, catName, items: grouped[catId] }); }
                 if (!state.activeCategories.some(c => c.id === catId)) {
                     const cat = { id: catId, nama: catName };
                     state.activeCategories.push(cat);
@@ -158,7 +233,7 @@ if (!wrapper || !tbody) {
                 }
             });
             sessionStorage.setItem('rab_pending_items', JSON.stringify(parsed));
-        } catch (_) {}
+        } catch (_) { }
 
         injectPendingItems();
     });

@@ -6,6 +6,8 @@
 
 import { state, tbody, wrapper, searchInput, tambahKategoriBtn, totalJumlah, totalPpn, totalFinal } from '../core/state.js';
 import { fmt, escHtml } from '../../shared/utils.js';
+import { fetchRabData } from '../core/data.js';
+
 
 export function renderLoading() {
     tbody.innerHTML = `
@@ -36,9 +38,9 @@ export function renderReadonly(data) {
     let html = '';
 
     categories.forEach(cat => {
-        const catTotal   = cat.items.reduce((s, i) => s + Number(i.hargaKeseluruhan), 0);
-        const isOpen     = !state.collapsed[cat.id];
-        const subClass   = isOpen ? '' : 'hidden';
+        const catTotal = cat.items.reduce((s, i) => s + Number(i.hargaKeseluruhan), 0);
+        const isOpen = !state.collapsed[cat.id];
+        const subClass = isOpen ? '' : 'hidden';
         const chevronRot = isOpen ? '' : 'rotate-180';
 
         html += `
@@ -115,12 +117,8 @@ export function renderReadonly(data) {
                                     </button>
                                     <div class="border-t border-table-border my-1"></div>
                                     <button type="button"
-                                        class="readonly-item-delete flex w-full items-center gap-2.5 px-4 py-2.5 text-xs text-red-500 hover:bg-red-50 transition-colors">
-                                        <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                        </svg>
-                                        Hapus
-                                    </button>
+                                    class="readonly-item-delete flex w-full items-center gap-2.5 px-4 py-2.5 text-xs text-red-500 hover:bg-red-50 transition-colors"
+                                    data-id-rap-detail="${item.id_rap_detail}">
                                 </div>
                             </div>
                         </td>
@@ -133,7 +131,7 @@ export function renderReadonly(data) {
     updateTotals(grandTotal);
     bindCategoryToggle();
     bindReadonlyDropdowns();
-    try { window.HSStaticMethods?.autoInit(['dropdown']); } catch (_) {}
+    try { window.HSStaticMethods?.autoInit(['dropdown']); } catch (_) { }
 }
 
 export function renderEditable() {
@@ -149,11 +147,11 @@ export function renderEditable() {
 }
 
 export function updateTotals(total) {
-    const ppn   = total * 0.11;
+    const ppn = total * 0.11;
     const grand = total + ppn;
     if (totalJumlah) totalJumlah.textContent = fmt(total);
-    if (totalPpn)    totalPpn.textContent    = fmt(ppn);
-    if (totalFinal)  totalFinal.textContent  = fmt(grand);
+    if (totalPpn) totalPpn.textContent = fmt(ppn);
+    if (totalFinal) totalFinal.textContent = fmt(grand);
 }
 
 export function showTable() {
@@ -167,23 +165,23 @@ export function showTable() {
 
 export function setEditableMode(on) {
     if (tambahKategoriBtn) {
-        tambahKategoriBtn.classList.toggle('hidden', !on);
+        tambahKategoriBtn.classList.remove('hidden');
     }
 }
 
 export function bindCategoryToggle() {
     tbody.querySelectorAll('.rab-category[data-cat]').forEach(row => {
         row.addEventListener('click', function () {
-            const catId    = row.dataset.cat;
-            const subRows  = tbody.querySelectorAll(`.subrow-${catId}`);
-            const minus    = row.querySelector('.cat-icon-minus');
-            const plus     = row.querySelector('.cat-icon-plus');
-            const chevron  = row.querySelector('.cat-chevron');
+            const catId = row.dataset.cat;
+            const subRows = tbody.querySelectorAll(`.subrow-${catId}`);
+            const minus = row.querySelector('.cat-icon-minus');
+            const plus = row.querySelector('.cat-icon-plus');
+            const chevron = row.querySelector('.cat-chevron');
             const isHidden = subRows.length && subRows[0].classList.contains('hidden');
 
             subRows.forEach(r => r.classList.toggle('hidden', !isHidden));
-            if (minus)   minus.classList.toggle('hidden', !isHidden);
-            if (plus)    plus.classList.toggle('hidden',   isHidden);
+            if (minus) minus.classList.toggle('hidden', !isHidden);
+            if (plus) plus.classList.toggle('hidden', isHidden);
             if (chevron) chevron.classList.toggle('rotate-180', !isHidden);
             state.collapsed[catId] = !isHidden;
         });
@@ -199,16 +197,31 @@ export function bindReadonlyDropdowns() {
             window.location.href = btn.dataset.url || '/menu-rap/rincian-ahs';
         });
     });
+
     tbody.querySelectorAll('.readonly-item-delete').forEach(btn => {
-        btn.addEventListener('click', function () {
-            const row = btn.closest('tr');
-            if (row) row.remove();
-            let total = 0;
-            tbody.querySelectorAll('[class*="rab-harga-cell-"]').forEach(cell => {
-                const val = cell.textContent.replace(/[^\d,]/g, '').replace(',', '.');
-                total += parseFloat(val) || 0;
-            });
-            updateTotals(total);
+        btn.addEventListener('click', async function () {
+            const idRapDetail = btn.dataset.idRapDetail || btn.getAttribute('data-id-rap-detail');
+            if (!idRapDetail) return;
+
+            const ok = confirm('Yakin ingin menghapus pekerjaan ini?');
+            if (!ok) return;
+
+            try {
+                const res = await fetch(`/api/rap/pekerjaan/${idRapDetail}`, {
+                    method: 'DELETE',
+                });
+
+                const json = await res.json();
+                if (!res.ok || json.status !== 'success') {
+                    throw new Error(json.message || 'Gagal menghapus');
+                }
+
+                const idProject = window.RAB_INIT?.idProject || window.RAB_INIT?.id;
+                renderLoading();
+                renderReadonly(await fetchRabData(idProject));
+            } catch (err) {
+                alert(err.message || 'Terjadi kesalahan saat menghapus');
+            }
         });
     });
 }

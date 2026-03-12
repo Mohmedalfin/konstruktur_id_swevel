@@ -1,51 +1,66 @@
-/**
- * tambah-ahs/hooks/submit.js
- * Submit hook — saves selected items to sessionStorage and redirects back to RAB.
- */
-
 import { state, submitBtn } from '../core/state.js';
 
 export function bindSubmit() {
     if (!submitBtn) return;
 
-    submitBtn.addEventListener('click', function () {
+    submitBtn.addEventListener('click', async function () {
         const items = Object.values(state.selected);
         if (items.length === 0) return;
 
-        let catId   = '';
-        let catName = '';
+        let catId = '';
         try {
-            catId   = sessionStorage.getItem('rab_tambah_ahs_cat')     || '';
-            catName = sessionStorage.getItem('rab_tambah_ahs_catname') || '';
-        } catch (_) {}
+            catId = sessionStorage.getItem('rab_tambah_ahs_cat') || '';
+        } catch (_) { }
+
+        const idProject = sessionStorage.getItem('current_id_project') || new URLSearchParams(window.location.search).get('id');
+
+        if (!idProject || !catId) {
+            alert('Kategori atau project tidak ditemukan.');
+            return;
+        }
+
+        const payloadItems = items.map(item => ({
+            nama: item.nama,
+            volume: 1,
+            satuan: item.satuan || '',
+            harga_bahan: 0,
+            harga_alat: 0,
+            harga_upah: 0,
+            keterangan: item.sumber || 'manual',
+        }));
+
+        submitBtn.textContent = 'Menambahkan...';
+        submitBtn.disabled = true;
 
         try {
-            let existing = [];
-            try {
-                const raw = sessionStorage.getItem('rab_pending_items');
-                if (raw) existing = JSON.parse(raw);
-            } catch (_) {}
+            const res = await fetch('/api/rap/pekerjaan', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    id_project: Number(idProject),
+                    id_kategori: Number(catId),
+                    pekerjaan: payloadItems,
+                }),
+            });
 
-            // Replace existing group for this category (avoid duplicates)
-            existing = existing.filter(g => g.catId !== catId);
-            existing.push({ catId, catName, items });
-            sessionStorage.setItem('rab_pending_items', JSON.stringify(existing));
-        } catch (_) {}
+            const json = await res.json();
 
-        // Visual feedback → redirect
-        submitBtn.textContent = 'Menambahkan…';
-        submitBtn.disabled    = true;
-
-        setTimeout(function () {
-            let rabUrl = '';
-            try { rabUrl = sessionStorage.getItem('rab_return_url') || ''; } catch (_) {}
-            if (!rabUrl) {
-                try {
-                    const ref = document.referrer;
-                    if (ref && new URL(ref).origin === window.location.origin) rabUrl = ref;
-                } catch (_) {}
+            if (!res.ok || json.status !== 'success') {
+                throw new Error(json.message || 'Gagal menyimpan pekerjaan');
             }
-            window.location.href = rabUrl || '/menu-rap?mode=new';
-        }, 600);
+
+            let rabUrl = '';
+            try {
+                rabUrl = sessionStorage.getItem('rab_return_url') || '';
+            } catch (_) { }
+
+            window.location.href = rabUrl || `/menu-rap?id=${idProject}`;
+        } catch (err) {
+            alert(err.message || 'Terjadi kesalahan saat menyimpan pekerjaan');
+            submitBtn.textContent = 'Tambah ke RAB';
+            submitBtn.disabled = false;
+        }
     });
 }

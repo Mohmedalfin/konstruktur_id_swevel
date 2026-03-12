@@ -26,10 +26,15 @@ if (! in_array($rabMode, ['readonly', 'new'], true)) {
     <!-- Pass init state to ajax_rab.js -->
     <script>
         window.RAB_INIT = {
-            mode:          <?= $rabMode ? json_encode($rabMode) : 'null' ?>,
-            id:            <?= $rabId   ? json_encode($rabId)   : 'null' ?>,
-            rincianAhsUrl: <?= json_encode(base_url('menu-rap/rincian-ahs')) ?>,
-            tambahAhsUrl:  <?= json_encode(base_url('menu-rap/tambah-ahs')) ?>
+            mode:              <?= $rabMode ? json_encode($rabMode) : 'null' ?>,
+            id:                <?= $rabId   ? json_encode($rabId)   : 'null' ?>,
+            idProject:         <?= $rabId   ? json_encode($rabId)   : 'null' ?>,
+            rincianAhsUrl:     <?= json_encode(base_url('menu-rap/rincian-ahs')) ?>,
+            tambahAhsUrl:      <?= json_encode(base_url('menu-rap/tambah-ahs')) ?>,
+            apiRapUrl:         <?= json_encode(base_url('api/rap')) ?>,
+            apiKategoriUrl:    <?= json_encode(base_url('api/rap/kategori')) ?>,
+            apiKategoriMaster: <?= json_encode(base_url('api/rap/kategori-master')) ?>,
+            apiPekerjaanUrl:   <?= json_encode(base_url('api/rap/pekerjaan')) ?>
         };
     </script>
 
