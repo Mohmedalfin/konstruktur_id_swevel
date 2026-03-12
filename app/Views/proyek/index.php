@@ -79,20 +79,13 @@
 <div class="mt-6">
   <div class="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3 xl:grid-cols-5">
     <?php
-    $cards = [
-        // Cards with existing RAB data → readonly mode
-        ['title' => 'Pembangunan Gedung Klinik Pratama',  'lokasi' => 'Kab. Sleman, DIY',       'nilai' => 'Rp 3.250.000.000', 'pct' => '-2,1%', 'tgl' => '2026-02-12', 'href' => base_url('menu-rap?id=1')],
-        ['title' => 'Renovasi Gedung Kantor Dinas',       'lokasi' => 'Kota Semarang, Jateng',  'nilai' => 'Rp 1.800.000.000', 'pct' => '+0,8%', 'tgl' => '2026-01-20', 'href' => base_url('menu-rap?id=2')],
-        // Cards without RAB yet → editable / new mode
-        ['title' => 'Pembangunan Jembatan Desa',          'lokasi' => 'Kab. Banyumas, Jateng',  'nilai' => null,               'pct' => null,    'tgl' => '2026-03-05', 'href' => base_url('menu-rap?mode=new')],
-        ['title' => 'Rehabilitasi Gedung Sekolah',        'lokasi' => 'Kota Surabaya, Jatim',   'nilai' => null,               'pct' => null,    'tgl' => '2026-03-10', 'href' => base_url('menu-rap?mode=new')],
-        ['title' => 'Pembangunan Embung Irigasi',         'lokasi' => 'Kab. Bantul, DIY',       'nilai' => null,               'pct' => null,    'tgl' => '2026-03-18', 'href' => base_url('menu-rap?mode=new')],
-        ['title' => 'Peningkatan Jalan Kabupaten',        'lokasi' => 'Kab. Magelang, Jateng',  'nilai' => null,               'pct' => null,    'tgl' => '2026-03-22', 'href' => base_url('menu-rap?mode=new')],
-    ];
-
-    foreach ($cards as $card):
-        echo view('partials/card-proyek', ['card' => $card]);
-    endforeach;
+    if (empty($cards)) {
+        echo '<div class="col-span-full text-center text-gray-500 py-10">Belum ada proyek yang ditambahkan.</div>';
+    } else {
+        foreach ($cards as $card):
+            echo view('partials/card-proyek', ['card' => $card]);
+        endforeach;
+    }
     ?>
   </div>
 </div>
