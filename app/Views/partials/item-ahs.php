@@ -119,4 +119,4 @@ $wrapperClass = $wrapperClass ?? 'w-full';
 
 </div>
 
-<script src="<?= base_url('ajax/ajax_tambah_ahs.js') ?>"></script>
+<script type="module" src="<?= base_url('js/pekerjaan/index.js') ?>"></script>
