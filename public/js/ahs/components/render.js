@@ -5,6 +5,7 @@
 
 import { state, tbody, totalBahanEl, totalAlatEl, totalUpahEl, totalKeselEl } from '../core/state.js';
 import { fmt, escHtml } from '../../shared/utils.js';
+import { toast }        from '../../shared/ui/toast.js';
 
 export const tipeConfig = {
     bahan: { label: 'Bahan', badge: 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-300' },
@@ -105,6 +106,7 @@ function _bindRowInputs(tr) {
         tr.remove();
         renumberRows();
         recalcTotals();
+        toast.show('Item berhasil dihapus dari rincian', 'info', 2500);
     });
 
     // Autocomplete
@@ -170,4 +172,6 @@ export function addRow(tipe) {
     document.getElementById('ahs-empty-row')?.remove();
     renderRow({ id: Date.now(), tipe, uraian: '', merk: '', spesifikasi: '', koefisien: 1, satuan: '', hargaSatuan: 0, sumber: '' }, true);
     recalcTotals();
+    const tipeLabel = tipeConfig[tipe]?.label || tipe;
+    toast.show(`Baris ${tipeLabel} baru ditambahkan`, 'success', 2000);
 }

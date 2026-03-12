@@ -4,6 +4,7 @@
  */
 
 import { state, submitBtn } from '../core/state.js';
+import { toast } from '../../shared/ui/toast.js';
 
 export function bindSubmit() {
     if (!submitBtn) return;
@@ -35,6 +36,7 @@ export function bindSubmit() {
         // Visual feedback → redirect
         submitBtn.textContent = 'Menambahkan…';
         submitBtn.disabled    = true;
+        toast.show(`Berhasil menambahkan ${items.length} pekerjaan ke RAB`, 'success', 2500);
 
         setTimeout(function () {
             let rabUrl = '';
@@ -46,6 +48,6 @@ export function bindSubmit() {
                 } catch (_) {}
             }
             window.location.href = rabUrl || '/menu-rap?mode=new';
-        }, 600);
+        }, 1200); // Tunggu toast sebentar sebelum pindah
     });
 }

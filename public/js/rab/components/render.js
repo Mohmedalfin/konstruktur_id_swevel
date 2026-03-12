@@ -5,7 +5,9 @@
  */
 
 import { state, tbody, wrapper, searchInput, tambahKategoriBtn, totalJumlah, totalPpn, totalFinal } from '../core/state.js';
-import { fmt, escHtml } from '../../shared/utils.js';
+import { fmt, escHtml }   from '../../shared/utils.js';
+import { confirmDelete }  from '../../shared/ui/confirm.js';
+import { toast }          from '../../shared/ui/toast.js';
 
 export function renderLoading() {
     tbody.innerHTML = `
@@ -200,15 +202,23 @@ export function bindReadonlyDropdowns() {
         });
     });
     tbody.querySelectorAll('.readonly-item-delete').forEach(btn => {
-        btn.addEventListener('click', function () {
-            const row = btn.closest('tr');
+        btn.addEventListener('click', async function () {
+            // Get the item name from the row for a clearer dialog message
+            const row      = btn.closest('tr');
+            const itemName = row?.querySelector('td:nth-child(2)')?.textContent.trim() || 'item ini';
+
+            const confirmed = await confirmDelete(itemName);
+            if (!confirmed) return;
+
             if (row) row.remove();
+
             let total = 0;
             tbody.querySelectorAll('[class*="rab-harga-cell-"]').forEach(cell => {
                 const val = cell.textContent.replace(/[^\d,]/g, '').replace(',', '.');
                 total += parseFloat(val) || 0;
             });
             updateTotals(total);
+            toast.show(`Pekerjaan berhasil dihapus dari RAB`, 'info', 2500);
         });
     });
 }
