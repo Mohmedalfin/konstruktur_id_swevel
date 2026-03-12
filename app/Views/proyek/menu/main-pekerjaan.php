@@ -18,6 +18,12 @@
     <script src="<?= base_url('assets/js/preline.js') ?>"></script>
     <script src="<?= base_url('assets/js/partials/navbar.js') ?>"></script>
     <script>
+        const params = new URLSearchParams(window.location.search);
+        window.RAB_INIT = {
+            idProject: params.get('id') || sessionStorage.getItem('current_id_project') || null
+        };
+    </script>
+    <script>
         window.addEventListener('load', function () {
             window.HSStaticMethods?.autoInit();
         });

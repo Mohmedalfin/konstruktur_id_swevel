@@ -44,4 +44,11 @@ $routes->group('', function ($routes) {
 $routes->group('api', ['namespace' => 'App\Controllers\Api'], function ($routes) {
     $routes->get('pekerjaan', 'PekerjaanController::index');
     $routes->get('ahs', 'AhsController::index');
+
+    $routes->get('rap', 'RapController::index');
+    $routes->get('rap/kategori-master', 'RapController::kategoriMaster');
+    $routes->post('rap/kategori', 'RapController::tambahKategori');
+    $routes->post('rap/pekerjaan', 'RapController::tambahPekerjaan');
+    $routes->delete('rap/pekerjaan/(:num)', 'RapController::deletePekerjaan/$1');
+    $routes->post('rap/copy-ahs-estimator', 'RapController::copyAhsEstimator');
 });
