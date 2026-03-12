@@ -36,7 +36,10 @@ $pctCls = match (true) {
     <!-- ── Cover ───────────────────────────────────────────────── -->
     <div class="relative h-24 sm:h-36 shrink-0 overflow-hidden">
 
-        <img src="<?= base_url('assets/images/BackgroundLogin.png') ?>"
+        <?php
+        $fotoPath = !empty($card['foto']) ? base_url($card['foto']) : base_url('assets/images/BackgroundLogin.png');
+        ?>
+        <img src="<?= $fotoPath ?>"
              class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
              alt="Cover <?= esc($title) ?>">
 
@@ -55,6 +58,9 @@ $pctCls = match (true) {
                 <div class="hs-dropdown-menu hidden z-50 mt-2 w-32 sm:w-44 overflow-hidden rounded-xl bg-white shadow-xl ring-1 ring-black/10 end-0" role="menu">
                     <a class="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-2.5 text-xs text-slate-700 hover:bg-slate-50" href="#">
                         <i class="fa-solid fa-user-plus w-3.5 sm:w-4 text-primary shrink-0"></i> Undang Tim
+                    </a>
+                    <a class="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-2.5 text-xs text-slate-700 hover:bg-slate-50" href="<?= isset($card['id']) ? base_url('proyek/edit/' . $card['id']) : '#' ?>">
+                        <i class="fa-regular fa-pen-to-square w-3.5 sm:w-4 text-amber-500 shrink-0"></i> Edit
                     </a>
                     <a class="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-2.5 text-xs text-slate-700 hover:bg-slate-50" href="#">
                         <i class="fa-regular fa-copy w-3.5 sm:w-4 text-primary shrink-0"></i> Duplikat
