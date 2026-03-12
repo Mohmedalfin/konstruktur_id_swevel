@@ -1,0 +1,166 @@
+/**
+ * rab/index.js
+ * Entry point for the RAB feature.
+ * Structure:
+ *   core/       ← state and data layer
+ *   components/ ← DOM builders / UI components
+ *   hooks/      ← stateful behaviors
+ */
+
+import { state, wrapper, tbody, addRabBtn, cards,
+         tambahKategoriBtn, kategoriModalClose, kategoriModalCancel,
+         kategoriModalList, kategoriModalOverlay, kategoriModalConfirm } from './core/state.js';
+import { fetchRabData, dummyKategoriMaster }                             from './core/data.js';
+import { renderLoading, renderReadonly, renderEditable,
+         showTable, setEditableMode }                                    from './components/render.js';
+import { openKategoriModal, closeKategoriModal,
+         updateModalInfo, appendCategoryRow }                            from './components/categories.js';
+import { initImport }                                                    from './components/import.js';
+import { initTemplate }                                                  from './components/template.js';
+import { injectPendingItems, restorePendingCategories }                  from './hooks/pending.js';
+import { bindSearch }                                                    from './hooks/search.js';
+
+// Guard: do nothing if not a RAB page
+if (!wrapper || !tbody) {
+    // Not a RAB page — exit silently
+} else {
+
+    // ── Hooks ─────────────────────────────────────────────────────────────────
+    bindSearch();
+
+    // ── Components init ───────────────────────────────────────────────────────
+    initTemplate();
+    initImport();
+
+    // ── Kategori modal events ─────────────────────────────────────────────────
+    if (tambahKategoriBtn) tambahKategoriBtn.addEventListener('click', openKategoriModal);
+    if (kategoriModalClose)  kategoriModalClose.addEventListener('click',  closeKategoriModal);
+    if (kategoriModalCancel) kategoriModalCancel.addEventListener('click', closeKategoriModal);
+    if (kategoriModalList)   kategoriModalList.addEventListener('change',  updateModalInfo);
+    if (kategoriModalOverlay) {
+        kategoriModalOverlay.addEventListener('click', e => {
+            if (e.target === kategoriModalOverlay) closeKategoriModal();
+        });
+    }
+    if (kategoriModalConfirm) {
+        kategoriModalConfirm.addEventListener('click', function () {
+            if (!kategoriModalList) { closeKategoriModal(); return; }
+            kategoriModalList.querySelectorAll('.kategori-checkbox:not([disabled]):checked').forEach(cb => {
+                const cat = { id: cb.dataset.id, nama: cb.dataset.nama };
+                if (!state.activeCategories.some(c => c.id === cat.id)) {
+                    state.activeCategories.push(cat);
+                    appendCategoryRow(cat);
+                }
+            });
+            closeKategoriModal();
+        });
+    }
+
+    // ── RAB card click (readonly mode) ───────────────────────────────────────
+    cards.forEach(card => {
+        card.addEventListener('click', async function () {
+            const id = card.dataset.id;
+            state.mode            = 'readonly';
+            state.currentId       = id;
+            state.collapsed       = {};
+            state.activeCategories = [];
+
+            cards.forEach(c => c.classList.remove('ring-2', 'ring-primary'));
+            card.classList.add('ring-2', 'ring-primary');
+
+            setEditableMode(false);
+            showTable();
+            renderLoading();
+            renderReadonly(await fetchRabData(id));
+        });
+    });
+
+    // ── Add RAB button (editable mode) ───────────────────────────────────────
+    if (addRabBtn) {
+        addRabBtn.addEventListener('click', function () {
+            state.mode            = 'editable';
+            state.currentId       = null;
+            state.collapsed       = {};
+            state.activeCategories = [];
+            cards.forEach(c => c.classList.remove('ring-2', 'ring-primary'));
+            setEditableMode(true);
+            showTable();
+            renderEditable();
+        });
+    }
+
+    // ── DOMContentLoaded: auto-init from URL (RAB_INIT) ──────────────────────
+    document.addEventListener('DOMContentLoaded', async function () {
+        const init = window.RAB_INIT;
+        if (!init || !init.mode) return;
+
+        if (init.mode === 'readonly' && init.id) {
+            state.mode      = 'readonly';
+            state.currentId = init.id;
+            setEditableMode(false);
+            showTable();
+            renderLoading();
+            renderReadonly(await fetchRabData(init.id));
+
+        } else if (init.mode === 'new') {
+            state.mode            = 'editable';
+            state.currentId       = null;
+            state.activeCategories = [];
+            setEditableMode(true);
+            showTable();
+            renderEditable();
+            restorePendingCategories();
+        }
+    });
+
+    // ── BOQ Import event (from components/import.js) ─────────────────────────
+    window.addEventListener('rabDataImported', function (e) {
+        const importedItems = e.detail;
+        if (!importedItems || importedItems.length === 0) return;
+
+        if (state.mode === 'readonly') {
+            alert('RAB dalam mode Read-Only. Tidak bisa mengimpor data ke sini.');
+            return;
+        }
+
+        const newItems = importedItems.map(item => ({
+            id:               item.id,
+            nama:             item.uraian,
+            volume:           item.volume,
+            satuan:           item.satuan,
+            hargaBahan:       item.harga_bahan,
+            hargaAlat:        item.harga_alat,
+            hargaUpah:        item.harga_upah,
+            hargaKeseluruhan: (item.volume || 1) * (item.harga_bahan + item.harga_alat + item.harga_upah),
+            kategori:         item.kategori || 'persiapan'
+        }));
+
+        const grouped = {};
+        newItems.forEach(item => {
+            if (!grouped[item.kategori]) grouped[item.kategori] = [];
+            grouped[item.kategori].push(item);
+        });
+
+        const nameMap = {};
+        dummyKategoriMaster.forEach(k => { nameMap[k.id] = k.nama; });
+
+        try {
+            let parsed = JSON.parse(sessionStorage.getItem('rab_pending_items') || '[]');
+            Object.keys(grouped).forEach(catId => {
+                const catName = nameMap[catId] || catId;
+                const found   = parsed.find(g => g.catId === catId);
+                if (found) { found.items.push(...grouped[catId]); }
+                else       { parsed.push({ catId, catName, items: grouped[catId] }); }
+                if (!state.activeCategories.some(c => c.id === catId)) {
+                    const cat = { id: catId, nama: catName };
+                    state.activeCategories.push(cat);
+                    appendCategoryRow(cat);
+                }
+            });
+            sessionStorage.setItem('rab_pending_items', JSON.stringify(parsed));
+        } catch (_) {}
+
+        injectPendingItems();
+    });
+
+} // end guard

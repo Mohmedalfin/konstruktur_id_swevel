@@ -1,0 +1,68 @@
+/**
+ * tambah-ahs/components/custom-row.js
+ * "Tambah Sendiri" — inline editable row to add a custom (non-database) item.
+ */
+
+import { state, tbody, customBtn } from '../core/state.js';
+import { updateSubmitBar } from './render.js';
+
+export function bindCustomRow() {
+    if (!customBtn) return;
+
+    customBtn.addEventListener('click', function () {
+        // Only allow one custom row at a time
+        const existing = tbody.querySelector('.tambah-ahs-custom-row');
+        if (existing) {
+            existing.querySelector('input[data-field="nama"]').focus();
+            return;
+        }
+
+        const customRow = document.createElement('tr');
+        customRow.className = 'tambah-ahs-custom-row bg-primary/5 border-b-2 border-primary/30';
+        customRow.innerHTML = `
+            <td class="px-3 md:px-5 py-2.5 text-center text-table-subtle">—</td>
+            <td class="px-3 md:px-5 py-2.5">
+                <input type="text" data-field="nama" placeholder="Nama pekerjaan…"
+                    class="w-full px-2 py-1.5 text-xs border border-table-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary bg-white text-table-strong"/>
+            </td>
+            <td class="px-3 md:px-5 py-2.5">
+                <input type="text" data-field="satuan" placeholder="m²"
+                    class="w-full px-2 py-1.5 text-xs border border-table-border rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary bg-white text-table-medium"/>
+            </td>
+            <td class="px-3 md:px-5 py-2.5">
+                <input type="text" data-field="sumber" placeholder="Sumber…" value="Manual"
+                    class="w-full px-2 py-1.5 text-xs border border-table-border rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary bg-white text-table-medium"/>
+            </td>
+            <td class="px-3 md:px-5 py-2.5 text-center">
+                <div class="flex items-center justify-center gap-1.5">
+                    <button class="custom-add-confirm inline-flex items-center justify-center w-7 h-7 rounded-lg bg-primary hover:bg-primary/80 text-white transition-colors focus:outline-none" title="Tambahkan">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                    </button>
+                    <button class="custom-add-cancel inline-flex items-center justify-center w-7 h-7 rounded-lg bg-white hover:bg-red-50 border border-table-border hover:border-red-300 text-table-subtle hover:text-red-500 transition-colors focus:outline-none" title="Batal">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            </td>`;
+
+        tbody.insertBefore(customRow, tbody.firstChild);
+        customRow.querySelector('input[data-field="nama"]').focus();
+
+        customRow.querySelector('.custom-add-cancel').addEventListener('click', () => customRow.remove());
+
+        customRow.querySelector('.custom-add-confirm').addEventListener('click', function () {
+            const nama   = customRow.querySelector('[data-field="nama"]').value.trim();
+            const satuan = customRow.querySelector('[data-field="satuan"]').value.trim() || 'm²';
+            const sumber = customRow.querySelector('[data-field="sumber"]').value.trim() || 'Manual';
+            if (!nama) { customRow.querySelector('[data-field="nama"]').focus(); return; }
+
+            const tempId = 'custom-' + Date.now();
+            state.selected[tempId] = { id: tempId, nama, satuan, harga: 0, sumber };
+            customRow.remove();
+            updateSubmitBar();
+        });
+    });
+}
