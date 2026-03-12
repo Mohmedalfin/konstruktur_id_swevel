@@ -4,10 +4,12 @@
  * RAB table after returning from the Tambah AHS page, and restoring category rows.
  */
 
-import { state, tbody } from '../core/state.js';
-import { fmt, escHtml } from '../../shared/utils.js';
-import { updateTotals } from '../components/render.js';
+import { state, tbody }    from '../core/state.js';
+import { fmt, escHtml }    from '../../shared/utils.js';
+import { updateTotals }    from '../components/render.js';
 import { appendCategoryRow } from '../components/categories.js';
+import { confirmDelete }   from '../../shared/ui/confirm.js';
+import { toast }           from '../../shared/ui/toast.js';
 
 export function restorePendingCategories() {
     let groups = [];
@@ -111,9 +113,14 @@ export function injectPendingItems() {
             }
             lastInserted = itemRow;
 
-            itemRow.querySelector('.del-pending-item').addEventListener('click', () => {
+            itemRow.querySelector('.del-pending-item').addEventListener('click', async () => {
+                const itemName = item.nama || 'pekerjaan ini';
+                const confirmed = await confirmDelete(itemName);
+                if (!confirmed) return;
+
                 itemRow.remove();
                 recomputePendingTotals();
+                toast.show(`"${itemName}" berhasil dihapus dari RAB`, 'info', 2500);
             });
             itemRow.querySelector('.pending-item-edit').addEventListener('click', () => {
                 try {

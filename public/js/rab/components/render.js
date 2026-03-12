@@ -8,7 +8,6 @@ import { state, tbody, wrapper, searchInput, tambahKategoriBtn, totalJumlah, tot
 import { fmt, escHtml } from '../../shared/utils.js';
 import { fetchRabData } from '../core/data.js';
 
-
 export function renderLoading() {
     tbody.innerHTML = `
         <tr>
@@ -117,8 +116,13 @@ export function renderReadonly(data) {
                                     </button>
                                     <div class="border-t border-table-border my-1"></div>
                                     <button type="button"
-                                    class="readonly-item-delete flex w-full items-center gap-2.5 px-4 py-2.5 text-xs text-red-500 hover:bg-red-50 transition-colors"
-                                    data-id-rap-detail="${item.id_rap_detail}">
+                                        class="readonly-item-delete flex w-full items-center gap-2.5 px-4 py-2.5 text-xs text-red-500 hover:bg-red-50 transition-colors"
+                                        data-id-rap-detail="${item.id_rap_detail}">
+                                        <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        </svg>
+                                        Hapus
+                                    </button>
                                 </div>
                             </div>
                         </td>
@@ -185,8 +189,12 @@ export function bindCategoryToggle() {
             if (chevron) chevron.classList.toggle('rotate-180', !isHidden);
             state.collapsed[catId] = !isHidden;
         });
+
         row.addEventListener('keydown', e => {
-            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); row.click(); }
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                row.click();
+            }
         });
     });
 }

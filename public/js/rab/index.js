@@ -120,6 +120,12 @@ if (!wrapper || !tbody) {
         });
     }
 
+    if (tambahKategoriBtn) {
+        tambahKategoriBtn.addEventListener('click', function () {
+            console.log('tombol kategori diklik');
+            openKategoriModal();
+        });
+    }
     // ── RAB card click (readonly mode) ───────────────────────────────────────
     cards.forEach(card => {
         card.addEventListener('click', async function () {

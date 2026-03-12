@@ -1,4 +1,5 @@
 import { state, submitBtn } from '../core/state.js';
+import { toast } from '../../shared/ui/toast.js';
 
 export function bindSubmit() {
     if (!submitBtn) return;
