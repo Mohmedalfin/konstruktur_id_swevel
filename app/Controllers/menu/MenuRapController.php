@@ -14,11 +14,11 @@ class MenuRapController extends BaseController
 
     public function rincianAHS()
     {
-        return view('proyek/menu/rincian-ahs');
+        return view('proyek/menu/main-ahs');
     }
 
     public function tambahAHS()
     {
-        return view('proyek/menu/tambah-ahs');
+        return view('proyek/menu/main-pekerjaan');
     }
 }
