@@ -73,11 +73,11 @@ $wrapperClass = $wrapperClass ?? 'w-full';
         <table class="w-full text-left border-collapse min-w-[700px]" id="tambah-ahs-table">
 
             <colgroup>
-                <col style="width: 3.25rem">   <!-- No -->
-                <col>                           <!-- Nama Pekerjaan -->
+                <col style="width: 3.25rem">    <!-- No -->
+                <col style="width: 45%">        <!-- Nama Pekerjaan — dibatasi supaya tidak ambil semua ruang -->
                 <col style="width: 6rem">       <!-- Satuan -->
-                <col style="width: 10rem">      <!-- Sumber -->
-                <col style="width: 5.5rem">     <!-- Aksi -->
+                <col style="width: 14rem">      <!-- Sumber -->
+                <col style="width: 5.5rem">     <!-- Pilih -->
             </colgroup>
 
             <!-- ── Head ─────────────────────────────────────────────── -->

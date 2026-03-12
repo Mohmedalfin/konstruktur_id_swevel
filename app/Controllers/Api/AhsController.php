@@ -12,7 +12,7 @@ class AhsController extends BaseController
         $db = \Config\Database::connect();
         
         $search = $this->request->getGet('q');
-        $tipe = $this->request->getGet('tipe'); // bahan, alat, upah atau all
+        $tipe = $this->request->getGet('tipe');
         
         $sql = "
             SELECT * FROM (
@@ -20,11 +20,11 @@ class AhsController extends BaseController
                     id_bahan AS id, 
                     nama_bahan AS uraian, 
                     satuan, 
-                    sumber, 
+                    keterangan AS sumber, 
                     spesifikasi, 
                     merk, 
                     'bahan' AS tipe,
-                    0 AS hargaSatuan
+                    harga_dasar AS hargaSatuan
                 FROM bahan_utama
             
                 UNION ALL
@@ -33,11 +33,11 @@ class AhsController extends BaseController
                     id_upah AS id, 
                     nama_upah AS uraian, 
                     satuan, 
-                    sumber, 
+                    keterangan AS sumber, 
                     spesifikasi, 
                     merk, 
                     'upah' AS tipe,
-                    0 AS hargaSatuan
+                    harga_dasar AS hargaSatuan
                 FROM upah_utama
             
                 UNION ALL
@@ -46,11 +46,11 @@ class AhsController extends BaseController
                     id_alat AS id, 
                     nama_alat AS uraian, 
                     satuan, 
-                    sumber, 
+                    keterangan AS sumber, 
                     spesifikasi, 
                     merk, 
                     'alat' AS tipe,
-                    0 AS hargaSatuan
+                    harga_dasar AS hargaSatuan
                 FROM alat_utama
             ) AS master_bua
             WHERE 1=1
@@ -73,20 +73,18 @@ class AhsController extends BaseController
         
         $sql .= " ORDER BY master_bua.uraian ASC, master_bua.id ASC";
         
-        // --- Pagination Logic ---
         $page = (int) $this->request->getGet('page');
         if ($page < 1) $page = 1;
         
-        $limit = 20; // 20 item per loading
+        $limit = 20; 
         $offset = ($page - 1) * $limit;
         
         $sql .= " LIMIT {$limit} OFFSET {$offset}";
-        // ------------------------
         
         $query = $db->query($sql, $params);
         $data = $query->getResultArray();
         
-        // Convert hargaSatuan to float just to be safe
+
         foreach ($data as &$row) {
             $row['hargaSatuan'] = (float) $row['hargaSatuan'];
         }

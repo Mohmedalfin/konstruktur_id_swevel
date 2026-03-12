@@ -184,31 +184,31 @@ $wrapperClass = $wrapperClass ?? 'w-full';
             </div>
         </div>
 
-        <!-- Table List AHS (scrollable) -->
+
         <div class="flex-1 overflow-auto">
             <table class="w-full text-left border-collapse table-fixed min-w-[1200px]" id="ahs-modal-table">
                 <colgroup>
-                    <col style="width: 3rem">     <!-- Checkbox -->
-                    <col style="width: 5.5rem">   <!-- Tipe -->
-                    <col style="min-width: 16rem"> <!-- Uraian (flexible) -->
+                    <col style="width: 3.25rem">  <!-- Checkbox -->
+                    <col style="width: 6rem">     <!-- ID Item -->
+                    <col style="width: 18rem">    <!-- Uraian -->
                     <col style="width: 8rem">     <!-- Merk -->
                     <col style="width: 10rem">    <!-- Spesifikasi -->
                     <col style="width: 5.5rem">   <!-- Satuan -->
                     <col style="width: 8rem">     <!-- Harga Satuan -->
-                    <col style="width: 8rem">     <!-- Sumber -->
+                    <col style="width: 14rem">    <!-- Sumber -->
                 </colgroup>
-                <thead class="sticky top-0 bg-slate-100 z-10">
+                <thead class="sticky top-0 bg-slate-100/90 backdrop-blur-sm z-10 shadow-sm">
                     <tr>
-                        <th class="px-4 py-2.5 text-center text-[10px] font-semibold uppercase tracking-wider text-table-subtle w-10">
+                        <th class="px-4 py-3 text-center text-[10px] font-semibold uppercase tracking-wider text-table-subtle">
                             <input id="ahs-modal-check-all" type="checkbox" class="w-3.5 h-3.5 rounded accent-primary cursor-pointer"/>
                         </th>
-                        <th class="px-4 py-2.5 text-center text-[10px] font-semibold uppercase tracking-wider text-table-subtle w-20">ID Item</th>
-                        <th class="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-table-subtle">Uraian</th>
-                        <th class="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-table-subtle">Merk</th>
-                        <th class="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-table-subtle">Spesifikasi</th>
-                        <th class="px-4 py-2.5 text-center text-[10px] font-semibold uppercase tracking-wider text-table-subtle w-16">Satuan</th>
-                        <th class="px-4 py-2.5 text-right text-[10px] font-semibold uppercase tracking-wider text-table-subtle w-28">Harga Satuan</th>
-                        <th class="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-table-subtle">Sumber</th>
+                        <th class="px-4 py-3 text-center text-[10px] font-semibold uppercase tracking-wider text-table-subtle">ID Item</th>
+                        <th class="px-4 py-3 text-[10px] font-semibold uppercase tracking-wider text-table-subtle">Uraian</th>
+                        <th class="px-4 py-3 text-[10px] font-semibold uppercase tracking-wider text-table-subtle">Merk</th>
+                        <th class="px-4 py-3 text-[10px] font-semibold uppercase tracking-wider text-table-subtle">Spesifikasi</th>
+                        <th class="px-4 py-3 text-center text-[10px] font-semibold uppercase tracking-wider text-table-subtle">Satuan</th>
+                        <th class="px-4 py-3 text-right text-[10px] font-semibold uppercase tracking-wider text-table-subtle">Harga Satuan</th>
+                        <th class="px-4 py-3 text-[10px] font-semibold uppercase tracking-wider text-table-subtle">Sumber</th>
                     </tr>
                 </thead>
                 <tbody id="ahs-modal-tbody" class="text-[11px] md:text-[13px] text-table-body">

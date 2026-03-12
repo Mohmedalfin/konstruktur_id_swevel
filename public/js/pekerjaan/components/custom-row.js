@@ -18,20 +18,20 @@ export function bindCustomRow() {
         }
 
         const customRow = document.createElement('tr');
-        customRow.className = 'tambah-ahs-custom-row bg-primary/5 border-b-2 border-primary/30';
+        customRow.className = 'tambah-ahs-custom-row bg-primary/5 border-b-1 border-primary/30';
         customRow.innerHTML = `
             <td class="px-3 md:px-5 py-2.5 text-center text-table-subtle">—</td>
             <td class="px-3 md:px-5 py-2.5">
                 <input type="text" data-field="nama" placeholder="Nama pekerjaan…"
-                    class="w-full px-2 py-1.5 text-xs border border-table-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary bg-white text-table-strong"/>
+                    class="w-full px-2 py-1.5 text-xs border border-table-border rounded-lg focus:outline-none focus:ring-0.5 focus:ring-primary focus:border-primary bg-white text-table-strong"/>
             </td>
             <td class="px-3 md:px-5 py-2.5">
                 <input type="text" data-field="satuan" placeholder="m²"
-                    class="w-full px-2 py-1.5 text-xs border border-table-border rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary bg-white text-table-medium"/>
+                    class="w-full px-2 py-1.5 text-xs border border-table-border rounded-lg text-center focus:outline-none focus:ring-0.5 focus:ring-primary focus:border-primary bg-white text-table-medium"/>
             </td>
             <td class="px-3 md:px-5 py-2.5">
                 <input type="text" data-field="sumber" placeholder="Sumber…" value="Manual"
-                    class="w-full px-2 py-1.5 text-xs border border-table-border rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary bg-white text-table-medium"/>
+                    class="w-full px-2 py-1.5 text-xs border border-table-border rounded-lg text-center focus:outline-none focus:ring-0.5 focus:ring-primary focus:border-primary bg-white text-table-medium"/>
             </td>
             <td class="px-3 md:px-5 py-2.5 text-center">
                 <div class="flex items-center justify-center gap-1.5">
