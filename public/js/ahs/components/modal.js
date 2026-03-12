@@ -7,6 +7,7 @@ import { state, modalOverlay, modalClose, modalCancel, modalConfirm,
          modalSearch, modalTbody, modalCheckAll, modalCountEl, filterBtns } from '../core/state.js';
 import { fetchAhsDatabase } from '../core/data.js';
 import { fmt, escHtml } from '../../shared/utils.js';
+import { toast } from '../../shared/ui/toast.js';
 import { tipeConfig, renderRow, recalcTotals } from './render.js';
 
 export function openModal() {
@@ -107,6 +108,7 @@ export function syncFilterButtons() {
 
 export function confirmModalSelection() {
     document.getElementById('ahs-empty-row')?.remove();
+    const count = state.modalSelected.size;
     Array.from(state.modalSelected.values()).forEach(item => {
         renderRow({
             id: Date.now() + Math.random(),
@@ -117,6 +119,9 @@ export function confirmModalSelection() {
     });
     recalcTotals();
     closeModal();
+    if (count > 0) {
+        toast.show(`Berhasil menambahkan ${count} item dari database`, 'success', 3000);
+    }
 }
 
 export function bindModalInfiniteScroll() {

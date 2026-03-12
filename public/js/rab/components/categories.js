@@ -4,7 +4,9 @@
  */
 
 import { state, tbody, kategoriModalOverlay, kategoriModalList, kategoriModalInfo } from '../core/state.js';
-import { fetchKategoriMaster } from '../core/data.js';
+import { fetchKategoriMaster }     from '../core/data.js';
+import { confirmDeleteCategory }   from '../../shared/ui/confirm.js';
+import { toast }                   from '../../shared/ui/toast.js';
 
 export function openKategoriModal() {
     if (!kategoriModalOverlay || !kategoriModalList) return;
@@ -121,15 +123,31 @@ function _bindAddSubItemRow(catTr) {
     });
 
     catTr.querySelectorAll('.del-cat-btn').forEach(btn => {
-        btn.addEventListener('click', function () {
+        btn.addEventListener('click', async function (e) {
+            e.stopPropagation();
+
+            // Get the category name from the row for the dialog
+            const catName = catTr.querySelector('td:nth-child(2) span:last-child')?.textContent.trim()
+                         || btn.dataset.cat
+                         || 'kategori ini';
+
+            const confirmed = await confirmDeleteCategory(catName);
+            if (!confirmed) return;
+
             const catId = btn.dataset.cat;
+
+            // Remove all sub-items for this category
             tbody.querySelectorAll('.subrow-item-' + catId).forEach(r => r.remove());
+
+            // Show placeholder if none exists
             if (!tbody.querySelector('.subrow-placeholder-' + catId)) {
                 const ph = document.createElement('tr');
                 ph.className = `subrow-placeholder-${catId} bg-table-row border-b border-table-border`;
                 ph.innerHTML = `<td colspan="12" class="px-5 py-2.5 text-center text-table-subtle text-xs italic">Belum ada item — klik Tambah untuk menambahkan.</td>`;
                 catTr.after(ph);
             }
+
+            toast.show(`Semua item di "${catName}" berhasil dihapus`, 'info', 2500);
         });
     });
 }
