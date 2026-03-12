@@ -33,11 +33,10 @@ if (! in_array($rabMode, ['readonly', 'new'], true)) {
         };
     </script>
 
-    <script src="<?= base_url('ajax/ajax_rab.js') ?>"></script>
     <script src="<?= base_url('assets/js/preline.js') ?>"></script>
     <script src="<?= base_url('node_modules/preline/dist/preline.js') ?>"></script>
     <script src="<?= base_url('assets/js/partials/navbar.js') ?>"></script>
     <script src="<?= base_url('assets/js/vendor/exceljs.min.js') ?>"></script>
-    <script src="<?= base_url('ajax/ajax_import_rab.js') ?>"></script>
+    <script type="module" src="<?= base_url('js/rab/index.js') ?>"></script>
 </body>
 </html>

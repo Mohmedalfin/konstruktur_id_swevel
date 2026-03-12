@@ -7,14 +7,21 @@
  */
 
 (function () {
+
     'use strict';
 
+    /* ============================================================
+       STATE
+    ============================================================ */
     const state = {
         mode: null,
         currentId: null,
-        collapsed: {}
+        collapsed: {}   // tracks which category IDs are collapsed
     };
 
+    /* ============================================================
+       DOM REFERENCES
+    ============================================================ */
     const wrapper              = document.getElementById('rab-table-wrapper');
     const tbody                = document.getElementById('rab-tbody');
     const addRowBtn            = document.getElementById('rab-add-row-btn');
@@ -26,11 +33,13 @@
     const boqImportBtn         = document.getElementById('boq-import-btn');
     const boqFileInput         = document.getElementById('boq-file-input');
     const boqDownloadTplBtn    = document.getElementById('boq-download-template-btn');
-    const searchInput          = document.getElementById('rab-search');
-    const btnTambahKategoriHdr = document.getElementById('btn-tambah-kategori-header');
 
     if (!wrapper || !tbody) return;
 
+    /* ============================================================
+       DUMMY DATA  (replace with real CI4 AJAX endpoints later)
+       Structure: { categories: [ { id, name, items: [...] } ] }
+    ============================================================ */
     const dummyDatabase = {
         1: {
             categories: [
@@ -82,6 +91,7 @@
         }
     };
 
+    // Default category list used in editable (Add RAB) mode — no sub-items
     const defaultCategories = [
         { id: 'persiapan',  name: 'Pekerjaan Persiapan'  },
         { id: 'struktur',   name: 'Pekerjaan Struktur'    },
@@ -90,14 +100,25 @@
         { id: 'finishing',  name: 'Pekerjaan Finishing'   }
     ];
 
+    /**
+     * Simulate AJAX fetch — replace with:
+     *   const res = await fetch(`/api/rab/${id}`);
+     *   return await res.json();
+     */
     function fetchRabData(id) {
         return new Promise(resolve => {
             setTimeout(() => resolve(dummyDatabase[id] || { categories: [] }), 350);
         });
     }
 
+    /* ============================================================
+       FORMAT HELPERS
+    ============================================================ */
     const fmt = n => 'Rp ' + Number(n).toLocaleString('id-ID', { minimumFractionDigits: 2 });
 
+    /* ============================================================
+       RENDER — LOADING
+    ============================================================ */
     function renderLoading() {
         tbody.innerHTML = `
             <tr>
@@ -112,16 +133,17 @@
         updateTotals(0);
     }
 
+    /* ============================================================
+       RENDER — READONLY (category headers + collapsible sub-rows)
+    ============================================================ */
     function renderReadonly(data) {
         const categories = data.categories || [];
         const grandTotal = categories.reduce(
             (sum, cat) => sum + cat.items.reduce((s, i) => s + Number(i.hargaKeseluruhan), 0), 0
         );
 
-        if (btnTambahKategoriHdr) btnTambahKategoriHdr.classList.add('hidden');
-
         if (categories.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="12" class="text-center py-10 text-table-subtle text-xs">Tidak ada data pekerjaan.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="9" class="text-center py-10 text-table-subtle text-xs">Tidak ada data pekerjaan.</td></tr>`;
             updateTotals(0);
             return;
         }
@@ -134,9 +156,11 @@
             const subClass   = isOpen ? '' : 'hidden';
             const chevronRot = isOpen ? '' : 'rotate-180';
 
+            // ── Category header row ──
             html += `
                 <tr class="rab-category bg-table-category text-white hover:bg-table-category-hover cursor-pointer select-none transition-colors duration-200"
                     data-cat="${cat.id}" role="button" tabindex="0">
+                    <!-- Col 1: Minus (open) / Plus (closed) icon — fixed-width, never shifts -->
                     <td class="w-12 md:w-14 px-3 md:px-5 py-2.5 md:py-3 text-center">
                         <div class="relative flex items-center justify-center w-5 h-5 mx-auto">
                             <!-- Minus: visible when open -->
@@ -153,13 +177,16 @@
                             </svg>
                         </div>
                     </td>
+                    <!-- Col 2-8: Category name -->
                     <td colspan="9" class="px-3 md:px-5 py-2.5 md:py-3 font-semibold text-[10px] md:text-xs uppercase tracking-widest">
                         <span class="flex items-center gap-2">
                             <span class="w-1 h-3.5 md:h-4 bg-secondary rounded-full"></span>
                             ${cat.name}
                         </span>
                     </td>
+                    <!-- Col 8: Harga Keseluruhan sub-total -->
                     <td class="px-3 md:px-5 py-2.5 md:py-3 text-right text-[10px] md:text-xs tabular-nums opacity-80">${fmt(catTotal)}</td>
+                    <!-- Col 9: Chevron (right end) -->
                     <td class="w-20 md:w-24 px-3 md:px-5 py-2.5 md:py-3 text-center">
                         <svg class="cat-chevron w-3.5 h-3.5 md:w-4 md:h-4 mx-auto opacity-60 transition-transform duration-300 ${chevronRot}"
                              fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -168,6 +195,7 @@
                     </td>
                 </tr>`;
 
+            // ── Sub-rows ──
             if (cat.items.length === 0) {
                 html += `
                     <tr class="subrow-${cat.id} ${subClass} bg-table-row border-b border-table-border">
@@ -229,30 +257,15 @@
         updateTotals(grandTotal);
         bindCategoryToggle();
         bindReadonlyDropdowns();
-        try { window.HSStaticMethods?.autoInit(['dropdown', 'overlay']); } catch (_) {}
+        try { window.HSStaticMethods?.autoInit(['dropdown']); } catch (_) {}
     }
 
+    /* ============================================================
+       RENDER — EDITABLE (category headers only + Add Item per cat)
+    ============================================================ */
     function renderEditable(categories) {
-        if (btnTambahKategoriHdr) {
-            btnTambahKategoriHdr.classList.remove('hidden');
-        }
-
         if (categories.length === 0) {
-            tbody.innerHTML = `
-                <tr id="empty-category-row">
-                    <td colspan="12" class="text-center py-10 bg-slate-50 border-b border-table-border">
-                        <div class="flex flex-col items-center justify-center">
-                            <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-3">
-                                <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
-                                </svg>
-                            </div>
-                            <h3 class="text-sm font-semibold text-table-strong mb-1">Belum Ada Kategori Pekerjaan</h3>
-                            <p class="text-xs text-table-subtle mb-4 max-w-sm">Silakan mulai dengan menambahkan kategori pekerjaan klik tombol "Tambah Kategori" di pojok kanan atas layar.</p>
-                        </div>
-                    </td>
-                </tr>
-            `;
+            tbody.innerHTML = `<tr><td colspan="12" class="text-center py-10 text-table-subtle text-xs">Tidak ada kategori.</td></tr>`;
             updateTotals(0);
             return;
         }
@@ -260,8 +273,10 @@
         let html = '';
 
         categories.forEach(cat => {
+            // ── Category header row (editable) ──
             html += `
-                <tr class="rab-category bg-table-category text-white" data-cat="${cat.id}">
+                <tr class="rab-category bg-table-category text-white">
+                    <!-- Col 1: Plus (open) / Minus (close) toggle — left column -->
                     <td class="w-12 md:w-14 px-3 md:px-5 py-2.5 md:py-3 text-center">
                         <button
                             class="edit-cat-toggle-btn relative flex items-center justify-center w-5 h-5 mx-auto focus:outline-none"
@@ -286,6 +301,7 @@
                             ${cat.name}
                         </span>
                     </td>
+                    <!-- Col 9: Tambah AHS + Hapus buttons (right) -->
                     <td class="px-2 md:px-3 py-2.5 md:py-3 text-center">
                         <div class="inline-flex items-center gap-1">
                             <button
@@ -308,7 +324,7 @@
                 </tr>
                 <tr class="subrow-placeholder-${cat.id} bg-table-row border-b border-table-border">
                     <td colspan="12" class="px-5 py-2.5 text-center text-table-subtle text-xs italic">
-                        Belum ada item — klik Tambah AHS untuk menambahkan.
+                        Belum ada item — klik Tambah untuk menambahkan.
                     </td>
                 </tr>`;
         });
@@ -317,9 +333,13 @@
         updateTotals(0);
         bindAddSubItem();
         bindEditableCategoryToggle();
+        // Inject items yang menunggu (dari sessionStorage setelah redirect tambah-ahs)
         injectPendingItems();
     }
 
+    /* ============================================================
+       FOOTER TOTALS
+    ============================================================ */
     function updateTotals(total) {
         const ppn   = total * 0.11;
         const grand = total + ppn;
@@ -328,15 +348,17 @@
         if (totalFinal)  totalFinal.textContent  = fmt(grand);
     }
 
+    /* ============================================================
+       SHOW TABLE
+    ============================================================ */
     function showTable() {
         wrapper.classList.remove('hidden');
-        if (searchInput) {
-            searchInput.value = '';
-            searchInput.dispatchEvent(new Event('input'));
-        }
         setTimeout(() => wrapper.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
     }
 
+    /* ============================================================
+       ACCORDION TOGGLE (readonly)
+    ============================================================ */
     function bindCategoryToggle() {
         tbody.querySelectorAll('.rab-category[data-cat]').forEach(row => {
             row.addEventListener('click', function () {
@@ -347,11 +369,14 @@
                 const chevron = row.querySelector('.cat-chevron');
                 const isHidden = subRows.length && subRows[0].classList.contains('hidden');
 
+                // Show/hide sub-rows
                 subRows.forEach(r => r.classList.toggle('hidden', !isHidden));
 
+                // Swap plus ↔ minus
                 if (minus)   minus.classList.toggle('hidden', !isHidden);
                 if (plus)    plus.classList.toggle('hidden',   isHidden);
 
+                // Rotate chevron: points up when open, down when closed
                 if (chevron) chevron.classList.toggle('rotate-180', !isHidden);
 
                 state.collapsed[catId] = !isHidden;
@@ -363,7 +388,11 @@
         });
     }
 
+    /* ============================================================
+       DROPDOWN ACTIONS — readonly sub-rows
+    ============================================================ */
     function bindReadonlyDropdowns() {
+        // "Input Rincian AHS" — navigate
         tbody.querySelectorAll('.readonly-item-detail').forEach(function (btn) {
             btn.addEventListener('click', function () {
                 const url = btn.dataset.url || '/menu-rap/rincian-ahs';
@@ -371,11 +400,12 @@
             });
         });
 
+        // "Hapus" — remove row & recompute totals
         tbody.querySelectorAll('.readonly-item-delete').forEach(function (btn) {
             btn.addEventListener('click', function () {
                 const row = btn.closest('tr');
                 if (row) row.remove();
-                
+                // Recompute grand total dari harga-cell yang tersisa
                 let total = 0;
                 tbody.querySelectorAll('[class*="rab-harga-cell-"]').forEach(function (cell) {
                     const val = cell.textContent.replace(/[^\d,]/g, '').replace(',', '.');
@@ -386,13 +416,16 @@
         });
     }
 
+    /* ============================================================
+       ADD SUBITEM BUTTON (editable) — navigates to Tambah AHS
+    ============================================================ */
     function bindAddSubItem() {
         tbody.querySelectorAll('.add-subitem-btn').forEach(btn => {
             btn.addEventListener('click', function (e) {
                 e.stopPropagation();
                 const catId   = btn.dataset.cat;
                 const catName = btn.dataset.catname || '';
-                
+                // Simpan kategori asal & URL kembali agar tambah-ahs.js dapat info ini
                 try {
                     sessionStorage.setItem('rab_tambah_ahs_cat',     catId);
                     sessionStorage.setItem('rab_tambah_ahs_catname', catName);
@@ -405,13 +438,16 @@
             });
         });
 
+        // ── Trash (delete all items in category) ──
         tbody.querySelectorAll('.del-cat-btn').forEach(btn => {
             btn.addEventListener('click', function () {
                 const catId     = btn.dataset.cat;
                 const catHeader = btn.closest('tr');
 
+                // Remove all added sub-item rows for this category
                 tbody.querySelectorAll(`.subrow-item-${catId}`).forEach(r => r.remove());
 
+                // Re-insert placeholder if it was removed
                 if (!tbody.querySelector(`.subrow-placeholder-${catId}`)) {
                     const placeholder = document.createElement('tr');
                     placeholder.className = `subrow-placeholder-${catId} bg-table-row border-b border-table-border`;
@@ -424,6 +460,11 @@
         });
     }
 
+    /* ============================================================
+       INJECT PENDING ITEMS (dari sessionStorage setelah redirect)
+       Membaca rab_pending_items dan menyisipkan sub-rows ke tabel
+       editable dengan style mirip sub-rows pada mode readonly.
+    ============================================================ */
     function injectPendingItems() {
         let groups = [];
         try {
@@ -439,14 +480,18 @@
             const items = group.items || [];
             if (items.length === 0) return;
 
+            // Hapus placeholder jika ada
             const placeholder = tbody.querySelector('.subrow-placeholder-' + catId);
             if (placeholder) placeholder.remove();
 
+            // Cari category header row sebagai anchor
             const catHeader = tbody.querySelector('.rab-category [data-cat="' + catId + '"]');
             const anchorRow = catHeader ? catHeader.closest('tr') : null;
 
+            // Hapus item rows lama untuk catId ini (hasil inject sebelumnya)
             tbody.querySelectorAll('.subrow-item-' + catId).forEach(function (r) { r.remove(); });
 
+            // Hitung mulai dari berapa item sudah ada di kategori ini
             let rowNum      = 0;
             let lastInserted = anchorRow; 
 
@@ -500,18 +545,21 @@
                         </div>
                     </td>`;
 
+                // Sisipkan setelah lastInserted agar urutan tetap benar
                 if (lastInserted && lastInserted.parentNode) {
                     lastInserted.parentNode.insertBefore(itemRow, lastInserted.nextSibling);
                 } else {
                     tbody.appendChild(itemRow);
                 }
-                lastInserted = itemRow;
+                lastInserted = itemRow; // geser anchor ke row yang baru ditambahkan
 
+                // Bind hapus item
                 itemRow.querySelector('.del-pending-item').addEventListener('click', function () {
                     itemRow.remove();
                     recomputePendingTotals();
                 });
 
+                // Bind Input Rincian AHS — navigate ke rincian-ahs dengan context nama item
                 itemRow.querySelector('.pending-item-edit').addEventListener('click', function () {
                     try {
                         sessionStorage.setItem('ahs_item_label', item.nama || '');
@@ -527,16 +575,21 @@
             });
         });
 
+        // Perbarui footer totals
         recomputePendingTotals();
 
+        // Bersihkan sessionStorage setelah berhasil di-inject
         try { sessionStorage.removeItem('rab_pending_items'); } catch (_) {}
 
-        try { window.HSStaticMethods?.autoInit(['dropdown', 'overlay']); } catch (_) {}
+        // Re-init Preline agar hs-dropdown pada rows baru berfungsi
+        try { window.HSStaticMethods?.autoInit(['dropdown']); } catch (_) {}
 
+        // Sembunyikan kategori yang tidak memiliki item (masih ada placeholder)
         tbody.querySelectorAll('.rab-category').forEach(function(catHeaderRow) {
             const catBtn = catHeaderRow.querySelector('.edit-cat-toggle-btn');
             if (catBtn) {
                 const checkCatId = catBtn.dataset.cat;
+                // Jika kategori ini tidak punya item sama sekali
                 if (tbody.querySelectorAll('.subrow-item-' + checkCatId).length === 0) {
                     catHeaderRow.classList.add('hidden');
                     const placeholder = tbody.querySelector('.subrow-placeholder-' + checkCatId);
@@ -544,12 +597,14 @@
                 } else {
                     catHeaderRow.classList.remove('hidden');
                     const placeholder = tbody.querySelector('.subrow-placeholder-' + checkCatId);
+                    // jika ada placeholder (seharusnya sudah dihapus saat inject item, tapi just in case)
                     if (placeholder) placeholder.classList.add('hidden'); 
                 }
             }
         });
     }
 
+    /* ── Hitung ulang total dari semua hargaKeseluruhan cell (editable mode) ── */
     function recomputePendingTotals() {
         let total = 0;
         tbody.querySelectorAll('[class*="rab-harga-cell-"]').forEach(function (cell) {
@@ -559,6 +614,7 @@
         updateTotals(total);
     }
 
+    /* ── Escape HTML helper ── */
     function escHtml(str) {
         return String(str)
             .replace(/&/g, '&amp;')
@@ -568,6 +624,10 @@
             .replace(/'/g, '&#39;');
     }
 
+
+    /* ============================================================
+       EDITABLE CATEGORY TOGGLE (plus/minus in left column)
+    ============================================================ */
     function bindEditableCategoryToggle() {
         tbody.querySelectorAll('.edit-cat-toggle-btn').forEach(btn => {
             btn.addEventListener('click', function (e) {
@@ -576,88 +636,26 @@
                 const plus  = btn.querySelector('.edit-cat-icon-plus');
                 const minus = btn.querySelector('.edit-cat-icon-minus');
 
+                // Gather placeholder + any added item rows for this category
                 const targets = tbody.querySelectorAll(
                     `.subrow-placeholder-${catId}, .subrow-item-${catId}`
                 );
 
+                // Currently open (rows visible) → close; currently closed → open
                 const isOpen = targets.length && !targets[0].classList.contains('hidden');
 
                 targets.forEach(r => r.classList.toggle('hidden', isOpen));
 
+                // Plus shown when closed, minus shown when open
                 if (plus)  plus.classList.toggle('hidden',  !isOpen);
                 if (minus) minus.classList.toggle('hidden',  isOpen);
             });
         });
     }
 
-    function bindSearch() {
-        if (!searchInput) return;
-
-        searchInput.addEventListener('input', function (e) {
-            const term = e.target.value.toLowerCase().trim();
-            const categories = tbody.querySelectorAll('.rab-category');
-
-            categories.forEach(catRow => {
-                const catId = catRow.dataset.cat;
-                if (!catId) return;
-
-                const catText = catRow.textContent.toLowerCase();
-                const items = tbody.querySelectorAll(`.subrow-${catId}, .subrow-item-${catId}, .subrow-placeholder-${catId}`);
-
-                let catMatch = term === '' || catText.includes(term);
-                let anyItemMatch = false;
-
-                items.forEach(itemRow => {
-                    const itemText = itemRow.textContent.toLowerCase();
-                    const itemMatch = term === '' || itemText.includes(term);
-
-                    if (itemMatch || catMatch) {
-                        itemRow.style.display = '';
-                        if (term !== '') {
-                            itemRow.classList.remove('hidden');
-                        }
-                        anyItemMatch = true;
-                    } else {
-                        itemRow.style.display = 'none';
-                    }
-                });
-
-                if (catMatch || anyItemMatch) {
-                    catRow.style.display = '';
-                    if (term !== '') {
-                        const plus = catRow.querySelector('.cat-icon-plus, .edit-cat-icon-plus');
-                        const minus = catRow.querySelector('.cat-icon-minus, .edit-cat-icon-minus');
-                        const chevron = catRow.querySelector('.cat-chevron');
-                        if (plus) plus.classList.add('hidden');
-                        if (minus) minus.classList.remove('hidden');
-                        if (chevron) chevron.classList.remove('rotate-180');
-                    }
-                } else {
-                    catRow.style.display = 'none';
-                }
-
-                if (term === '') {
-                    items.forEach(itemRow => {
-                        itemRow.style.display = '';
-                        if (state.mode === 'readonly') {
-                            const isHidden = state.collapsed[catId];
-                            itemRow.classList.toggle('hidden', !!isHidden);
-
-                            const plus = catRow.querySelector('.cat-icon-plus');
-                            const minus = catRow.querySelector('.cat-icon-minus');
-                            const chevron = catRow.querySelector('.cat-chevron');
-                            if (plus) plus.classList.toggle('hidden', !isHidden);
-                            if (minus) minus.classList.toggle('hidden', !!isHidden);
-                            if (chevron) chevron.classList.toggle('rotate-180', !!isHidden);
-                        }
-                    });
-                }
-            });
-        });
-    }
-
-    bindSearch();
-
+    /* ============================================================
+       CARD CLICK → readonly
+    ============================================================ */
     cards.forEach(card => {
         card.addEventListener('click', async function () {
             const id = card.dataset.id;
@@ -676,20 +674,26 @@
         });
     });
 
+    /* ============================================================
+       ADD RAB BUTTON → editable (category headers only)
+    ============================================================ */
     if (addRabBtn) {
         addRabBtn.addEventListener('click', function () {
             state.mode      = 'editable';
             state.currentId = null;
             state.collapsed = {};
-            currentEditableCategories = [];
 
             cards.forEach(c => c.classList.remove('ring-2', 'ring-primary'));
 
             showTable('editable');
-            renderEditable(currentEditableCategories);
+            renderEditable(defaultCategories);
         });
     }
 
+    /* ============================================================
+       AUTO-INIT from window.RAB_INIT (set by menu-rap.php)
+       Triggered when arriving from a dashboard card or Add RAB link.
+    ============================================================ */
     document.addEventListener('DOMContentLoaded', async function () {
         const init = window.RAB_INIT;
         if (!init || !init.mode) return;
@@ -704,21 +708,29 @@
         } else if (init.mode === 'new') {
             state.mode      = 'editable';
             state.currentId = null;
-            currentEditableCategories = [];
             showTable('editable');
-            renderEditable(currentEditableCategories);
+            renderEditable(defaultCategories);
+            // injectPendingItems dipanggil di dalam renderEditable
         }
     });
 
+    /* ============================================================
+       IMPORT BOQ — listen to custom event from ajax_import_rab.js
+    ============================================================ */
+    // Tombol klik import di-handle sepenuhnya oleh ajax_import_rab.js (melempar event file popup)
+    
+    // Tangkap data yang sudah di-parsing dan dikonfirmasi dari modal preview
     window.addEventListener('rabDataImported', function (e) {
         const importedItems = e.detail;
         if (!importedItems || importedItems.length === 0) return;
 
+        // Cek mode table
         if (state.mode === 'readonly') {
             alert("RAB dalam mode Read-Only. Tidak bisa mengimpor data ke sini.");
             return;
         }
 
+        // Susun item supaya match dengan format pending items
         const newItems = importedItems.map(item => ({
             id: item.id,
             nama: item.uraian,
@@ -731,6 +743,7 @@
             kategori: item.kategori || 'persiapan'
         }));
 
+        // Group items by category (kategori)
         const groupedItems = {};
         newItems.forEach(item => {
             const catId = item.kategori;
@@ -738,6 +751,7 @@
             groupedItems[catId].push(item);
         });
 
+        // Insert into sessionStorage
         try {
             let existing = sessionStorage.getItem('rab_pending_items');
             let parsed = existing ? JSON.parse(existing) : [];
@@ -754,13 +768,18 @@
             sessionStorage.setItem('rab_pending_items', JSON.stringify(parsed));
         } catch (_) {}
 
+        // Panggil fungsi inject untuk merender baris-baris baru ini ke tabel RAB
         injectPendingItems();
         
         alert(`Berhasil menambahkan ${importedItems.length} item pekerjaan dari Excel.`);
     });
 
+    /* ============================================================
+       DOWNLOAD TEMPLATE BOQ
+    ============================================================ */
     if (boqDownloadTplBtn) {
         boqDownloadTplBtn.addEventListener('click', function () {
+            // Generate CSV template sederhana
             const headers = ['No', 'Uraian Pekerjaan', 'Volume', 'Satuan'];
             const examples = [
                 ['1', 'Contoh: Pembuatan gudang semen', '1', 'm²'],
@@ -780,67 +799,6 @@
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
         });
-    }
-
-    // Modal UI Logic untuk Tambah Kategori
-    const btnSimpanKategori = document.getElementById('btn-simpan-kategori');
-    const selectKategori = document.getElementById('select-kategori');
-    const inputCustomKategori = document.getElementById('input-custom-kategori');
-    const containerCustomKategori = document.getElementById('container-custom-kategori');
-
-    if (selectKategori && inputCustomKategori) {
-        // Tampilkan input teks jika opsi "custom" dipilih
-        selectKategori.addEventListener('change', function() {
-            if (this.value === 'custom') {
-                containerCustomKategori.classList.remove('hidden');
-                inputCustomKategori.focus();
-            } else {
-                containerCustomKategori.classList.add('hidden');
-                inputCustomKategori.value = '';
-            }
-        });
-
-        // Handle simpan
-        if (btnSimpanKategori) {
-            btnSimpanKategori.addEventListener('click', function() {
-                const isCustom = selectKategori.value === 'custom';
-                const catName = isCustom ? inputCustomKategori.value.trim() : selectKategori.options[selectKategori.selectedIndex].text;
-                let catId = selectKategori.value;
-
-                if (isCustom) {
-                    if (!catName) {
-                        alert('Silakan masukkan nama kategori custom.');
-                        return;
-                    }
-                    // Generate ID untuk kategori custom baru
-                    catId = 'custom_' + Date.now();
-                }
-
-                // Cek apakah kategori sudah ada di array saat ini
-                const exists = currentEditableCategories.some(c => c.id === catId || c.name.toLowerCase() === catName.toLowerCase());
-                if (exists) {
-                    alert('Kategori ini sudah ada di RAB.');
-                    return;
-                }
-
-                // Tambahkan ke state array dan re-render table
-                currentEditableCategories.push({
-                    id: catId,
-                    name: catName
-                });
-                
-                // Tutup modal
-                window.HSOverlay.close(document.getElementById('tambah-kategori-modal'));
-
-                // Render ulang table tanpa menghilangkan item di sessionStorage/DB
-                renderEditable(currentEditableCategories);
-
-                // Reset form
-                selectKategori.value = 'persiapan';
-                containerCustomKategori.classList.add('hidden');
-                inputCustomKategori.value = '';
-            });
-        }
     }
 
 })();
