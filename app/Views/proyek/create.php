@@ -118,10 +118,18 @@
                                 class="w-full  border border-gray-300 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500" />
                         </div>
 
-                        <div>
-                            <label class="mb-1 block text-md font-semibold text-text-primary">Jenis Proyek</label>
-                            <input name="jenis_proyek" type="text" placeholder="Masukkan Jenis Proyek"
-                                class="w-full  border border-gray-300 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                            <div>
+                                <label class="mb-1 block text-md font-semibold text-text-primary">Jenis Proyek</label>
+                                <input name="jenis_proyek" type="text" placeholder="Masukkan Jenis Proyek"
+                                    class="w-full  border border-gray-300 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                            </div>
+
+                            <div>
+                                <label class="mb-1 block text-md font-semibold text-text-primary">Harga Deal</label>
+                                <input name="harga_deal" id="harga_deal" type="text" placeholder="Masukkan Harga Deal"
+                                    class="w-full  border border-gray-300 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                            </div>
                         </div>
 
                         <!-- DATEPICKER ROW (SIMPLE - PRELINE) -->
@@ -236,6 +244,21 @@
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         // =========================
+        // 0) FORMAT HARGA DEAL
+        // =========================
+        const hargaDealInput = document.getElementById('harga_deal');
+        if (hargaDealInput) {
+            hargaDealInput.addEventListener('input', function(e) {
+                let value = this.value.replace(/[^0-9]/g, '');
+                if (value) {
+                    this.value = 'Rp ' + parseInt(value, 10).toLocaleString('id-ID');
+                } else {
+                    this.value = '';
+                }
+            });
+        }
+
+        // =========================
         // 1) UPLOAD FOTO (preview)
         // =========================
         const fotoInput = document.getElementById('foto_proyek');
@@ -286,10 +309,14 @@
         }
 
         function syncInputFiles() {
+            // Disabled temporarily: Trying to override input.files with DataTransfer breaks the actual form submission
+            // if not done perfectly for all inputs.
+            /*
             if (!dokInput) return;
             const dt = new DataTransfer();
             selectedFiles.forEach(f => dt.items.add(f));
             dokInput.files = dt.files;
+            */
         }
 
         function renderDokumen() {
@@ -299,7 +326,7 @@
                 dokEmpty.classList.remove('hidden');
                 dokList.classList.add('hidden');
                 dokList.innerHTML = '';
-                syncInputFiles();
+                // syncInputFiles();
                 return;
             }
 
@@ -321,7 +348,7 @@
         </div>
       `).join('');
 
-            syncInputFiles();
+            // syncInputFiles();
         }
 
         if (btnDok && dokInput) {
