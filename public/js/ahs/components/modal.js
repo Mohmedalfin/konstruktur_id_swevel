@@ -58,13 +58,13 @@ export function renderModalRows(items) {
                 <input type="checkbox" class="modal-item-cb w-3.5 h-3.5 rounded accent-primary cursor-pointer"
                     data-uid="${item._uid}" ${checked ? 'checked' : ''}/>
             </td>
-            <td class="px-4 py-2.5 text-center text-[10px] md:text-[11px] font-semibold text-table-subtle">${escHtml(item.id)}</td>
+            <td class="px-4 py-2.5 text-center text-[10px] md:text-[11px] font-semibold text-table-subtle whitespace-nowrap">${escHtml(item.id)}</td>
             <td class="px-4 py-2.5 text-[12px] text-table-medium">${escHtml(item.uraian)}</td>
-            <td class="px-4 py-2.5 text-[12px] text-table-medium">${escHtml(item.merk || '-')}</td>
+            <td class="px-4 py-2.5 text-[12px] text-table-medium whitespace-nowrap">${escHtml(item.merk || '-')}</td>
             <td class="px-4 py-2.5 text-[12px] text-table-medium">${escHtml(item.spesifikasi || '-')}</td>
-            <td class="px-4 py-2.5 text-center text-[12px] text-table-subtle">${escHtml(item.satuan)}</td>
-            <td class="px-4 py-2.5 text-right text-[12px] tabular-nums text-table-strong">${fmt(item.hargaSatuan)}</td>
-            <td class="px-4 py-2.5 text-[12px] text-table-medium">${escHtml(item.sumber || '-')}</td>
+            <td class="px-4 py-2.5 text-center text-[12px] text-table-subtle whitespace-nowrap">${escHtml(item.satuan)}</td>
+            <td class="px-4 py-2.5 text-right text-[12px] tabular-nums text-table-strong whitespace-nowrap">${fmt(item.hargaSatuan)}</td>
+            <td class="px-4 py-2.5 text-[12px] text-table-medium whitespace-nowrap" style="min-width:12rem">${escHtml(item.sumber || '-')}</td>
         </tr>`;
     }).join('');
 

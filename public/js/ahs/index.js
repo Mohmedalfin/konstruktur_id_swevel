@@ -115,3 +115,10 @@ if (!tbody) {
     });
 
 } // end guard
+
+// Global helper for Back button
+window.goBackToRab = function() {
+    let returnUrl = '';
+    try { returnUrl = sessionStorage.getItem('rab_return_url'); } catch (_) {}
+    window.location.href = returnUrl ? returnUrl : '/menu-rap?mode=new';
+};

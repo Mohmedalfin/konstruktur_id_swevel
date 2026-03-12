@@ -1,10 +1,27 @@
 /**
- * tambah-ahs/components/render.js
+ * pekerjaan/components/render.js
  * Renders loading state, table rows, pagination buttons, and binds checkbox events.
  */
 
 import { state, tbody, countEl, paginationEl, paginationInfo,
-         submitBtn, selectedCount, PAGE_SIZE, sumberColor } from '../core/state.js';
+         submitBtn, selectedCount, PAGE_SIZE } from '../core/state.js';
+
+/**
+ * Map keyword → Tailwind badge classes.
+ * Matches partial text from 'sumber' (raw keterangan from DB).
+ */
+const BADGE_MAP = [
+    { keyword: 'SNI',       cls: 'bg-emerald-100 text-emerald-700' },
+    { keyword: 'PUPR',      cls: 'bg-violet-100 text-violet-700'   },
+    { keyword: 'Empiris',   cls: 'bg-amber-100 text-amber-700'     },
+    { keyword: 'Estimator', cls: 'bg-rose-100 text-rose-700'       },
+];
+
+function getSumberBadge(sumber) {
+    const text = (sumber || '').toUpperCase();
+    const match = BADGE_MAP.find(b => text.includes(b.keyword.toUpperCase()));
+    return match ? match.cls : 'bg-blue-100 text-blue-700'; // default = Proyek Terkini
+}
 
 export function renderLoading() {
     tbody.innerHTML = `
@@ -45,15 +62,15 @@ export function renderRows(result) {
         const rowNum     = start + idx;
         const isChecked  = !!state.selected[item.id];
         const rowBg      = rowNum % 2 === 0 ? 'bg-table-row' : 'bg-white';
-        const badgeCls   = sumberColor[item.sumber] || 'bg-gray-100 text-gray-600';
+        const badgeCls   = getSumberBadge(item.sumber);
         return `
             <tr class="tambah-ahs-row border-b border-table-border/60 hover:bg-primary/5 transition-colors duration-100 ${isChecked ? 'bg-primary/5' : rowBg}"
                 data-id="${item.id}">
                 <td class="px-3 md:px-5 py-2.5 md:py-3 text-center text-table-subtle font-medium tabular-nums">${rowNum}</td>
-                <td class="px-3 md:px-5 py-2.5 md:py-3 font-semibold text-table-strong max-w-0 truncate" title="${item.nama}">${item.nama}</td>
-                <td class="px-3 md:px-5 py-2.5 md:py-3 text-center text-table-subtle">${item.satuan}</td>
+                <td class="px-3 md:px-5 py-2.5 md:py-3 font-semibold text-table-strong truncate max-w-xs" title="${item.nama}">${item.nama}</td>
+                <td class="px-3 md:px-5 py-2.5 md:py-3 text-center text-table-subtle whitespace-nowrap">${item.satuan}</td>
                 <td class="px-3 md:px-5 py-2.5 md:py-3 text-center">
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] md:text-[10px] font-semibold ${badgeCls}">${item.sumber}</span>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] md:text-[10px] font-semibold whitespace-nowrap ${badgeCls}">${item.sumber}</span>
                 </td>
                 <td class="px-3 md:px-5 py-2.5 md:py-3 text-center">
                     <input type="checkbox"
