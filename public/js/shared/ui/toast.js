@@ -14,8 +14,8 @@ class ToastManager {
         
         const container = document.createElement('div');
         container.id = this.containerId;
-        // Positioned at top-right
-        container.className = 'fixed top-6 right-4 z-[9999] flex flex-col gap-2 p-4 pointer-events-none w-full max-w-sm';
+        // Positioned center top on mobile, and top-right on screens >= sm
+        container.className = 'fixed top-4 left-1/2 -translate-x-1/2 sm:top-6 sm:left-auto sm:right-4 sm:translate-x-0 z-[9999] flex flex-col gap-2 p-3 sm:p-4 pointer-events-none w-[calc(100%-2rem)] sm:w-full max-w-sm';
         document.body.appendChild(container);
     }
 
