@@ -119,10 +119,10 @@ $wrapperClass = $tableVisible ? '' : 'hidden';
     </div>
 
     <!-- ═══════════════════════════════════════════════════════════════
-         MODAL — Preview Import BOQ Excel
+         MODAL — Preview Import BOQ Excel (Direct Data Swipe)
     ════════════════════════════════════════════════════════════════ -->
     <div id="import-rab-modal-overlay" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-5xl h-[600px] flex flex-col overflow-hidden">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-[95vw] h-[85vh] flex flex-col overflow-hidden">
             
             <!-- Modal Header -->
             <div class="flex items-center justify-between px-6 py-4 border-b border-table-border bg-primary text-white rounded-t-2xl shrink-0">
@@ -131,43 +131,31 @@ $wrapperClass = $tableVisible ? '' : 'hidden';
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
                     </svg>
                     <div>
-                        <h3 class="text-sm font-bold tracking-wide">Preview Data Import BOQ</h3>
-                        <p class="text-[11px] text-white/60">Tinjau data pekerjaan dari Excel sebelum disimpan ke RAB</p>
+                        <h3 class="text-sm font-bold tracking-wide">Pemetaan Data Excel (<span id="import-file-name" class="font-medium text-blue-200"></span>)</h3>
+                        <p class="text-[11px] text-white/70 mt-0.5">Pilih <span class="bg-white/20 px-1 rounded mx-0.5 text-white underline font-medium">Dropdown Kolom Sistem</span> pada masing-masing header Excel untuk mencocokkan data.</p>
+                        <p class="text-[11px] text-white/70 mt-0.5">Urutan Kolom : URAIAN, VOLUME, SATUAN</p>
                     </div>
                 </div>
                 <button id="import-rab-modal-close" type="button" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 transition-colors focus:outline-none">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
 
-            <!-- Table Preview (scrollable) -->
-            <div class="flex-1 overflow-auto bg-slate-50 p-4">
+            <!-- Single Table Workspace -->
+            <div id="import-step-preview" class="flex-1 overflow-auto bg-slate-50 p-4">
                 <div class="rounded-xl shadow-sm border border-table-border bg-white overflow-hidden h-full flex flex-col">
-                    <div class="overflow-auto flex-1">
-                        <table class="w-full text-left border-collapse table-fixed min-w-[1000px]" id="import-rab-modal-table">
-                            <colgroup>
-                                <col style="width: 3.5rem">     <!-- No -->
-                                <col>                           <!-- Uraian Pekerjaan -->
-                                <col style="width: 6rem">       <!-- Volume -->
-                                <col style="width: 6rem">       <!-- Satuan -->
-                                <col style="width: 10rem">      <!-- Kategori -->
-                            </colgroup>
-                            <thead class="sticky top-0 bg-slate-100 z-10 shadow-sm">
+                    <div class="overflow-auto flex-1 pb-4">
+                        <table class="table-auto min-w-max md:w-full text-left border-collapse" id="import-rab-modal-table">
+                            <!-- Injected dynamically by JS including colgroups and JS-powered swiper headers -->
+                            <thead class="sticky top-0 bg-slate-100 z-10 shadow-sm border-b border-table-border" id="import-rab-modal-thead">
                                 <tr>
-                                    <th class="px-4 py-2.5 text-center text-[10px] font-semibold uppercase tracking-wider text-table-subtle w-12">No</th>
-                                    <th class="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-table-subtle">Uraian Pekerjaan</th>
-                                    <th class="px-4 py-2.5 text-center text-[10px] font-semibold uppercase tracking-wider text-table-subtle w-24">Volume</th>
-                                    <th class="px-4 py-2.5 text-center text-[10px] font-semibold uppercase tracking-wider text-table-subtle w-24">Satuan</th>
-                                    <th class="px-4 py-2.5 text-center text-[10px] font-semibold uppercase tracking-wider text-table-subtle w-40">Kategori</th>
+                                    <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-table-subtle">Memuat Struktur Tabel...</th>
                                 </tr>
                             </thead>
                             <tbody id="import-rab-modal-tbody" class="text-[11px] md:text-[13px] text-table-body">
-                                <!-- injected by JS -->
                                 <tr>
-                                    <td colspan="5" class="text-center py-10 text-table-subtle text-xs italic">
-                                        Memproses data Excel...
+                                    <td class="text-center py-20 text-table-subtle text-xs italic">
+                                        Menunggu file Excel...
                                     </td>
                                 </tr>
                             </tbody>
@@ -177,16 +165,16 @@ $wrapperClass = $tableVisible ? '' : 'hidden';
             </div>
 
             <!-- Modal Footer -->
-            <div class="flex flex-col-reverse md:flex-row md:items-center md:justify-between gap-2 px-4 md:px-6 py-3 md:py-4 border-t border-table-border bg-white shrink-0 rounded-b-2xl shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+            <div class="flex flex-col-reverse md:flex-row md:items-center md:justify-between gap-2 px-4 md:px-6 py-3 md:py-4 border-t border-table-border bg-white shrink-0 rounded-b-2xl shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-20">
                 <p id="import-rab-modal-count" class="text-[10px] md:text-xs text-table-subtle font-medium text-center md:text-left">
-                    0 baris terdeteksi
+                    Pilih file Excel untuk memulai
                 </p>
                 <div class="flex items-center justify-end gap-2">
-                    <button id="import-rab-modal-cancel" type="button" class="whitespace-nowrap px-3 md:px-4 py-1.5 md:py-2 rounded-lg border border-table-border bg-white hover:bg-slate-50 text-table-body text-[10px] md:text-xs font-medium transition-all focus:outline-none active:scale-95">
+                    <button id="import-rab-modal-cancel" type="button" class="whitespace-nowrap px-4 py-1.5 md:py-2 rounded-lg border border-table-border bg-white hover:bg-slate-50 text-table-body text-[10px] md:text-xs font-medium transition-all focus:outline-none active:scale-95">
                         Batal
                     </button>
-                    <button id="import-rab-modal-confirm" type="button" class="whitespace-nowrap px-3 md:px-5 py-1.5 md:py-2 rounded-lg bg-primary hover:bg-primary-hover text-white text-[10px] md:text-xs font-semibold tracking-wide shadow-sm transition-all duration-150 focus:outline-none active:scale-95">
-                        Tambahkan ke RAB
+                    <button id="import-rab-modal-confirm" type="button" class="hidden whitespace-nowrap px-4 md:px-6 py-1.5 md:py-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] md:text-xs font-bold tracking-wide shadow-sm transition-all duration-150 focus:outline-none active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <div class="flex items-center gap-2">Simpan ke RAB<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg></div>
                     </button>
                 </div>
             </div>
@@ -218,7 +206,18 @@ $wrapperClass = $tableVisible ? '' : 'hidden';
             </div>
 
             <!-- Modal Body: List Kategori -->
-            <div class="flex-1 overflow-y-auto p-5 bg-slate-50">
+            <div class="flex-1 overflow-y-auto p-5 bg-slate-50 flex flex-col gap-4">
+                
+                <!-- Input Kategori Manual -->
+                <div class="flex items-center gap-2 pb-4 border-b border-slate-200">
+                    <input type="text" id="kategori-manual-input" placeholder="Atau ketik kategori baru di sini..." 
+                        class="flex-1 text-xs px-4 py-2.5 rounded-lg border border-table-border focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-400">
+                    <button type="button" id="kategori-manual-add" 
+                        class="px-4 py-2.5 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-semibold shadow-sm transition-all focus:outline-none active:scale-95 whitespace-nowrap">
+                        Tambah
+                    </button>
+                </div>
+
                 <ul id="kategori-modal-list" class="space-y-2">
                     <!-- injected by JS -->
                 </ul>
