@@ -1,7 +1,7 @@
 <?php
 // Read GET params passed from dashboard.php links
-$rabId   = isset($_GET['id'])   ? (int) $_GET['id']     : null;
-$rabMode = isset($_GET['mode']) ? $_GET['mode']          : ($rabId ? 'readonly' : null);
+$rabId   = $idProject ?? null;
+$rabMode = $rabId ? 'readonly' : null;
 
 // Sanitize mode
 if (! in_array($rabMode, ['readonly', 'new'], true)) {
@@ -24,17 +24,32 @@ if (! in_array($rabMode, ['readonly', 'new'], true)) {
     <?php echo view('partials/table-rab', ['tableVisible' => true]); ?>
 
     <!-- Pass init state to ajax_rab.js -->
-    <script>
+    <!-- <script>
         window.RAB_INIT = {
             mode:              <?= $rabMode ? json_encode($rabMode) : 'null' ?>,
-            id:                <?= $rabId   ? json_encode($rabId)   : 'null' ?>,
-            idProject:         <?= $rabId   ? json_encode($rabId)   : 'null' ?>,
+            id:                <?= $rabId ? json_encode($rabId) : 'null' ?>,
+            idProject:         <?= $rabId ? json_encode($rabId) : 'null' ?>,
+            slug:              <?= isset($slug) ? json_encode($slug) : 'null' ?>,
             rincianAhsUrl:     <?= json_encode(base_url('menu-rap/rincian-ahs')) ?>,
             tambahAhsUrl:      <?= json_encode(base_url('menu-rap/tambah-ahs')) ?>,
             apiRapUrl:         <?= json_encode(base_url('api/rap')) ?>,
             apiKategoriUrl:    <?= json_encode(base_url('api/rap/kategori')) ?>,
             apiKategoriMaster: <?= json_encode(base_url('api/rap/kategori-master')) ?>,
             apiPekerjaanUrl:   <?= json_encode(base_url('api/rap/pekerjaan')) ?>
+        };
+    </script> -->
+    <script>
+        window.RAB_INIT = {
+            mode: 'readonly',
+            id: <?= json_encode($idProject) ?>,
+            idProject: <?= json_encode($idProject) ?>,
+            slug: <?= json_encode($slug) ?>,
+            rincianAhsUrl: <?= json_encode(base_url('menu-rap/rincian-ahs')) ?>,
+            tambahAhsUrl: <?= json_encode(base_url('menu-rap/tambah-ahs')) ?>,
+            apiRapUrl: <?= json_encode(base_url('api/rap')) ?>,
+            apiKategoriUrl: <?= json_encode(base_url('api/rap/kategori')) ?>,
+            apiKategoriMaster: <?= json_encode(base_url('api/rap/kategori-master')) ?>,
+            apiPekerjaanUrl: <?= json_encode(base_url('api/rap/pekerjaan')) ?>
         };
     </script>
 

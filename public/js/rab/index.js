@@ -25,6 +25,16 @@ import { initImport } from './components/import.js';
 import { initTemplate } from './components/template.js';
 import { bindSearch } from './hooks/search.js';
 
+/**
+ * Show or hide the "+ Kategori Pekerjaan" button based on the sumber_data
+ * returned from the API. Only manual projects can be edited.
+ */
+function applySourcePermission(data) {
+    if (!tambahKategoriBtn) return;
+    const isEditable = (data?.sumber_data || 'manual') === 'manual';
+    tambahKategoriBtn.classList.toggle('hidden', !isEditable);
+}
+
 // Guard: do nothing if not a RAB page
 if (!wrapper || !tbody) {
     // Not a RAB page — exit silently
@@ -107,6 +117,7 @@ if (!wrapper || !tbody) {
                     nama: cat.name
                 }));
 
+                applySourcePermission(data);
                 renderReadonly(data);
 
                 kategoriModalConfirm.disabled = false;
@@ -120,12 +131,6 @@ if (!wrapper || !tbody) {
         });
     }
 
-    if (tambahKategoriBtn) {
-        tambahKategoriBtn.addEventListener('click', function () {
-            console.log('tombol kategori diklik');
-            openKategoriModal();
-        });
-    }
     // ── RAB card click (readonly mode) ───────────────────────────────────────
     cards.forEach(card => {
         card.addEventListener('click', async function () {
@@ -162,38 +167,39 @@ if (!wrapper || !tbody) {
     // ── DOMContentLoaded: auto-init from URL (RAB_INIT) ──────────────────────
     document.addEventListener('DOMContentLoaded', async function () {
         const init = window.RAB_INIT;
-        if (!init || !init.mode) return;
+        const idProject = init?.idProject || init?.id;
 
-        if (init.mode === 'readonly' && init.id) {
+        if (!init || !idProject) return;
+
+        try {
             state.mode = 'readonly';
-            state.currentId = init.id;
-            setEditableMode(true); // tombol kategori tetap tampil
-            showTable();
-            renderLoading();
+            state.currentId = idProject;
+            state.collapsed = {};
 
-            const data = await fetchRabData(init.id);
-            state.activeCategories = (data.categories || []).map(cat => ({
-                id: String(cat.id),
-                nama: cat.name
-            }));
-            renderReadonly(data);
-
-        } else if (init.mode === 'new' || init.id) {
-            state.mode = 'readonly';
-            state.currentId = init.id;
             setEditableMode(true);
             showTable();
             renderLoading();
 
-            const data = await fetchRabData(init.id);
+            const data = await fetchRabData(idProject);
+
             state.activeCategories = (data.categories || []).map(cat => ({
                 id: String(cat.id),
                 nama: cat.name
             }));
+
+            applySourcePermission(data);
             renderReadonly(data);
+        } catch (err) {
+            console.error('Gagal memuat RAP:', err);
+            tbody.innerHTML = `
+            <tr>
+                <td colspan="12" class="text-center py-10 text-red-500 text-xs">
+                    Gagal memuat data RAP.
+                </td>
+            </tr>
+        `;
         }
     });
-
     // ── BOQ Import event (from components/import.js) ─────────────────────────
     window.addEventListener('rabDataImported', function (e) {
         const importedItems = e.detail;

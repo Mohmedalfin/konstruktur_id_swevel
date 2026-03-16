@@ -21,12 +21,23 @@ class ProyekController extends BaseController
                 'nilai'  => $p['harga_deal'] > 0 ? 'Rp ' . number_format($p['harga_deal'], 0, ',', '.') : null,
                 'pct'    => '0%', // Temporary placeholder until RAB/Realization logic is implemented
                 'tgl'    => $p['tanggal_mulai'] ?? date('Y-m-d', strtotime($p['created_at'])),
-                'href'   => base_url('menu-rap?id=' . $p['id_project']),
+                'href'   => base_url('proyek/' . $p['slug']),
                 'foto'   => $p['foto_proyek'] // Passing the photo for the view
             ];
         }
 
         return view('proyek/index', ['cards' => $cards]);
+    }
+    public function show($slug)
+    {
+        $proyekModel = new \App\Models\ProyekModel();
+        $proyek = $proyekModel->where('slug', $slug)->first();
+
+        if (!$proyek) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('Proyek tidak ditemukan.');
+        }
+
+        return view('proyek/show', ['proyek' => $proyek]);
     }
     public function create()
     {
@@ -35,7 +46,8 @@ class ProyekController extends BaseController
     public function store()
     {
         $proyekModel = new \App\Models\ProyekModel();
-
+        $namaProyek = trim($this->request->getPost('nama_proyek') ?? '');
+        $slug = $proyekModel->generateUniqueSlug($namaProyek);
         // Generate simple Kode Proyek
         $kodeProyek = 'PRJ-' . date('YmdHis') . '-' . rand(100, 999);
 
@@ -46,19 +58,20 @@ class ProyekController extends BaseController
         // Map form data to database fields
         $data = [
             'kode_proyek'      => $kodeProyek,
-            'nama_proyek'      => $this->request->getPost('nama_proyek'),
+            'nama_proyek'      => $namaProyek,
+            'slug'             => $slug,
             'lokasi_proyek'    => $this->request->getPost('lokasi_proyek'),
             'jenis_proyek'     => $this->request->getPost('jenis_proyek'),
             'tanggal_mulai'    => $this->request->getPost('tanggal_mulai') ? date('Y-m-d', strtotime(str_replace('.', '-', $this->request->getPost('tanggal_mulai')))) : null,
             'estimasi_selesai' => $this->request->getPost('estimasi_selesai') ? date('Y-m-d', strtotime(str_replace('.', '-', $this->request->getPost('estimasi_selesai')))) : null,
             'nama_owner'       => $this->request->getPost('nama_owner'),
-            'nama_perusahaan'  => $this->request->getPost('perusahaan'), // in schema it's nama_perusahaan, in form it's perusahaan
+            'nama_perusahaan'  => $this->request->getPost('perusahaan'),
             'nomor_kontrak'    => $this->request->getPost('nomor_kontrak'),
             'keterangan'       => $this->request->getPost('keterangan_lain'),
             'status_proyek'    => 'draft',
             'sumber_data'      => 'manual',
             'harga_deal'       => $hargaDeal,
-            'foto_proyek'      => null, // Save as null if no photo is uploaded to save database space
+            'foto_proyek'      => null,
         ];
 
         // Process Upload Foto Proyek
@@ -113,15 +126,18 @@ class ProyekController extends BaseController
         $hargaDealRaw = $this->request->getPost('harga_deal') ?? '';
         $hargaDeal = (int) preg_replace('/[^0-9]/', '', $hargaDealRaw);
 
-        // Map form data to database fields
+        $namaProyek = trim($this->request->getPost('nama_proyek') ?? '');
+        $slug = $proyekModel->generateUniqueSlug($namaProyek, (int) $id);
+
         $data = [
-            'nama_proyek'      => $this->request->getPost('nama_proyek'),
+            'nama_proyek'      => $namaProyek,
+            'slug'             => $slug,
             'lokasi_proyek'    => $this->request->getPost('lokasi_proyek'),
             'jenis_proyek'     => $this->request->getPost('jenis_proyek'),
             'tanggal_mulai'    => $this->request->getPost('tanggal_mulai') ? date('Y-m-d', strtotime(str_replace('.', '-', $this->request->getPost('tanggal_mulai')))) : null,
             'estimasi_selesai' => $this->request->getPost('estimasi_selesai') ? date('Y-m-d', strtotime(str_replace('.', '-', $this->request->getPost('estimasi_selesai')))) : null,
             'nama_owner'       => $this->request->getPost('nama_owner'),
-            'nama_perusahaan'  => $this->request->getPost('perusahaan'), 
+            'nama_perusahaan'  => $this->request->getPost('perusahaan'),
             'nomor_kontrak'    => $this->request->getPost('nomor_kontrak'),
             'keterangan'       => $this->request->getPost('keterangan_lain'),
             'harga_deal'       => $hargaDeal,
