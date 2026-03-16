@@ -6,6 +6,7 @@ use CodeIgniter\Model;
 
 class PekerjaanModel extends Model
 {
+    protected $DBGroup          = 'estimator';
     protected $table            = 'pekerjaan_utama';
     protected $primaryKey       = 'id_pekerjaan';
     protected $useAutoIncrement = true;
