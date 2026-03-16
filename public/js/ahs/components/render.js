@@ -14,7 +14,6 @@ export const tipeConfig = {
 };
 
 export function renderRow(rowData, isNew = false) {
-    state.rowCounter++;
     const cfg    = tipeConfig[rowData.tipe] || tipeConfig.bahan;
     const jumlah = (parseFloat(rowData.koefisien) || 0) * (parseFloat(rowData.hargaSatuan) || 0);
     const tr     = document.createElement('tr');
@@ -24,7 +23,7 @@ export function renderRow(rowData, isNew = false) {
 
     tr.innerHTML = `
         <td class="px-3 md:px-4 py-2 md:py-2.5 text-center text-table-subtle">
-            <span class="ahs-rownum">${state.rowCounter}</span>
+            <span class="ahs-rownum">-</span>
         </td>
         <td class="px-3 md:px-4 py-2 md:py-2.5 text-center">
             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] md:text-[11px] font-semibold ${cfg.badge}">
@@ -80,9 +79,51 @@ export function renderRow(rowData, isNew = false) {
             </button>
         </td>`;
 
-    tbody.appendChild(tr);
+    // Insertion logic for grouping
+    const header = _ensureHeader(rowData.tipe);
+    const lastRowOfTipe = Array.from(tbody.querySelectorAll(`.ahs-row[data-tipe="${rowData.tipe}"]`)).pop();
+
+    if (lastRowOfTipe) {
+        lastRowOfTipe.after(tr);
+    } else {
+        header.after(tr);
+    }
+
     _bindRowInputs(tr);
+    renumberRows(); // Count correctly including new row
     if (isNew) setTimeout(() => tr.querySelector('.ahs-uraian')?.focus(), 50);
+}
+
+function _ensureHeader(tipe) {
+    let header = tbody.querySelector(`.ahs-category-header[data-tipe="${tipe}"]`);
+    if (!header) {
+        header = document.createElement('tr');
+        header.className = 'ahs-category-header bg-slate-100/80 border-y border-table-border';
+        header.dataset.tipe = tipe;
+        header.innerHTML = `
+            <td colspan="11" class="px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-600">
+                ${tipeConfig[tipe]?.label || tipe}
+            </td>`;
+
+        // Maintain order: Bahan -> Alat -> Upah
+        const types = ['bahan', 'alat', 'upah'];
+        const myIdx = types.indexOf(tipe);
+        let inserted = false;
+
+        for (let i = myIdx + 1; i < types.length; i++) {
+            const nextHeader = tbody.querySelector(`.ahs-category-header[data-tipe="${types[i]}"]`);
+            if (nextHeader) {
+                nextHeader.before(header);
+                inserted = true;
+                break;
+            }
+        }
+
+        if (!inserted) {
+            tbody.appendChild(header);
+        }
+    }
+    return header;
 }
 
 function _bindRowInputs(tr) {
@@ -103,7 +144,15 @@ function _bindRowInputs(tr) {
     hargaInput?.addEventListener('input', recalcRow);
 
     tr.querySelector('.ahs-del-btn')?.addEventListener('click', function () {
+        const tipe = tr.dataset.tipe;
         tr.remove();
+
+        // Remove header if no rows left for this type
+        const remainingRows = tbody.querySelectorAll(`.ahs-row[data-tipe="${tipe}"]`);
+        if (remainingRows.length === 0) {
+            tbody.querySelector(`.ahs-category-header[data-tipe="${tipe}"]`)?.remove();
+        }
+
         renumberRows();
         recalcTotals();
         toast.show('Item berhasil dihapus dari rincian', 'info', 2500);
@@ -175,3 +224,4 @@ export function addRow(tipe) {
     const tipeLabel = tipeConfig[tipe]?.label || tipe;
     toast.show(`Baris ${tipeLabel} baru ditambahkan`, 'success', 2000);
 }
+
