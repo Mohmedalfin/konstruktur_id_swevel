@@ -9,6 +9,7 @@ use App\Models\KategoriPekerjaanModel;
 use App\Models\RapKategoriModel;
 use App\Models\RapDetailItemModel;
 use App\Models\AhsModel;
+use App\Models\ProyekModel;
 use CodeIgniter\Database\Exceptions\DatabaseException;
 use Throwable;
 
@@ -20,6 +21,7 @@ class RapController extends BaseController
     protected RapKategoriModel $rapKategoriModel;
     protected RapDetailItemModel $rapDetailItemModel;
     protected AhsModel $ahsModel;
+    protected ProyekModel $proyekModel;
 
     public function __construct()
     {
@@ -29,6 +31,7 @@ class RapController extends BaseController
         $this->rapKategoriModel   = new RapKategoriModel();
         $this->rapDetailItemModel = new RapDetailItemModel();
         $this->ahsModel           = new AhsModel();
+        $this->proyekModel        = new ProyekModel();
     }
 
     public function index()
@@ -38,20 +41,27 @@ class RapController extends BaseController
 
             if ($idProject <= 0) {
                 return $this->response->setStatusCode(400)->setJSON([
-                    'status' => 'error',
+                    'status'  => 'error',
                     'message' => 'id_project wajib diisi',
                 ]);
             }
+
+            $project = $this->proyekModel
+                ->where('id_project', $idProject)
+                ->first();
+
+            $sumberData = $project['sumber_data'] ?? 'manual';
 
             $rap = $this->rapModel->where('id_project', $idProject)->first();
 
             if (!$rap) {
                 return $this->response->setJSON([
                     'status' => 'success',
-                    'data' => [
-                        'id_project' => $idProject,
-                        'id_rap' => null,
-                        'categories' => [],
+                    'data'   => [
+                        'id_project'  => $idProject,
+                        'id_rap'      => null,
+                        'sumber_data' => $sumberData,
+                        'categories'  => [],
                     ],
                 ]);
             }
@@ -82,6 +92,7 @@ class RapController extends BaseController
 
             foreach ($kategoriRows as $cat) {
                 $catId = (string) $cat['id_kategori'];
+
                 $grouped[$catId] = [
                     'id'    => $catId,
                     'name'  => $cat['nama_kategori'] ?? 'Tanpa Kategori',
@@ -94,6 +105,7 @@ class RapController extends BaseController
 
                 if (!isset($grouped[$catId])) {
                     $kategori = $this->kategoriModel->find((int) $catId);
+
                     $grouped[$catId] = [
                         'id'    => $catId,
                         'name'  => $kategori['nama_kategori'] ?? 'Tanpa Kategori',
@@ -117,15 +129,16 @@ class RapController extends BaseController
 
             return $this->response->setJSON([
                 'status' => 'success',
-                'data' => [
-                    'id_project' => $idProject,
-                    'id_rap'     => $rapId,
-                    'categories' => array_values($grouped),
+                'data'   => [
+                    'id_project'  => $idProject,
+                    'id_rap'      => $rapId,
+                    'sumber_data' => $sumberData,
+                    'categories'  => array_values($grouped),
                 ],
             ]);
         } catch (Throwable $e) {
             return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
+                'status'  => 'error',
                 'message' => $e->getMessage(),
             ]);
         }
@@ -151,7 +164,7 @@ class RapController extends BaseController
             ]);
         } catch (Throwable $e) {
             return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
+                'status'  => 'error',
                 'message' => $e->getMessage(),
             ]);
         }
@@ -171,6 +184,24 @@ class RapController extends BaseController
                 return $this->response->setStatusCode(400)->setJSON([
                     'status'  => 'error',
                     'message' => 'id_project wajib diisi',
+                ]);
+            }
+
+            $project = $this->proyekModel
+                ->where('id_project', $idProject)
+                ->first();
+
+            if (!$project) {
+                return $this->response->setStatusCode(404)->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Project tidak ditemukan',
+                ]);
+            }
+
+            if (($project['sumber_data'] ?? 'manual') !== 'manual') {
+                return $this->response->setStatusCode(403)->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Kategori proyek estimator tidak dapat diubah',
                 ]);
             }
 
@@ -196,6 +227,7 @@ class RapController extends BaseController
                     'status_rap'        => 'draft',
                     'keterangan'        => null,
                 ]);
+
                 $rapId = (int) $this->rapModel->getInsertID();
             } else {
                 $rapId = (int) $rap['id_rap'];
@@ -220,6 +252,7 @@ class RapController extends BaseController
                     $this->kategoriModel->insert([
                         'nama_kategori' => $namaKategori,
                     ]);
+
                     $kategoriId = (int) $this->kategoriModel->getInsertID();
                 } else {
                     $kategoriId = (int) $existingKategori['id_kategori_pekerjaan'];
@@ -232,8 +265,8 @@ class RapController extends BaseController
 
                 if (!$existingRapKategori) {
                     $this->rapKategoriModel->insert([
-                        'id_rap'     => $rapId,
-                        'id_kategori'=> $kategoriId,
+                        'id_rap'      => $rapId,
+                        'id_kategori' => $kategoriId,
                     ]);
                 }
 
@@ -269,6 +302,109 @@ class RapController extends BaseController
         }
     }
 
+    public function deleteKategori($idKategori = null)
+    {
+        $db = db_connect();
+
+        try {
+            $idKategori = (int) $idKategori;
+            $idProject  = (int) ($this->request->getGet('id_project') ?? 0);
+
+            if ($idProject <= 0 || $idKategori <= 0) {
+                return $this->response->setStatusCode(400)->setJSON([
+                    'status'  => 'error',
+                    'message' => 'id_project dan id_kategori wajib diisi',
+                ]);
+            }
+
+            $project = $this->proyekModel
+                ->where('id_project', $idProject)
+                ->first();
+
+            if (!$project) {
+                return $this->response->setStatusCode(404)->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Project tidak ditemukan',
+                ]);
+            }
+
+            if (($project['sumber_data'] ?? 'manual') !== 'manual') {
+                return $this->response->setStatusCode(403)->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Kategori proyek estimator tidak dapat dihapus',
+                ]);
+            }
+
+            $rap = $this->rapModel->where('id_project', $idProject)->first();
+
+            if (!$rap) {
+                return $this->response->setStatusCode(404)->setJSON([
+                    'status'  => 'error',
+                    'message' => 'RAP tidak ditemukan',
+                ]);
+            }
+
+            $rapId = (int) $rap['id_rap'];
+
+            $existingRapKategori = $this->rapKategoriModel
+                ->where('id_rap', $rapId)
+                ->where('id_kategori', $idKategori)
+                ->first();
+
+            if (!$existingRapKategori) {
+                return $this->response->setStatusCode(404)->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Kategori tidak ditemukan pada RAP ini',
+                ]);
+            }
+
+            $db->transStart();
+
+            $detailRows = $this->rapDetailModel
+                ->where('id_rap', $rapId)
+                ->where('id_kategori', $idKategori)
+                ->findAll();
+
+            foreach ($detailRows as $detail) {
+                $this->rapDetailItemModel
+                    ->where('id_rap_detail', $detail['id_rap_detail'])
+                    ->delete();
+            }
+
+            $this->rapDetailModel
+                ->where('id_rap', $rapId)
+                ->where('id_kategori', $idKategori)
+                ->delete();
+
+            $this->rapKategoriModel
+                ->where('id_rap', $rapId)
+                ->where('id_kategori', $idKategori)
+                ->delete();
+
+            $this->recalculateRapTotal($rapId);
+
+            $db->transComplete();
+
+            if ($db->transStatus() === false) {
+                throw new DatabaseException('Gagal menghapus kategori');
+            }
+
+            return $this->response->setJSON([
+                'status'  => 'success',
+                'message' => 'Kategori berhasil dihapus',
+            ]);
+        } catch (Throwable $e) {
+            if ($db->transStatus()) {
+                $db->transRollback();
+            }
+
+            return $this->response->setStatusCode(500)->setJSON([
+                'status'  => 'error',
+                'message' => $e->getMessage(),
+            ]);
+        }
+    }
+
     public function tambahPekerjaan()
     {
         $db = db_connect();
@@ -282,14 +418,32 @@ class RapController extends BaseController
 
             if ($idProject <= 0 || $idKategori <= 0) {
                 return $this->response->setStatusCode(400)->setJSON([
-                    'status' => 'error',
+                    'status'  => 'error',
                     'message' => 'id_project dan id_kategori wajib diisi',
+                ]);
+            }
+
+            $project = $this->proyekModel
+                ->where('id_project', $idProject)
+                ->first();
+
+            if (!$project) {
+                return $this->response->setStatusCode(404)->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Project tidak ditemukan',
+                ]);
+            }
+
+            if (($project['sumber_data'] ?? 'manual') !== 'manual') {
+                return $this->response->setStatusCode(403)->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Pekerjaan proyek estimator tidak dapat diubah',
                 ]);
             }
 
             if (!is_array($items) || empty($items)) {
                 return $this->response->setStatusCode(400)->setJSON([
-                    'status' => 'error',
+                    'status'  => 'error',
                     'message' => 'pekerjaan wajib berupa array',
                 ]);
             }
@@ -309,6 +463,7 @@ class RapController extends BaseController
                     'status_rap'        => 'draft',
                     'keterangan'        => null,
                 ]);
+
                 $rapId = (int) $this->rapModel->getInsertID();
             } else {
                 $rapId = (int) $rap['id_rap'];
@@ -407,16 +562,37 @@ class RapController extends BaseController
 
             if ($idRapDetail <= 0) {
                 return $this->response->setStatusCode(400)->setJSON([
-                    'status' => 'error',
+                    'status'  => 'error',
                     'message' => 'id_rap_detail tidak valid',
                 ]);
             }
 
             $detail = $this->rapDetailModel->find($idRapDetail);
+
             if (!$detail) {
                 return $this->response->setStatusCode(404)->setJSON([
-                    'status' => 'error',
+                    'status'  => 'error',
                     'message' => 'Data pekerjaan tidak ditemukan',
+                ]);
+            }
+
+            $rap = $this->rapModel->find($detail['id_rap']);
+
+            if (!$rap) {
+                return $this->response->setStatusCode(404)->setJSON([
+                    'status'  => 'error',
+                    'message' => 'RAP tidak ditemukan',
+                ]);
+            }
+
+            $project = $this->proyekModel
+                ->where('id_project', $rap['id_project'])
+                ->first();
+
+            if (($project['sumber_data'] ?? 'manual') !== 'manual') {
+                return $this->response->setStatusCode(403)->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Pekerjaan proyek estimator tidak dapat dihapus',
                 ]);
             }
 
@@ -448,7 +624,7 @@ class RapController extends BaseController
 
             if ($idRapDetail <= 0 || $idPekerjaan === '') {
                 return $this->response->setStatusCode(400)->setJSON([
-                    'status' => 'error',
+                    'status'  => 'error',
                     'message' => 'id_rap_detail dan id_pekerjaan wajib diisi',
                 ]);
             }
@@ -471,6 +647,7 @@ class RapController extends BaseController
             $this->rapDetailItemModel->where('id_rap_detail', $idRapDetail)->delete();
 
             $urutan = 0;
+
             foreach ($ahsRows as $row) {
                 $urutan++;
 

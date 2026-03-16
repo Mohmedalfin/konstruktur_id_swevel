@@ -16,21 +16,17 @@ export async function fetchKategoriMaster() {
 }
 
 export async function fetchRabData(idProject) {
-    try {
-        const baseUrl = (window.RAB_INIT && window.RAB_INIT.apiRapUrl)
-            ? window.RAB_INIT.apiRapUrl
-            : '/api/rap';
+    const res = await fetch(`/api/rap?id_project=${encodeURIComponent(idProject)}`, {
+        headers: {
+            Accept: 'application/json'
+        }
+    });
 
-        const url = new URL(baseUrl, window.location.origin);
-        url.searchParams.set('id_project', idProject);
+    const json = await res.json();
 
-        const res = await fetch(url.toString());
-        if (!res.ok) throw new Error('Gagal mengambil data RAP');
-
-        const json = await res.json();
-        return json.data || { categories: [] };
-    } catch (err) {
-        console.error(err);
-        return { categories: [] };
+    if (!res.ok || json.status !== 'success') {
+        throw new Error(json.message || 'Gagal mengambil data RAP');
     }
+
+    return json.data;
 }

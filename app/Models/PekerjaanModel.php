@@ -8,7 +8,7 @@ class PekerjaanModel extends Model
 {
     protected $DBGroup          = 'estimator';
     protected $table            = 'pekerjaan_utama';
-    protected $primaryKey       = '';
+    protected $primaryKey       = 'id_pekerjaan';
     protected $useAutoIncrement = false;
     protected $returnType       = 'array';
     protected $protectFields    = true;
