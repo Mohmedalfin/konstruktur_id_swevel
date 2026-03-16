@@ -26,3 +26,5 @@ export const kategoriModalInfo    = document.getElementById('kategori-modal-info
 export const kategoriModalClose   = document.getElementById('kategori-modal-close');
 export const kategoriModalCancel  = document.getElementById('kategori-modal-cancel');
 export const kategoriModalConfirm = document.getElementById('kategori-modal-confirm');
+export const kategoriManualInput  = document.getElementById('kategori-manual-input');
+export const kategoriManualAdd    = document.getElementById('kategori-manual-add');
