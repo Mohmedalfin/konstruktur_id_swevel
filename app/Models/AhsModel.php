@@ -6,6 +6,7 @@ use CodeIgniter\Model;
 
 class AhsModel extends Model
 {
+    protected $DBGroup          = 'estimator';
     protected $table            = 'ahs';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;

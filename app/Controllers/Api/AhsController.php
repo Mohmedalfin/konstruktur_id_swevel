@@ -19,7 +19,7 @@ class AhsController extends BaseController
     public function index(): ResponseInterface
     {
         try {
-            $db     = \Config\Database::connect();
+            $db     = \Config\Database::connect('estimator');
             $search = $this->request->getGet('q');
             $tipe   = $this->request->getGet('tipe');
             $page   = max(1, (int) $this->request->getGet('page'));
