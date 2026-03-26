@@ -15,6 +15,8 @@ class KategoriPekerjaanModel extends Model
 
     protected $allowedFields = [
         'nama_kategori',
+        'slug',
+        'id_project',
     ];
 
     protected $useTimestamps = false;
