@@ -1,27 +1,21 @@
-export async function fetchKategoriMaster() {
-    try {
-        const url = (window.RAB_INIT && window.RAB_INIT.apiKategoriMaster)
-            ? window.RAB_INIT.apiKategoriMaster
-            : '/api/rap/kategori-master';
+/**
+ * rab/core/data.js
+ * Data layer for RAP/RAB feature.
+ */
 
-        const res = await fetch(url);
-        if (!res.ok) throw new Error('Gagal mengambil kategori master');
-
-        const json = await res.json();
-        return json.data || [];
-    } catch (err) {
-        console.error(err);
-        return [];
-    }
-}
+export const dummyKategoriMaster = [
+    { id: 'persiapan', nama: 'Pekerjaan Persiapan' },
+    { id: 'struktur', nama: 'Pekerjaan Struktur' },
+    { id: 'arsitektur', nama: 'Pekerjaan Arsitektur' },
+    { id: 'mep', nama: 'Pekerjaan MEP' },
+    { id: 'finishing', nama: 'Pekerjaan Finishing' },
+];
 
 export async function fetchRabData(idProject) {
-    const res = await fetch(`/api/rap?id_project=${encodeURIComponent(idProject)}`, {
-        headers: {
-            Accept: 'application/json'
-        }
-    });
+    const url = new URL('/api/rap', window.location.origin);
+    url.searchParams.set('id_project', idProject);
 
+    const res = await fetch(url.toString());
     const json = await res.json();
 
     if (!res.ok || json.status !== 'success') {
@@ -29,4 +23,18 @@ export async function fetchRabData(idProject) {
     }
 
     return json.data;
+}
+
+export async function fetchKategoriMaster(idProject) {
+    const url = new URL('/api/rap/kategori-master', window.location.origin);
+    url.searchParams.set('id_project', idProject);
+
+    const res = await fetch(url.toString());
+    const json = await res.json();
+
+    if (!res.ok || json.status !== 'success') {
+        throw new Error(json.message || 'Gagal mengambil kategori master');
+    }
+
+    return json.data || [];
 }

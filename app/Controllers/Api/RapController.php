@@ -50,9 +50,18 @@ class RapController extends BaseController
                 ->where('id_project', $idProject)
                 ->first();
 
+            if (!$project) {
+                return $this->response->setStatusCode(404)->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Project tidak ditemukan',
+                ]);
+            }
+
             $sumberData = $project['sumber_data'] ?? 'manual';
 
-            $rap = $this->rapModel->where('id_project', $idProject)->first();
+            $rap = $this->rapModel
+                ->where('id_project', $idProject)
+                ->first();
 
             if (!$rap) {
                 return $this->response->setJSON([
@@ -69,19 +78,23 @@ class RapController extends BaseController
             $rapId = (int) $rap['id_rap'];
 
             $kategoriRows = $this->rapKategoriModel
-                ->select('rap_kategori.id_kategori, kategori_pekerjaan.nama_kategori')
+                ->select('rap_kategori.id_kategori, kategori_pekerjaan.nama_kategori, kategori_pekerjaan.id_project')
                 ->join(
                     'kategori_pekerjaan',
                     'kategori_pekerjaan.id_kategori_pekerjaan = rap_kategori.id_kategori',
                     'left'
                 )
                 ->where('rap_kategori.id_rap', $rapId)
+                ->groupStart()
+                    ->where('kategori_pekerjaan.id_project', $idProject)
+                    ->orWhere('kategori_pekerjaan.id_project', null)
+                ->groupEnd()
                 ->orderBy('kategori_pekerjaan.nama_kategori', 'ASC')
                 ->findAll();
 
             $detailRows = $this->rapDetailModel
                 ->where('id_rap', $rapId)
-                ->where('pekerjaan IS NOT NULL')
+                ->where('pekerjaan IS NOT NULL', null, false)
                 ->where('pekerjaan !=', '')
                 ->orderBy('id_kategori', 'ASC')
                 ->orderBy('urutan', 'ASC')
@@ -147,7 +160,20 @@ class RapController extends BaseController
     public function kategoriMaster()
     {
         try {
+            $idProject = (int) ($this->request->getGet('id_project') ?? 0);
+
+            if ($idProject <= 0) {
+                return $this->response->setStatusCode(400)->setJSON([
+                    'status'  => 'error',
+                    'message' => 'id_project wajib diisi',
+                ]);
+            }
+
             $rows = $this->kategoriModel
+                ->groupStart()
+                    ->where('id_project', $idProject)
+                    ->orWhere('id_project', null)
+                ->groupEnd()
                 ->orderBy('nama_kategori', 'ASC')
                 ->findAll();
 
@@ -214,7 +240,9 @@ class RapController extends BaseController
 
             $db->transStart();
 
-            $rap = $this->rapModel->where('id_project', $idProject)->first();
+            $rap = $this->rapModel
+                ->where('id_project', $idProject)
+                ->first();
 
             if (!$rap) {
                 $this->rapModel->insert([
@@ -245,12 +273,18 @@ class RapController extends BaseController
                 }
 
                 $existingKategori = $this->kategoriModel
+                    ->groupStart()
+                        ->where('id_project', $idProject)
+                        ->orWhere('id_project', null)
+                    ->groupEnd()
                     ->where('LOWER(nama_kategori)', strtolower($namaKategori))
+                    ->orderBy('id_project', 'ASC')
                     ->first();
 
                 if (!$existingKategori) {
                     $this->kategoriModel->insert([
                         'nama_kategori' => $namaKategori,
+                        'id_project'    => $idProject,
                     ]);
 
                     $kategoriId = (int) $this->kategoriModel->getInsertID();
@@ -335,12 +369,37 @@ class RapController extends BaseController
                 ]);
             }
 
-            $rap = $this->rapModel->where('id_project', $idProject)->first();
+            $rap = $this->rapModel
+                ->where('id_project', $idProject)
+                ->first();
 
             if (!$rap) {
                 return $this->response->setStatusCode(404)->setJSON([
                     'status'  => 'error',
                     'message' => 'RAP tidak ditemukan',
+                ]);
+            }
+
+            $kategori = $this->kategoriModel->find($idKategori);
+
+            if (!$kategori) {
+                return $this->response->setStatusCode(404)->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Kategori tidak ditemukan',
+                ]);
+            }
+
+            if ($kategori['id_project'] === null) {
+                return $this->response->setStatusCode(403)->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Kategori default tidak dapat dihapus dari master',
+                ]);
+            }
+
+            if ((int) $kategori['id_project'] !== $idProject) {
+                return $this->response->setStatusCode(403)->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Kategori ini bukan milik project aktif',
                 ]);
             }
 
@@ -380,6 +439,8 @@ class RapController extends BaseController
                 ->where('id_rap', $rapId)
                 ->where('id_kategori', $idKategori)
                 ->delete();
+
+            $this->kategoriModel->delete($idKategori);
 
             $this->recalculateRapTotal($rapId);
 
@@ -448,9 +509,26 @@ class RapController extends BaseController
                 ]);
             }
 
+            $kategori = $this->kategoriModel->find($idKategori);
+            if (!$kategori) {
+                return $this->response->setStatusCode(404)->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Kategori tidak ditemukan',
+                ]);
+            }
+
+            if ($kategori['id_project'] !== null && (int) $kategori['id_project'] !== $idProject) {
+                return $this->response->setStatusCode(403)->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Kategori ini bukan milik project aktif',
+                ]);
+            }
+
             $db->transStart();
 
-            $rap = $this->rapModel->where('id_project', $idProject)->first();
+            $rap = $this->rapModel
+                ->where('id_project', $idProject)
+                ->first();
 
             if (!$rap) {
                 $this->rapModel->insert([
@@ -589,6 +667,13 @@ class RapController extends BaseController
                 ->where('id_project', $rap['id_project'])
                 ->first();
 
+            if (!$project) {
+                return $this->response->setStatusCode(404)->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Project tidak ditemukan',
+                ]);
+            }
+
             if (($project['sumber_data'] ?? 'manual') !== 'manual') {
                 return $this->response->setStatusCode(403)->setJSON([
                     'status'  => 'error',
@@ -596,8 +681,12 @@ class RapController extends BaseController
                 ]);
             }
 
-            $this->rapDetailItemModel->where('id_rap_detail', $idRapDetail)->delete();
+            $this->rapDetailItemModel
+                ->where('id_rap_detail', $idRapDetail)
+                ->delete();
+
             $this->rapDetailModel->delete($idRapDetail);
+
             $this->recalculateRapTotal((int) $detail['id_rap']);
 
             return $this->response->setJSON([
@@ -644,7 +733,9 @@ class RapController extends BaseController
 
             $db->transStart();
 
-            $this->rapDetailItemModel->where('id_rap_detail', $idRapDetail)->delete();
+            $this->rapDetailItemModel
+                ->where('id_rap_detail', $idRapDetail)
+                ->delete();
 
             $urutan = 0;
 
