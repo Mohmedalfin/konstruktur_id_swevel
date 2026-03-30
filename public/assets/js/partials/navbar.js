@@ -18,6 +18,12 @@
         let isActive = false;
         if (isRoot) {
             isActive = currentPath === '' || currentPath === '/';
+        } else if (navPath === '/menu-rap') {
+            // RAB & RAP is active on /menu-rap/*, /proyek/* (project detail) and /proyek/menu/*
+            isActive = currentPath === navPath
+                || currentPath.startsWith(navPath + '/')
+                || currentPath.startsWith('/proyek/')
+                || currentPath.startsWith('/proyek/menu/');
         } else {
             isActive = currentPath === navPath || currentPath.startsWith(navPath + '/');
         }
@@ -32,6 +38,17 @@
             activeClasses.forEach(function (cls)   { link.classList.remove(cls); });
         }
     });
+
+    // --- Restore last project slug into the RAB & RAP nav link ---
+    const rabLink = document.querySelector('header nav a[data-nav-path="menu-rap"]');
+    if (rabLink) {
+        const lastSlug = localStorage.getItem('lastProjectSlug');
+        if (lastSlug) {
+            // Point directly back to the last visited project
+            const baseOrigin = window.location.origin;
+            rabLink.href = baseOrigin + '/proyek/' + lastSlug;
+        }
+    }
 
     // Make dropdown button active if its internal links correspond to the current page
     const dropBtn = document.getElementById('hs-header-base-dropdown');

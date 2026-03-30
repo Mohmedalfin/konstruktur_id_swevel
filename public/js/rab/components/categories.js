@@ -1,7 +1,8 @@
 import {
     kategoriModalOverlay,
     kategoriModalList,
-    kategoriModalConfirm
+    kategoriModalConfirm,
+    state
 } from '../core/state.js';
 
 import { fetchKategoriMaster } from '../core/data.js';
@@ -33,20 +34,30 @@ export async function openKategoriModal() {
             return;
         }
 
-        kategoriModalList.innerHTML = categories.map(cat => `
+        const activeIds = (state.activeCategories || []).map(c => String(c.id));
+
+        kategoriModalList.innerHTML = categories.map(cat => {
+            const isActive = activeIds.includes(String(cat.id));
+            const disabledAttr = isActive ? 'disabled checked' : '';
+            const bgClass = isActive ? 'bg-slate-50 opacity-60 cursor-not-allowed border-slate-200' : 'border-slate-200 hover:border-primary hover:bg-primary/5 cursor-pointer';
+            const textClass = isActive ? 'text-slate-400' : 'text-slate-700';
+
+            return `
             <li>
-                <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-200 hover:border-primary hover:bg-primary/5 cursor-pointer transition-all">
+                <label class="flex items-center gap-3 p-3 rounded-xl border ${bgClass} transition-all">
                     <input
                         type="checkbox"
-                        class="kategori-checkbox w-4 h-4 accent-primary rounded"
+                        class="kategori-checkbox w-4 h-4 accent-primary rounded disabled:opacity-50"
                         value="${cat.id}"
                         data-id="${cat.id}"
                         data-nama="${cat.nama}"
+                        ${disabledAttr}
                     >
-                    <span class="text-sm text-slate-700">${cat.nama}</span>
+                    <span class="text-sm ${textClass}">${cat.nama}</span>
+                    ${isActive ? `<span class="ml-auto text-[10px] bg-emerald-50 text-emerald-600 border border-emerald-200 px-2 py-0.5 rounded-full font-medium">Terpilih</span>` : ''}
                 </label>
             </li>
-        `).join('');
+        `}).join('');
 
         updateModalInfo();
     } catch (err) {

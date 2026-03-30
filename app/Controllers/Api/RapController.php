@@ -169,13 +169,21 @@ class RapController extends BaseController
                 ]);
             }
 
+            $idUser = session()->get('id_user'); // Assuming user ID is stored in session
+
             $rows = $this->kategoriModel
                 ->groupStart()
+                    ->where('jenis_kategori', 'sistem')
+                ->groupEnd()
+                ->orGroupStart()
+                    ->where('jenis_kategori', 'custom')
                     ->where('id_project', $idProject)
-                    ->orWhere('id_project', null)
+                    ->where('id_user', $idUser)
                 ->groupEnd()
                 ->orderBy('nama_kategori', 'ASC')
                 ->findAll();
+
+            error_log('SQL KategoriMaster: ' . $this->kategoriModel->builder()->getCompiledSelect());
 
             $data = array_map(function ($row) {
                 return [
@@ -186,6 +194,7 @@ class RapController extends BaseController
 
             return $this->response->setJSON([
                 'status' => 'success',
+                'sql'    => $this->kategoriModel->builder()->getCompiledSelect(),
                 'data'   => $data,
             ]);
         } catch (Throwable $e) {
@@ -272,19 +281,27 @@ class RapController extends BaseController
                     continue;
                 }
 
+                $idUser = session()->get('id_user');
+
                 $existingKategori = $this->kategoriModel
+                    ->where('nama_kategori', $namaKategori)
                     ->groupStart()
-                        ->where('id_project', $idProject)
-                        ->orWhere('id_project', null)
+                        ->where('jenis_kategori', 'sistem')
+                        ->orGroupStart()
+                            ->where('jenis_kategori', 'custom')
+                            ->where('id_project', $idProject)
+                            ->where('id_user', $idUser)
+                        ->groupEnd()
                     ->groupEnd()
-                    ->where('LOWER(nama_kategori)', strtolower($namaKategori))
                     ->orderBy('id_project', 'ASC')
                     ->first();
 
                 if (!$existingKategori) {
                     $this->kategoriModel->insert([
-                        'nama_kategori' => $namaKategori,
-                        'id_project'    => $idProject,
+                        'nama_kategori'  => $namaKategori,
+                        'id_project'     => $idProject,
+                        'id_user'        => $idUser,
+                        'jenis_kategori' => 'custom',
                     ]);
 
                     $kategoriId = (int) $this->kategoriModel->getInsertID();
@@ -389,20 +406,6 @@ class RapController extends BaseController
                 ]);
             }
 
-            if ($kategori['id_project'] === null) {
-                return $this->response->setStatusCode(403)->setJSON([
-                    'status'  => 'error',
-                    'message' => 'Kategori default tidak dapat dihapus dari master',
-                ]);
-            }
-
-            if ((int) $kategori['id_project'] !== $idProject) {
-                return $this->response->setStatusCode(403)->setJSON([
-                    'status'  => 'error',
-                    'message' => 'Kategori ini bukan milik project aktif',
-                ]);
-            }
-
             $rapId = (int) $rap['id_rap'];
 
             $existingRapKategori = $this->rapKategoriModel
@@ -439,8 +442,6 @@ class RapController extends BaseController
                 ->where('id_rap', $rapId)
                 ->where('id_kategori', $idKategori)
                 ->delete();
-
-            $this->kategoriModel->delete($idKategori);
 
             $this->recalculateRapTotal($rapId);
 

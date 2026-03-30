@@ -14,7 +14,9 @@ import {
     kategoriModalCancel,
     kategoriModalList,
     kategoriModalOverlay,
-    kategoriModalConfirm
+    kategoriModalConfirm,
+    kategoriManualAdd,
+    kategoriManualInput
 } from './core/state.js';
 
 import { fetchRabData } from './core/data.js';
@@ -36,6 +38,7 @@ import {
 import { initImport } from './components/import.js';
 import { initTemplate } from './components/template.js';
 import { bindSearch } from './hooks/search.js';
+import { toast } from '../shared/ui/toast.js';
 
 function applySourcePermission(data) {
     if (!tambahKategoriBtn) return;
@@ -138,13 +141,74 @@ if (!wrapper || !tbody) {
                 applySourcePermission(data);
                 renderReadonly(data);
 
+                toast.show('Kategori berhasil ditambahkan ke RAB!', 'success');
+
                 kategoriModalConfirm.disabled = false;
                 kategoriModalConfirm.textContent = oldText;
             } catch (err) {
                 console.error('Gagal tambah kategori:', err);
                 kategoriModalConfirm.disabled = false;
                 kategoriModalConfirm.textContent = oldText;
-                alert(err.message || 'Terjadi kesalahan saat menambahkan kategori');
+                toast.show(err.message || 'Terjadi kesalahan saat menambahkan kategori', 'error');
+            }
+        });
+    }
+
+    if (kategoriManualAdd && kategoriManualInput) {
+        kategoriManualAdd.addEventListener('click', async function (e) {
+            e.preventDefault();
+            const val = kategoriManualInput.value.trim();
+            if (!val) {
+                alert('Silakan ketik nama kategori baru terlebih dahulu.');
+                return;
+            }
+
+            const idProject = window.RAB_INIT?.idProject || window.RAB_INIT?.id;
+            if (!idProject) {
+                alert('ID project tidak ditemukan.');
+                return;
+            }
+
+            const oldText = kategoriManualAdd.textContent || 'Tambah';
+            kategoriManualAdd.disabled = true;
+            kategoriManualAdd.textContent = '...';
+
+            try {
+                const res = await fetch(window.RAB_INIT.apiKategoriUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        id_project: Number(idProject),
+                        kategori: [ { nama: val } ]
+                    })
+                });
+
+                const json = await res.json();
+                if (!res.ok || json.status !== 'success') {
+                    throw new Error(json.message || 'Gagal menyimpan kategori');
+                }
+
+                kategoriManualInput.value = '';
+                closeKategoriModal();
+                renderLoading();
+
+                const data = await fetchRabData(idProject);
+                state.activeCategories = (data.categories || []).map(cat => ({
+                    id: String(cat.id),
+                    nama: cat.name
+                }));
+
+                applySourcePermission(data);
+                renderReadonly(data);
+
+                toast.show('Kategori custom berhasil dibuat dan ditambahkan!', 'success');
+
+            } catch (err) {
+                console.error('Gagal tambah kategori manual:', err);
+                toast.show(err.message || 'Terjadi kesalahan', 'error');
+            } finally {
+                kategoriManualAdd.disabled = false;
+                kategoriManualAdd.textContent = oldText;
             }
         });
     }

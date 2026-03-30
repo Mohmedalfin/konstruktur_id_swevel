@@ -17,7 +17,6 @@ class AhsController extends BaseController
      *   page   int     – page number (default 1)
      * 
      */
-    a
     public function index(): ResponseInterface
     {
         try {
