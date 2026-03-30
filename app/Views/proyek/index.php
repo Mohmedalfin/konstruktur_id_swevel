@@ -24,19 +24,20 @@
   </div>
 
   <div>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 p-3 md:p-4">
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-3 md:gap-4 p-3 md:p-4">
 
       <!-- Nama Proyek -->
-      <div>
+      <div class="md:col-span-5">
         <label class="mb-1 block text-xs md:text-sm font-semibold text-text-primary">Nama Proyek</label>
         <input
           type="text"
+          id="filter-nama"
           placeholder="Masukkan Nama Proyek"
           class="w-full rounded-md border border-gray-300 px-2.5 py-1.5 md:px-3 md:py-2 text-xs md:text-sm focus:outline-none focus:ring-1 focus:ring-primary" />
       </div>
 
       <!-- Lokasi Proyek (Preline Select Optgroup) -->
-      <div class="relative">
+      <div class="relative md:col-span-5">
         <label class="mb-1 block text-xs md:text-sm font-semibold text-text-primary">Lokasi Proyek</label>
         <select id="filter-lokasi" data-hs-select='{
           "hasSearch": true,
@@ -66,11 +67,12 @@
       </div>
 
       <!-- Tahun -->
-      <div>
+      <div class="md:col-span-2">
         <label class="mb-1 block text-xs md:text-sm font-semibold text-text-primary">Tahun</label>
         <input
-          type="text"
-          placeholder="Tahun Proyek"
+          type="number"
+          id="filter-tahun"
+          placeholder="Tahun"
           class="w-full rounded-md border border-gray-300 px-2.5 py-1.5 md:px-3 md:py-2 text-xs md:text-sm focus:outline-none focus:ring-1 focus:ring-primary" />
       </div>
 
@@ -104,6 +106,15 @@
     }
     ?>
   </div>
+
+  <!-- Empty state untuk filter (JS) -->
+  <div id="filter-empty-state" class="hidden flex-col items-center justify-center py-20 text-center animate-fade-in">
+    <div class="mb-4 inline-flex h-20 w-20 items-center justify-center rounded-full bg-gray-50 border border-gray-100 shadow-inner text-gray-300">
+      <i class="fa-solid fa-folder-open text-3xl"></i>
+    </div>
+    <h3 class="text-base sm:text-lg font-semibold text-gray-700">Tidak Ada Proyek Ditemukan</h3>
+    <p class="mt-1 max-w-sm mx-auto text-xs sm:text-sm text-gray-400">Data yang Anda cari tidak tersedia. Cobalah kata kunci lain atau ubah pengaturan filter Lokasi & Tahun Anda.</p>
+  </div>
 </div>
 <?= $this->endSection() ?>
 
@@ -131,6 +142,58 @@
             document.getElementById('form-delete-' + id).submit();
         }
     };
+
+    // Script Filter Real-Time Card Tanpa Reload (Client-side)
+    document.addEventListener('DOMContentLoaded', () => {
+        const inputNama = document.getElementById('filter-nama');
+        const inputTahun = document.getElementById('filter-tahun');
+        const selectLokasi = document.getElementById('filter-lokasi');
+        const cards = document.querySelectorAll('.proyek-card');
+        const emptyState = document.getElementById('filter-empty-state');
+        const gridContainer = document.querySelector('.grid.grid-cols-2'); // Optional, to hide/margin the grid if wanted
+
+        function filterCards() {
+            const valNama = inputNama ? inputNama.value.toLowerCase().trim() : '';
+            const valLokasi = selectLokasi ? selectLokasi.value.toLowerCase().trim() : '';
+            const valTahun = inputTahun ? inputTahun.value.trim() : '';
+
+            let visibleCount = 0;
+
+            cards.forEach(card => {
+                const cardNama = card.getAttribute('data-nama') || '';
+                const cardLokasi = card.getAttribute('data-lokasi') || '';
+                const cardTahun = card.getAttribute('data-tahun') || '';
+
+                const matchNama = cardNama.includes(valNama);
+                const matchTahun = valTahun === "" || cardTahun === valTahun;
+                
+                // Pencocokan fleksibel lokasi (karena format data bisa "Demak" vs "Kabupaten Demak, Jawa Tengah")
+                const matchLokasi = valLokasi === "" || cardLokasi.includes(valLokasi) || valLokasi.includes(cardLokasi);
+
+                if (matchNama && matchLokasi && matchTahun) {
+                    card.style.display = ''; 
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            // Tampilkan icon data kosong jika tidak ada yang matching
+            if (emptyState) {
+                if (visibleCount === 0 && cards.length > 0) {
+                    emptyState.classList.remove('hidden');
+                    emptyState.classList.add('flex');
+                } else {
+                    emptyState.classList.add('hidden');
+                    emptyState.classList.remove('flex');
+                }
+            }
+        }
+
+        if (inputNama) inputNama.addEventListener('input', filterCards);
+        if (inputTahun) inputTahun.addEventListener('input', filterCards);
+        if (selectLokasi) selectLokasi.addEventListener('change', filterCards);
+    });
 
 </script>
 <?= $this->endSection() ?>

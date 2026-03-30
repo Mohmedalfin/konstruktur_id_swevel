@@ -57,6 +57,7 @@ class AuthService
             'isLoggedIn'      => true,
             'id_user'         => $user['id_user'],
             'kode_user'       => $user['kode_user'],
+            'nama_lengkap'    => $user['nama_lengkap'],
             'nama_perusahaan' => $user['nama_perusahaan'],
             'posisi_pekerjaan'=> $user['posisi_pekerjaan']
         ]);

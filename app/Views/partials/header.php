@@ -1,6 +1,6 @@
 <?php
-$userName = session()->get('nama_pengguna') ?? session()->get('nama') ?? 'Pengguna';
-$userRole = session()->get('kategori_akun') ?? session()->get('role') ?? 'Kontraktor';
+$userName = session()->get('nama_lengkap') ?? 'Pengguna';
+$userRole = session()->get('posisi_pekerjaan') ?? 'Kontraktor';
 ?>
 
 <!-- ========== HEADER ========== -->
@@ -63,8 +63,12 @@ $userRole = session()->get('kategori_akun') ?? session()->get('role') ?? 'Kontra
                                     </div>
 
                                     <div class="leading-tight text-left">
-                                        <div class="text-sm font-medium text-white"><?= esc($userName) ?></div>
-                                        <div class="text-xs text-secondary opacity-80"><?= esc($userRole) ?></div>
+                                        <div class="text-sm font-medium text-white truncate max-w-[95px]" title="<?= esc($userName) ?>">
+                                            <?= esc($userName) ?>
+                                        </div>
+                                        <div class="text-xs text-secondary opacity-80 truncate max-w-[95px]" title="<?= esc($userRole) ?>">
+                                            <?= esc($userRole) ?>
+                                        </div>
                                     </div>
 
                                     <svg class="text-white hs-dropdown-open:-rotate-180 duration-300 shrink-0 size-4 ms-auto md:ms-1 group-hover:translate-y-0.5" 

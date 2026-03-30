@@ -16,7 +16,10 @@ $pctCls = match (true) {
 };
 ?>
 
-<div class="group relative flex flex-col overflow-hidden rounded-2xl bg-white border border-table-border shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
+<div class="group relative flex flex-col overflow-hidden rounded-2xl bg-white border border-table-border shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 proyek-card"
+     data-nama="<?= esc(strtolower($title)) ?>"
+     data-lokasi="<?= esc(strtolower($lokasi)) ?>"
+     data-tahun="<?= esc(date('Y', strtotime($tgl))) ?>">
 
     <!-- Full-card click target (sits behind dropdowns) -->
     <a href="<?= esc($href) ?>" class="absolute inset-0 z-10" aria-label="Buka proyek <?= esc($title) ?>"></a>
@@ -58,6 +61,9 @@ $pctCls = match (true) {
                         <a class="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-2.5 text-xs text-slate-700 hover:bg-slate-50" href="#">
                             <i class="fa-solid fa-user-plus w-3.5 sm:w-4 text-primary shrink-0"></i> Undang Tim
                         </a>
+                        <button type="button" class="w-full text-left flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-2.5 text-xs text-slate-700 hover:bg-slate-50">
+                            <i class="fa-solid fa-pen-to-square w-3.5 sm:w-4 text-emerald-500 shrink-0"></i> Edit Proyek
+                        </button>
                         <button type="button" onclick="handleProyekComplete(<?= $id ?>, '<?= esc($title, 'js') ?>')" class="w-full text-left flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-2.5 text-xs text-slate-700 hover:bg-slate-50">
                             <i class="fa-solid fa-circle-check w-3.5 sm:w-4 text-emerald-500 shrink-0"></i> Selesaikan
                         </button>
