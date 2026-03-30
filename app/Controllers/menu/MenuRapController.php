@@ -37,7 +37,7 @@ class MenuRapController extends BaseController
         return view('proyek/menu/tambah-ahs');
     }
     
-    public function mainPekerjaan()
+    public function tambahPekerjaan()
     {
         $slug = $this->request->getGet('slug');
         $idProject = $this->request->getGet('id');

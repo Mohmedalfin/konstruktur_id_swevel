@@ -16,6 +16,7 @@ if (! in_array($rabMode, ['readonly', 'new'], true)) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Menu RAB &amp; RAP</title>
     <link href="<?= base_url('assets/css/output.css') ?>" rel="stylesheet">
+    <link rel="stylesheet" href="<?= base_url('assets/fontawesome/css/all.min.css') ?>">
 </head>
 <body class="bg-gray-50 min-h-screen">
     <?php echo view('partials/navbar'); ?>
@@ -51,6 +52,11 @@ if (! in_array($rabMode, ['readonly', 'new'], true)) {
             apiKategoriMaster: <?= json_encode(base_url('api/rap/kategori-master')) ?>,
             apiPekerjaanUrl: <?= json_encode(base_url('api/rap/pekerjaan')) ?>
         };
+
+        // Persist the current project slug so the navbar can restore it
+        if (window.RAB_INIT.slug) {
+            localStorage.setItem('lastProjectSlug', window.RAB_INIT.slug);
+        }
     </script>
 
     <script src="<?= base_url('assets/js/preline.js') ?>"></script>

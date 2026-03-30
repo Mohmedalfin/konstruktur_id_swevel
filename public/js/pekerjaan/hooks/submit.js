@@ -57,7 +57,14 @@ export function bindSubmit() {
                 rabUrl = sessionStorage.getItem('rab_return_url') || '';
             } catch (_) { }
 
-            window.location.href = rabUrl || `/menu-rap?id=${idProject}`;
+            // Prefer the stored return URL (e.g. /proyek/my-slug), then try
+            // localStorage slug, then fall back to the proyek list.
+            if (!rabUrl) {
+                const slug = localStorage.getItem('lastProjectSlug');
+                rabUrl = slug ? `/proyek/${slug}` : '/proyek';
+            }
+
+            window.location.href = rabUrl;
         } catch (err) {
             alert(err.message || 'Terjadi kesalahan saat menyimpan pekerjaan');
             submitBtn.textContent = 'Tambah ke RAB';

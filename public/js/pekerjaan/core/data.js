@@ -10,6 +10,8 @@ export async function fetchTambahAhsData(query, sources, page) {
         const url = new URL('/api/pekerjaan', window.location.origin);
         url.searchParams.append('page',  page);
         url.searchParams.append('limit', PAGE_SIZE);
+        const idProject = window.RAB_INIT?.idProject || '';
+        if (idProject)              url.searchParams.append('id_project', idProject);
         if (query)                  url.searchParams.append('q', query);
         if (sources && sources.length > 0) sources.forEach(s => url.searchParams.append('sumber[]', s));
 

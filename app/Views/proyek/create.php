@@ -138,47 +138,21 @@
                             <!-- Tanggal Mulai -->
                             <div>
                                 <label class="mb-1 block text-md font-semibold text-text-primary">Tanggal Mulai</label>
-
                                 <input
                                     name="tanggal_mulai"
-                                    class="hs-datepicker py-3 px-4 block w-full bg-white border border-gray-300 sm:text-sm text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                                    type="text"
-                                    placeholder="YYYY.MM.DD"
-                                    autocomplete="off"
-                                    onkeydown="return false"
-                                    data-hs-datepicker='{
-                                      "type": "default",
-                                      "applyUtilityClasses": true,
-                                      "dateMax": "2050-12-31",
-                                      "mode": "custom-select",
-                                      "templates": {
-                                        "arrowPrev": "<button data-vc-arrow=\"prev\"><svg class=\"shrink-0 size-4\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m15 18-6-6 6-6\"></path></svg></button>",
-                                        "arrowNext": "<button data-vc-arrow=\"next\"><svg class=\"shrink-0 size-4\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m9 18 6-6-6-6\"></path></svg></button>"
-                                      }
-                                    }'>
+                                    class="py-3 px-4 block w-full bg-white border border-gray-300 sm:text-sm text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                                    type="date"
+                                    required>
                             </div>
 
                             <!-- Estimasi Selesai -->
                             <div>
                                 <label class="mb-1 block text-md font-semibold text-text-primary">Estimasi Selesai</label>
-
                                 <input
                                     name="estimasi_selesai"
-                                    class="hs-datepicker py-3 px-4 block w-full bg-white border border-gray-300 sm:text-sm text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                                    type="text"
-                                    placeholder="YYYY.MM.DD"
-                                    autocomplete="off"
-                                    onkeydown="return false"
-                                    data-hs-datepicker='{
-                                      "type": "default",
-                                      "applyUtilityClasses": true,
-                                      "dateMax": "2050-12-31",
-                                      "mode": "custom-select",
-                                      "templates": {
-                                        "arrowPrev": "<button data-vc-arrow=\"prev\"><svg class=\"shrink-0 size-4\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m15 18-6-6 6-6\"></path></svg></button>",
-                                        "arrowNext": "<button data-vc-arrow=\"next\"><svg class=\"shrink-0 size-4\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m9 18 6-6-6-6\"></path></svg></button>"
-                                      }
-                                    }'>
+                                    class="py-3 px-4 block w-full bg-white border border-gray-300 sm:text-sm text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                                    type="date"
+                                    required>
                             </div>
 
                         </div>

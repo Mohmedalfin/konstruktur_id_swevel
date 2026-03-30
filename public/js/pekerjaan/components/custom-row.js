@@ -72,21 +72,65 @@ export function bindCustomRow() {
 
         customRow.querySelector('.custom-add-cancel').addEventListener('click', () => customRow.remove());
 
-        customRow.querySelector('.custom-add-confirm').addEventListener('click', function () {
+        customRow.querySelector('.custom-add-confirm').addEventListener('click', async function () {
+            const btn = this;
             const nama   = customRow.querySelector('[data-field="nama"]').value.trim();
             const satuan = customRow.querySelector('[data-field="satuan"]').value.trim() || 'm²';
-            const sumber = customRow.querySelector('[data-field="sumber"]').value.trim() || 'Menual';
+            const sumber = customRow.querySelector('[data-field="sumber"]').value.trim() || 'Manual';
+
             if (!nama) {
                 customRow.querySelector('[data-field="nama"]').focus();
                 toast.show('Nama Pekerjaan wajib diisi', 'error');
                 return;
             }
 
-            const tempId = 'custom-' + Date.now();
-            state.selected[tempId] = { id: tempId, nama, satuan, harga: 0, sumber };
-            customRow.remove();
-            updateSubmitBar();
-            toast.show('Pekerjaan custom berhasil ditambahkan ke pilihan', 'success');
+            // AJAX Save to Database
+            btn.disabled = true;
+            btn.innerHTML = '<span class="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>';
+
+            try {
+                const response = await fetch('/api/pekerjaan/custom', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        nama,
+                        satuan,
+                        id_project: window.RAB_INIT?.idProject || null
+                    })
+                });
+
+                const result = await response.json();
+
+                if (!response.ok || result.status !== 'success') {
+                    throw new Error(result.message || 'Gagal menyimpan ke database');
+                }
+
+                const newId = result.data.id;
+
+                // Add to selection state
+                state.selected[newId] = { 
+                    id: newId, 
+                    nama, 
+                    satuan, 
+                    harga: 0, 
+                    sumber: 'Proyek Terkini' 
+                };
+
+                customRow.remove();
+                updateSubmitBar();
+                toast.show('Pekerjaan berhasil disimpan dan ditambahkan ke pilihan', 'success');
+
+                // Trigger reload table so it appears in the master list
+                window.dispatchEvent(new CustomEvent('tambahAhsPageChange', { 
+                    detail: { page: 1 } 
+                }));
+
+            } catch (err) {
+                console.error(err);
+                toast.show(err.message, 'error');
+                btn.disabled = false;
+                btn.textContent = 'Tambah';
+            }
         });
     });
 }

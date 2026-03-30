@@ -27,10 +27,32 @@
     <script src="<?= base_url('assets/js/preline.js') ?>"></script>
     <script src="<?= base_url('assets/js/partials/navbar.js') ?>"></script>
     <script>
-        const params = new URLSearchParams(window.location.search);
-        window.RAB_INIT = {
-            idProject: params.get('id') || sessionStorage.getItem('current_id_project') || null
-        };
+        (function () {
+            const params = new URLSearchParams(window.location.search);
+
+            const idProject   = params.get('id')           || sessionStorage.getItem('current_id_project') || null;
+            const kategoriId  = params.get('kategori_id')  || sessionStorage.getItem('rab_tambah_ahs_cat')  || null;
+            const slug        = params.get('slug')          || localStorage.getItem('lastProjectSlug')       || null;
+
+            window.RAB_INIT = { idProject };
+
+            // Persist for submit.js
+            if (idProject)  sessionStorage.setItem('current_id_project', idProject);
+            if (kategoriId) sessionStorage.setItem('rab_tambah_ahs_cat',  kategoriId);
+
+            // Build the return URL so after submit we land back on the right project
+            if (slug) {
+                sessionStorage.setItem('rab_return_url', `/proyek/${slug}`);
+                localStorage.setItem('lastProjectSlug', slug);
+            }
+
+            // Show the kategori name in the context banner
+            const label = document.getElementById('tambah-ahs-pekerjaan-label');
+            if (label) {
+                const nama = params.get('kategori_nama');
+                if (nama) label.textContent = decodeURIComponent(nama.replace(/\+/g, ' '));
+            }
+        })();
     </script>
     <script>
         window.addEventListener('load', function () {

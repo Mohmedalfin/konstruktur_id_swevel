@@ -276,10 +276,27 @@ export function bindDeleteCategoryButtons() {
 
                 renderLoading();
                 const data = await fetchRabData(idProject);
+                
+                state.activeCategories = (data.categories || []).map(cat => ({
+                    id: String(cat.id),
+                    nama: cat.name
+                }));
+
                 renderReadonly(data);
+                
+                // Show toast specifically for UI completeness
+                if (window.Toast) {
+                    window.Toast.show(`Kategori "${catName}" berhasi dihapus dari project`, 'success');
+                } else if (typeof toast !== 'undefined' && toast.show) {
+                    toast.show(`Kategori "${catName}" berhasi dihapus dari project`, 'success');
+                }
             } catch (err) {
                 console.error('Gagal hapus kategori:', err);
-                alert(err.message || 'Terjadi kesalahan saat menghapus kategori');
+                if (window.Toast) {
+                    window.Toast.show(err.message || 'Terjadi kesalahan saat menghapus kategori', 'error');
+                } else {
+                    alert(err.message || 'Terjadi kesalahan saat menghapus kategori');
+                }
             }
         });
     });
@@ -391,10 +408,24 @@ export function bindReadonlyDropdowns() {
 
                 renderLoading();
                 const data = await fetchRabData(idProject);
+
+                state.activeCategories = (data.categories || []).map(cat => ({
+                    id: String(cat.id),
+                    nama: cat.name
+                }));
+
                 renderReadonly(data);
+
+                if (window.Toast) {
+                    window.Toast.show('Pekerjaan berhasil dihapus dari RAB', 'success');
+                }
             } catch (err) {
                 console.error('Gagal hapus pekerjaan:', err);
-                alert(err.message || 'Terjadi kesalahan saat menghapus');
+                if (window.Toast) {
+                    window.Toast.show(err.message || 'Terjadi kesalahan saat menghapus', 'error');
+                } else {
+                    alert(err.message || 'Terjadi kesalahan saat menghapus');
+                }
             }
         });
     });

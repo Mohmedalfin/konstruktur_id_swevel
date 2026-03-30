@@ -14,6 +14,14 @@ class ProyekController extends BaseController
 
         $cards = [];
         foreach ($proyeks as $p) {
+            $slug = $p['slug'];
+            
+            // Auto-generate missing slug for old projects
+            if (empty($slug)) {
+                $slug = $proyekModel->generateUniqueSlug($p['nama_proyek'] ?? 'proyek', $p['id_project']);
+                $proyekModel->update($p['id_project'], ['slug' => $slug]);
+            }
+
             $cards[] = [
                 'id'     => $p['id_project'],
                 'title'  => $p['nama_proyek'],
@@ -21,7 +29,7 @@ class ProyekController extends BaseController
                 'nilai'  => $p['harga_deal'] > 0 ? 'Rp ' . number_format($p['harga_deal'], 0, ',', '.') : null,
                 'pct'    => '0%', // Temporary placeholder until RAB/Realization logic is implemented
                 'tgl'    => $p['tanggal_mulai'] ?? date('Y-m-d', strtotime($p['created_at'])),
-                'href'   => base_url('proyek/' . $p['slug']),
+                'href'   => base_url('proyek/' . $slug),
                 'foto'   => $p['foto_proyek'] // Passing the photo for the view
             ];
         }

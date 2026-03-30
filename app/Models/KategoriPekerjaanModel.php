@@ -17,6 +17,8 @@ class KategoriPekerjaanModel extends Model
         'nama_kategori',
         'slug',
         'id_project',
+        'id_user',
+        'jenis_kategori',
     ];
 
     protected $useTimestamps = false;
