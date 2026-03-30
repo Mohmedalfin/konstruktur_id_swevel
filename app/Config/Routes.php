@@ -8,19 +8,28 @@ use CodeIgniter\Router\RouteCollection;
 // --------------------------------------------------------------------
 // RUTE WEB (Menangani Tampilan / HTML / View)
 // --------------------------------------------------------------------
+
+// 1. Rute Publik (Tanpa JWT)
 $routes->group('', function ($routes) {
-    
     // Auth & Registrasi
-    $routes->get('/', 'Home::login');
-    $routes->get('Register', 'Home::register');
+    $routes->get('/', 'AuthController::login');
+    $routes->get('Register', 'AuthController::register');
+    $routes->post('auth/process-register', 'AuthController::processRegister');
+    $routes->post('auth/process-login', 'AuthController::processLogin');
+    $routes->get('logout', 'AuthController::logout');
     $routes->get('registrasi', 'Registrasi::index');
     $routes->post('registrasi/simpan', 'Registrasi::simpan');
+});
 
+// 2. Rute Terlindungi (Harus lewat Session Auth)
+$routes->group('', ['filter' => 'auth'], function ($routes) {
     // Proyek
     $routes->get('data-empiris', 'Proyek::dataEmpiris');
-    $routes->get('/proyek', 'ProyekController::index');
-    $routes->get('/proyek/create', 'ProyekController::create');
-    $routes->post('/proyek/store', 'ProyekController::store');
+    $routes->get('/proyek', 'menu\ProyekController::index');
+    $routes->get('/proyek/create', 'menu\ProyekController::create');
+    $routes->post('/proyek/store', 'menu\ProyekController::store');
+    $routes->post('/proyek/complete/(:num)', 'menu\ProyekController::complete/$1');
+    $routes->post('/proyek/delete/(:num)', 'menu\ProyekController::delete/$1');
 
     // Dashboard
     $routes->get('/dashboard', 'menu\DashboardController::index');
@@ -39,7 +48,7 @@ $routes->group('', function ($routes) {
 // --------------------------------------------------------------------
 // RUTE API (Menangani Data Mentah JSON)
 // --------------------------------------------------------------------
-$routes->group('api', ['namespace' => 'App\Controllers\Api'], function ($routes) {
+$routes->group('api', ['namespace' => 'App\Controllers\Api', 'filter' => 'auth'], function ($routes) {
     $routes->get('pekerjaan', 'PekerjaanController::index');
     $routes->get('ahs', 'AhsController::index');
 });

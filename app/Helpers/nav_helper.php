@@ -37,7 +37,19 @@ if (! function_exists('is_nav_active')) {
     function is_nav_active(string $path): bool
     {
         $linkUrl = rtrim(base_url($path), '/');
-        $currUrl = rtrim(str_replace('/index.php', '', current_url()), '/');
+        // Get the current URL
+        $currUrl = current_url();
+        // Remove index.php
+        $currUrl = str_replace('/index.php', '', $currUrl);
+        // Strip query strings thoroughly
+        if (($pos = strpos($currUrl, '?')) !== false) {
+            $currUrl = substr($currUrl, 0, $pos);
+        }
+        $currUrl = rtrim($currUrl, '/');
+
+        if (($pos = strpos($linkUrl, '?')) !== false) {
+            $linkUrl = substr($linkUrl, 0, $pos);
+        }
 
         if ($path === '' || $path === '/') {
             return $linkUrl === $currUrl;

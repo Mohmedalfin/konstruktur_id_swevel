@@ -151,18 +151,51 @@ window.addEventListener('DOMContentLoaded', () => {
 
     if (!isValid) return;
 
-    const user = DUMMY_USERS.find(u => u.email === email);
-
-    if (!user) {
-      showToast('error', 'Login Gagal', 'Email tidak terdaftar. Silakan periksa kembali email Anda.');
-      return;
+    // Submit ke backend dengan AJAX tanpa refresh
+    const formData = new FormData(loginForm);
+    const submitBtn = loginForm.querySelector('button[type="submit"]');
+    const originalText = submitBtn ? submitBtn.innerHTML : '';
+    
+    if (submitBtn) {
+      submitBtn.innerHTML = 'Memproses...';
+      submitBtn.disabled = true;
     }
 
-    if (user.password !== password) {
-      showToast('error', 'Login Gagal', 'Password salah. Silakan coba lagi.');
-      return;
-    }
+    fetch(loginForm.action, {
+      method: 'POST',
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (submitBtn) {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+      }
+      
+      if (data.status === 'success') {
+        showToast('success', 'Login Berhasil', data.message);
+        setTimeout(() => {
+          if (data.redirect) {
+            window.location.href = data.redirect;
+          } else {
+            window.location.reload();
+          }
+        }, 1500);
+      } else {
+        showToast('error', 'Login Gagal', data.message || 'Error occurred');
+      }
+    })
+    .catch(error => {
+      if (submitBtn) {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+      }
+      showToast('error', 'Koneksi Gagal', 'Sistem tidak dapat terhubung ke server.');
+      console.error(error);
+    });
 
-    showToast('success', 'Login Berhasil', 'Selamat datang kembali! Anda akan dialihkan...');
   });
 });

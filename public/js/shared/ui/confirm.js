@@ -25,6 +25,8 @@ const AppSwal = Swal.mixin({
     },
     buttonsStyling: false,   // ← We supply our own Tailwind classes
     reverseButtons:  true,   // Cancel on left, Confirm on right
+    heightAuto: false,       // ← Prevent SweetAlert from messing with body height (fixes layout jumps)
+    scrollbarPadding: false, // ← Prevent visual shifts from Scrollbar compensation
 });
 
 // -------------------------------------------------------------------
@@ -75,6 +77,36 @@ export async function confirmInfo(title, html) {
         confirmButtonText:  'Lanjutkan',
         cancelButtonText:   'Batal',
         focusConfirm:       true,
+    });
+    return result.isConfirmed;
+}
+
+// -------------------------------------------------------------------
+// confirmProyekHapus / confirmProyekSelesai
+// For project lifecycle actions
+// -------------------------------------------------------------------
+export async function confirmProyekHapus(label) {
+    const result = await AppSwal.fire({
+        icon:               'warning',
+        title:              'Hapus Proyek?',
+        html:               `Data Proyek <strong>${label}</strong> beserta data RAB & Schedule akan dihapus (Soft Delete).`,
+        showCancelButton:   true,
+        confirmButtonText:  'Ya, Hapus',
+        cancelButtonText:   'Batal',
+        focusCancel:        true,
+    });
+    return result.isConfirmed;
+}
+
+export async function confirmProyekSelesai(label) {
+    const result = await AppSwal.fire({
+        icon:               'question',
+        title:              'Selesaikan Proyek?',
+        html:               `Proyek <strong>${label}</strong> akan ditandai Selesai dan tidak dapat diubah lagi (Read-Only).`,
+        showCancelButton:   true,
+        confirmButtonText:  'Ya, Tandai Selesai',
+        cancelButtonText:   'Batal',
+        focusCancel:        true,
     });
     return result.isConfirmed;
 }

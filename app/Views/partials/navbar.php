@@ -1,3 +1,4 @@
+<?= $this->include('partials/preloader') ?>
 <!-- ========== HEADER ========== -->
 <header class="flex flex-wrap md:justify-start md:flex-nowrap z-50 bg-navbar border-b border-navbar-line sticky top-0 transition-all duration-500 ease-in-out">
   <nav class="relative max-w-[85rem] w-full mx-auto md:flex md:items-center md:justify-between md:gap-3 py-2 px-4 sm:px-6 lg:px-8">
@@ -34,7 +35,7 @@
 
               <a class="<?= get_nav_class('menu-rap') ?>" href="<?= base_url('menu-rap') ?>" data-nav-path="menu-rap" <?= is_nav_active('menu-rap') ? 'aria-current="page"' : '' ?>>
                 <svg class="shrink-0 size-4 me-3 md:me-2 block md:hidden" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                RAB & RAP
+                RAP
               </a>
 
               <a class="<?= get_nav_class('schedule') ?>" href="<?= base_url('schedule') ?>" data-nav-path="schedule" <?= is_nav_active('schedule') ? 'aria-current="page"' : '' ?>>

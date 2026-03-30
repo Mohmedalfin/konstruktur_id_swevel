@@ -102,7 +102,7 @@
       if (!isValid) return;
 
       // All valid — form would submit here
-      alert('Registrasi berhasil! (dummy)');
+      form.submit();
     });
   });
 })();

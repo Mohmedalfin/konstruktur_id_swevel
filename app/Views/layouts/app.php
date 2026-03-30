@@ -11,6 +11,7 @@
 </head>
 
 <body class="bg-gray-50">
+    <?= $this->include('partials/preloader') ?>
 
     <?= $this->include('partials/header') ?>
     <?php echo view('partials/topbar', ['title' => 'Daftar Project', 'subtitle' => '']); ?>

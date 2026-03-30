@@ -9,7 +9,7 @@
     const navLinks = document.querySelectorAll('header nav a[data-nav-path]');
 
     const activeClasses   = ['bg-white', 'text-gray-900', 'font-semibold'];
-    const inactiveClasses = ['text-navbar-nav-foreground', 'hover:bg-navbar-nav-hover', 'focus:bg-navbar-nav-focus'];
+    const inactiveClasses = ['text-navbar-foreground', 'hover:bg-navbar-hover', 'focus:bg-navbar-focus'];
 
     navLinks.forEach(function (link) {
         const navPath = '/' + link.dataset.navPath.replace(/^\//, '');

@@ -20,43 +20,48 @@
 
   <!-- Header -->
   <div class="flex items-center gap-2 bg-primary px-4 py-2.5 text-white rounded-t-xl">
-    <i class="fa-solid fa-filter text-xs"></i>
     <span class="text-sm font-semibold">Tampilkan Berdasarkan</span>
   </div>
 
   <div>
-    <div class="grid grid-cols-2 gap-3 p-3 md:grid-cols-3 md:gap-4 md:p-4">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 p-3 md:p-4">
 
       <!-- Nama Proyek -->
-      <div class="col-span-2 md:col-span-1">
+      <div>
         <label class="mb-1 block text-xs md:text-sm font-semibold text-text-primary">Nama Proyek</label>
         <input
           type="text"
           placeholder="Masukkan Nama Proyek"
-          class="w-full rounded-md border border-gray-300 px-2.5 py-1.5 md:px-3 md:py-2 text-xs md:text-sm focus:outline-none focus:ring-1 focus:ring-blue-500" />
+          class="w-full rounded-md border border-gray-300 px-2.5 py-1.5 md:px-3 md:py-2 text-xs md:text-sm focus:outline-none focus:ring-1 focus:ring-primary" />
       </div>
 
-      <!-- Lokasi Proyek (Preline Select) -->
+      <!-- Lokasi Proyek (Preline Select Optgroup) -->
       <div class="relative">
         <label class="mb-1 block text-xs md:text-sm font-semibold text-text-primary">Lokasi Proyek</label>
-        <select id="hs-search-both-value-and-description" data-hs-select='{
+        <select id="filter-lokasi" data-hs-select='{
           "hasSearch": true,
           "isSearchDirectMatch": false,
-          "searchPlaceholder": "Search...",
-          "searchClasses": "block w-full text-sm bg-white border border-gray-300 rounded-md px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500",
-          "searchWrapperClasses": "bg-white p-2 -mx-1 sticky top-0",
-          "placeholder": "Pilih Lokasi",
+          "searchPlaceholder": "Cari Kabupaten/Kota...",
+          "searchClasses": "block w-full text-sm bg-white border border-gray-300 rounded-md px-3 py-2 mb-1 focus:border-primary focus:ring-1 focus:ring-primary",
+          "searchWrapperClasses": "bg-white p-2 -mx-1 sticky top-0 z-10",
+          "placeholder": "Semua Lokasi",
           "toggleTag": "<button type=\"button\" aria-expanded=\"false\"></button>",
-          "toggleClasses": "relative py-1.5 ps-2.5 pe-8 md:py-2 md:ps-3 md:pe-9 flex w-full cursor-pointer bg-white border border-gray-300 rounded-md text-start text-xs md:text-sm hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-blue-500",
-          "dropdownClasses": "mt-2 z-50 w-full max-h-72 p-1 space-y-0.5 bg-white border border-gray-200 rounded-lg shadow-xl overflow-hidden overflow-y-auto",
-          "optionClasses": "hs-selected:bg-gray-100 py-2 px-3 w-full text-sm text-gray-800 cursor-pointer hover:bg-gray-50 rounded-md",
-          "optionTemplate": "<div class=\"flex items-center\"><div class=\"me-2\" data-icon></div><div><div class=\"hs-selected:font-semibold text-sm\" data-title></div><div class=\"text-xs text-gray-500\" data-description></div></div><div class=\"ms-auto\"><span class=\"hidden hs-selected:block\"><svg class=\"size-4\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 16 16\" fill=\"currentColor\"><path d=\"M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022Z\"/></svg></span></div></div>",
-          "extraMarkup": "<div class=\"absolute top-1/2 end-3 -translate-y-1/2\"><svg class=\"size-4 text-gray-500\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 20 20\" fill=\"currentColor\"><path fill-rule=\"evenodd\" d=\"M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.168l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.24 4.5a.75.75 0 0 1-1.08 0l-4.24-4.5a.75.75 0 0 1 .02-1.06Z\" clip-rule=\"evenodd\"/></svg></div>"
+          "toggleClasses": "relative py-1.5 ps-2.5 pe-8 md:py-2 md:ps-3 md:pe-9 flex w-full cursor-pointer bg-white border border-gray-300 rounded-md text-start text-xs md:text-sm hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-primary",
+          "dropdownClasses": "mt-2 z-50 w-full max-h-[300px] p-1 space-y-0.5 bg-white border border-gray-200 rounded-lg shadow-xl overflow-hidden overflow-y-auto",
+          "optionClasses": "hs-selected:bg-primary/10 hs-selected:border-primary hs-selected:text-primary py-2 px-3 w-full text-sm text-gray-800 cursor-pointer hover:bg-gray-50 rounded-md",
+          "optionTemplate": "<div class=\"flex items-center\"><div class=\"me-2\" data-icon></div><div><div class=\"hs-selected:font-semibold text-sm\" data-title></div><div class=\"text-xs text-gray-500\" data-description></div></div><div class=\"ms-auto\"><span class=\"hidden hs-selected:block\"><svg class=\"shrink-0 size-4 text-primary\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 16 16\" fill=\"currentColor\"><path d=\"M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022Z\"/></svg></span></div></div>",
+          "extraMarkup": "<div class=\"absolute top-1/2 end-3 -translate-y-1/2\"><svg class=\"shrink-0 size-3.5 text-gray-500\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m7 15 5 5 5-5\"/><path d=\"m7 9 5-5 5 5\"/></svg></div>"
         }' class="hidden">
-          <option value="">Choose</option>
-          <option selected value="1" data-hs-select-option='{"icon":"<img class=\"shrink-0 size-5 rounded-full\" src=\"https://images.unsplash.com/photo-1659482633369-9fe69af50bfb?auto=format&fit=facearea&facepad=3&w=64&h=64&q=80\" />","description":"Kab. Sleman, DIY"}'>Sleman</option>
-          <option value="2" data-hs-select-option='{"icon":"<img class=\"shrink-0 size-5 rounded-full\" src=\"https://images.unsplash.com/photo-1541101767792-f9b2b1c4f127?auto=format&fit=facearea&facepad=3&w=64&h=64&q=80\" />","description":"Kota Semarang, Jateng"}'>Semarang</option>
-          <option value="3" data-hs-select-option='{"icon":"<img class=\"shrink-0 size-5 rounded-full\" src=\"https://images.unsplash.com/photo-1601935111741-ae98b2b230b0?auto=format&fit=facearea&facepad=2.5&w=64&h=64&q=80\" />","description":"Kota Surabaya, Jatim"}'>Surabaya</option>
+          <option value="">Semua Lokasi</option>
+          <?php if(!empty($wilayah)): ?>
+            <?php foreach($wilayah as $prov): ?>
+                <?php foreach($prov['regencies'] as $reg): ?>
+                  <option value="<?= esc($reg['name'] . ', ' . $prov['name']) ?>" data-hs-select-option='{"description":"<?= esc($prov['name']) ?>"}'>
+                      <?= esc($reg['name']) ?>
+                  </option>
+                <?php endforeach; ?>
+            <?php endforeach; ?>
+          <?php endif; ?>
         </select>
       </div>
 
@@ -66,7 +71,7 @@
         <input
           type="text"
           placeholder="Tahun Proyek"
-          class="w-full rounded-md border border-gray-300 px-2.5 py-1.5 md:px-3 md:py-2 text-xs md:text-sm focus:outline-none focus:ring-1 focus:ring-blue-500" />
+          class="w-full rounded-md border border-gray-300 px-2.5 py-1.5 md:px-3 md:py-2 text-xs md:text-sm focus:outline-none focus:ring-1 focus:ring-primary" />
       </div>
 
     </div>
@@ -79,24 +84,53 @@
 <div class="mt-6">
   <div class="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3 xl:grid-cols-5">
     <?php
-    $cards = [
-        // Cards with existing RAB data → readonly mode
-        ['title' => 'Pembangunan Gedung Klinik Pratama',  'lokasi' => 'Kab. Sleman, DIY',       'nilai' => 'Rp 3.250.000.000', 'pct' => '-2,1%', 'tgl' => '2026-02-12', 'href' => base_url('menu-rap?id=1')],
-        ['title' => 'Renovasi Gedung Kantor Dinas',       'lokasi' => 'Kota Semarang, Jateng',  'nilai' => 'Rp 1.800.000.000', 'pct' => '+0,8%', 'tgl' => '2026-01-20', 'href' => base_url('menu-rap?id=2')],
-        // Cards without RAB yet → editable / new mode
-        ['title' => 'Pembangunan Jembatan Desa',          'lokasi' => 'Kab. Banyumas, Jateng',  'nilai' => null,               'pct' => null,    'tgl' => '2026-03-05', 'href' => base_url('menu-rap?mode=new')],
-        ['title' => 'Rehabilitasi Gedung Sekolah',        'lokasi' => 'Kota Surabaya, Jatim',   'nilai' => null,               'pct' => null,    'tgl' => '2026-03-10', 'href' => base_url('menu-rap?mode=new')],
-        ['title' => 'Pembangunan Embung Irigasi',         'lokasi' => 'Kab. Bantul, DIY',       'nilai' => null,               'pct' => null,    'tgl' => '2026-03-18', 'href' => base_url('menu-rap?mode=new')],
-        ['title' => 'Peningkatan Jalan Kabupaten',        'lokasi' => 'Kab. Magelang, Jateng',  'nilai' => null,               'pct' => null,    'tgl' => '2026-03-22', 'href' => base_url('menu-rap?mode=new')],
-    ];
-
-    foreach ($cards as $card):
-        echo view('partials/card-proyek', ['card' => $card]);
-    endforeach;
+    if (isset($proyeks) && !empty($proyeks)) {
+        foreach ($proyeks as $row):
+            $card = [
+                'title'  => $row['nama_proyek'],
+                'lokasi' => $row['lokasi_proyek'],
+                'nilai'  => null, // Diambil dari realisasi RAB nanti jika ada
+                'pct'    => null,
+                'tgl'    => !empty($row['tgl_mulai']) ? date('Y-m-d', strtotime($row['tgl_mulai'])) : date('Y-m-d'),
+                'href'   => base_url('dashboard?mode=new&slug=' . (!empty($row['slug']) ? $row['slug'] : $row['id_proyek'])),
+                'cover'  => $row['foto_project'],
+                'id'     => $row['id_proyek'],
+                'status' => $row['status'] ?? 'Berjalan'
+            ];
+            echo view('partials/card-proyek', ['card' => $card]);
+        endforeach;
+    } else {
+        echo '<div class="col-span-full text-center py-10 text-gray-500 italic">Belum ada proyek yang dibuat.</div>';
+    }
     ?>
   </div>
 </div>
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
+<?php if (session()->getFlashdata('success')) : ?>
+<script type="module">
+    import { toast } from "<?= base_url('js/shared/ui/toast.js') ?>";
+    toast.show("<?= esc(session()->getFlashdata('success')) ?>", "success", 4000);
+</script>
+<?php endif; ?>
+
+<script type="module">
+    import { confirmProyekHapus, confirmProyekSelesai } from "<?= base_url('js/shared/ui/confirm.js') ?>";
+
+    window.handleProyekComplete = async function(id, title) {
+        const confirmed = await confirmProyekSelesai(title);
+        if (confirmed) {
+            document.getElementById('form-complete-' + id).submit();
+        }
+    };
+
+    window.handleProyekDelete = async function(id, title) {
+        const confirmed = await confirmProyekHapus(title);
+        if (confirmed) {
+            document.getElementById('form-delete-' + id).submit();
+        }
+    };
+
+</script>
 <?= $this->endSection() ?>

@@ -31,21 +31,22 @@
                     Masuk ke Akun Kontraktor.id
                 </h1>
 
-            <form action="#" method="POST" class="flex flex-col">
+            <form action="<?= base_url('auth/process-login') ?>" method="POST" class="flex flex-col">
+                <?= csrf_field() ?>
                 
                 <div class="mb-6">
-                    <label for="email" class="block text-sm font-medium text-brand-dark mb-2">Email</label>
-                    <input type="email" id="email" name="email"
-                           class="w-full border-b border-gray-300 bg-transparent py-2 text-brand-dark focus:outline-none focus:border-brand-dark transition-colors"
+                    <label for="email" class="block text-sm font-semibold text-brand-dark mb-2">Email</label>
+                    <input type="email" id="email" name="email" value="<?= old('email') ?>"
+                           class="w-full text-sm border-b border-gray-300 bg-transparent py-1 text-slate-600 focus:outline-none focus:border-brand-dark transition-colors"
                            placeholder=" ">
                     <span id="email-error" class="text-red-500 text-xs mt-1 hidden"></span>
                 </div>
 
                 <div class="mb-6">
-                    <label for="password" class="block text-sm font-medium text-brand-dark mb-2">Password</label>
+                    <label for="password" class="block text-sm font-semibold text-brand-dark mb-2">Password</label>
                     <div class="relative">
-                        <input type="password" id="password" name="password"
-                               class="w-full border-b border-gray-300 bg-transparent py-2 pr-10 text-brand-dark focus:outline-none focus:border-brand-dark transition-colors">
+                        <input type="password" id="password" name="password" value="<?= old('password') ?>"
+                               class="w-full text-sm border-b border-gray-300 bg-transparent py-1 pr-10 text-slate-600 focus:outline-none focus:border-brand-dark transition-colors">
                         <button type="button" id="togglePassword" class="absolute right-0 top-1/2 -translate-y-1/2 text-brand-dark hover:text-gray-500 transition-colors focus:outline-none">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -56,12 +57,12 @@
                     <span id="password-error" class="text-red-500 text-xs mt-1 hidden"></span>
                 </div>
 
-                <div class="flex items-center justify-between mb-8 text-xs sm:text-sm">
+                <div class="flex items-center justify-between mb-8 text-xs sm:text-xs">
                     <label class="flex items-center cursor-pointer text-brand-dark font-medium">
                         <input type="checkbox" class="w-4 h-4 mr-2 rounded accent-secondary cursor-pointer">
                         Ingat Saya
                     </label>
-                    <a href="#" class="text-brand-dark font-bold hover:underline">Lupa Password?</a>
+                    <a href="#" class="text-brand-dark font-semibold hover:text-brand-dark/80">Lupa Password?</a>
                 </div>
 
                 <button type="submit" class="w-full bg-primary text-white font-semibold py-3 px-4 rounded-md hover:bg-[#0f1831] transition-colors focus:ring-4 focus:ring-blue-900 focus:outline-none">
@@ -78,6 +79,37 @@
     </main>
 
     <script src="<?= base_url('assets/js/loginUI.js') ?>"></script>
+    <script>
+        // Inline fungsi showToast disediakan oleh notification.js di bawahnya
+    </script>
     <script src="<?= base_url('assets/js/notification/notification.js') ?>"></script>
+
+    <?php if (session()->getFlashdata('error')) : ?>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                showToast('error', 'Akses Ditolak', '<?= session()->getFlashdata('error') ?>');
+            });
+        </script>
+    <?php endif; ?>
+
+    <?php if (session()->getFlashdata('success')) : ?>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                showToast('success', 'Berhasil', '<?= session()->getFlashdata('success') ?>');
+            });
+        </script>
+    <?php endif; ?>
+
+    <?php if (session()->getFlashdata('login_success')) : ?>
+        <script>
+            // Tampilkan notifikasi sukses lalu otomatis beralih ke /proyek setelah 1.5 detik
+            document.addEventListener('DOMContentLoaded', () => {
+                showToast('success', 'Login Berhasil', '<?= session()->getFlashdata('login_success') ?>');
+                setTimeout(() => {
+                    window.location.href = '<?= base_url('/proyek') ?>';
+                }, 1500); 
+            });
+        </script>
+    <?php endif; ?>
 </body>
 </html>

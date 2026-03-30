@@ -29,43 +29,60 @@
                     Buat Akun Kontraktor.id
                 </h1>
                 
-                <form action="#" class="w-full space-y-5">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <form action="<?= base_url('auth/process-register') ?>" method="post" class="w-full space-y-3">
+                    <?= csrf_field() ?>
+                    
+                    <?php if (session()->getFlashdata('error')) : ?>
+                        <div class="p-3 bg-red-100 text-red-700 rounded-md text-sm mb-4">
+                            <?= session()->getFlashdata('error') ?>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php if (session()->getFlashdata('errors')) : ?>
+                        <div class="p-3 bg-red-100 text-red-700 rounded-md text-sm mb-4">
+                            <ul class="list-disc pl-5">
+                                <?php foreach (session()->getFlashdata('errors') as $err) : ?>
+                                    <li><?= esc($err) ?></li>
+                                <?php endforeach ?>
+                            </ul>
+                        </div>
+                    <?php endif; ?>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div class="md:col-span-2">
                             <div id="field-nama" class="border-b border-gray-300 transition-colors">
-                                <label for="nama_lengkap" class="block text-sm font-medium text-brand-dark mb-2">Nama Lengkap</label>
-                                <input type="text" id="nama_lengkap" name="nama_lengkap" class="w-full py-1 bg-transparent focus:outline-none">
+                                <label for="nama_lengkap" class="block text-sm font-semibold text-brand-dark mb-2">Nama Lengkap</label>
+                                <input type="text" id="nama_lengkap" name="nama_lengkap" class="w-full text-sm py-1 text-slate-600 bg-transparent focus:outline-none">
                             </div>
                             <span id="nama_lengkap-error" class="text-red-500 text-xs mt-1 hidden"></span>
                         </div>
                         <div>
                             <div id="field-email" class="border-b border-gray-300 transition-colors">
-                                <label for="email" class="block text-sm font-medium text-brand-dark mb-2">Email</label>
-                                <input type="email" id="reg_email" name="email" class="w-full py-1 bg-transparent focus:outline-none">
+                                <label for="email" class="block text-sm font-semibold text-brand-dark mb-2">Email</label>
+                                <input type="email" id="reg_email" name="email" class="w-full text-sm py-1 text-slate-600 bg-transparent focus:outline-none">
                             </div>
                             <span id="reg_email-error" class="text-red-500 text-xs mt-1 hidden"></span>
                         </div>
                         <div>
                             <div id="field-nohp" class="border-b border-gray-300 transition-colors">
-                                <label for="no_hp" class="block text-sm font-medium text-brand-dark mb-2">No. HP</label>
-                                <input type="text" id="no_hp" name="no_hp" class="w-full py-1 bg-transparent focus:outline-none">
+                                <label for="no_hp" class="block text-sm font-semibold text-brand-dark mb-2">No. HP</label>
+                                <input type="text" id="no_hp" name="no_hp" class="w-full text-sm py-1 text-slate-600 bg-transparent focus:outline-none">
                             </div>
                             <span id="no_hp-error" class="text-red-500 text-xs mt-1 hidden"></span>
                         </div>
                         
                         <div class="md:col-span-2">
                             <div id="field-perusahaan" class="border-b border-gray-300 transition-colors">
-                                <label for="nama_perusahaan" class="block text-sm font-medium text-brand-dark mb-2">Nama Perusahaan</label>
-                                <input type="text" id="nama_perusahaan" name="nama_perusahaan" class="w-full py-1 bg-transparent focus:outline-none">
+                                <label for="nama_perusahaan" class="block text-sm font-semibold text-brand-dark mb-2">Nama Perusahaan</label>
+                                <input type="text" id="nama_perusahaan" name="nama_perusahaan" class="w-full text-sm py-1 text-slate-600 bg-transparent focus:outline-none">
                             </div>
                             <span id="nama_perusahaan-error" class="text-red-500 text-xs mt-1 hidden"></span>
                         </div>
 
                         <div class="md:col-span-2">
                             <div id="field-domisili" class="border-b border-gray-300 transition-colors">
-                                <label for="domisili" class="block text-sm font-medium text-brand-dark mb-2">Domisili Perusahaan</label>
+                                <label for="domisili" class="block text-sm font-semibold text-brand-dark mb-2">Domisili Perusahaan</label>
                                 <el-select id="domisili" name="domisili" class="block w-full">
-                                    <button type="button" class="grid w-full cursor-default grid-cols-1 py-1 text-left text-brand-dark bg-transparent focus:outline-none sm:text-sm/6">
+                                    <button type="button" class="grid w-full cursor-default grid-cols-1 py-1 text-left text-slate-600 bg-transparent focus:outline-none sm:text-sm/6">
                                         <el-selectedcontent class="col-start-1 row-start-1 flex items-center gap-3 pr-5">
                                             <span class="block truncate text-sm text-gray-400">Pilih Domisili Perusahaan</span>
                                         </el-selectedcontent>
@@ -75,27 +92,55 @@
                                     </button>
 
                                     <el-options anchor="bottom start" popover class="max-h-56 w-(--button-width) overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 [--anchor-gap:--spacing(1)] data-leave:transition data-leave:transition-discrete data-leave:duration-100 data-leave:ease-in data-closed:data-leave:opacity-0 sm:text-sm">
-                                        <el-option value="kontraktor" class="group/option relative block cursor-default py-2 pr-9 pl-3 text-brand-dark select-none focus:bg-primary focus:text-white focus:outline-hidden">
-                                            <div class="flex items-center">
-                                                <span class="block truncate font-normal group-aria-selected/option:font-semibold">Yogyakarta</span>
-                                            </div>
-                                            <span class="absolute inset-y-0 right-0 flex items-center pr-4 text-primary group-not-aria-selected/option:hidden group-focus/option:text-white in-[el-selectedcontent]:hidden">
-                                                <svg viewBox="0 0 20 20" fill="currentColor" class="size-5">
-                                                    <path d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" fill-rule="evenodd" />
-                                                </svg>
-                                            </span>
-                                        </el-option>
+                                        <?php if (!empty($provinces)): ?>
+                                            <?php foreach($provinces as $prov): 
+                                                // Ubah ALL CAPS jadi Title Case (misal: "DKI JAKARTA" -> "Dki Jakarta")
+                                                $namaProv = ucwords(strtolower($prov['name']));
+                                            ?>
+                                                <el-option value="<?= esc($namaProv) ?>" class="group/option relative block cursor-default py-2 pr-9 pl-3 text-brand-dark select-none focus:bg-primary focus:text-white focus:outline-hidden">
+                                                    <div class="flex items-center">
+                                                        <span class="block truncate font-normal group-aria-selected/option:font-semibold"><?= esc($namaProv) ?></span>
+                                                    </div>
+                                                    <span class="absolute inset-y-0 right-0 flex items-center pr-4 text-primary group-not-aria-selected/option:hidden group-focus/option:text-white in-[el-selectedcontent]:hidden">
+                                                        <svg viewBox="0 0 20 20" fill="currentColor" class="size-5">
+                                                            <path d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" fill-rule="evenodd" />
+                                                        </svg>
+                                                    </span>
+                                                </el-option>
+                                            <?php endforeach; ?>
+                                        <?php else: ?>
+                                            <!-- Fallback: Jika tidak ada internet/API gagal dimuat -->
+                                            <el-option value="yogyakarta" class="group/option relative block cursor-default py-2 pr-9 pl-3 text-brand-dark select-none focus:bg-primary focus:text-white focus:outline-hidden">
+                                                <div class="flex items-center">
+                                                    <span class="block truncate font-normal group-aria-selected/option:font-semibold">Yogyakarta</span>
+                                                </div>
+                                                <span class="absolute inset-y-0 right-0 flex items-center pr-4 text-primary group-not-aria-selected/option:hidden group-focus/option:text-white in-[el-selectedcontent]:hidden">
+                                                    <svg viewBox="0 0 20 20" fill="currentColor" class="size-5">
+                                                        <path d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" fill-rule="evenodd" />
+                                                    </svg>
+                                                </span>
+                                            </el-option>
+                                        <?php endif; ?>
                                     </el-options>
                                 </el-select>
                             </div>
                             <span id="domisili-error" class="text-red-500 text-xs mt-1 hidden"></span>
                         </div>
+
+                        <div class="md:col-span-2">
+                            <div id="field-alamat" class="border-b border-gray-300 transition-colors">
+                                <label for="alamat" class="block text-sm font-semibold text-brand-dark mb-2">Alamat Proyek</label>
+                                <input type="text" id="alamat" name="alamat" class="w-full text-sm py-1 text-slate-600 bg-transparent focus:outline-none">
+                            </div>
+                            <span id="alamat-error" class="text-red-500 text-xs mt-1 hidden"></span>
+                        </div>
+
                         
                         <div class="md:col-span-2">
                             <div id="field-posisi" class="border-b border-gray-300 transition-colors">
-                            <label for="posisi" class="block text-sm font-medium text-brand-dark mb-2">Posisi Pekerjaan</label>
+                            <label for="posisi" class="block text-sm font-semibold text-brand-dark mb-2">Posisi Pekerjaan</label>
                             <el-select id="posisi" name="posisi" class="block w-full">
-                                <button type="button" class="grid w-full cursor-default grid-cols-1 py-1 text-left text-brand-dark bg-transparent focus:outline-none sm:text-sm/6">
+                                <button type="button" class="grid w-full cursor-default grid-cols-1 py-1 text-left text-slate-600 bg-transparent focus:outline-none sm:text-sm/6">
                                     <el-selectedcontent class="col-start-1 row-start-1 flex items-center gap-3 pr-5">
                                         <span class="block truncate text-sm text-gray-400">Pilih Posisi Pekerjaan</span>
                                     </el-selectedcontent>
@@ -143,8 +188,8 @@
                         
                         <div>
                             <div id="field-password" class="relative border-b border-gray-300 transition-colors">
-                                <label for="password" class="block text-sm font-medium text-brand-dark mb-2">Password</label>
-                                <input type="password" id="password" name="password" class="w-full pr-8 py-1 bg-transparent focus:outline-none">
+                                <label for="password" class="block text-sm font-semibold text-brand-dark mb-2">Password</label>
+                                <input type="password" id="password" name="password" class="w-full text-sm pr-8 py-1 text-slate-600 bg-transparent focus:outline-none">
                                 <button type="button" id="togglePassword" class="toggle-pass absolute right-0 bottom-1 text-brand-dark hover:text-gray-500 transition-colors focus:outline-none">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -156,8 +201,8 @@
                         </div>
                         <div>
                             <div id="field-confirm" class="relative border-b border-gray-300 transition-colors">
-                                <label for="confirmPassword" class="block text-sm font-medium text-brand-dark mb-2">Konfirmasi Password</label>
-                                <input type="password" id="confirmPassword" name="confirm_password" class="w-full pr-8 py-1 bg-transparent focus:outline-none">
+                                <label for="confirmPassword" class="block text-sm font-semibold text-brand-dark mb-2">Konfirmasi Password</label>
+                                <input type="password" id="confirmPassword" name="confirm_password" class="w-full text-sm pr-8 py-1 text-slate-600 bg-transparent focus:outline-none">
                                 <button type="button" id="toggleConfirmPassword" class="toggle-pass absolute right-0 bottom-1 text-brand-dark hover:text-gray-500 transition-colors focus:outline-none">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -189,5 +234,60 @@
     <script src="<?= base_url('assets/js/loginUI.js') ?>"></script>
     <script src="./node_modules/preline/dist/preline.js"></script>
     <script src="<?= base_url('assets/js/notification/registerValidation.js') ?>"></script>
+
+    <?php if (session()->getFlashdata('register_success')) : ?>
+        <script>
+            function showToast(type, title, message) {
+              const isSuccess = type === 'success';
+
+              const successIcon = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
+              const errorIcon = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+
+              const borderColor = isSuccess ? '#bbf7d0' : '#fecaca';
+              const bgColor = isSuccess ? '#f0fdf4' : '#fef2f2';
+              const titleColor = isSuccess ? '#166534' : '#991b1b';
+              const msgColor = isSuccess ? '#15803d' : '#b91c1c';
+              const icon = isSuccess ? successIcon : errorIcon;
+              const closeColor = isSuccess ? '#16a34a' : '#dc2626';
+
+              const toastNode = document.createElement('div');
+              toastNode.style.cssText = `
+                position: fixed; top: 20px; right: 20px; z-index: 9999;
+                min-width: 320px; max-width: 400px;
+                background: ${bgColor} !important; background-image: none !important;
+                border: 1px solid ${borderColor}; border-radius: 12px;
+                box-shadow: 0 10px 25px rgba(0,0,0,0.1); padding: 16px;
+                display: flex; align-items: flex-start; gap: 12px;
+                opacity: 0; transform: translateX(100%);
+                transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+                font-family: 'Inter', sans-serif;
+              `;
+
+              toastNode.innerHTML = `
+                <div style="flex-shrink:0; margin-top:2px;">${icon}</div>
+                <div style="flex:1; min-width:0;">
+                  <div style="font-weight:600; font-size:14px; color:${titleColor}; margin-bottom:4px;">${title}</div>
+                  <div style="font-size:13px; color:${msgColor}; line-height:1.4;">${message}</div>
+                </div>
+                <button onclick="this.parentElement.remove()" style="flex-shrink:0; background:none; border:none; cursor:pointer; color:${closeColor};"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" class="size-4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+              `;
+              document.body.appendChild(toastNode);
+              requestAnimationFrame(() => requestAnimationFrame(() => {
+                toastNode.style.opacity = '1'; toastNode.style.transform = 'translateX(0)';
+              }));
+              setTimeout(() => {
+                toastNode.style.opacity = '0'; toastNode.style.transform = 'translateX(100%)';
+                setTimeout(() => toastNode.remove(), 400);
+              }, 4000);
+            }
+
+            document.addEventListener('DOMContentLoaded', () => {
+                showToast('success', 'Pendaftaran Berhasil', '<?= session()->getFlashdata('register_success') ?>');
+                setTimeout(() => {
+                    window.location.href = '<?= base_url('/') ?>';
+                }, 1500);
+            });
+        </script>
+    <?php endif; ?>
 </body>
 </html>

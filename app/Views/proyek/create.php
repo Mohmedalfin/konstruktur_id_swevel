@@ -109,19 +109,19 @@
                         <div>
                             <label class="mb-1 block text-md font-semibold text-text-primary">Nama Proyek</label>
                             <input name="nama_proyek" type="text" placeholder="Masukkan Nama Proyek"
-                                class="w-full  border border-gray-300 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                                class="w-full  border border-gray-300 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-primary" />
                         </div>
 
                         <div>
                             <label class="mb-1 block text-md font-semibold text-text-primary">Lokasi Proyek</label>
                             <input name="lokasi_proyek" type="text" placeholder="Masukkan Lokasi Proyek"
-                                class="w-full  border border-gray-300 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                                class="w-full  border border-gray-300 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-primary" />
                         </div>
 
                         <div>
                             <label class="mb-1 block text-md font-semibold text-text-primary">Jenis Proyek</label>
                             <input name="jenis_proyek" type="text" placeholder="Masukkan Jenis Proyek"
-                                class="w-full  border border-gray-300 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                                class="w-full  border border-gray-300 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-primary" />
                         </div>
 
                         <!-- DATEPICKER ROW (SIMPLE - PRELINE) -->
@@ -133,21 +133,9 @@
 
                                 <input
                                     name="tanggal_mulai"
-                                    class="hs-datepicker py-3 px-4 block w-full bg-white border border-gray-300 sm:text-sm text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                                    type="text"
-                                    placeholder="YYYY.MM.DD"
-                                    autocomplete="off"
-                                    onkeydown="return false"
-                                    data-hs-datepicker='{
-                                      "type": "default",
-                                      "applyUtilityClasses": true,
-                                      "dateMax": "2050-12-31",
-                                      "mode": "custom-select",
-                                      "templates": {
-                                        "arrowPrev": "<button data-vc-arrow=\"prev\"><svg class=\"shrink-0 size-4\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m15 18-6-6 6-6\"></path></svg></button>",
-                                        "arrowNext": "<button data-vc-arrow=\"next\"><svg class=\"shrink-0 size-4\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m9 18 6-6-6-6\"></path></svg></button>"
-                                      }
-                                    }'>
+                                    class="py-3 px-4 block w-full bg-white text-slate-800 border border-gray-300 sm:text-sm focus:border-primary focus:ring-1 focus:ring-primary"
+                                    type="date"
+                                    autocomplete="off">
                             </div>
 
                             <!-- Estimasi Selesai -->
@@ -156,21 +144,9 @@
 
                                 <input
                                     name="estimasi_selesai"
-                                    class="hs-datepicker py-3 px-4 block w-full bg-white border border-gray-300 sm:text-sm text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                                    type="text"
-                                    placeholder="YYYY.MM.DD"
-                                    autocomplete="off"
-                                    onkeydown="return false"
-                                    data-hs-datepicker='{
-                                      "type": "default",
-                                      "applyUtilityClasses": true,
-                                      "dateMax": "2050-12-31",
-                                      "mode": "custom-select",
-                                      "templates": {
-                                        "arrowPrev": "<button data-vc-arrow=\"prev\"><svg class=\"shrink-0 size-4\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m15 18-6-6 6-6\"></path></svg></button>",
-                                        "arrowNext": "<button data-vc-arrow=\"next\"><svg class=\"shrink-0 size-4\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m9 18 6-6-6-6\"></path></svg></button>"
-                                      }
-                                    }'>
+                                    class="py-3 px-4 block w-full bg-white text-slate-800 border border-gray-300 sm:text-sm focus:border-primary focus:ring-1 focus:ring-primary"
+                                    type="date"
+                                    autocomplete="off">
                             </div>
 
                         </div>
@@ -186,25 +162,25 @@
                             <div>
                                 <label class="mb-1 block text-md font-semibold text-text-primary">Nama Owner / Klien</label>
                                 <input name="nama_owner" type="text" placeholder="Masukkan Nama Owner / Klien"
-                                    class="w-full  border border-gray-300 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                                    class="w-full  border border-gray-300 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-primary" />
                             </div>
 
                             <div>
                                 <label class="mb-1 block text-md font-semibold text-text-primary">Perusahaan</label>
                                 <input name="perusahaan" type="text" placeholder="Masukkan Nama Perusahaan"
-                                    class="w-full  border border-gray-300 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                                    class="w-full  border border-gray-300 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-primary" />
                             </div>
 
                             <div>
                                 <label class="mb-1 block text-md font-semibold text-text-primary">Nomor Kontrak</label>
                                 <input name="nomor_kontrak" type="text" placeholder="Masukkan Nomor Kontrak"
-                                    class="w-full  border border-gray-300 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                                    class="w-full  border border-gray-300 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-primary" />
                             </div>
 
                             <div>
                                 <label class="mb-1 block text-md font-semibold text-text-primary">Keterangan Lain</label>
                                 <input name="keterangan_lain" type="text" placeholder="Masukkan Keterangan Lain"
-                                    class="w-full  border border-gray-300 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                                    class="w-full  border border-gray-300 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-primary" />
                             </div>
                         </div>
 
