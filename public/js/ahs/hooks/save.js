@@ -4,24 +4,60 @@
  */
 
 import { state, tbody, simpanBtn } from '../core/state.js';
+import { saveRincianAHS } from '../core/data.js';
+import { toast } from '../../shared/ui/toast.js';
 
 export function bindSave() {
     if (!simpanBtn) return;
-    simpanBtn.addEventListener('click', function () {
-        const payload = [];
+    simpanBtn.addEventListener('click', async function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        const idDetail  = urlParams.get('id_rap_detail');
+        
+        if (!idDetail) {
+            toast.show('ID Detail tidak ditemukan di URL', 'error');
+            return;
+        }
+
+        const items = [];
         tbody.querySelectorAll('.ahs-row').forEach(tr => {
-            payload.push({
+            const rowData = {
                 tipe:        tr.dataset.tipe,
-                uraian:      tr.querySelector('.ahs-uraian')?.value      || '',
-                merk:        tr.querySelector('.ahs-merk')?.value        || '',
-                spesifikasi: tr.querySelector('.ahs-spesifikasi')?.value || '',
+                uraian:      (tr.querySelector('.ahs-uraian')?.value      || '').trim(),
+                merk:        (tr.querySelector('.ahs-merk')?.value        || '').trim(),
+                spesifikasi: (tr.querySelector('.ahs-spesifikasi')?.value || '').trim(),
                 koefisien:   parseFloat(tr.querySelector('.ahs-koef')?.value) || 0,
-                satuan:      tr.querySelector('.ahs-satuan')?.value      || '',
+                satuan:      (tr.querySelector('.ahs-satuan')?.value      || '').trim(),
                 hargaSatuan: parseFloat(tr.querySelector('.ahs-harga-satuan')?.value) || 0,
-                sumber:      tr.querySelector('.ahs-sumber')?.value      || '',
-            });
+                sumber:      (tr.querySelector('.ahs-sumber')?.value      || '').trim(),
+            };
+            
+            if (rowData.uraian) {
+                items.push(rowData);
+            }
         });
-        console.info('[AHS Simpan]', payload);
-        alert('Data AHS berhasil dikumpulkan (' + payload.length + ' baris).\nEndpoint CI4 segera diimplementasi.');
+
+        if (items.length === 0) {
+            toast.show('Tambahkan minimal satu item sebelum menyimpan', 'warning');
+            return;
+        }
+
+        // ── Block UI ─────────────────────────────────────────────────────
+        const originalText = simpanBtn.textContent;
+        simpanBtn.disabled  = true;
+        simpanBtn.innerHTML = '<span class="animate-spin mr-2">↻</span> Menyimpan...';
+
+        try {
+            const res = await saveRincianAHS({ id_rap_detail: idDetail, items });
+            if (res.status === 'success') {
+                toast.show('Rincian AHS berhasil disimpan ke database', 'success', 4000);
+            } else {
+                throw new Error(res.message || 'Gagal menyimpan');
+            }
+        } catch (err) {
+            toast.show('Gagal menyimpan: ' + err.message, 'error', 5000);
+        } finally {
+            simpanBtn.disabled  = false;
+            simpanBtn.textContent = originalText;
+        }
     });
 }

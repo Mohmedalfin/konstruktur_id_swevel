@@ -23,6 +23,7 @@
 
     <script src="<?= base_url('assets/js/preline.js') ?>"></script>
     <script src="<?= base_url('node_modules/preline/dist/preline.js') ?>"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="<?= base_url('assets/js/partials/navbar.js') ?>"></script>
     <script type="module" src="<?= base_url('js/ahs/index.js') ?>"></script>
 </body>

@@ -143,11 +143,46 @@ function _bindRowInputs(tr) {
     koefInput?.addEventListener('input', recalcRow);
     hargaInput?.addEventListener('input', recalcRow);
 
-    tr.querySelector('.ahs-del-btn')?.addEventListener('click', function () {
-        const tipe = tr.dataset.tipe;
+    tr.querySelector('.ahs-del-btn')?.addEventListener('click', async function () {
+        const rowId = tr.dataset.id;
+        const tipe  = tr.dataset.tipe;
+
+        // ── Step 1: Confirm with SweetAlert2 ───────────────────────────
+        const result = await Swal.fire({
+            title: 'Apakah Anda yakin?',
+            text: "Item ini akan dihapus dari rincian AHS.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Ya, Hapus!',
+            cancelButtonText: 'Batal',
+            reverseButtons: true
+        });
+
+        if (!result.isConfirmed) return;
+
+        // ── Step 2: Persistent Deletion (if applicable) ────────────────
+        // If rowId is a number and not a timestamp (typically < 1000000000)
+        // or if we know it came from the DB. 
+        // In our case, DB IDs are small integers, while Date.now() IDs are large.
+        const isPersistent = !isNaN(rowId) && parseInt(rowId) < 1000000000;
+
+        if (isPersistent) {
+            try {
+                const res = await fetch(`/api/ahs/rincian/item/${rowId}`, { method: 'DELETE' });
+                const json = await res.json();
+                if (json.status !== 'success') throw new Error(json.message);
+            } catch (err) {
+                toast.show('Gagal menghapus dari database: ' + err.message, 'error');
+                return;
+            }
+        }
+
+        // ── Step 3: Remove from UI ──────────────────────────────────────
         tr.remove();
 
-        // Remove header if no rows left for this type
+        // ── Step 4: UI Cleanup ──────────────────────────────────────────
         const remainingRows = tbody.querySelectorAll(`.ahs-row[data-tipe="${tipe}"]`);
         if (remainingRows.length === 0) {
             tbody.querySelector(`.ahs-category-header[data-tipe="${tipe}"]`)?.remove();
@@ -155,7 +190,7 @@ function _bindRowInputs(tr) {
 
         renumberRows();
         recalcTotals();
-        toast.show('Item berhasil dihapus dari rincian', 'info', 2500);
+        toast.show('Item berhasil dihapus', 'success', 2000);
     });
 
     // Autocomplete

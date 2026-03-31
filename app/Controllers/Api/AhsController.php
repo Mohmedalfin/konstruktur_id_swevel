@@ -3,10 +3,140 @@
 namespace App\Controllers\Api;
 
 use App\Controllers\BaseController;
+use CodeIgniter\HTTP\ResponseInterface;
 use Throwable;
+use App\Models\RapDetailItemModel;
 
 class AhsController extends BaseController
 {
+    /**
+     * GET /api/ahs/rincian/(:num)
+     * Fetches saved rincian items (Bahan, Alat, Upah) for a given detail.
+     */
+    public function getRincian($id_rap_detail): ResponseInterface
+    {
+        try {
+            $model = new RapDetailItemModel();
+            $data  = $model->where('id_rap_detail', $id_rap_detail)
+                           ->orderBy('jenis_item', 'ASC')
+                           ->orderBy('id_rap_detail_item', 'ASC')
+                           ->findAll();
+            
+            // Format for frontend
+            $formatted = array_map(function($row) {
+                return [
+                    'id'          => $row['id_rap_detail_item'],
+                    'tipe'        => $row['jenis_item'], // mapped mapping
+                    'uraian'      => $row['nama_item'],
+                    'merk'        => $row['merk']        ?? '',
+                    'spesifikasi' => $row['spesifikasi'] ?? '',
+                    'koefisien'   => (float)$row['koefisien'],
+                    'satuan'      => $row['satuan'],
+                    'hargaSatuan' => (float)$row['harga_satuan'],
+                    'sumber'      => $row['keterangan']  ?? '',
+                ];
+            }, $data);
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'data'   => $formatted
+            ]);
+        } catch (Throwable $e) {
+            return $this->response->setStatusCode(500)->setJSON([
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * POST /api/ahs/rincian
+     * Saves (overwrites) rincian items.
+     */
+    public function saveRincian(): ResponseInterface
+    {
+        try {
+            $json   = $this->request->getJSON(true);
+            $idDetail = $json['id_rap_detail'] ?? null;
+            $items    = $json['items']          ?? [];
+
+            if (!$idDetail) {
+                return $this->response->setStatusCode(400)->setJSON([
+                    'status' => 'error',
+                    'message' => 'id_rap_detail wajib diisi'
+                ]);
+            }
+
+            $model = new RapDetailItemModel();
+            
+            // ── Transaction ──────────────────────────────────────────────────
+            $db = \Config\Database::connect();
+            $db->transBegin();
+
+            // 1. Delete existing
+            $model->where('id_rap_detail', $idDetail)->delete();
+
+            // 2. Insert new
+            foreach ($items as $index => $item) {
+                $model->insert([
+                    'id_rap_detail' => $idDetail,
+                    'jenis_item'    => $item['tipe']   ?? 'bahan',
+                    'nama_item'     => $item['uraian'] ?? '',
+                    'merk'          => $item['merk']   ?? '',
+                    'spesifikasi'   => $item['spesifikasi'] ?? '',
+                    'koefisien'     => $item['koefisien']   ?? 0,
+                    'satuan'        => $item['satuan']      ?? '',
+                    'harga_dasar'   => $item['hargaSatuan'] ?? 0,
+                    'harga_satuan'  => $item['hargaSatuan'] ?? 0,
+                    'keterangan'    => $item['sumber']      ?? '',
+                    'urutan'        => $index + 1,
+                ]);
+            }
+
+            if ($db->transStatus() === false) {
+                $db->transRollback();
+                throw new \Exception('Gagal menyimpan rincian ke database');
+            }
+
+            $db->transCommit();
+
+            return $this->response->setJSON([
+                'status'  => 'success',
+                'message' => 'Rincian AHS berhasil disimpan'
+            ]);
+
+        } catch (Throwable $e) {
+            return $this->response->setStatusCode(500)->setJSON([
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * DELETE /api/ahs/rincian/item/(:num)
+     * Deletes a specific rincian item row.
+     */
+    public function deleteItem($id_rap_detail_item): ResponseInterface
+    {
+        try {
+            $model = new RapDetailItemModel();
+            if ($model->delete($id_rap_detail_item)) {
+                return $this->response->setJSON([
+                    'status'  => 'success',
+                    'message' => 'Item berhasil dihapus'
+                ]);
+            } else {
+                throw new \Exception('Gagal menghapus item dari database');
+            }
+        } catch (Throwable $e) {
+            return $this->response->setStatusCode(500)->setJSON([
+                'status'  => 'error',
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
+
     /**
      * GET /api/ahs
      * Returns a paginated list of AHS items (bahan, upah, alat) from master tables.
@@ -111,7 +241,7 @@ class AhsController extends BaseController
             log_message('error', '[AhsController::index] ' . $e->getMessage());
 
             return $this->response
-                ->setStatusCode(ResponseInterface::HTTP_INTERNAL_ERROR)
+                ->setStatusCode(500)
                 ->setJSON([
                     'status'  => 'error',
                     'message' => 'Gagal memuat data AHS. Silakan coba lagi.',
