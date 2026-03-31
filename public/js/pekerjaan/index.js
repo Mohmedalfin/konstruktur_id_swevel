@@ -7,11 +7,11 @@
  *   hooks/      ← submit to sessionStorage (submit.js)
  */
 
-import { state, namaInput, sourceBoxes, tbody } from './core/state.js';
-import { fetchTambahAhsData }                   from './core/data.js';
-import { renderLoading, renderRows }             from './components/render.js';
-import { bindCustomRow }                         from './components/custom-row.js';
-import { bindSubmit }                            from './hooks/submit.js';
+import { state, namaInput, sourceBoxes, tbody } from './core/state.js?v=3';
+import { fetchTambahAhsData }                   from './core/data.js?v=3';
+import { renderLoading, renderRows }             from './components/render.js?v=3';
+import { bindCustomRow }                         from './components/custom-row.js?v=3';
+import { bindSubmit }                            from './hooks/submit.js?v=3';
 
 export async function load() {
     renderLoading();

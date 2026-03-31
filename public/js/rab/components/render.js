@@ -8,6 +8,7 @@ import { state, tbody, wrapper, searchInput, tambahKategoriBtn, totalJumlah, tot
 import { fmt, escHtml }   from '../../shared/utils.js';
 import { confirmDelete }  from '../../shared/ui/confirm.js';
 import { toast }          from '../../shared/ui/toast.js';
+import { bindAddSubItemRow, bindToggleRow } from './categories.js?v=4';
 
 export function renderLoading() {
     tbody.innerHTML = `
@@ -222,3 +223,216 @@ export function bindReadonlyDropdowns() {
         });
     });
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// renderRapFromDB — render data yang sudah tersimpan di DB (GET /api/rap)
+// Dipakai saat halaman RAB dibuka / di-refresh untuk menampilkan data persisten
+// ─────────────────────────────────────────────────────────────────────────────
+export function renderRapFromDB(apiData) {
+    const groups = apiData?.data ?? [];
+
+    if (groups.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="12" class="text-center py-12 text-table-subtle text-xs italic">Belum ada pekerjaan. Klik <strong>+ Kategori Pekerjaan</strong> untuk memulai.</td></tr>`;
+        updateTotals(0);
+        return;
+    }
+
+    let html       = '';
+    let grandTotal = 0;
+    let rowNum     = 0;
+
+    groups.forEach(group => {
+        const catId   = group.id_kategori  ?? 0;
+        const catName = group.nama_kategori ?? 'Tanpa Kategori';
+
+        // Hitung total kategori dari sum sub-total keseluruhan
+        const catTotal = group.items.reduce((sum, item) => {
+            const hargaBahan = item.harga_bahan * item.volume;
+            const hargaAlat  = item.harga_alat  * item.volume;
+            const hargaUpah  = item.harga_upah  * item.volume;
+            return sum + hargaBahan + hargaAlat + hargaUpah;
+        }, 0);
+        grandTotal += catTotal;
+
+        // Header kategori
+        html += `
+        <tr class="rab-category bg-table-category text-white select-none" data-cat="${catId}">
+            <td class="w-12 md:w-14 px-3 md:px-5 py-2.5 md:py-3 text-center">
+                <button class="edit-cat-toggle-btn relative flex items-center justify-center w-5 h-5 mx-auto focus:outline-none"
+                    data-cat="${catId}" title="Buka / Tutup">
+                    <svg class="edit-cat-icon-plus absolute w-4 h-4 md:w-5 md:h-5 opacity-90 transition-opacity duration-200 hidden"
+                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <svg class="edit-cat-icon-minus absolute w-4 h-4 md:w-5 md:h-5 opacity-90 transition-opacity duration-200"
+                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </button>
+            </td>
+            <td colspan="10" class="px-3 md:px-5 py-2.5 md:py-3 font-semibold text-[10px] md:text-xs uppercase tracking-widest">
+                <div class="flex items-center justify-between w-full">
+                    <span class="flex items-center gap-2">
+                        <span class="w-1 h-3.5 md:h-4 bg-secondary rounded-full"></span>
+                        ${escHtml(catName)}
+                    </span>
+                    <span class="ml-auto text-xs font-semibold tabular-nums opacity-80">${fmt(catTotal)}</span>
+                </div>
+            </td>
+            <td class="px-2 md:px-3 py-2.5 md:py-3 text-center">
+                <div class="inline-flex items-center gap-1">
+                    <button class="add-subitem-btn inline-flex items-center justify-center w-6 h-6 rounded-md bg-white/20 hover:bg-white/30 text-white transition-colors duration-150 focus:outline-none"
+                        data-cat="${catId}" data-catname="${escHtml(catName)}" data-dbid="${catId === 0 ? '' : catId}" title="Tambah AHS">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                    </button>
+                    <!-- Hapus tombol delete API per kategori krn logic DB butuh delete per item -->
+                    <button class="del-cat-btn inline-flex items-center justify-center w-6 h-6 rounded-md bg-white/10 hover:bg-red-500/80 text-white/70 hover:text-white transition-colors duration-150 focus:outline-none opacity-50 cursor-not-allowed"
+                        title="Hanya bisa menghapus per item saat dikendalikan DB" disabled>
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                    </button>
+                </div>
+            </td>
+        </tr>`;
+
+        // Baris item per kategori
+        group.items.forEach(item => {
+            rowNum++;
+            const vol        = item.volume      || 0;
+            const hargaBahan = item.harga_bahan || 0;
+            const hargaAlat  = item.harga_alat  || 0;
+            const hargaUpah  = item.harga_upah  || 0;
+            const subBahan   = hargaBahan * vol;
+            const subAlat    = hargaAlat  * vol;
+            const subUpah    = hargaUpah  * vol;
+            const total      = subBahan + subAlat + subUpah;
+
+            html += `
+            <tr class="subrow-item-${catId} bg-table-row border-b border-table-border hover:bg-white transition-colors duration-150" data-id-rap="${item.id_rap}">
+                <td class="px-3 md:px-5 py-2 md:py-2.5 text-center text-table-subtle">${rowNum}</td>
+                <td class="px-3 md:px-5 py-2 md:py-2.5 font-medium text-table-medium min-w-[250px] whitespace-normal leading-relaxed">${escHtml(item.nama_pekerjaan)}</td>
+                <td class="px-3 md:px-5 py-2 md:py-2.5 text-center">
+                    <input type="number" min="0" step="0.01"
+                        class="rab-volume-db w-20 text-center text-xs px-2 py-1 border border-table-border rounded focus:outline-none focus:border-primary"
+                        value="${vol}" data-id-rap="${item.id_rap}">
+                </td>
+                <td class="px-3 md:px-5 py-2 md:py-2.5 text-center text-table-subtle">${escHtml(item.satuan)}</td>
+                <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums">${fmt(hargaBahan)}</td>
+                <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums">${fmt(hargaAlat)}</td>
+                <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums">${fmt(hargaUpah)}</td>
+                <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums font-medium">${fmt(subBahan)}</td>
+                <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums font-medium">${fmt(subAlat)}</td>
+                <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums font-medium">${fmt(subUpah)}</td>
+                <td class="rab-harga-cell-db-${item.id_rap} px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums font-semibold text-table-strong">${fmt(total)}</td>
+                <td class="px-3 md:px-5 py-2 md:py-2.5 text-center">
+                    <div class="hs-dropdown relative inline-flex">
+                        <button type="button"
+                            class="hs-dropdown-toggle inline-flex items-center justify-center w-7 h-7 rounded-lg bg-white hover:bg-slate-50 border border-table-border text-table-subtle transition-colors focus:outline-none"
+                            title="Opsi">
+                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M10 6a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4z"/>
+                            </svg>
+                        </button>
+                        <div class="hs-dropdown-menu hidden z-50 mt-1 w-44 overflow-hidden rounded-xl bg-white shadow-xl ring-1 ring-black/10 end-0" role="menu">
+                            <button type="button" class="rap-rincian-btn flex w-full items-center gap-2.5 px-4 py-2.5 text-xs text-slate-700 hover:bg-slate-50 transition-colors"
+                                data-id-rap="${item.id_rap}" data-nama="${escHtml(item.nama_pekerjaan)}">
+                                <svg class="w-3.5 h-3.5 text-primary shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                </svg>
+                                Rincian AHS
+                            </button>
+                            <div class="border-t border-table-border my-1"></div>
+                            <button type="button" class="rap-del-btn flex w-full items-center gap-2.5 px-4 py-2.5 text-xs text-red-500 hover:bg-red-50 transition-colors"
+                                data-id-rap="${item.id_rap}" data-nama="${escHtml(item.nama_pekerjaan)}">
+                                <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                </svg>
+                                Hapus dari RAP
+                            </button>
+                        </div>
+                    </div>
+                </td>
+            </tr>`;
+        });
+    });
+
+    tbody.innerHTML = html;
+    updateTotals(grandTotal);
+
+    // Bind kategori headers yang baru di render dari DB
+    tbody.querySelectorAll('.rab-category').forEach(tr => {
+        bindAddSubItemRow(tr);
+        bindToggleRow(tr);
+    });
+
+    // ── Bind events setelah innerHTML ──────────────────────────────────────
+    // Volume input → auto-save ke DB
+    tbody.querySelectorAll('.rab-volume-db').forEach(input => {
+        let timer;
+        input.addEventListener('input', () => {
+            clearTimeout(timer);
+            timer = setTimeout(async () => {
+                const idRap = input.dataset.idRap;
+                const vol   = parseFloat(input.value) || 0;
+                if (!idRap) return;
+                try {
+                    const { updateRapVolume } = await import('../core/rap-data.js');
+                    await updateRapVolume(idRap, vol);
+                    // Update subtotals di baris ini
+                    const row        = input.closest('tr');
+                    const hargaSels  = row.querySelectorAll('td');
+                    // Recalculate totals
+                    let grandT = 0;
+                    tbody.querySelectorAll('[class*="rab-harga-cell-db-"]').forEach(c => {
+                        grandT += parseFloat(c.textContent.replace(/[^0-9.]/g,'')) || 0;
+                    });
+                    updateTotals(grandT);
+                } catch (e) { console.warn('Gagal update volume:', e); }
+            }, 600);
+        });
+    });
+
+    // Hapus item → DELETE API
+    tbody.querySelectorAll('.rap-del-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const idRap = btn.dataset.idRap;
+            const nama  = btn.dataset.nama || 'pekerjaan ini';
+            const confirmed = await confirmDelete(nama);
+            if (!confirmed) return;
+            try {
+                const { deleteRapItem } = await import('../core/rap-data.js');
+                await deleteRapItem(idRap);
+                btn.closest('tr').remove();
+                let grandT = 0;
+                tbody.querySelectorAll('[class*="rab-harga-cell-db-"]').forEach(c => {
+                    grandT += parseFloat(c.textContent.replace(/[^0-9.]/g,'')) || 0;
+                });
+                updateTotals(grandT);
+                toast.show(`"${nama}" dihapus dari RAP`, 'info', 2500);
+            } catch (e) {
+                toast.show('Gagal menghapus item', 'error', 2500);
+            }
+        });
+    });
+
+    // Rincian AHS
+    tbody.querySelectorAll('.rap-rincian-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            try {
+                sessionStorage.setItem('ahs_id_rap',    btn.dataset.idRap);
+                sessionStorage.setItem('ahs_item_label', btn.dataset.nama);
+                sessionStorage.setItem('rab_return_url', window.location.href);
+            } catch (_) {}
+            window.location.href = (window.RAB_INIT?.rincianAhsUrl) || '/menu-rap/rincian-ahs';
+        });
+    });
+
+    try { window.HSStaticMethods?.autoInit(['dropdown']); } catch (_) {}
+}
+

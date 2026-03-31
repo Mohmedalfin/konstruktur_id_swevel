@@ -20,7 +20,7 @@
         </nav>
     </div>
 
-    <?php echo view('partials/item-ahs'); ?>
+    <?php echo view('partials/table-pekerjaan'); ?>
 
 
     <script src="<?= base_url('node_modules/preline/dist/preline.js') ?>"></script>

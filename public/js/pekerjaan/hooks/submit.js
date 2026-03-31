@@ -13,11 +13,15 @@ export function bindSubmit() {
         const items = Object.values(state.selected);
         if (items.length === 0) return;
 
+        // Ambil konteks kategori dari sessionStorage (disimpan saat klik + di RAB)
         let catId   = '';
         let catName = '';
+        let catDbId = null;  // db_id integer dari tabel kategori_pekerjaan
         try {
             catId   = sessionStorage.getItem('rab_tambah_ahs_cat')     || '';
             catName = sessionStorage.getItem('rab_tambah_ahs_catname') || '';
+            catDbId = sessionStorage.getItem('rab_tambah_ahs_dbid')    || null;
+            if (catDbId) catDbId = parseInt(catDbId, 10) || null;
         } catch (_) {}
 
         try {
@@ -29,7 +33,7 @@ export function bindSubmit() {
 
             // Replace existing group for this category (avoid duplicates)
             existing = existing.filter(g => g.catId !== catId);
-            existing.push({ catId, catName, items });
+            existing.push({ catId, catName, catDbId, items });
             sessionStorage.setItem('rab_pending_items', JSON.stringify(existing));
         } catch (_) {}
 
@@ -48,6 +52,6 @@ export function bindSubmit() {
                 } catch (_) {}
             }
             window.location.href = rabUrl || '/menu-rap?mode=new';
-        }, 1200); // Tunggu toast sebentar sebelum pindah
+        }, 1200);
     });
 }

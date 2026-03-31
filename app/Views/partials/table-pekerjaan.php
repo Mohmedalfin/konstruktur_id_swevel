@@ -119,4 +119,4 @@ $wrapperClass = $wrapperClass ?? 'w-full';
 
 </div>
 
-<script type="module" src="<?= base_url('js/pekerjaan/index.js') ?>"></script>
+<script type="module" src="<?= base_url('js/pekerjaan/index.js?v=' . time()) ?>"></script>

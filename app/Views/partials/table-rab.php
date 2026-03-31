@@ -8,9 +8,9 @@ $wrapperClass = $tableVisible ? '' : 'hidden';
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
 
         <!-- Search -->
-        <div class="relative w-full sm:w-64">
+        <div class="relative w-full sm:w-100">
             <input id="rab-search" type="text" placeholder="Cari pekerjaan..."
-                class="w-full pl-9 pr-4 py-2 text-xs sm:text-sm border border-table-border rounded-lg bg-white placeholder-table-subtle focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
+                class="w-full pl-9 pr-4 py-2 text-xs sm:text-sm border border-table-border rounded-lg bg-white placeholder-table-subtle focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all" />
             <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-table-subtle" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
             </svg>
@@ -28,25 +28,29 @@ $wrapperClass = $tableVisible ? '' : 'hidden';
                 Kategori Pekerjaan
             </button>
 
-            <!-- Download Template -->
-            <button id="boq-download-template-btn" type="button" title="Download Template BOQ"
-                class="inline-flex items-center gap-1 md:gap-1.5 px-2 py-1.5 md:px-3 md:py-2 rounded-lg bg-amber-400 hover:bg-amber-500 text-black text-[10px] md:text-xs font-semibold transition-all duration-150 focus:outline-none active:scale-95 shadow-sm">
-                <svg class="w-3 h-3 md:w-3.5 md:h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                </svg>
-                Template
-            </button>
+            <!-- BOQ Actions Dropdown -->
+            <div class="hs-dropdown relative inline-flex">
+                <button type="button" title="Aksi BOQ" class="hs-dropdown-toggle inline-flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-lg border border-table-border bg-white hover:bg-slate-50 text-slate-700 transition-all duration-150 focus:outline-none active:scale-95 shadow-sm">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
+                    </svg>
+                </button>
 
-            <!-- Import BOQ -->
-            <button id="boq-import-btn" type="button" title="Import BOQ dari Excel"
-                class="inline-flex items-center gap-1 md:gap-1.5 px-2 py-1.5 md:px-3 md:py-2 rounded-lg bg-primary hover:bg-primary-hover text-white text-[10px] md:text-xs font-semibold transition-all duration-150 focus:outline-none active:scale-95 shadow-sm">
-                <svg class="w-3 h-3 md:w-3.5 md:h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
-                </svg>
-                Import BOQ
-            </button>
+                <div class="hs-dropdown-menu hidden z-50 mt-2 w-48 overflow-hidden rounded-xl bg-white shadow-xl ring-1 ring-black/10 end-0" role="menu">
+                    <button id="boq-download-template-btn" type="button" class="w-full text-left flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-2.5 text-xs text-slate-700 hover:bg-slate-50 focus:outline-none transition-colors">
+                        <svg class="w-4 h-4 text-amber-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                        </svg>
+                        Download Template
+                    </button>
+                    <button id="boq-import-btn" type="button" class="w-full text-left flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-2.5 text-xs text-slate-700 hover:bg-slate-50 focus:outline-none transition-colors">
+                        <svg class="w-4 h-4 text-primary shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                        </svg>
+                        Import Excel BOQ
+                    </button>
+                </div>
+            </div>
 
             <!-- Hidden file input -->
             <input id="boq-file-input" type="file" accept=".xlsx,.xls,.csv" class="hidden" />
@@ -233,5 +237,4 @@ $wrapperClass = $tableVisible ? '' : 'hidden';
             </div>
         </div>
     </div>
-
 </div>

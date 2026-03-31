@@ -50,5 +50,21 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
 // --------------------------------------------------------------------
 $routes->group('api', ['namespace' => 'App\Controllers\Api', 'filter' => 'auth'], function ($routes) {
     $routes->get('pekerjaan', 'PekerjaanController::index');
+    $routes->post('pekerjaan/kustom', 'PekerjaanController::store');
+    $routes->put('pekerjaan/kustom/(:num)', 'PekerjaanController::update/$1');
+    $routes->delete('pekerjaan/kustom/(:num)', 'PekerjaanController::destroy/$1');
+
     $routes->get('ahs', 'AhsController::index');
+
+    // Kategori Pekerjaan RAB
+    $routes->get('kategori', 'KategoriController::index');
+    $routes->post('kategori', 'KategoriController::create');
+    $routes->put('kategori/(:num)', 'KategoriController::update/$1');
+    $routes->delete('kategori/(:num)', 'KategoriController::delete/$1');
+
+    // RAP — Rencana Anggaran Pelaksanaan
+    $routes->get('rap',           'RapController::index');
+    $routes->post('rap',          'RapController::store');
+    $routes->put('rap/(:num)',    'RapController::update/$1');
+    $routes->delete('rap/(:num)', 'RapController::destroy/$1');
 });

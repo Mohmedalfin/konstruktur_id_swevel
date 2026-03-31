@@ -44,7 +44,7 @@ $userRole = session()->get('posisi_pekerjaan') ?? 'Kontraktor';
                 <div class="py-2 md:py-0 flex flex-col md:flex-row md:items-stretch gap-0.5 md:gap-0">
                     <div class="grow">
                         <div class="flex flex-col md:flex-row md:justify-end md:items-stretch gap-0 md:gap-0">
-                            <a class="px-4 h-14 md:py-0 md:w-28 md:justify-center flex items-center gap-3 text-sm bg-white text-primary md:rounded-none focus:outline-hidden" href="#" aria-current="page">
+                            <a class="px-4 h-14 md:py-0 md:w-28 md:justify-center flex items-center gap-3 text-sm font-semibold bg-white text-primary md:rounded-none focus:outline-hidden" href="#" aria-current="page">
                                 <svg class="shrink-0 size-4 block md:hidden" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
                                     <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />

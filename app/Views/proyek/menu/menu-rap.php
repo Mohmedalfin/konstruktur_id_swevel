@@ -37,6 +37,6 @@ if (! in_array($rabMode, ['readonly', 'new'], true)) {
     <script src="<?= base_url('node_modules/preline/dist/preline.js') ?>"></script>
     <script src="<?= base_url('assets/js/partials/navbar.js') ?>"></script>
     <script src="<?= base_url('assets/js/vendor/exceljs.min.js') ?>"></script>
-    <script type="module" src="<?= base_url('js/rab/index.js') ?>"></script>
+    <script type="module" src="<?= base_url('js/rab/index.js?v=' . time()) ?>"></script>
 </body>
 </html>
