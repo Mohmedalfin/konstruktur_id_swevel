@@ -6,12 +6,12 @@ use CodeIgniter\Model;
 
 class AhsModel extends Model
 {
-    protected $DBGroup          = 'estimator';
-    protected $table            = 'ahs';
-    protected $primaryKey       = 'id_ahs';
+    protected $DBGroup = 'estimator';
+    protected $table = 'ahs';
+    protected $primaryKey = 'id_ahs';
     protected $useAutoIncrement = true;
-    protected $returnType       = 'array';
-    protected $protectFields    = true;
+    protected $returnType = 'array';
+    protected $protectFields = true;
 
     protected $allowedFields = [
         'id_ahs',

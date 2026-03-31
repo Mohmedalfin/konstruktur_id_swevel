@@ -34,3 +34,29 @@ export async function fetchAhsDatabase(page = 1, q = '', appendData = false) {
         state.isFetching = false;
     }
 }
+export async function fetchRincianAHS(idDetail) {
+    try {
+        const res = await fetch(`/api/ahs/rincian/${idDetail}`);
+        if (!res.ok) throw new Error('Fetch Error');
+        const json = await res.json();
+        return json.status === 'success' ? json.data : [];
+    } catch (err) {
+        console.error('Gagal memuat rincian:', err);
+        return [];
+    }
+}
+
+export async function saveRincianAHS(payload) {
+    try {
+        const res = await fetch('/api/ahs/rincian', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error('Save Error');
+        return await res.json();
+    } catch (err) {
+        console.error('Gagal menyimpan rincian:', err);
+        throw err;
+    }
+}

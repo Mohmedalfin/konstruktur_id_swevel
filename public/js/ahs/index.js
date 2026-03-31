@@ -10,7 +10,7 @@
 import { state, tbody, itemLabel, addBahanBtn, addAlatBtn, addUpahBtn,
          fromDbBtn, modalClose, modalCancel, modalConfirm,
          modalSearch, modalCheckAll, filterBtns, modalTbody } from './core/state.js';
-import { fetchAhsDatabase }                                    from './core/data.js';
+import { fetchAhsDatabase, fetchRincianAHS }               from './core/data.js';
 import { addRow, renderRow, recalcTotals }                     from './components/render.js';
 import { openModal, closeModal, renderModalRows, updateModalCount,
          syncFilterButtons, confirmModalSelection,
@@ -23,6 +23,8 @@ if (!tbody) {
 } else {
 
     document.addEventListener('DOMContentLoaded', async function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        const idDetail  = urlParams.get('id_rap_detail');
 
         // ── Label item dari sessionStorage ────────────────────────────────
         try {
@@ -30,11 +32,23 @@ if (!tbody) {
             if (itemLabel) itemLabel.textContent = namaItem.toUpperCase();
         } catch (_) {}
 
-        // ── Render initial rows (kosong / dummy) ──────────────────────────
-        if (tbody.querySelectorAll('.ahs-row').length === 0) {
-            tbody.innerHTML = `<tr id="ahs-empty-row"><td colspan="11" class="text-center py-10 text-table-subtle text-xs italic">Belum ada rincian AHS. Tambahkan item untuk memulai.</td></tr>`;
+        // ── Render initial rows ───────────────────────────────────────────
+        if (idDetail) {
+            const existing = await fetchRincianAHS(idDetail);
+            if (existing && existing.length > 0) {
+                document.getElementById('ahs-empty-row')?.remove();
+                existing.forEach(item => renderRow(item));
+            } else {
+                tbody.innerHTML = `<tr id="ahs-empty-row"><td colspan="11" class="text-center py-10 text-table-subtle text-xs italic">Belum ada rincian AHS. Tambahkan item untuk memulai.</td></tr>`;
+            }
+        } else {
+            tbody.innerHTML = `<tr id="ahs-empty-row"><td colspan="11" class="text-center py-10 text-table-subtle text-xs italic">ID Detail tidak valid.</td></tr>`;
         }
+
         recalcTotals();
+
+        // ── Fetch master for autocomplete ─────────────────────────────────
+        fetchAhsDatabase(1);
 
         // ── Toolbar ───────────────────────────────────────────────────────
         addBahanBtn?.addEventListener('click', () => addRow('bahan'));

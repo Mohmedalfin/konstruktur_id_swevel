@@ -50,6 +50,9 @@ $routes->group('api', ['namespace' => 'App\Controllers\Api'], function ($routes)
     $routes->get('pekerjaan', 'PekerjaanController::index');
     $routes->post('pekerjaan/custom', 'PekerjaanController::storeCustom');
     $routes->get('ahs', 'AhsController::index');
+    $routes->get('ahs/rincian/(:num)', 'AhsController::getRincian/$1');
+    $routes->post('ahs/rincian', 'AhsController::saveRincian');
+    $routes->delete('ahs/rincian/item/(:num)', 'AhsController::deleteItem/$1');
 
     $routes->get('rap', 'RapController::index');
 
