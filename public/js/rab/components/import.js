@@ -26,6 +26,7 @@ let globalWorksheet = null;
 let excelColumns = []; // [{idxExcel: -1, name: '-- Kosongkan --'}, {idxExcel: 1, name: 'Uraian'}, ...]
 let rawDataStore = []; // The raw rows from excel (up to ~100 for preview)
 let currentMapping = {}; // key: index in excelColumns array (e.g., uraian: 1)
+let currentMasterCats = []; // Stores dynamically fetched categories
 
 function _openModal(overlay) {
     if (overlay) { overlay.classList.remove('hidden'); overlay.classList.add('flex'); document.body.style.overflow = 'hidden'; }
@@ -210,14 +211,18 @@ function _renderTableBody(tbody) {
         }
         
         // Render system Kategori at the end
+        let optionsHtml = '';
+        if (currentMasterCats && currentMasterCats.length > 0) {
+            currentMasterCats.forEach(mc => {
+                optionsHtml += `<option value="${mc.id}">${mc.nama}</option>`;
+            });
+        } else {
+            optionsHtml = `<option value="">-- Tanpa Kategori --</option>`;
+        }
+        
         const selectCat = `
             <select class="category-select w-full border border-slate-200 rounded text-[10px] px-1 py-1 focus:border-primary outline-none bg-white" data-index="${index}">
-                <option value="persiapan">Pekerjaan Persiapan</option>
-                <option value="tanah">Pekerjaan Tanah</option>
-                <option value="struktur">Pekerjaan Struktur</option>
-                <option value="arsitektur">Pekerjaan Arsitektur</option>
-                <option value="mep">Pekerjaan MEP</option>
-                <option value="finishing">Pekerjaan Finishing</option>
+                ${optionsHtml}
             </select>`;
         html += `<td class="px-2 py-2 text-center align-middle">${isHeaderStyle ? '' : selectCat}</td>`;
         
@@ -277,7 +282,7 @@ function _getFinalParsedData() {
         const volVal = isVolEmpty ? 0 : parseNumber(rawVolCell);
         
         // Grab the category selection from the UI state if available
-        let cat = 'persiapan';
+        let cat = currentMasterCats.length > 0 ? currentMasterCats[0].id : '';
         if (rowNumber - 2 < selects.length && !isVolEmpty) {
             cat = selects[rowNumber - 2].value;
         }
@@ -332,6 +337,10 @@ export function initImport() {
             _openModal(modalOverlay);
 
             try {
+                // Fetch dynamic categories
+                const { fetchKategoriMaster } = await import('../core/data.js');
+                currentMasterCats = await fetchKategoriMaster() || [];
+
                 const workbook = new ExcelJS.Workbook();
                 await workbook.xlsx.load(await file.arrayBuffer());
                 globalWorksheet = workbook.getWorksheet(1);

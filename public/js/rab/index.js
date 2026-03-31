@@ -54,7 +54,11 @@ if (!wrapper || !tbody) {
                     nama: cb.dataset.nama,
                     db_id: cb.dataset.dbid || cb.dataset.db_id || '' 
                 };
-                if (!state.activeCategories.some(c => c.id === cat.id)) {
+                if (!state.activeCategories.some(c => 
+                    (c.id && cat.id && c.id === cat.id) || 
+                    (c.db_id && cat.db_id && String(c.db_id) === String(cat.db_id)) ||
+                    (c.nama && cat.nama && c.nama.trim().toLowerCase() === cat.nama.trim().toLowerCase())
+                )) {
                     state.activeCategories.push(cat);
                     appendCategoryRow(cat);
                 }
@@ -353,7 +357,7 @@ if (!wrapper || !tbody) {
             hargaAlat:        item.harga_alat,
             hargaUpah:        item.harga_upah,
             hargaKeseluruhan: (item.volume || 1) * (item.harga_bahan + item.harga_alat + item.harga_upah),
-            kategori:         item.kategori || 'persiapan'
+            kategori:         item.kategori || ''
         }));
 
         const grouped = {};
@@ -379,7 +383,11 @@ if (!wrapper || !tbody) {
                 const found   = parsed.find(g => g.catId === catId);
                 if (found) { found.items.push(...grouped[catId]); }
                 else       { parsed.push({ catId, catName, catDbId, items: grouped[catId] }); }
-                if (!state.activeCategories.some(c => c.id === catId)) {
+                if (!state.activeCategories.some(c => 
+                    (c.id && catId && c.id === catId) || 
+                    (c.db_id && catDbId && String(c.db_id) === String(catDbId)) ||
+                    (c.nama && catName && c.nama.trim().toLowerCase() === catName.trim().toLowerCase())
+                )) {
                     const cat = { id: catId, nama: catName, db_id: catDbId };
                     state.activeCategories.push(cat);
                     appendCategoryRow(cat);
@@ -388,7 +396,19 @@ if (!wrapper || !tbody) {
             sessionStorage.setItem('rab_pending_items', JSON.stringify(parsed));
         } catch (_) {}
 
-        injectPendingItems();
+        // 1. Simpan ke database
+        await injectPendingItems();
+
+        // 2. Refresh UI secara langsung dari database agar muncul baris item-nya
+        try {
+            renderLoading();
+            const slug = getProjectSlug();
+            const apiData = await fetchRapItems(slug);
+            renderRapFromDB(apiData);
+        } catch (e) {
+            console.error('Gagal memuat ulang tabel dari DB setelah impor:', e);
+            renderEditable();
+        }
     });
 
 } // end guard

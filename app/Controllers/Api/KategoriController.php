@@ -37,6 +37,22 @@ class KategoriController extends ResourceController
             ->orderBy('id_kategori_pekerjaan', 'DESC')
             ->findAll();
 
+        // Cek kategori yang sudah ada di tabel rap
+        $db = \Config\Database::connect();
+        $usedCats = $db->table('rap')
+            ->select('id_kategori_pekerjaan')
+            ->where('id_proyek', $idProyek)
+            ->where('id_kategori_pekerjaan IS NOT NULL')
+            ->groupBy('id_kategori_pekerjaan')
+            ->get()
+            ->getResultArray();
+            
+        $usedCatIds = array_column($usedCats, 'id_kategori_pekerjaan');
+
+        foreach ($kategori as &$kat) {
+            $kat['sudah_digunakan'] = in_array($kat['id_kategori_pekerjaan'], $usedCatIds);
+        }
+
         return $this->respond($kategori);
     }
 

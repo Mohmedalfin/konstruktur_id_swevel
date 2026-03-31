@@ -17,7 +17,7 @@ $wrapperClass = $tableVisible ? '' : 'hidden';
         </div>
 
         <!-- BOQ Actions -->
-        <div class="flex items-center gap-1.5 md:gap-2 shrink-0">
+        <div class="flex items-center justify-end gap-1.5 md:gap-2 shrink-0">
 
             <!-- Tambah Kategori (only visible in editable mode) -->
             <button id="tambah-kategori-btn" type="button" title="Tambah Kategori Pekerjaan"

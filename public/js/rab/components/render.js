@@ -231,8 +231,10 @@ export function bindReadonlyDropdowns() {
 export function renderRapFromDB(apiData) {
     const groups = apiData?.data ?? [];
 
+    state.activeCategories = [];
+
     if (groups.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="12" class="text-center py-12 text-table-subtle text-xs italic">Belum ada pekerjaan. Klik <strong>+ Kategori Pekerjaan</strong> untuk memulai.</td></tr>`;
+        tbody.innerHTML = `<tr id="rab-tbody-empty"><td colspan="12" class="text-center py-12 text-table-subtle text-xs italic">Belum ada pekerjaan. Klik <strong>+ Kategori Pekerjaan</strong> untuk memulai.</td></tr>`;
         updateTotals(0);
         return;
     }
@@ -253,6 +255,15 @@ export function renderRapFromDB(apiData) {
             return sum + hargaBahan + hargaAlat + hargaUpah;
         }, 0);
         grandTotal += catTotal;
+
+        // Register to activeCategories so it won't be duplicated in modal
+        if (catId) {
+            state.activeCategories.push({
+                id: `db_${catId}`,
+                nama: catName,
+                db_id: catId
+            });
+        }
 
         // Header kategori
         html += `
@@ -289,10 +300,10 @@ export function renderRapFromDB(apiData) {
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                         </svg>
                     </button>
-                    <!-- Hapus tombol delete API per kategori krn logic DB butuh delete per item -->
-                    <button class="del-cat-btn inline-flex items-center justify-center w-6 h-6 rounded-md bg-white/10 hover:bg-red-500/80 text-white/70 hover:text-white transition-colors duration-150 focus:outline-none opacity-50 cursor-not-allowed"
-                        title="Hanya bisa menghapus per item saat dikendalikan DB" disabled>
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <!-- Tombol Hapus Kategori -->
+                    <button class="del-cat-btn inline-flex items-center justify-center w-6 h-6 rounded-md bg-white/10 hover:bg-red-500/80 text-white/70 hover:text-white transition-colors duration-150 focus:outline-none pointer-events-auto"
+                        data-cat="${catId}" data-catname="${escHtml(catName)}" title="Hapus Kategori (dan seluruh item di dalamnya)">
+                        <svg class="w-3.5 h-3.5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                         </svg>
@@ -417,6 +428,59 @@ export function renderRapFromDB(apiData) {
                 toast.show(`"${nama}" dihapus dari RAP`, 'info', 2500);
             } catch (e) {
                 toast.show('Gagal menghapus item', 'error', 2500);
+            }
+        });
+    });
+
+    // Hapus kategori beserta seluruh anak-anak itemnya
+    tbody.querySelectorAll('.del-cat-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            e.stopPropagation(); // Mencegah toggle expand/collapse row
+            
+            const catId = btn.dataset.cat;
+            const catName = btn.dataset.catname || 'kategori ini';
+            const subRows = tbody.querySelectorAll(`.subrow-item-${catId}`);
+            
+            const confirmed = await confirmDelete(`Kategori "${catName}" beserta ${subRows.length} item pekerjaan di dalamnya`);
+            if (!confirmed) return;
+
+            btn.innerHTML = `<svg class="animate-spin w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10" stroke-width="4" class="opacity-25"></circle><path fill="currentColor" class="opacity-75" d="M4 12a8 8 0 018-8v8H4z"></path></svg>`;
+            
+            try {
+                const { deleteRapItem } = await import('../core/rap-data.js');
+                
+                // Hapus item satu per satu (sekuensial untuk menghindari server overload/rate limit)
+                for (let i = 0; i < subRows.length; i++) {
+                    const idRap = subRows[i].dataset.idRap;
+                    if (idRap) await deleteRapItem(idRap);
+                }
+                
+                // Hapus dari UI
+                btn.closest('.rab-category').remove();
+                subRows.forEach(r => r.remove());
+                
+                // Hapus dari state agar dropdown tambah kategori membukanya kembali
+                state.activeCategories = state.activeCategories.filter(c => String(c.db_id) !== String(catId));
+                
+                // Cek jika tabel kosong sama sekali
+                if (tbody.querySelectorAll('.rab-category').length === 0) {
+                     renderRapFromDB({ data: [] });
+                     toast.show(`Kategori "${catName}" dihapus`, 'info', 2500);
+                     return;
+                }
+
+                // Kalkulasi ulang Total
+                let grandT = 0;
+                tbody.querySelectorAll('[class*="rab-harga-cell-db-"]').forEach(c => {
+                    grandT += parseFloat(c.textContent.replace(/[^0-9.]/g,'')) || 0;
+                });
+                updateTotals(grandT);
+                
+                toast.show(`Kategori "${catName}" beserta isinya berhasil dihapus`, 'info', 2500);
+            } catch (err) {
+                console.error('Gagal hapus kategori:', err);
+                toast.show('Pengahapusan kategori gagal', 'error', 3000);
+                btn.innerHTML = `<svg class="w-3.5 h-3.5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>`;
             }
         });
     });

@@ -14,7 +14,11 @@ export function openKategoriModal() {
     fetchKategoriMaster().then(list => {
         kategoriModalList.innerHTML = '';
         list.forEach(cat => {
-            const alreadyAdded = state.activeCategories.some(c => c.id === cat.id);
+            const alreadyAdded = cat.sudah_digunakan || state.activeCategories.some(c => 
+                (c.id && cat.id && c.id === cat.id) || 
+                (c.db_id && cat.db_id && String(c.db_id) === String(cat.db_id)) ||
+                (c.nama && cat.nama && c.nama.trim().toLowerCase() === cat.nama.trim().toLowerCase())
+            );
             const li = document.createElement('li');
             
             if (cat.id && cat.id.startsWith('kustom_')) {
@@ -250,28 +254,61 @@ export function bindAddSubItemRow(catTr) {
         btn.addEventListener('click', async function (e) {
             e.stopPropagation();
 
-            // Get the category name from the row for the dialog
+            const catId = btn.dataset.cat;
             const catName = catTr.querySelector('td:nth-child(2) span:last-child')?.textContent.trim()
-                         || btn.dataset.cat
-                         || 'kategori ini';
+                         || btn.dataset.catname || 'kategori ini';
+            const subRows = tbody.querySelectorAll('.subrow-item-' + catId);
 
-            const confirmed = await confirmDeleteCategory(catName);
+            const confirmed = await confirmDelete(`Kategori "${catName}" beserta ${subRows.length} item pekerjaan di dalamnya`);
             if (!confirmed) return;
 
-            const catId = btn.dataset.cat;
+            btn.innerHTML = `<svg class="animate-spin w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10" stroke-width="4" class="opacity-25"></circle><path fill="currentColor" class="opacity-75" d="M4 12a8 8 0 018-8v8H4z"></path></svg>`;
 
-            // Remove all sub-items for this category
-            tbody.querySelectorAll('.subrow-item-' + catId).forEach(r => r.remove());
+            try {
+                const { deleteRapItem } = await import('../core/rap-data.js');
+                
+                // Hapus satu-per-satu dari database (jika ada idRap)
+                for (let i = 0; i < subRows.length; i++) {
+                    const idRap = subRows[i].dataset.idRap;
+                    if (idRap) await deleteRapItem(idRap);
+                }
 
-            // Show placeholder if none exists
-            if (!tbody.querySelector('.subrow-placeholder-' + catId)) {
-                const ph = document.createElement('tr');
-                ph.className = `subrow-placeholder-${catId} bg-table-row border-b border-table-border`;
-                ph.innerHTML = `<td colspan="12" class="px-5 py-2.5 text-center text-table-subtle text-xs italic">Belum ada item — klik Tambah untuk menambahkan.</td>`;
-                catTr.after(ph);
+                // Hapus DOM Header & DOM sub-item & DOM placeholder
+                btn.closest('.rab-category').remove();
+                subRows.forEach(r => r.remove());
+                const ph = tbody.querySelector('.subrow-placeholder-' + catId);
+                if (ph) ph.remove();
+
+                // Hapus dari state
+                state.activeCategories = state.activeCategories.filter(c => String(c.db_id) !== String(catId) && c.id !== catId);
+
+                // Kembalikan ke halaman kosong jika tabel keseluruhan kosong
+                if (tbody.querySelectorAll('.rab-category').length === 0) {
+                     const emptyTr = document.createElement('tr');
+                     emptyTr.id = 'rab-tbody-empty';
+                     emptyTr.innerHTML = `<td colspan="12" class="text-center py-14 text-table-subtle text-xs">
+                         <svg class="w-10 h-10 mx-auto mb-3 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                         Belum ada kategori pekerjaan. Klik <strong>+ Kategori Pekerjaan</strong> untuk memulai.
+                     </td>`;
+                     tbody.appendChild(emptyTr);
+                }
+
+                // Kalkulasi ulang total
+                try {
+                    const { updateTotals } = await import('./render.js');
+                    let grandT = 0;
+                    tbody.querySelectorAll('[class*="rab-harga-cell-db-"]').forEach(c => {
+                        grandT += parseFloat(c.textContent.replace(/[^0-9.]/g,'')) || 0;
+                    });
+                    updateTotals(grandT);
+                } catch(e) {}
+
+                toast.show(`Kategori "${catName}" berhasil dihapus`, 'info', 2500);
+            } catch (err) {
+                console.error(err);
+                toast.show('Pengahapusan kategori gagal', 'error', 3000);
+                btn.innerHTML = `<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>`;
             }
-
-            toast.show(`Semua item di "${catName}" berhasil dihapus`, 'info', 2500);
         });
     });
 }

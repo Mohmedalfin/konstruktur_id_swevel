@@ -10,11 +10,12 @@ export function fetchKategoriMaster() {
     return fetch(`/api/kategori?slug=${slug}`)
         .then(res => res.json())
         .then(data => {
-            // Map the API data {id_kategori_pekerjaan, kode_kategori, nama_kategori} to {id, nama, db_id}
+            // Map the API data {id_kategori_pekerjaan, kode_kategori, nama_kategori, sudah_digunakan} to {id, nama, db_id, sudah_digunakan}
             return data.map(item => ({
                 db_id: item.id_kategori_pekerjaan,
                 id: item.kode_kategori,
-                nama: item.nama_kategori
+                nama: item.nama_kategori,
+                sudah_digunakan: item.sudah_digunakan || false
             }));
         })
         .catch(err => {
