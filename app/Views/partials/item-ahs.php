@@ -77,7 +77,7 @@ $wrapperClass = $wrapperClass ?? 'w-full';
                 <col style="width: 45%">        <!-- Nama Pekerjaan — dibatasi supaya tidak ambil semua ruang -->
                 <col style="width: 6rem">       <!-- Satuan -->
                 <col style="width: 14rem">      <!-- Sumber -->
-                <col style="width: 5.5rem">     <!-- Pilih -->
+                <col style="width: 9rem">     <!-- Pilih -->
             </colgroup>
 
             <!-- ── Head ─────────────────────────────────────────────── -->

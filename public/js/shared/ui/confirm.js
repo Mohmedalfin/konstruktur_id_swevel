@@ -9,7 +9,7 @@
  *   if (ok) { // proceed }
  */
 
-import Swal from '/js/vendor/sweetalert2.esm.js';
+import Swal from 'https://cdn.jsdelivr.net/npm/sweetalert2@11/+esm';
 
 // -------------------------------------------------------------------
 // Base Swal instance styled to match the app's design tokens
@@ -75,6 +75,23 @@ export async function confirmInfo(title, html) {
         confirmButtonText:  'Lanjutkan',
         cancelButtonText:   'Batal',
         focusConfirm:       true,
+    });
+    return result.isConfirmed;
+}
+
+// -------------------------------------------------------------------
+// confirmAction(title, html, confirmText)
+// A generic warning dialog.
+// -------------------------------------------------------------------
+export async function confirmAction(title, html, confirmText = 'Ya, Lanjutkan') {
+    const result = await AppSwal.fire({
+        icon:               'warning',
+        title,
+        html,
+        showCancelButton:   true,
+        confirmButtonText:  confirmText,
+        cancelButtonText:   'Batal',
+        focusCancel:        true,
     });
     return result.isConfirmed;
 }

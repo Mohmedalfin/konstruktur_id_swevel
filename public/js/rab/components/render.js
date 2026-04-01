@@ -16,6 +16,7 @@ import {
 } from '../core/state.js';
 import { fmt, escHtml } from '../../shared/utils.js';
 import { fetchRabData } from '../core/data.js';
+import { confirmAction } from '../../shared/ui/confirm.js';
 
 export function renderLoading() {
     tbody.innerHTML = `
@@ -237,7 +238,7 @@ export function bindCategoryActionButtons() {
             params.set('kategori_id', idKategori);
             params.set('kategori_nama', namaKategori);
 
-            window.location.href = `/proyek/menu/main-pekerjaan?${params.toString()}`;
+            window.location.href = `/menu-rap/tambah-pekerjaan?${params.toString()}`;
         });
     });
 }
@@ -252,7 +253,11 @@ export function bindDeleteCategoryButtons() {
 
             if (!catId) return;
 
-            const ok = confirm(`Yakin ingin menghapus kategori "${catName}"? Semua pekerjaan di kategori ini juga akan ikut terhapus.`);
+            const ok = await confirmAction(
+                'Hapus Kategori?',
+                `Yakin ingin menghapus kategori <strong>"${catName}"</strong>? Semua pekerjaan di kategori ini juga akan ikut terhapus.`,
+                'Ya, Hapus'
+            );
             if (!ok) return;
 
             try {
@@ -384,7 +389,11 @@ export function bindReadonlyDropdowns() {
             const idRapDetail = btn.dataset.idRapDetail || btn.getAttribute('data-id-rap-detail');
             if (!idRapDetail) return;
 
-            const ok = confirm('Yakin ingin menghapus pekerjaan ini?');
+            const ok = await confirmAction(
+                'Hapus Pekerjaan?',
+                'Yakin ingin menghapus pekerjaan ini dari RAB?',
+                'Ya, Hapus'
+            );
             if (!ok) return;
 
             try {

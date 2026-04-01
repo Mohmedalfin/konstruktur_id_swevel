@@ -6,7 +6,7 @@
 import { state, tbody, totalBahanEl, totalAlatEl, totalUpahEl, totalKeselEl } from '../core/state.js';
 import { fmt, escHtml } from '../../shared/utils.js';
 import { toast }        from '../../shared/ui/toast.js';
-
+import { confirmAction }  from '../../shared/ui/confirm.js';
 export const tipeConfig = {
     bahan: { label: 'Bahan', badge: 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-300' },
     alat:  { label: 'Alat',  badge: 'bg-blue-100 text-blue-700 ring-1 ring-blue-300'          },
@@ -148,19 +148,12 @@ function _bindRowInputs(tr) {
         const tipe  = tr.dataset.tipe;
 
         // ── Step 1: Confirm with SweetAlert2 ───────────────────────────
-        const result = await Swal.fire({
-            title: 'Apakah Anda yakin?',
-            text: "Item ini akan dihapus dari rincian AHS.",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Ya, Hapus!',
-            cancelButtonText: 'Batal',
-            reverseButtons: true
-        });
-
-        if (!result.isConfirmed) return;
+        const isConfirmed = await confirmAction(
+            'Hapus Item AHS?',
+            'Item ini akan dihapus dari rincian AHS.',
+            'Ya, Hapus!'
+        );
+        if (!isConfirmed) return;
 
         // ── Step 2: Persistent Deletion (if applicable) ────────────────
         // If rowId is a number and not a timestamp (typically < 1000000000)

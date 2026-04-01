@@ -6,6 +6,8 @@ use App\Controllers\BaseController;
 use CodeIgniter\HTTP\ResponseInterface;
 use Throwable;
 use App\Models\RapDetailItemModel;
+use App\Models\RapDetailModel;
+use App\Models\RapModel;
 
 class AhsController extends BaseController
 {
@@ -78,7 +80,7 @@ class AhsController extends BaseController
 
             // 2. Insert new
             foreach ($items as $index => $item) {
-                $model->insert([
+                $inserted = $model->insert([
                     'id_rap_detail' => $idDetail,
                     'jenis_item'    => $item['tipe']   ?? 'bahan',
                     'nama_item'     => $item['uraian'] ?? '',
@@ -91,6 +93,11 @@ class AhsController extends BaseController
                     'keterangan'    => $item['sumber']      ?? '',
                     'urutan'        => $index + 1,
                 ]);
+                if (!$inserted) {
+                    $db->transRollback();
+                    $errors = implode(', ', $model->errors() ?: ['Unknown detail']);
+                    throw new \Exception('Insert failed: ' . $errors);
+                }
             }
 
             if ($db->transStatus() === false) {
@@ -99,6 +106,57 @@ class AhsController extends BaseController
             }
 
             $db->transCommit();
+
+            // ── 3. Recalculate rap_detail totals from saved AHS items ─────────
+            $rapDetailModel = new RapDetailModel();
+            $rapDetail = $rapDetailModel->find($idDetail);
+
+            if ($rapDetail) {
+                // Sum koefisien * harga_satuan per jenis_item
+                $totals = ['bahan' => 0.0, 'alat' => 0.0, 'upah' => 0.0];
+
+                $savedItems = $model
+                    ->where('id_rap_detail', $idDetail)
+                    ->findAll();
+
+                foreach ($savedItems as $si) {
+                    $jenis  = strtolower($si['jenis_item'] ?? 'bahan');
+                    $jumlah = (float)($si['koefisien'] ?? 0) * (float)($si['harga_satuan'] ?? 0);
+                    if (isset($totals[$jenis])) {
+                        $totals[$jenis] += $jumlah;
+                    }
+                }
+
+                $volume           = (float)($rapDetail['volume'] ?? 1);
+                $hargaBahan       = $totals['bahan'];
+                $hargaAlat        = $totals['alat'];
+                $hargaUpah        = $totals['upah'];
+                $subtotalBahan    = $volume * $hargaBahan;
+                $subtotalAlat     = $volume * $hargaAlat;
+                $subtotalUpah     = $volume * $hargaUpah;
+                $totalKeseluruhan = $subtotalBahan + $subtotalAlat + $subtotalUpah;
+
+                $rapDetailModel->update($idDetail, [
+                    'harga_bahan'       => $hargaBahan,
+                    'harga_alat'        => $hargaAlat,
+                    'harga_upah'        => $hargaUpah,
+                    'subtotal_bahan'    => $subtotalBahan,
+                    'subtotal_alat'     => $subtotalAlat,
+                    'subtotal_upah'     => $subtotalUpah,
+                    'total_keseluruhan' => $totalKeseluruhan,
+                ]);
+
+                // ── 4. Recalculate RAP-level grand total ──────────────────────
+                $rapModel  = new RapModel();
+                $idRap     = (int)($rapDetail['id_rap'] ?? 0);
+                if ($idRap > 0) {
+                    $allDetails = $rapDetailModel->where('id_rap', $idRap)->findAll();
+                    $grandTotal = array_reduce($allDetails, function ($carry, $d) {
+                        return $carry + (float)($d['total_keseluruhan'] ?? 0);
+                    }, 0.0);
+                    $rapModel->update($idRap, ['total_keseluruhan' => $grandTotal]);
+                }
+            }
 
             return $this->response->setJSON([
                 'status'  => 'success',
