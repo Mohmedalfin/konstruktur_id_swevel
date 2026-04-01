@@ -13,12 +13,16 @@
  *   ]
  */
 
+$id     = $card['id']     ?? 0;
 $title  = $card['title']  ?? '';
 $lokasi = $card['lokasi'] ?? '';
 $nilai  = $card['nilai']  ?? null;
 $pctVal = $card['pct']    ?? null;
 $tgl    = $card['tgl']    ?? '';
 $href   = $card['href']   ?? '#';
+$status = $card['status'] ?? 'draft';
+
+$isSelesai = $status === 'done';
 
 // % color
 $pctCls = match (true) {
@@ -28,7 +32,7 @@ $pctCls = match (true) {
 };
 ?>
 
-<div class="group relative flex flex-col overflow-hidden rounded-2xl bg-white border border-table-border shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
+<div id="proyek-card-<?= $id ?>" class="group relative flex flex-col overflow-hidden rounded-2xl bg-white border border-table-border shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
 
     <!-- Full-card click target (sits behind dropdowns) -->
     <a href="<?= esc($href) ?>" class="absolute inset-0 z-10" aria-label="Buka proyek <?= esc($title) ?>"></a>
@@ -48,6 +52,13 @@ $pctCls = match (true) {
 
         <!-- ⋯ Context menu (z-20 — above the card link) -->
         <div class="absolute top-2 right-2 z-20">
+
+            <?php if ($isSelesai): ?>
+                <!-- Badge selesai (replaces 3-dot button for completed projects) -->
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/90 backdrop-blur-sm text-white text-[10px] sm:text-xs font-semibold shadow">
+                    <i class="fa-solid fa-circle-check"></i> Selesai
+                </span>
+            <?php else: ?>
             <div class="hs-dropdown relative inline-flex">
 
                 <button type="button"
@@ -65,16 +76,27 @@ $pctCls = match (true) {
                     <a class="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-2.5 text-xs text-slate-700 hover:bg-slate-50" href="#">
                         <i class="fa-regular fa-copy w-3.5 sm:w-4 text-primary shrink-0"></i> Duplikat
                     </a>
-                    <a class="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-2.5 text-xs text-slate-700 hover:bg-slate-50" href="#">
-                        <i class="fa-solid fa-circle-check w-3.5 sm:w-4 text-emerald-500 shrink-0"></i> Selesaikan
-                    </a>
+                    <?php if ($isSelesai): ?>
+                        <span class="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-2.5 text-xs font-semibold text-emerald-600">
+                            <i class="fa-solid fa-circle-check w-3.5 sm:w-4 shrink-0"></i> Sudah Selesai
+                        </span>
+                    <?php else: ?>
+                        <button type="button"
+                            class="btn-selesai-proyek w-full flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-2.5 text-xs text-slate-700 hover:bg-emerald-50 text-left"
+                            data-id="<?= $id ?>" data-nama="<?= esc($title) ?>">
+                            <i class="fa-solid fa-circle-check w-3.5 sm:w-4 text-emerald-500 shrink-0"></i> Selesaikan
+                        </button>
+                    <?php endif; ?>
                     <div class="border-t border-table-border my-1"></div>
-                    <a class="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-2.5 text-xs text-red-500 hover:bg-red-50" href="#">
+                    <button type="button"
+                        class="btn-hapus-proyek w-full flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-2.5 text-xs text-red-500 hover:bg-red-50 text-left"
+                        data-id="<?= $id ?>" data-nama="<?= esc($title) ?>">
                         <i class="fa-regular fa-trash-can w-3.5 sm:w-4 shrink-0"></i> Hapus
-                    </a>
+                    </button>
                 </div>
 
             </div>
+            <?php endif; ?>
         </div>
 
     </div>
@@ -118,12 +140,19 @@ $pctCls = match (true) {
             <span class="hidden xs:inline sm:inline"><?= esc($tgl) ?></span>
             <span class="inline sm:hidden"><?= date('d/m', strtotime($tgl)) ?></span>
         </span>
-        <span class="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-semibold text-primary group-hover:underline">
-            <span class="hidden sm:inline">Lihat Detail</span>
-            <svg class="w-3 h-3 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-            </svg>
-        </span>
+        <?php if ($isSelesai): ?>
+            <span class="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-semibold text-emerald-600">
+                <i class="fa-solid fa-circle-check"></i>
+                <span class="hidden sm:inline">Selesai</span>
+            </span>
+        <?php else: ?>
+            <span class="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-semibold text-primary group-hover:underline">
+                <span class="hidden sm:inline">Lihat Detail</span>
+                <svg class="w-3 h-3 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+            </span>
+        <?php endif; ?>
     </div>
 
 </div>

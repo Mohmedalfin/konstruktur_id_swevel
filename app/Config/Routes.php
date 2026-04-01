@@ -27,6 +27,8 @@ $routes->group('', function ($routes) {
 
     // Detail proyek / menu RAP by slug
     $routes->get('proyek/(:segment)', 'menu\MenuRapController::index/$1');
+    $routes->post('proyek/selesai/(:num)', 'ProyekController::selesai/$1');
+    $routes->delete('proyek/delete/(:num)', 'ProyekController::destroy/$1');
 
     // Dashboard
     $routes->get('dashboard', 'menu\DashboardController::index');
