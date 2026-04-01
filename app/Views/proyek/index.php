@@ -9,7 +9,8 @@
 <?= $this->section('content') ?>
 <!-- Button Proyek Baru -->
 <div class="mb-4">
-  <a class="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-white shadow-md hover:bg-primary/90" href="<?= base_url('proyek/create') ?>">
+  <a class="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-white shadow-md hover:bg-primary/90"
+    href="<?= base_url('proyek/create') ?>">
     <i class="fa-solid fa-circle-plus"></i>
     <span class="font-semibold">Proyek Baru</span>
   </a>
@@ -30,9 +31,7 @@
       <!-- Nama Proyek -->
       <div class="col-span-2 md:col-span-1">
         <label class="mb-1 block text-xs md:text-sm font-semibold text-text-primary">Nama Proyek</label>
-        <input
-          type="text"
-          placeholder="Masukkan Nama Proyek"
+        <input type="text" placeholder="Masukkan Nama Proyek"
           class="w-full rounded-md border border-gray-300 px-2.5 py-1.5 md:px-3 md:py-2 text-xs md:text-sm focus:outline-none focus:ring-1 focus:ring-blue-500" />
       </div>
 
@@ -54,18 +53,22 @@
           "extraMarkup": "<div class=\"absolute top-1/2 end-3 -translate-y-1/2\"><svg class=\"size-4 text-gray-500\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 20 20\" fill=\"currentColor\"><path fill-rule=\"evenodd\" d=\"M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.168l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.24 4.5a.75.75 0 0 1-1.08 0l-4.24-4.5a.75.75 0 0 1 .02-1.06Z\" clip-rule=\"evenodd\"/></svg></div>"
         }' class="hidden">
           <option value="">Choose</option>
-          <option selected value="1" data-hs-select-option='{"icon":"<img class=\"shrink-0 size-5 rounded-full\" src=\"https://images.unsplash.com/photo-1659482633369-9fe69af50bfb?auto=format&fit=facearea&facepad=3&w=64&h=64&q=80\" />","description":"Kab. Sleman, DIY"}'>Sleman</option>
-          <option value="2" data-hs-select-option='{"icon":"<img class=\"shrink-0 size-5 rounded-full\" src=\"https://images.unsplash.com/photo-1541101767792-f9b2b1c4f127?auto=format&fit=facearea&facepad=3&w=64&h=64&q=80\" />","description":"Kota Semarang, Jateng"}'>Semarang</option>
-          <option value="3" data-hs-select-option='{"icon":"<img class=\"shrink-0 size-5 rounded-full\" src=\"https://images.unsplash.com/photo-1601935111741-ae98b2b230b0?auto=format&fit=facearea&facepad=2.5&w=64&h=64&q=80\" />","description":"Kota Surabaya, Jatim"}'>Surabaya</option>
+          <option selected value="1"
+            data-hs-select-option='{"icon":"<img class=\"shrink-0 size-5 rounded-full\" src=\"https://images.unsplash.com/photo-1659482633369-9fe69af50bfb?auto=format&fit=facearea&facepad=3&w=64&h=64&q=80\" />","description":"Kab. Sleman, DIY"}'>
+            Sleman</option>
+          <option value="2"
+            data-hs-select-option='{"icon":"<img class=\"shrink-0 size-5 rounded-full\" src=\"https://images.unsplash.com/photo-1541101767792-f9b2b1c4f127?auto=format&fit=facearea&facepad=3&w=64&h=64&q=80\" />","description":"Kota Semarang, Jateng"}'>
+            Semarang</option>
+          <option value="3"
+            data-hs-select-option='{"icon":"<img class=\"shrink-0 size-5 rounded-full\" src=\"https://images.unsplash.com/photo-1601935111741-ae98b2b230b0?auto=format&fit=facearea&facepad=2.5&w=64&h=64&q=80\" />","description":"Kota Surabaya, Jatim"}'>
+            Surabaya</option>
         </select>
       </div>
 
       <!-- Tahun -->
       <div>
         <label class="mb-1 block text-xs md:text-sm font-semibold text-text-primary">Tahun</label>
-        <input
-          type="text"
-          placeholder="Tahun Proyek"
+        <input type="text" placeholder="Tahun Proyek"
           class="w-full rounded-md border border-gray-300 px-2.5 py-1.5 md:px-3 md:py-2 text-xs md:text-sm focus:outline-none focus:ring-1 focus:ring-blue-500" />
       </div>
 
@@ -80,11 +83,11 @@
   <div class="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3 xl:grid-cols-5">
     <?php
     if (empty($cards)) {
-        echo '<div class="col-span-full text-center text-gray-500 py-10">Belum ada proyek yang ditambahkan.</div>';
+      echo '<div class="col-span-full text-center text-gray-500 py-10">Belum ada proyek yang ditambahkan.</div>';
     } else {
-        foreach ($cards as $card):
-            echo view('partials/card-proyek', ['card' => $card]);
-        endforeach;
+      foreach ($cards as $card):
+        echo view('partials/card-proyek', ['card' => $card]);
+      endforeach;
     }
     ?>
   </div>
@@ -92,4 +95,134 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
+<script type="module">
+import Swal from 'https://cdn.jsdelivr.net/npm/sweetalert2@11/+esm';
+
+// Same mixin as shared/ui/confirm.js
+const AppSwal = Swal.mixin({
+    customClass: {
+        popup:         'app-swal-popup',
+        title:         'app-swal-title',
+        htmlContainer: 'app-swal-html',
+        confirmButton: 'app-swal-confirm',
+        cancelButton:  'app-swal-cancel',
+        icon:          'app-swal-icon',
+    },
+    buttonsStyling: false,
+    reverseButtons:  true,
+});
+
+const baseUrl = '<?= base_url() ?>';
+
+document.addEventListener('click', async function (e) {
+    const btn = e.target.closest('.btn-selesai-proyek');
+    if (!btn) return;
+    e.stopPropagation();
+
+    const id   = btn.dataset.id;
+    const nama = btn.dataset.nama;
+
+    const { isConfirmed } = await AppSwal.fire({
+        icon:              'question',
+        title:             'Tandai Proyek Selesai?',
+        html:              `Proyek <strong>${nama}</strong> akan ditandai sebagai <strong style="color:#10b981">Selesai</strong>.`,
+        showCancelButton:  true,
+        confirmButtonText: 'Ya, Selesai!',
+        cancelButtonText:  'Batal',
+        focusCancel:       true,
+    });
+
+    if (!isConfirmed) return;
+
+    try {
+        const res  = await fetch(`${baseUrl}proyek/selesai/${id}`, { method: 'POST' });
+        const json = await res.json();
+        if (!res.ok || json.status !== 'success') throw new Error(json.message || 'Gagal');
+
+        // Update DOM in-place without reload
+        const card = document.getElementById(`proyek-card-${id}`);
+        if (card) {
+            const dropdownWrap = card.querySelector('.hs-dropdown')?.closest('div.absolute');
+            if (dropdownWrap) {
+                dropdownWrap.innerHTML = `
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/90 backdrop-blur-sm text-white text-xs font-semibold shadow">
+                        <i class="fa-solid fa-circle-check"></i> Selesai
+                    </span>`;
+            }
+            const footerLink = card.querySelector('.group-hover\\:underline');
+            if (footerLink) {
+                footerLink.outerHTML = `
+                    <span class="inline-flex items-center gap-1 text-xs font-semibold" style="color:#10b981;">
+                        <i class="fa-solid fa-circle-check"></i>
+                        <span class="hidden sm:inline">Selesai</span>
+                    </span>`;
+            }
+        }
+
+        AppSwal.fire({
+            toast: true, position: 'top-end', icon: 'success',
+            title: 'Proyek ditandai selesai!',
+            showConfirmButton: false, timer: 2000, timerProgressBar: true,
+        });
+
+    } catch (err) {
+        AppSwal.fire({
+            toast: true, position: 'top-end', icon: 'error',
+            title: err.message || 'Terjadi kesalahan',
+            showConfirmButton: false, timer: 2500,
+        });
+    }
+});
+
+// Hapus Proyek
+document.addEventListener('click', async function (e) {
+    const btn = e.target.closest('.btn-hapus-proyek');
+    if (!btn) return;
+    e.stopPropagation();
+
+    const id   = btn.dataset.id;
+    const nama = btn.dataset.nama;
+
+    const { isConfirmed } = await AppSwal.fire({
+        icon:              'warning',
+        title:             'Hapus Proyek Permanen?',
+        html:              `Proyek <strong>${nama}</strong> beserta seluruh data RAP dan AHS akan <strong style="color:#ef4444">dihapus selamanya</strong>.`,
+        showCancelButton:  true,
+        confirmButtonText: 'Ya, Hapus!',
+        cancelButtonText:  'Batal',
+        focusCancel:       true,
+    });
+
+    if (!isConfirmed) return;
+
+    try {
+        const res  = await fetch(`${baseUrl}proyek/delete/${id}`, { method: 'DELETE' });
+        const json = await res.json();
+        if (!res.ok || json.status !== 'success') throw new Error(json.message || 'Gagal');
+
+        // Remove card from DOM with animation
+        const card = document.getElementById(`proyek-card-${id}`);
+        if (card) {
+            card.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(10px)';
+            setTimeout(() => card.remove(), 400);
+        }
+
+        AppSwal.fire({
+            toast: true, position: 'top-end', icon: 'success',
+            title: 'Proyek berhasil dihapus!',
+            showConfirmButton: false, timer: 2000, timerProgressBar: true
+        });
+
+    } catch (err) {
+        AppSwal.fire({
+            toast: true, position: 'top-end', icon: 'error',
+            title: err.message || 'Gagal menghapus proyek',
+            showConfirmButton: false, timer: 3000
+        });
+    }
+});
+</script>
 <?= $this->endSection() ?>
+
