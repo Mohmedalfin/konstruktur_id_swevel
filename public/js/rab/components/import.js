@@ -4,6 +4,23 @@
  * and dispatching the 'rabDataImported' custom event when confirmed.
  */
 
+import { fetchKategoriMaster } from '../core/data.js';
+
+// Cache of available categories (loaded from API)
+let availableCategories = [];
+
+// Expose refresh so index.js can update after a new custom category is added
+export async function refreshImportCategories() {
+    const idProject = window.RAB_INIT?.idProject || window.RAB_INIT?.id;
+    if (!idProject) return;
+    try {
+        availableCategories = await fetchKategoriMaster(idProject);
+    } catch (_) {
+        availableCategories = [];
+    }
+}
+
+
 const formatRp = (val) =>
     new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(val || 0);
 
@@ -209,15 +226,15 @@ function _renderTableBody(tbody) {
             html += `<td class="px-3 py-2 align-middle ${align} ${extraClasses}" title="${cellVal}">${cellVal || '-'}</td>`;
         }
         
-        // Render system Kategori at the end
+
+        // Build category options from API data
+        const catOptions = availableCategories.length
+            ? availableCategories.map(c => `<option value="${c.id}">${c.nama}</option>`).join('')
+            : `<option value="">Pilih Kategori</option>`;
+
         const selectCat = `
             <select class="category-select w-full border border-slate-200 rounded text-[10px] px-1 py-1 focus:border-primary outline-none bg-white" data-index="${index}">
-                <option value="persiapan">Pekerjaan Persiapan</option>
-                <option value="tanah">Pekerjaan Tanah</option>
-                <option value="struktur">Pekerjaan Struktur</option>
-                <option value="arsitektur">Pekerjaan Arsitektur</option>
-                <option value="mep">Pekerjaan MEP</option>
-                <option value="finishing">Pekerjaan Finishing</option>
+                ${catOptions}
             </select>`;
         html += `<td class="px-2 py-2 text-center align-middle">${isHeaderStyle ? '' : selectCat}</td>`;
         
@@ -258,13 +275,21 @@ function _getFinalParsedData() {
     
     const finalData = [];
     let tbody = document.getElementById('import-rab-modal-tbody');
-    let selects = tbody ? tbody.querySelectorAll('.category-select') : [];
+
+    // Build a lookup map: rawDataStore index → selected category value
+    // Each <select class="category-select"> has data-index = its rawDataStore index.
+    // Header-style rows don't render a <select>, so they won't be in this map.
+    const categoryMap = {};
+    if (tbody) {
+        tbody.querySelectorAll('.category-select').forEach(sel => {
+            categoryMap[sel.dataset.index] = sel.value;
+        });
+    }
 
     globalWorksheet.eachRow((row, rowNumber) => {
         if (rowNumber === 1) return; // Skip header
-        
+
         const vals = row.values;
-        // Verify we actually have a valid Uraian string mapped from the correct column
         const uraianTxt = mapUraian !== -1 && vals[mapUraian] ? (vals[mapUraian]).toString().trim() : '';
         if (!uraianTxt) return;
 
@@ -275,12 +300,14 @@ function _getFinalParsedData() {
         }
 
         const volVal = isVolEmpty ? 0 : parseNumber(rawVolCell);
-        
-        // Grab the category selection from the UI state if available
-        let cat = 'persiapan';
-        if (rowNumber - 2 < selects.length && !isVolEmpty) {
-            cat = selects[rowNumber - 2].value;
-        }
+
+        // rawDataStore index = rowNumber - 2 (excel row 2 → index 0, etc.)
+        const rawIdx = rowNumber - 2;
+        // Use the map keyed by data-index; fallback to first available category
+        const firstCat = Object.values(categoryMap)[0] || '';
+        const cat = (!isVolEmpty && categoryMap[rawIdx] !== undefined)
+            ? categoryMap[rawIdx]
+            : firstCat;
 
         finalData.push({
             id:          'import-' + Date.now() + '-' + rowNumber,
@@ -298,7 +325,7 @@ function _getFinalParsedData() {
     return finalData;
 }
 
-export function initImport() {
+export async function initImport() {
     const importBtn    = document.getElementById('boq-import-btn');
     const fileInput    = document.getElementById('boq-file-input');
     const modalOverlay = document.getElementById('import-rab-modal-overlay');
@@ -317,6 +344,9 @@ export function initImport() {
         fileInput.addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (!file) return;
+
+            // Refresh categories NOW — RAB_INIT is guaranteed to be set at this point
+            await refreshImportCategories();
 
             const thead = document.getElementById('import-rab-modal-thead');
             const tbody = document.getElementById('import-rab-modal-tbody');

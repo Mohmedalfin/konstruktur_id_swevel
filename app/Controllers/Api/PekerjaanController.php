@@ -186,4 +186,93 @@ class PekerjaanController extends BaseController
             ]);
         }
     }
+
+    /**
+     * PUT /api/pekerjaan/custom/(:num)
+     * Updates an existing custom pekerjaan.
+     */
+    public function updateCustom($id = null)
+    {
+        try {
+            $id = (int)$id;
+            $json = $this->request->getJSON(true);
+            $nama = trim($json['nama'] ?? '');
+            $satuan = trim($json['satuan'] ?? 'm2');
+
+            if ($id <= 0 || empty($nama)) {
+                return $this->response->setStatusCode(400)->setJSON([
+                    'status'  => 'error',
+                    'message' => 'ID dan Nama pekerjaan wajib diisi'
+                ]);
+            }
+
+            $model = new \App\Models\LocalPekerjaanModel();
+            
+            // Check existence
+            $existing = $model->find($id);
+            if (!$existing) {
+                return $this->response->setStatusCode(404)->setJSON([
+                    'status' => 'error',
+                    'message'=> 'Pekerjaan kustom tidak ditemukan'
+                ]);
+            }
+
+            $model->update($id, [
+                'nama_pekerjaan' => $nama,
+                'satuan'         => $satuan,
+            ]);
+
+            return $this->response->setJSON([
+                'status'  => 'success',
+                'message' => 'Pekerjaan kustom berhasil diperbarui'
+            ]);
+
+        } catch (\Throwable $e) {
+            return $this->response->setStatusCode(500)->setJSON([
+                'status'  => 'error',
+                'message' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * DELETE /api/pekerjaan/custom/(:num)
+     * Deletes a custom pekerjaan.
+     */
+    public function deleteCustom($id = null)
+    {
+        try {
+            $id = (int)$id;
+            if ($id <= 0) {
+                return $this->response->setStatusCode(400)->setJSON([
+                    'status'  => 'error',
+                    'message' => 'ID pekerjaan wajib diisi'
+                ]);
+            }
+
+            $model = new \App\Models\LocalPekerjaanModel();
+            
+            // Check existence
+            $existing = $model->find($id);
+            if (!$existing) {
+                return $this->response->setStatusCode(404)->setJSON([
+                    'status' => 'error',
+                    'message'=> 'Pekerjaan kustom tidak ditemukan'
+                ]);
+            }
+
+            $model->delete($id);
+
+            return $this->response->setJSON([
+                'status'  => 'success',
+                'message' => 'Pekerjaan kustom berhasil dihapus'
+            ]);
+
+        } catch (\Throwable $e) {
+            return $this->response->setStatusCode(500)->setJSON([
+                'status'  => 'error',
+                'message' => $e->getMessage(),
+            ]);
+        }
+    }
 }

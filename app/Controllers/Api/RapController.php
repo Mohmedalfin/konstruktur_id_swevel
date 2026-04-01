@@ -187,8 +187,9 @@ class RapController extends BaseController
 
             $data = array_map(function ($row) {
                 return [
-                    'id'   => (string) $row['id_kategori_pekerjaan'],
-                    'nama' => $row['nama_kategori'],
+                    'id'    => (string) $row['id_kategori_pekerjaan'],
+                    'nama'  => $row['nama_kategori'],
+                    'jenis' => $row['jenis_kategori'] ?? 'sistem',
                 ];
             }, $rows);
 
@@ -214,6 +215,7 @@ class RapController extends BaseController
 
             $idProject    = (int) ($payload['id_project'] ?? 0);
             $kategoriList = $payload['kategori'] ?? [];
+            $isMasterOnly = filter_var($payload['is_master_only'] ?? false, FILTER_VALIDATE_BOOLEAN);
 
             if ($idProject <= 0) {
                 return $this->response->setStatusCode(400)->setJSON([
@@ -309,16 +311,18 @@ class RapController extends BaseController
                     $kategoriId = (int) $existingKategori['id_kategori_pekerjaan'];
                 }
 
-                $existingRapKategori = $this->rapKategoriModel
-                    ->where('id_rap', $rapId)
-                    ->where('id_kategori', $kategoriId)
-                    ->first();
-
-                if (!$existingRapKategori) {
-                    $this->rapKategoriModel->insert([
-                        'id_rap'      => $rapId,
-                        'id_kategori' => $kategoriId,
-                    ]);
+                if (!$isMasterOnly) {
+                    $existingRapKategori = $this->rapKategoriModel
+                        ->where('id_rap', $rapId)
+                        ->where('id_kategori', $kategoriId)
+                        ->first();
+    
+                    if (!$existingRapKategori) {
+                        $this->rapKategoriModel->insert([
+                            'id_rap'      => $rapId,
+                            'id_kategori' => $kategoriId,
+                        ]);
+                    }
                 }
 
                 $saved[] = [
@@ -349,6 +353,121 @@ class RapController extends BaseController
             return $this->response->setStatusCode(500)->setJSON([
                 'status'  => 'error',
                 'message' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    public function updateKategoriMaster($idKategori = null)
+    {
+        try {
+            $idKategori = (int) $idKategori;
+            $payload    = $this->request->getJSON(true);
+            $nama       = trim($payload['nama'] ?? '');
+
+            if ($idKategori <= 0 || $nama === '') {
+                return $this->response->setStatusCode(400)->setJSON([
+                    'status'  => 'error',
+                    'message' => 'ID kategori dan nama wajib diisi'
+                ]);
+            }
+
+            $kategori = $this->kategoriModel->find($idKategori);
+
+            if (!$kategori) {
+                return $this->response->setStatusCode(404)->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Kategori tidak ditemukan'
+                ]);
+            }
+
+            if (($kategori['jenis_kategori'] ?? '') === 'sistem') {
+                return $this->response->setStatusCode(403)->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Kategori sistem tidak dapat diedit'
+                ]);
+            }
+
+            // Optional: verify ownership
+            $idUser = session()->get('id_user');
+            if ($kategori['id_user'] != $idUser && $idUser !== null) {
+                return $this->response->setStatusCode(403)->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Anda tidak memiliki hak untuk mengedit kategori ini'
+                ]);
+            }
+
+            $this->kategoriModel->update($idKategori, [
+                'nama_kategori' => $nama
+            ]);
+
+            return $this->response->setJSON([
+                'status'  => 'success',
+                'message' => 'Kategori berhasil diupdate'
+            ]);
+        } catch (\Throwable $e) {
+            return $this->response->setStatusCode(500)->setJSON([
+                'status'  => 'error',
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
+
+    public function deleteKategoriMaster($idKategori = null)
+    {
+        try {
+            $idKategori = (int) $idKategori;
+
+            if ($idKategori <= 0) {
+                return $this->response->setStatusCode(400)->setJSON([
+                    'status'  => 'error',
+                    'message' => 'ID kategori wajib diisi'
+                ]);
+            }
+
+            $kategori = $this->kategoriModel->find($idKategori);
+
+            if (!$kategori) {
+                return $this->response->setStatusCode(404)->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Kategori tidak ditemukan'
+                ]);
+            }
+
+            if (($kategori['jenis_kategori'] ?? '') === 'sistem') {
+                return $this->response->setStatusCode(403)->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Kategori sistem tidak dapat dihapus'
+                ]);
+            }
+
+            // Verify ownership
+            $idUser = session()->get('id_user');
+            if ($kategori['id_user'] != $idUser && $idUser !== null) {
+                return $this->response->setStatusCode(403)->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Anda tidak memiliki hak untuk menghapus kategori ini'
+                ]);
+            }
+
+            // Check if it's used in RAP
+            $used = $this->rapKategoriModel->where('id_kategori', $idKategori)->first();
+            if ($used) {
+                return $this->response->setStatusCode(400)->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Kategori sedang digunakan di RAP. Hapus dari RAP terlebih dahulu.'
+                ]);
+            }
+
+            $this->kategoriModel->delete($idKategori);
+
+            return $this->response->setJSON([
+                'status'  => 'success',
+                'message' => 'Kategori berhasil dihapus'
+            ]);
+        } catch (\Throwable $e) {
+            return $this->response->setStatusCode(500)->setJSON([
+                'status'  => 'error',
+                'message' => $e->getMessage()
             ]);
         }
     }
@@ -813,5 +932,89 @@ class RapController extends BaseController
             'subtotal_alat'     => $subtotalAlat,
             'total_keseluruhan' => $total,
         ]);
+    }
+
+    /**
+     * POST /api/rap/recalculate
+     * Recalculates every rap_detail row's harga from its AHS items,
+     * then updates the RAP-level totals.
+     */
+    public function recalculateFromAhs(): ResponseInterface
+    {
+        try {
+            $payload   = $this->request->getJSON(true);
+            $idProject = (int) ($payload['id_project'] ?? 0);
+
+            if ($idProject <= 0) {
+                return $this->response->setStatusCode(400)->setJSON([
+                    'status'  => 'error',
+                    'message' => 'id_project wajib diisi',
+                ]);
+            }
+
+            $rap = $this->rapModel->where('id_project', $idProject)->first();
+            if (!$rap) {
+                return $this->response->setJSON([
+                    'status'  => 'success',
+                    'message' => 'Tidak ada RAP untuk project ini',
+                ]);
+            }
+
+            $rapId       = (int) $rap['id_rap'];
+            $allDetails  = $this->rapDetailModel->where('id_rap', $rapId)->findAll();
+            $itemModel   = $this->rapDetailItemModel;
+            $updated     = 0;
+
+            foreach ($allDetails as $detail) {
+                $idDetail = (int) $detail['id_rap_detail'];
+                $volume   = (float) ($detail['volume'] ?? 1);
+
+                // Aggregate AHS items for this detail
+                $ahsItems = $itemModel->where('id_rap_detail', $idDetail)->findAll();
+
+                $totals = ['bahan' => 0.0, 'alat' => 0.0, 'upah' => 0.0];
+                foreach ($ahsItems as $ai) {
+                    $jenis  = strtolower($ai['jenis_item'] ?? 'bahan');
+                    $jumlah = (float)($ai['koefisien'] ?? 0) * (float)($ai['harga_satuan'] ?? 0);
+                    if (isset($totals[$jenis])) {
+                        $totals[$jenis] += $jumlah;
+                    }
+                }
+
+                $hargaBahan       = $totals['bahan'];
+                $hargaAlat        = $totals['alat'];
+                $hargaUpah        = $totals['upah'];
+                $subtotalBahan    = $volume * $hargaBahan;
+                $subtotalAlat     = $volume * $hargaAlat;
+                $subtotalUpah     = $volume * $hargaUpah;
+                $totalKeseluruhan = $subtotalBahan + $subtotalAlat + $subtotalUpah;
+
+                $this->rapDetailModel->update($idDetail, [
+                    'harga_bahan'       => $hargaBahan,
+                    'harga_alat'        => $hargaAlat,
+                    'harga_upah'        => $hargaUpah,
+                    'subtotal_bahan'    => $subtotalBahan,
+                    'subtotal_alat'     => $subtotalAlat,
+                    'subtotal_upah'     => $subtotalUpah,
+                    'total_keseluruhan' => $totalKeseluruhan,
+                ]);
+
+                $updated++;
+            }
+
+            // Rebuild RAP-level grand totals
+            $this->recalculateRapTotal($rapId);
+
+            return $this->response->setJSON([
+                'status'  => 'success',
+                'message' => "{$updated} pekerjaan berhasil direkalikulasi dari AHS",
+                'updated' => $updated,
+            ]);
+        } catch (Throwable $e) {
+            return $this->response->setStatusCode(500)->setJSON([
+                'status'  => 'error',
+                'message' => $e->getMessage(),
+            ]);
+        }
     }
 }

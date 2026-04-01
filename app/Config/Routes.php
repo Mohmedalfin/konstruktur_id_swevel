@@ -34,12 +34,13 @@ $routes->group('', function ($routes) {
     // Menu RAP (RAB & RAP)
     $routes->get('menu-rap', 'menu\MenuRapController::index');
     $routes->get('menu-rap/rincian-ahs', 'menu\MenuRapController::rincianAHS');
+    $routes->get('menu-rap/tambah-ahs', 'menu\MenuRapController::tambahAHS');
     $routes->get('menu-rap/tambah-pekerjaan', 'menu\MenuRapController::tambahPekerjaan');
 
     // Schedule & Monitoring
     $routes->get('schedule', 'ScheduleController::index');
     $routes->get('monitoring', 'MonitoringController::index');
-    $routes->get('proyek/menu/main-pekerjaan', 'menu\MenuRapController::mainPekerjaan');
+    $routes->get('proyek/menu/main-pekerjaan', 'menu\MenuRapController::tambahPekerjaan');
 });
 
 
@@ -49,6 +50,8 @@ $routes->group('', function ($routes) {
 $routes->group('api', ['namespace' => 'App\Controllers\Api'], function ($routes) {
     $routes->get('pekerjaan', 'PekerjaanController::index');
     $routes->post('pekerjaan/custom', 'PekerjaanController::storeCustom');
+    $routes->put('pekerjaan/custom/(:num)', 'PekerjaanController::updateCustom/$1');
+    $routes->delete('pekerjaan/custom/(:num)', 'PekerjaanController::deleteCustom/$1');
     $routes->get('ahs', 'AhsController::index');
     $routes->get('ahs/rincian/(:num)', 'AhsController::getRincian/$1');
     $routes->post('ahs/rincian', 'AhsController::saveRincian');
@@ -57,11 +60,14 @@ $routes->group('api', ['namespace' => 'App\Controllers\Api'], function ($routes)
     $routes->get('rap', 'RapController::index');
 
     $routes->get('rap/kategori-master', 'RapController::kategoriMaster');
+    $routes->put('rap/kategori-master/(:num)', 'RapController::updateKategoriMaster/$1');
+    $routes->delete('rap/kategori-master/(:num)', 'RapController::deleteKategoriMaster/$1');
     $routes->post('rap/kategori', 'RapController::tambahKategori');
     $routes->delete('rap/kategori/(:num)', 'RapController::deleteKategori/$1');
 
     $routes->post('rap/pekerjaan', 'RapController::tambahPekerjaan');
     $routes->delete('rap/pekerjaan/(:num)', 'RapController::deletePekerjaan/$1');
+    $routes->post('rap/recalculate', 'RapController::recalculateFromAhs');
 
     $routes->post('rap/copy-ahs-estimator', 'RapController::copyAhsEstimator');
 });

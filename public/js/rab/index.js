@@ -35,7 +35,7 @@ import {
     updateModalInfo
 } from './components/categories.js';
 
-import { initImport } from './components/import.js';
+import { initImport, refreshImportCategories } from './components/import.js';
 import { initTemplate } from './components/template.js';
 import { bindSearch } from './hooks/search.js';
 import { toast } from '../shared/ui/toast.js';
@@ -179,7 +179,8 @@ if (!wrapper || !tbody) {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         id_project: Number(idProject),
-                        kategori: [ { nama: val } ]
+                        kategori: [ { nama: val } ],
+                        is_master_only: true
                     })
                 });
 
@@ -189,19 +190,10 @@ if (!wrapper || !tbody) {
                 }
 
                 kategoriManualInput.value = '';
-                closeKategoriModal();
-                renderLoading();
+                await openKategoriModal();
+                refreshImportCategories(); // Update BOQ import dropdown too
 
-                const data = await fetchRabData(idProject);
-                state.activeCategories = (data.categories || []).map(cat => ({
-                    id: String(cat.id),
-                    nama: cat.name
-                }));
-
-                applySourcePermission(data);
-                renderReadonly(data);
-
-                toast.show('Kategori custom berhasil dibuat dan ditambahkan!', 'success');
+                toast.show('Kategori custom berhasil ditambahkan ke daftar!', 'success');
 
             } catch (err) {
                 console.error('Gagal tambah kategori manual:', err);
@@ -249,6 +241,85 @@ if (!wrapper || !tbody) {
         });
     }
 
+    // ── Handle BOQ Import confirmed event ─────────────────────────────────────
+    window.addEventListener('rabDataImported', async function (e) {
+        const importedRows = e.detail || [];
+        if (importedRows.length === 0) return;
+
+        const idProject = window.RAB_INIT?.idProject || window.RAB_INIT?.id;
+        if (!idProject) {
+            toast.show('ID project tidak ditemukan', 'error');
+            return;
+        }
+
+        // Group items by kategori ID
+        const groups = {};
+        importedRows.forEach(row => {
+            if (!row.kategori || row.type === 'header') return;
+            if (!groups[row.kategori]) groups[row.kategori] = [];
+            groups[row.kategori].push(row);
+        });
+
+        const kategoriIds = Object.keys(groups);
+        if (kategoriIds.length === 0) {
+            toast.show('Tidak ada item valid yang bisa diimpor', 'error');
+            return;
+        }
+
+        try {
+            renderLoading();
+            let totalSaved = 0;
+
+            for (const katId of kategoriIds) {
+                const items = groups[katId];
+
+                // Save pekerjaan for that category
+                // (the backend automatically links the category to the RAP if not already)
+                const pekerjaan = items.map(item => ({
+                    nama:       item.uraian   || '',
+                    volume:     item.volume   || 1,
+                    satuan:     item.satuan   || '',
+                    harga_bahan: 0,
+                    harga_alat:  0,
+                    harga_upah:  0
+                }));
+
+                const res = await fetch('/api/rap/pekerjaan', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        id_project:  Number(idProject),
+                        id_kategori: Number(katId),
+                        pekerjaan
+                    })
+                });
+
+                const json = await res.json();
+                if (!res.ok || json.status !== 'success') {
+                    throw new Error(json.message || 'Gagal menyimpan pekerjaan');
+                }
+
+                totalSaved += items.length;
+            }
+
+            const data = await fetchRabData(idProject);
+            state.activeCategories = (data.categories || []).map(cat => ({
+                id: String(cat.id),
+                nama: cat.name
+            }));
+            applySourcePermission(data);
+            renderReadonly(data);
+
+            toast.show(`${totalSaved} pekerjaan berhasil diimpor ke RAP!`, 'success');
+
+        } catch (err) {
+            console.error('Gagal import BOQ:', err);
+            const data = await fetchRabData(idProject).catch(() => null);
+            if (data) renderReadonly(data);
+            toast.show(err.message || 'Terjadi kesalahan saat mengimpor', 'error');
+        }
+    });
+
     document.addEventListener('DOMContentLoaded', async function () {
         const init = window.RAB_INIT;
         const idProject = init?.idProject || init?.id;
@@ -270,6 +341,22 @@ if (!wrapper || !tbody) {
                 id: String(cat.id),
                 nama: cat.name
             }));
+
+            // Silently sync AHS prices → RAP table on every page load
+            fetch('/api/rap/recalculate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id_project: Number(idProject) })
+            }).then(async () => {
+                // Re-fetch and re-render after recalculate so prices appear
+                const freshData = await fetchRabData(idProject);
+                state.activeCategories = (freshData.categories || []).map(cat => ({
+                    id: String(cat.id),
+                    nama: cat.name
+                }));
+                applySourcePermission(freshData);
+                renderReadonly(freshData);
+            }).catch(() => {/* non-blocking */});
 
             applySourcePermission(data);
             renderReadonly(data);
