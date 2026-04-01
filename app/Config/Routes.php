@@ -5,30 +5,71 @@ use CodeIgniter\Router\RouteCollection;
 /**
  * @var RouteCollection $routes
  */
-// login & register
-$routes->get('/', 'Home::login');
-$routes->get('Register', 'Home::register');
 
-$routes->get('registrasi', 'Registrasi::index');
-$routes->post('registrasi/simpan', 'Registrasi::simpan');
+// --------------------------------------------------------------------
+// RUTE WEB (Menangani Tampilan / HTML / View)
+// --------------------------------------------------------------------
+$routes->group('', function ($routes) {
 
-$routes->get('data-empiris', 'Proyek::dataEmpiris');
+    // Auth & Registrasi
+    $routes->get('/', 'Home::login');
+    $routes->get('Register', 'Home::register');
+    $routes->get('registrasi', 'Registrasi::index');
+    $routes->post('registrasi/simpan', 'Registrasi::simpan');
 
-$routes->get('/proyek', 'ProyekController::index');
-$routes->get('/proyek/create', 'ProyekController::create');
-$routes->post('/proyek/store', 'ProyekController::store');
+    // Proyek
+    $routes->get('data-empiris', 'Proyek::dataEmpiris');
+    $routes->get('proyek', 'ProyekController::index');
+    $routes->get('proyek/create', 'ProyekController::create');
+    $routes->post('proyek/store', 'ProyekController::store');
+    $routes->get('proyek/edit/(:num)', 'ProyekController::edit/$1');
+    $routes->post('proyek/update/(:num)', 'ProyekController::update/$1');
 
-// dashboard
-$routes->get('/dashboard', 'menu\DashboardController::index');
+    // Detail proyek / menu RAP by slug
+    $routes->get('proyek/(:segment)', 'menu\MenuRapController::index/$1');
+    $routes->post('proyek/selesai/(:num)', 'ProyekController::selesai/$1');
+    $routes->delete('proyek/delete/(:num)', 'ProyekController::destroy/$1');
 
-// menu rap (RAB & RAP)
-$routes->get('/menu-rap', 'menu\MenuRapController::index');
-$routes->get('/menu-rap/create', 'menu\MenuRapController::create');
-$routes->post('/menu-rap/store', 'menu\MenuRapController::store');
+    // Dashboard
+    $routes->get('dashboard', 'menu\DashboardController::index');
 
-// schedule
-$routes->get('/schedule', 'ScheduleController::index');
+    // Menu RAP (RAB & RAP)
+    $routes->get('menu-rap', 'menu\MenuRapController::index');
+    $routes->get('menu-rap/rincian-ahs', 'menu\MenuRapController::rincianAHS');
+    $routes->get('menu-rap/tambah-ahs', 'menu\MenuRapController::tambahAHS');
+    $routes->get('menu-rap/tambah-pekerjaan', 'menu\MenuRapController::tambahPekerjaan');
 
-// monitoring
-$routes->get('/monitoring', 'MonitoringController::index');
+    // Schedule & Monitoring
+    $routes->get('schedule', 'ScheduleController::index');
+    $routes->get('monitoring', 'MonitoringController::index');
+    $routes->get('proyek/menu/main-pekerjaan', 'menu\MenuRapController::tambahPekerjaan');
+});
 
+
+// --------------------------------------------------------------------
+// RUTE API (Menangani Data Mentah JSON)
+// --------------------------------------------------------------------
+$routes->group('api', ['namespace' => 'App\Controllers\Api'], function ($routes) {
+    $routes->get('pekerjaan', 'PekerjaanController::index');
+    $routes->post('pekerjaan/custom', 'PekerjaanController::storeCustom');
+    $routes->put('pekerjaan/custom/(:num)', 'PekerjaanController::updateCustom/$1');
+    $routes->delete('pekerjaan/custom/(:num)', 'PekerjaanController::deleteCustom/$1');
+    $routes->get('ahs', 'AhsController::index');
+    $routes->get('ahs/rincian/(:num)', 'AhsController::getRincian/$1');
+    $routes->post('ahs/rincian', 'AhsController::saveRincian');
+    $routes->delete('ahs/rincian/item/(:num)', 'AhsController::deleteItem/$1');
+
+    $routes->get('rap', 'RapController::index');
+
+    $routes->get('rap/kategori-master', 'RapController::kategoriMaster');
+    $routes->put('rap/kategori-master/(:num)', 'RapController::updateKategoriMaster/$1');
+    $routes->delete('rap/kategori-master/(:num)', 'RapController::deleteKategoriMaster/$1');
+    $routes->post('rap/kategori', 'RapController::tambahKategori');
+    $routes->delete('rap/kategori/(:num)', 'RapController::deleteKategori/$1');
+
+    $routes->post('rap/pekerjaan', 'RapController::tambahPekerjaan');
+    $routes->delete('rap/pekerjaan/(:num)', 'RapController::deletePekerjaan/$1');
+    $routes->post('rap/recalculate', 'RapController::recalculateFromAhs');
+
+    $routes->post('rap/copy-ahs-estimator', 'RapController::copyAhsEstimator');
+});

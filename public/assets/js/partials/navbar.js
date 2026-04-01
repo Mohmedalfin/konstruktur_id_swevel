@@ -18,6 +18,12 @@
         let isActive = false;
         if (isRoot) {
             isActive = currentPath === '' || currentPath === '/';
+        } else if (navPath === '/menu-rap') {
+            // RAB & RAP is active on /menu-rap/*, /proyek/* (project detail) and /proyek/menu/*
+            isActive = currentPath === navPath
+                || currentPath.startsWith(navPath + '/')
+                || currentPath.startsWith('/proyek/')
+                || currentPath.startsWith('/proyek/menu/');
         } else {
             isActive = currentPath === navPath || currentPath.startsWith(navPath + '/');
         }
@@ -32,6 +38,17 @@
             activeClasses.forEach(function (cls)   { link.classList.remove(cls); });
         }
     });
+
+    // --- Restore last project slug into the RAB & RAP nav link ---
+    const rabLink = document.querySelector('header nav a[data-nav-path="menu-rap"]');
+    if (rabLink) {
+        const lastSlug = localStorage.getItem('lastProjectSlug');
+        if (lastSlug) {
+            // Point directly back to the last visited project
+            const baseOrigin = window.location.origin;
+            rabLink.href = baseOrigin + '/proyek/' + lastSlug;
+        }
+    }
 
     // Make dropdown button active if its internal links correspond to the current page
     const dropBtn = document.getElementById('hs-header-base-dropdown');
@@ -61,7 +78,59 @@
             if (iconClose)     iconClose.classList.toggle('hidden',      isCurrentlyOpen);
         });
     }
+
+    /* ── Floating navbar on scroll ──────────────────────────────── */
+    const header = document.querySelector('header');
+    if (header) {
+        const floatAdd = [
+            'top-3',          // gap from viewport top (works with sticky)
+            'mx-3',           // horizontal gap
+            'sm:mx-6',
+            'lg:mx-10',
+            'rounded-2xl',    // rounded pill corners
+            'shadow-xl',      // elevated shadow
+            'border',
+            'border-white/10',
+        ];
+        // Classes removed when floating (revert defaults)
+        const floatRemove = [
+            'top-0',
+            'border-b',
+            'border-navbar-line',
+        ];
+
+
+        let ticking  = false;
+        let floating = false;
+
+        function applyFloatState() {
+            const shouldFloat = window.scrollY > 20;
+            if (shouldFloat === floating) return; 
+            floating = shouldFloat;
+
+            if (shouldFloat) {
+                floatAdd.forEach(cls    => header.classList.add(cls));
+                floatRemove.forEach(cls => header.classList.remove(cls));
+            } else {
+                floatAdd.forEach(cls    => header.classList.remove(cls));
+                floatRemove.forEach(cls => header.classList.add(cls));
+            }
+        }
+
+        window.addEventListener('scroll', function () {
+            if (!ticking) {
+                requestAnimationFrame(function () {
+                    applyFloatState();
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        }, { passive: true });
+
+        applyFloatState();
+    }
 })();
+
 
 /**
  * Toggles the visibility of table sub-rows with smooth CSS transitions.
