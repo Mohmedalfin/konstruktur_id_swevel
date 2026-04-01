@@ -43,6 +43,14 @@ if (! function_exists('is_nav_active')) {
             return $linkUrl === $currUrl;
         }
 
+        // Special handling for menu-rap: active on /menu-rap*, /proyek/* (project detail views)
+        if ($path === 'menu-rap') {
+            $baseProyek = rtrim(base_url('proyek'), '/');
+            return str_starts_with($currUrl . '/', $linkUrl . '/')
+                || str_starts_with($currUrl . '/', $baseProyek . '/')
+                || str_contains($currUrl, '/proyek/menu/');
+        }
+
         return $linkUrl === $currUrl
             || str_starts_with($currUrl . '/', $linkUrl . '/');
     }

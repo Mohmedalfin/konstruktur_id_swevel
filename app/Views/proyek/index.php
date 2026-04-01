@@ -9,7 +9,8 @@
 <?= $this->section('content') ?>
 <!-- Button Proyek Baru -->
 <div class="mb-4">
-  <a class="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-white shadow-md hover:bg-primary/90" href="<?= base_url('proyek/create') ?>">
+  <a class="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-white shadow-md hover:bg-primary/90"
+    href="<?= base_url('proyek/create') ?>">
     <i class="fa-solid fa-circle-plus"></i>
     <span class="font-semibold">Proyek Baru</span>
   </a>
@@ -17,140 +18,211 @@
 
 <!-- Panel Filter -->
 <div class="overflow-visible rounded-xl bg-white shadow-md">
-  <div class="flex items-center gap-2 bg-primary px-4 py-2 text-white rounded-t-xl">
-    <i class="fa-solid fa-filter"></i>
-    <span class="font-semibold">Tampilkan Berdasarkan</span>
+
+  <!-- Header -->
+  <div class="flex items-center gap-2 bg-primary px-4 py-2.5 text-white rounded-t-xl">
+    <i class="fa-solid fa-filter text-xs"></i>
+    <span class="text-sm font-semibold">Tampilkan Berdasarkan</span>
   </div>
 
-  <div class="grid grid-cols-1 gap-4 p-4 md:grid-cols-3">
-    <!-- Nama Proyek -->
-    <div>
-      <label class="mb-1 block text-sm font-semibold text-text-primary">Nama Proyek</label>
-      <input
-        type="text"
-        placeholder="Masukkan Nama Proyek"
-        class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500" />
-    </div>
+  <div>
+    <div class="grid grid-cols-2 gap-3 p-3 md:grid-cols-3 md:gap-4 md:p-4">
 
-    <!-- Lokasi Proyek (Preline Select) -->
-    <div class="relative">
-      <label class="mb-1 block text-sm font-semibold text-text-primary">Lokasi Proyek</label>
+      <!-- Nama Proyek -->
+      <div class="col-span-2 md:col-span-1">
+        <label class="mb-1 block text-xs md:text-sm font-semibold text-text-primary">Nama Proyek</label>
+        <input type="text" placeholder="Masukkan Nama Proyek"
+          class="w-full rounded-md border border-gray-300 px-2.5 py-1.5 md:px-3 md:py-2 text-xs md:text-sm focus:outline-none focus:ring-1 focus:ring-blue-500" />
+      </div>
 
-      <!-- Select (punyamu) -->
-      <select id="hs-search-both-value-and-description" data-hs-select='{
-        "hasSearch": true,
-        "isSearchDirectMatch": false,
-        "searchPlaceholder": "Search...",
-        "searchClasses": "block w-full text-sm bg-white border border-gray-300 rounded-md px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500",
-        "searchWrapperClasses": "bg-white p-2 -mx-1 sticky top-0",
-        "placeholder": "Pilih Lokasi Proyek",
-        "toggleTag": "<button type=\"button\" aria-expanded=\"false\"></button>",
-        "toggleClasses": "relative py-2 ps-3 pe-9 flex w-full cursor-pointer bg-white border border-gray-300 rounded-md text-start text-sm hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-blue-500",
-        "dropdownClasses": "mt-2 z-50 w-full max-h-72 p-1 space-y-0.5 bg-white border border-gray-200 rounded-lg shadow-xl overflow-hidden overflow-y-auto",
-        "optionClasses": "hs-selected:bg-gray-100 py-2 px-3 w-full text-sm text-gray-800 cursor-pointer hover:bg-gray-50 rounded-md",
-        "optionTemplate": "<div class=\"flex items-center\"><div class=\"me-2\" data-icon></div><div><div class=\"hs-selected:font-semibold text-sm\" data-title></div><div class=\"text-xs text-gray-500\" data-description></div></div><div class=\"ms-auto\"><span class=\"hidden hs-selected:block\"><svg class=\"size-4\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 16 16\" fill=\"currentColor\"><path d=\"M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022Z\"/></svg></span></div></div>",
-        "extraMarkup": "<div class=\"absolute top-1/2 end-3 -translate-y-1/2\"><svg class=\"size-4 text-gray-500\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 20 20\" fill=\"currentColor\"><path fill-rule=\"evenodd\" d=\"M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.168l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.24 4.5a.75.75 0 0 1-1.08 0l-4.24-4.5a.75.75 0 0 1 .02-1.06Z\" clip-rule=\"evenodd\"/></svg></div>"
-      }' class="hidden">
-        <option value="">Choose</option>
-        <option selected value="1" data-hs-select-option='{"icon":"<img class=\"shrink-0 size-5 rounded-full\" src=\"https://images.unsplash.com/photo-1659482633369-9fe69af50bfb?auto=format&fit=facearea&facepad=3&w=64&h=64&q=80\" />","description":"Kab. Sleman, DIY"}'>Sleman</option>
-        <option value="2" data-hs-select-option='{"icon":"<img class=\"shrink-0 size-5 rounded-full\" src=\"https://images.unsplash.com/photo-1541101767792-f9b2b1c4f127?auto=format&fit=facearea&facepad=3&w=64&h=64&q=80\" />","description":"Kota Semarang, Jateng"}'>Semarang</option>
-        <option value="3" data-hs-select-option='{"icon":"<img class=\"shrink-0 size-5 rounded-full\" src=\"https://images.unsplash.com/photo-1601935111741-ae98b2b230b0?auto=format&fit=facearea&facepad=2.5&w=64&h=64&q=80\" />","description":"Kota Surabaya, Jatim"}'>Surabaya</option>
-      </select>
-      <!-- End Select -->
-    </div>
+      <!-- Lokasi Proyek (Preline Select) -->
+      <div class="relative">
+        <label class="mb-1 block text-xs md:text-sm font-semibold text-text-primary">Lokasi Proyek</label>
+        <select id="hs-search-both-value-and-description" data-hs-select='{
+          "hasSearch": true,
+          "isSearchDirectMatch": false,
+          "searchPlaceholder": "Search...",
+          "searchClasses": "block w-full text-sm bg-white border border-gray-300 rounded-md px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500",
+          "searchWrapperClasses": "bg-white p-2 -mx-1 sticky top-0",
+          "placeholder": "Pilih Lokasi",
+          "toggleTag": "<button type=\"button\" aria-expanded=\"false\"></button>",
+          "toggleClasses": "relative py-1.5 ps-2.5 pe-8 md:py-2 md:ps-3 md:pe-9 flex w-full cursor-pointer bg-white border border-gray-300 rounded-md text-start text-xs md:text-sm hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-blue-500",
+          "dropdownClasses": "mt-2 z-50 w-full max-h-72 p-1 space-y-0.5 bg-white border border-gray-200 rounded-lg shadow-xl overflow-hidden overflow-y-auto",
+          "optionClasses": "hs-selected:bg-gray-100 py-2 px-3 w-full text-sm text-gray-800 cursor-pointer hover:bg-gray-50 rounded-md",
+          "optionTemplate": "<div class=\"flex items-center\"><div class=\"me-2\" data-icon></div><div><div class=\"hs-selected:font-semibold text-sm\" data-title></div><div class=\"text-xs text-gray-500\" data-description></div></div><div class=\"ms-auto\"><span class=\"hidden hs-selected:block\"><svg class=\"size-4\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 16 16\" fill=\"currentColor\"><path d=\"M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022Z\"/></svg></span></div></div>",
+          "extraMarkup": "<div class=\"absolute top-1/2 end-3 -translate-y-1/2\"><svg class=\"size-4 text-gray-500\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 20 20\" fill=\"currentColor\"><path fill-rule=\"evenodd\" d=\"M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.168l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.24 4.5a.75.75 0 0 1-1.08 0l-4.24-4.5a.75.75 0 0 1 .02-1.06Z\" clip-rule=\"evenodd\"/></svg></div>"
+        }' class="hidden">
+          <option value="">Choose</option>
+          <option selected value="1"
+            data-hs-select-option='{"icon":"<img class=\"shrink-0 size-5 rounded-full\" src=\"https://images.unsplash.com/photo-1659482633369-9fe69af50bfb?auto=format&fit=facearea&facepad=3&w=64&h=64&q=80\" />","description":"Kab. Sleman, DIY"}'>
+            Sleman</option>
+          <option value="2"
+            data-hs-select-option='{"icon":"<img class=\"shrink-0 size-5 rounded-full\" src=\"https://images.unsplash.com/photo-1541101767792-f9b2b1c4f127?auto=format&fit=facearea&facepad=3&w=64&h=64&q=80\" />","description":"Kota Semarang, Jateng"}'>
+            Semarang</option>
+          <option value="3"
+            data-hs-select-option='{"icon":"<img class=\"shrink-0 size-5 rounded-full\" src=\"https://images.unsplash.com/photo-1601935111741-ae98b2b230b0?auto=format&fit=facearea&facepad=2.5&w=64&h=64&q=80\" />","description":"Kota Surabaya, Jatim"}'>
+            Surabaya</option>
+        </select>
+      </div>
 
-    <!-- Tahun -->
-    <div>
-      <label class="mb-1 block text-sm font-semibold text-text-primary">Tahun</label>
-      <input
-        type="text"
-        placeholder="Masukkan Tahun Proyek"
-        class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500" />
+      <!-- Tahun -->
+      <div>
+        <label class="mb-1 block text-xs md:text-sm font-semibold text-text-primary">Tahun</label>
+        <input type="text" placeholder="Tahun Proyek"
+          class="w-full rounded-md border border-gray-300 px-2.5 py-1.5 md:px-3 md:py-2 text-xs md:text-sm focus:outline-none focus:ring-1 focus:ring-blue-500" />
+      </div>
+
     </div>
   </div>
+
 </div>
 
+
 <!-- Grid Cards -->
-<div class="mt-6 rounded-2xl bg-white p-6 shadow-md">
-  <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-    <?php for ($i = 0; $i < 6; $i++): ?>
-      <div class="relative group overflow-hidden rounded-2xl bg-white shadow-lg ring-1 ring-black/5 hover:shadow-xl transition-all duration-300">
-        <!-- Full Card Link -->
-        <a href="<?= base_url('menu-rap?id=' . ($i + 1)) ?>" class="absolute inset-0 z-10" aria-label="View Project"></a>
-
-        <!-- COVER -->
-        <div class="relative h-50 w-full overflow-hidden rounded-t-2xl">
-          <img
-            src="<?= base_url('assets/images/BackgroundLogin.png') ?>"
-            class="h-full w-full object-cover"
-            alt="Cover Proyek">
-
-          <!-- tombol ... (tidak diubah) -->
-          <div class="absolute top-0 right-0 z-20">
-            <div class="hs-dropdown relative inline-flex">
-              <button type="button"
-                class="hs-dropdown-toggle inline-flex size-6 items-center justify-center rounded-tr-lg rounded-bl-xl bg-primary text-white shadow-md ring-1 ring-black/10 hover:bg-white hover:text-primary px-5 ransition delay-150 duration-300 ease-in-out hover:-translate-y-1 hover:scale-110 hover:bg-indigo-500">
-                <i class="fa-solid fa-ellipsis"></i>
-              </button>
-
-              <!-- dropdown menu -->
-              <div
-                class="hs-dropdown-menu hidden z-50 mt-2 w-44 overflow-hidden rounded-xl bg-white shadow-xl ring-1 ring-black/10"
-                role="menu">
-                <a class="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100" href="#">
-                  <i class="fa-solid fa-user-plus w-4 text-light"></i>
-                  Undang Tim
-                </a>
-                <a class="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100" href="#">
-                  <i class="fa-regular fa-copy w-4"></i>
-                  Duplikat
-                </a>
-                <a class="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100" href="#">
-                  <i class="fa-regular fa-trash-can w-4"></i>
-                  Hapus
-                </a>
-                <a class="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100" href="#">
-                  <i class="fa-solid fa-circle-check w-4"></i>
-                  Selesaikan
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- BODY -->
-        <div class="p-5">
-          <h3 class="text-base font-bold leading-snug text-text-primary text-center">
-            Pembangunan Gedung Klinik<br>Pratama
-          </h3>
-
-          <div class="mt-4 space-y-2 text-sm text-slate-700">
-            <div class="flex items-center gap-3">
-              <i class="fa-solid fa-location-dot w-4 text-primary"></i>
-              <span>Kab. Sleman, DIY</span>
-            </div>
-
-            <div class="flex items-center gap-3">
-              <i class="fa-solid fa-money-bill-wave w-4 text-primary"></i>
-              <span>Rp 3.250.000.000</span>
-            </div>
-
-            <div class="flex items-center gap-3">
-              <i class="fa-solid fa-chart-simple w-4 text-primary"></i>
-              <span>-2,1%</span>
-            </div>
-
-            <div class="flex items-center gap-3">
-              <i class="fa-solid fa-calendar-days w-4 text-primary"></i>
-              <span>2026-02-12</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    <?php endfor; ?>
+<div class="mt-6">
+  <div class="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3 xl:grid-cols-5">
+    <?php
+    if (empty($cards)) {
+      echo '<div class="col-span-full text-center text-gray-500 py-10">Belum ada proyek yang ditambahkan.</div>';
+    } else {
+      foreach ($cards as $card):
+        echo view('partials/card-proyek', ['card' => $card]);
+      endforeach;
+    }
+    ?>
   </div>
 </div>
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
+<script type="module">
+import Swal from 'https://cdn.jsdelivr.net/npm/sweetalert2@11/+esm';
+
+// Same mixin as shared/ui/confirm.js
+const AppSwal = Swal.mixin({
+    customClass: {
+        popup:         'app-swal-popup',
+        title:         'app-swal-title',
+        htmlContainer: 'app-swal-html',
+        confirmButton: 'app-swal-confirm',
+        cancelButton:  'app-swal-cancel',
+        icon:          'app-swal-icon',
+    },
+    buttonsStyling: false,
+    reverseButtons:  true,
+});
+
+const baseUrl = '<?= base_url() ?>';
+
+document.addEventListener('click', async function (e) {
+    const btn = e.target.closest('.btn-selesai-proyek');
+    if (!btn) return;
+    e.stopPropagation();
+
+    const id   = btn.dataset.id;
+    const nama = btn.dataset.nama;
+
+    const { isConfirmed } = await AppSwal.fire({
+        icon:              'question',
+        title:             'Tandai Proyek Selesai?',
+        html:              `Proyek <strong>${nama}</strong> akan ditandai sebagai <strong style="color:#10b981">Selesai</strong>.`,
+        showCancelButton:  true,
+        confirmButtonText: 'Ya, Selesai!',
+        cancelButtonText:  'Batal',
+        focusCancel:       true,
+    });
+
+    if (!isConfirmed) return;
+
+    try {
+        const res  = await fetch(`${baseUrl}proyek/selesai/${id}`, { method: 'POST' });
+        const json = await res.json();
+        if (!res.ok || json.status !== 'success') throw new Error(json.message || 'Gagal');
+
+        // Update DOM in-place without reload
+        const card = document.getElementById(`proyek-card-${id}`);
+        if (card) {
+            const dropdownWrap = card.querySelector('.hs-dropdown')?.closest('div.absolute');
+            if (dropdownWrap) {
+                dropdownWrap.innerHTML = `
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/90 backdrop-blur-sm text-white text-xs font-semibold shadow">
+                        <i class="fa-solid fa-circle-check"></i> Selesai
+                    </span>`;
+            }
+            const footerLink = card.querySelector('.group-hover\\:underline');
+            if (footerLink) {
+                footerLink.outerHTML = `
+                    <span class="inline-flex items-center gap-1 text-xs font-semibold" style="color:#10b981;">
+                        <i class="fa-solid fa-circle-check"></i>
+                        <span class="hidden sm:inline">Selesai</span>
+                    </span>`;
+            }
+        }
+
+        AppSwal.fire({
+            toast: true, position: 'top-end', icon: 'success',
+            title: 'Proyek ditandai selesai!',
+            showConfirmButton: false, timer: 2000, timerProgressBar: true,
+        });
+
+    } catch (err) {
+        AppSwal.fire({
+            toast: true, position: 'top-end', icon: 'error',
+            title: err.message || 'Terjadi kesalahan',
+            showConfirmButton: false, timer: 2500,
+        });
+    }
+});
+
+// Hapus Proyek
+document.addEventListener('click', async function (e) {
+    const btn = e.target.closest('.btn-hapus-proyek');
+    if (!btn) return;
+    e.stopPropagation();
+
+    const id   = btn.dataset.id;
+    const nama = btn.dataset.nama;
+
+    const { isConfirmed } = await AppSwal.fire({
+        icon:              'warning',
+        title:             'Hapus Proyek Permanen?',
+        html:              `Proyek <strong>${nama}</strong> beserta seluruh data RAP dan AHS akan <strong style="color:#ef4444">dihapus selamanya</strong>.`,
+        showCancelButton:  true,
+        confirmButtonText: 'Ya, Hapus!',
+        cancelButtonText:  'Batal',
+        focusCancel:       true,
+    });
+
+    if (!isConfirmed) return;
+
+    try {
+        const res  = await fetch(`${baseUrl}proyek/delete/${id}`, { method: 'DELETE' });
+        const json = await res.json();
+        if (!res.ok || json.status !== 'success') throw new Error(json.message || 'Gagal');
+
+        // Remove card from DOM with animation
+        const card = document.getElementById(`proyek-card-${id}`);
+        if (card) {
+            card.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(10px)';
+            setTimeout(() => card.remove(), 400);
+        }
+
+        AppSwal.fire({
+            toast: true, position: 'top-end', icon: 'success',
+            title: 'Proyek berhasil dihapus!',
+            showConfirmButton: false, timer: 2000, timerProgressBar: true
+        });
+
+    } catch (err) {
+        AppSwal.fire({
+            toast: true, position: 'top-end', icon: 'error',
+            title: err.message || 'Gagal menghapus proyek',
+            showConfirmButton: false, timer: 3000
+        });
+    }
+});
+</script>
 <?= $this->endSection() ?>
+
