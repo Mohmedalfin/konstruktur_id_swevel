@@ -28,15 +28,6 @@ $wrapperClass = $tableVisible ? '' : 'hidden';
                 Kategori Pekerjaan
             </button>
 
-            <!-- Download Template -->
-            <button id="boq-download-template-btn" type="button" title="Download Template BOQ"
-                class="inline-flex items-center gap-1 md:gap-1.5 px-2 py-1.5 md:px-3 md:py-2 rounded-lg bg-amber-400 hover:bg-amber-500 text-black text-[10px] md:text-xs font-semibold transition-all duration-150 focus:outline-none active:scale-95 shadow-sm">
-                <svg class="w-3 h-3 md:w-3.5 md:h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                </svg>
-                Template
-            </button>
 
             <!-- Import BOQ -->
             <button id="boq-import-btn" type="button" title="Import BOQ dari Excel"
@@ -229,6 +220,44 @@ $wrapperClass = $tableVisible ? '' : 'hidden';
                 <div class="flex items-center gap-2">
                     <button id="kategori-modal-cancel" type="button" class="px-4 py-2 rounded-lg border border-table-border bg-white hover:bg-slate-50 text-table-body text-xs font-medium transition-all focus:outline-none active:scale-95">Batal</button>
                     <button id="kategori-modal-confirm" type="button" class="px-5 py-2 rounded-lg bg-primary hover:bg-primary-hover text-white text-xs font-semibold tracking-wide shadow-sm transition-all duration-150 focus:outline-none active:scale-95">Tambahkan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         MODAL — Prompt Import BOQ (Sudah Punya Excel atau Belum)
+    ════════════════════════════════════════════════════════════════ -->
+    <div id="import-prompt-modal-overlay" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-sm p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm flex flex-col overflow-hidden transform scale-95 transition-transform duration-300" id="import-prompt-modal-content">
+            <!-- Modal Body -->
+            <div class="px-6 py-8 text-center flex flex-col items-center">
+                <!-- Icon container -->
+                <div class="w-16 h-16 bg-blue-50 text-primary rounded-full flex items-center justify-center mb-5 rotate-3 shadow-inner">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                </div>
+                
+                <h3 class="text-xl font-bold text-slate-800 mb-2">Import BOQ Excel</h3>
+                <p class="text-[13px] text-slate-600 mb-1 leading-relaxed">Apakah Anda sudah memiliki file Excel untuk di-import?</p>
+                <p class="text-xs text-slate-400 mb-8 leading-relaxed px-2">Jika belum, silakan unduh template Excel yang telah kami siapkan.</p>
+
+                <div class="flex flex-col w-full gap-3">
+                    <button type="button" id="import-prompt-modal-excel" class="group relative w-full py-3 px-4 rounded-xl bg-primary hover:bg-primary-hover text-white text-sm font-bold tracking-wide shadow-md shadow-primary/20 transition-all duration-200 active:scale-[0.98] overflow-hidden flex items-center justify-center gap-2">
+                        <div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></div>
+                        <svg class="w-4 h-4 z-10 relative" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                        <span class="z-10 relative">Sudah, Import Excel</span>
+                    </button>
+
+                    <button type="button" id="import-prompt-modal-template" class="w-full py-3 px-4 rounded-xl border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-700 text-sm font-bold tracking-wide transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                        Belum, Unduh Template
+                    </button>
+
+                    <button type="button" id="import-prompt-modal-cancel" class="mt-4 text-[11px] font-semibold text-slate-400 hover:text-slate-600 transition-colors uppercase tracking-widest focus:outline-none">
+                        Batal
+                    </button>
                 </div>
             </div>
         </div>
