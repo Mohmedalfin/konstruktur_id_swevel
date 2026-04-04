@@ -5,6 +5,7 @@
  */
 
 import { fetchKategoriMaster } from '../core/data.js';
+import { generateTemplate } from './template.js';
 
 // Cache of available categories (loaded from API)
 let availableCategories = [];
@@ -336,8 +337,53 @@ export async function initImport() {
     const countDisplay  = document.getElementById('import-rab-modal-count');
     const fileNameDisp  = document.getElementById('import-file-name');
 
-    if (importBtn && fileInput) {
-        importBtn.addEventListener('click', () => { fileInput.value = ''; fileInput.click(); });
+    const promptOverlay = document.getElementById('import-prompt-modal-overlay');
+    const promptContent = document.getElementById('import-prompt-modal-content');
+    const promptExcel = document.getElementById('import-prompt-modal-excel');
+    const promptTemplate = document.getElementById('import-prompt-modal-template');
+    const promptCancel = document.getElementById('import-prompt-modal-cancel');
+
+    function closePrompt() {
+        if (promptOverlay && promptContent) {
+            promptContent.classList.remove('scale-100');
+            promptContent.classList.add('scale-95');
+            promptOverlay.classList.remove('opacity-100');
+            promptOverlay.classList.add('opacity-0');
+            setTimeout(() => {
+                promptOverlay.classList.add('hidden');
+                promptOverlay.classList.remove('flex');
+            }, 300);
+        }
+    }
+
+    if (importBtn && fileInput && promptOverlay) {
+        importBtn.addEventListener('click', () => {
+            promptOverlay.classList.remove('hidden');
+            promptOverlay.classList.add('flex');
+            // Allow CSS transition to take effect
+            setTimeout(() => {
+                promptOverlay.classList.remove('opacity-0');
+                promptOverlay.classList.add('opacity-100');
+                promptContent.classList.remove('scale-95');
+                promptContent.classList.add('scale-100');
+            }, 10);
+        });
+
+        promptExcel.addEventListener('click', () => {
+            closePrompt();
+            fileInput.value = '';
+            fileInput.click();
+        });
+
+        promptTemplate.addEventListener('click', () => {
+            closePrompt();
+            generateTemplate();
+        });
+
+        promptCancel.addEventListener('click', closePrompt);
+        promptOverlay.addEventListener('click', (e) => {
+            if (e.target === promptOverlay) closePrompt();
+        });
     }
 
     if (fileInput) {
