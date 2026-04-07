@@ -127,45 +127,76 @@ $wrapperClass = $tableVisible ? '' : 'hidden';
                         <p class="text-[11px] text-white/70 mt-0.5">Urutan Kolom : URAIAN, VOLUME, SATUAN</p>
                     </div>
                 </div>
-                <button id="import-rab-modal-close" type="button" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 transition-colors focus:outline-none">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                </button>
-            </div>
-
-            <!-- Single Table Workspace -->
-            <div id="import-step-preview" class="flex-1 overflow-auto bg-slate-50 p-4">
+                <button id="import-rab-modal-close" type="button" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 transition-colors focus:            <!-- Workspace Step 1: Mapping -->
+            <div id="import-step-1" class="flex-1 overflow-auto bg-slate-50 p-4">
                 <div class="rounded-xl shadow-sm border border-table-border bg-white overflow-hidden h-full flex flex-col">
                     <div class="overflow-auto flex-1 pb-4">
                         <table class="table-auto min-w-max md:w-full text-left border-collapse" id="import-rab-modal-table">
-                            <!-- Injected dynamically by JS including colgroups and JS-powered swiper headers -->
                             <thead class="sticky top-0 bg-slate-100 z-10 shadow-sm border-b border-table-border" id="import-rab-modal-thead">
-                                <tr>
-                                    <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-table-subtle">Memuat Struktur Tabel...</th>
-                                </tr>
+                                <tr><th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-table-subtle">Memuat Struktur Tabel...</th></tr>
                             </thead>
                             <tbody id="import-rab-modal-tbody" class="text-[11px] md:text-[13px] text-table-body">
-                                <tr>
-                                    <td class="text-center py-20 text-table-subtle text-xs italic">
-                                        Menunggu file Excel...
-                                    </td>
-                                </tr>
+                                <tr><td class="text-center py-20 text-table-subtle text-xs italic">Menunggu file Excel...</td></tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
+            <!-- Workspace Step 2: Studio Organisir -->
+            <div id="import-step-2" class="hidden flex-1 overflow-hidden bg-slate-50 flex flex-col">
+                <!-- Toolbar -->
+                <div class="px-6 py-3 bg-white border-b border-table-border flex items-center justify-between shadow-sm shrink-0">
+                    <div class="flex items-center gap-2">
+                        <button id="import-organize-as-cat" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 text-xs font-bold transition-all">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                            Jadikan Kategori
+                        </button>
+                        <button id="import-organize-as-item" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 text-xs font-bold transition-all">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                            Jadikan Item
+                        </button>
+                        <div class="w-px h-6 bg-slate-200 mx-1"></div>
+                        <button id="import-organize-indent-in" type="button" title="Jadikan Sub (Indentasi Masuk)" class="p-1.5 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-all">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"/></svg>
+                        </button>
+                        <button id="import-organize-indent-out" type="button" title="Naikkan Level (Indentasi Keluar)" class="p-1.5 rounded-lg bg-amber-50 text-amber-600 hover:bg-amber-100 transition-all">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex-1 overflow-auto p-4 lg:p-6">
+                    <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-sm border border-table-border overflow-hidden">
+                        <div id="import-organize-list" class="divide-y divide-slate-100 select-none">
+                            <!-- Injected by import.js -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Modal Footer -->
             <div class="flex flex-col-reverse md:flex-row md:items-center md:justify-between gap-2 px-4 md:px-6 py-3 md:py-4 border-t border-table-border bg-white shrink-0 rounded-b-2xl shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-20">
-                <p id="import-rab-modal-count" class="text-[10px] md:text-xs text-table-subtle font-medium text-center md:text-left">
-                    Pilih file Excel untuk memulai
-                </p>
+                <div class="flex items-center gap-4">
+                    <p id="import-rab-modal-count" class="text-[10px] md:text-xs text-table-subtle font-medium text-center md:text-left">
+                        Pilih file Excel untuk memulai
+                    </p>
+                </div>
                 <div class="flex items-center justify-end gap-2">
+                    <button id="import-rab-modal-back" type="button" class="hidden whitespace-nowrap px-4 py-1.5 md:py-2 rounded-lg border border-table-border bg-white hover:bg-slate-50 text-table-body text-[10px] md:text-xs font-medium transition-all focus:outline-none active:scale-95">
+                        <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg> Kembali
+                    </button>
                     <button id="import-rab-modal-cancel" type="button" class="whitespace-nowrap px-4 py-1.5 md:py-2 rounded-lg border border-table-border bg-white hover:bg-slate-50 text-table-body text-[10px] md:text-xs font-medium transition-all focus:outline-none active:scale-95">
                         Batal
                     </button>
-                    <button id="import-rab-modal-confirm" type="button" class="hidden whitespace-nowrap px-4 md:px-6 py-1.5 md:py-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] md:text-xs font-bold tracking-wide shadow-sm transition-all duration-150 focus:outline-none active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
-                        <div class="flex items-center gap-2">Simpan ke RAB<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg></div>
+                    <button id="import-rab-modal-next" type="button" class="hidden whitespace-nowrap px-4 md:px-6 py-1.5 md:py-2 rounded-lg bg-primary hover:bg-primary-hover text-white text-[10px] md:text-xs font-bold tracking-wide shadow-sm transition-all duration-150 focus:outline-none active:scale-95 disabled:opacity-50">
+                        Lanjut Organisir <svg class="w-4 h-4 inline ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </button>
+                    <button id="import-rab-modal-confirm" type="button" class="hidden whitespace-nowrap px-4 md:px-6 py-1.5 md:py-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] md:text-xs font-bold tracking-wide shadow-sm transition-all duration-150 focus:outline-none active:scale-95 disabled:opacity-50">
+                        Simpan ke RAB <svg class="w-4 h-4 inline ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    </button>
+                </div>
+            </div>impan ke RAB<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg></div>
                     </button>
                 </div>
             </div>

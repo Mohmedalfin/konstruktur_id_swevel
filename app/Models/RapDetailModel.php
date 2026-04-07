@@ -27,6 +27,7 @@ class RapDetailModel extends Model
         'subtotal_alat',
         'total_keseluruhan',
         'urutan',
+        'id_parent',
         'keterangan',
     ];
 
