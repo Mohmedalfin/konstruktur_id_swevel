@@ -51,6 +51,24 @@ class MenuRapController extends BaseController
             'idParent' => $idParent,
         ]);
     }
+    
+    public function aturUrutan()
+    {
+        $slug = $this->request->getGet('slug');
+        $idProject = $this->request->getGet('id_project');
+
+        $proyekModel = new \App\Models\ProyekModel();
+        $project = $proyekModel->where('id_project', $idProject)->first();
+
+        if (!$project) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
+        }
+
+        return view('proyek/menu/atur-urutan', [
+            'idProject' => $project['id_project'],
+            'slug' => $slug
+        ]);
+    }
     // public function kategoriMaster()
     // {
     //     try {
