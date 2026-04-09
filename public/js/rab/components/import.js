@@ -439,16 +439,42 @@ export async function initImport() {
 
     // Handle template generating & trigger
     document.getElementById('boq-import-btn')?.addEventListener('click', () => {
-        const prompt = document.getElementById('import-prompt-modal-overlay');
-        prompt?.classList.remove('hidden');
-        prompt?.classList.add('flex');
+        const overlay = document.getElementById('import-prompt-modal-overlay');
+        const content = document.getElementById('import-prompt-modal-content');
+        
+        overlay?.classList.remove('hidden');
+        overlay?.classList.add('flex');
+        
+        setTimeout(() => {
+            overlay?.classList.remove('opacity-0');
+            overlay?.classList.add('opacity-100');
+            content?.classList.remove('scale-95');
+            content?.classList.add('scale-100');
+        }, 10);
     });
+
     document.getElementById('import-prompt-modal-excel')?.addEventListener('click', () => {
         document.getElementById('import-prompt-modal-overlay')?.classList.add('hidden');
         fileInput.click();
     });
+
     document.getElementById('import-prompt-modal-template')?.addEventListener('click', () => {
         document.getElementById('import-prompt-modal-overlay')?.classList.add('hidden');
         generateTemplate();
+    });
+
+    document.getElementById('import-prompt-modal-cancel')?.addEventListener('click', () => {
+        const overlay = document.getElementById('import-prompt-modal-overlay');
+        const content = document.getElementById('import-prompt-modal-content');
+        
+        overlay?.classList.add('opacity-0');
+        overlay?.classList.remove('opacity-100');
+        content?.classList.add('scale-95');
+        content?.classList.remove('scale-100');
+        
+        setTimeout(() => {
+            overlay?.classList.add('hidden');
+            overlay?.classList.remove('flex');
+        }, 300);
     });
 }

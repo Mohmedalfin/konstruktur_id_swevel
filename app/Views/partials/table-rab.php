@@ -1,6 +1,7 @@
 <?php
 $tableVisible = isset($tableVisible) && $tableVisible;
 $wrapperClass = $tableVisible ? '' : 'hidden';
+$isReorderMode = isset($isReorderMode) && $isReorderMode;
 ?>
 
 <div id="rab-table-wrapper" class="w-full px-3 sm:px-6 lg:px-8 py-4 md:py-8 <?= $wrapperClass ?>">
@@ -18,30 +19,29 @@ $wrapperClass = $tableVisible ? '' : 'hidden';
 
         <!-- BOQ Actions -->
         <div class="flex items-center gap-1.5 md:gap-2 shrink-0">
+            <?php if ($isReorderMode): ?>
+                <!-- Actions moved to atur-urutan.php -->
 
-            <!-- Tambah Kategori (only visible in editable mode) -->
-            <button id="tambah-kategori-btn" type="button" title="Tambah Kategori Pekerjaan"
-                class="hidden inline-flex items-center gap-1 md:gap-1.5 px-2 py-1.5 md:px-3 md:py-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] md:text-xs font-semibold transition-all duration-150 focus:outline-none active:scale-95 shadow-sm">
-                <svg class="w-3 h-3 md:w-3.5 md:h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                </svg>
-                Kategori Pekerjaan
-            </button>
+            <?php else: ?>
+                <!-- Atur Urutan -->
+                <a href="<?= base_url('menu-rap/atur-urutan?id_project=' . ($idProject ?? '') . '&slug=' . ($slug ?? '')) ?>" title="Atur Urutan Uraian"
+                    class="inline-flex items-center gap-1 md:gap-1.5 px-2 py-1.5 md:px-3 md:py-2 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-[10px] md:text-xs font-semibold transition-all duration-150 shadow-sm">
+                    <i class="fas fa-list-ol"></i> Atur Urutan Uraian
+                </a>
 
+                <!-- Tambah Kategori -->
+                <button id="tambah-kategori-btn" type="button" title="Tambah Kategori Pekerjaan"
+                    class="hidden inline-flex items-center gap-1 md:gap-1.5 px-2 py-1.5 md:px-3 md:py-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] md:text-xs font-semibold transition-all duration-150 shadow-sm">
+                    <i class="fas fa-plus"></i> Kategori Pekerjaan
+                </button>
 
-            <!-- Import BOQ -->
-            <button id="boq-import-btn" type="button" title="Import BOQ dari Excel"
-                class="inline-flex items-center gap-1 md:gap-1.5 px-2 py-1.5 md:px-3 md:py-2 rounded-lg bg-primary hover:bg-primary-hover text-white text-[10px] md:text-xs font-semibold transition-all duration-150 focus:outline-none active:scale-95 shadow-sm">
-                <svg class="w-3 h-3 md:w-3.5 md:h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
-                </svg>
-                Import BOQ
-            </button>
-
-            <!-- Hidden file input -->
-            <input id="boq-file-input" type="file" accept=".xlsx,.xls,.csv" class="hidden" />
-
+                <!-- Import BOQ -->
+                <button id="boq-import-btn" type="button" title="Import BOQ dari Excel"
+                    class="inline-flex items-center gap-1 md:gap-1.5 px-2 py-1.5 md:px-3 md:py-2 rounded-lg bg-primary hover:bg-primary-hover text-white text-[10px] md:text-xs font-semibold transition-all duration-150 shadow-sm">
+                    <i class="fas fa-file-import"></i> Import BOQ
+                </button>
+                <input id="boq-file-input" type="file" accept=".xlsx,.xls,.csv" class="hidden" />
+            <?php endif; ?>
         </div>
 
     </div>
@@ -51,8 +51,9 @@ $wrapperClass = $tableVisible ? '' : 'hidden';
 
             <!-- Column widths — locked permanently, never shift on open/close -->
             <colgroup>
-                <col style="width: 3.5rem">     <!-- No -->
-                <col class="min-w-[300px]">     <!-- Uraian Pekerjaan (flexible/min-width to force scroll) -->
+                <col style="width: 4.5rem">     <!-- No -->
+                <col class="min-w-[300px]">     <!-- Uraian Pekerjaan -->
+                <?php if (!$isReorderMode): ?>
                 <col style="width: 6rem">       <!-- Volume -->
                 <col style="width: 6rem">       <!-- Satuan -->
                 <col style="width: 10rem">      <!-- Harga Bahan -->
@@ -63,6 +64,7 @@ $wrapperClass = $tableVisible ? '' : 'hidden';
                 <col style="width: 10rem">      <!-- Sub. Upah -->
                 <col style="width: 10rem">      <!-- Harga Keseluruhan -->
                 <col style="width: 7rem">       <!-- Aksi -->
+                <?php endif; ?>
             </colgroup>
 
             <!-- Table Head (static — never changes) -->
@@ -70,6 +72,7 @@ $wrapperClass = $tableVisible ? '' : 'hidden';
                 <tr class="bg-primary text-white">
                     <th scope="col" class="px-3 md:px-5 py-3 md:py-3.5 text-center text-[10px] md:text-xs font-semibold uppercase tracking-wider whitespace-nowrap">No</th>
                     <th scope="col" class="px-3 md:px-5 py-3 md:py-3.5 text-[10px] md:text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Uraian Pekerjaan</th>
+                    <?php if (!$isReorderMode): ?>
                     <th scope="col" class="px-3 md:px-5 py-3 md:py-3.5 text-center text-[10px] md:text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Volume</th>
                     <th scope="col" class="px-3 md:px-5 py-3 md:py-3.5 text-center text-[10px] md:text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Satuan</th>
                     <th scope="col" class="px-3 md:px-5 py-3 md:py-3.5 text-right text-[10px] md:text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Harga Bahan</th>
@@ -80,6 +83,7 @@ $wrapperClass = $tableVisible ? '' : 'hidden';
                     <th scope="col" class="px-3 md:px-5 py-3 md:py-3.5 text-right text-[10px] md:text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Sub. Upah</th>
                     <th scope="col" class="px-3 md:px-5 py-3 md:py-3.5 text-right text-[10px] md:text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Harga Keseluruhan</th>
                     <th scope="col" class="px-3 md:px-5 py-3 md:py-3.5 text-center text-[10px] md:text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Aksi</th>
+                    <?php endif; ?>
                 </tr>
             </thead>
 
@@ -89,6 +93,8 @@ $wrapperClass = $tableVisible ? '' : 'hidden';
             </tbody>
 
             <!-- Table Footer — updated by ajax_rab.js -->
+            <!-- Table Footer — updated by ajax_rab.js -->
+            <?php if (!$isReorderMode): ?>
             <tfoot id="rab-tfoot">
                 <tr class="bg-table-category text-white">
                     <td colspan="10" class="px-3 md:px-5 py-1.5 md:py-2 text-center text-[10px] md:text-xs font-bold uppercase tracking-wide whitespace-nowrap">Jumlah Harga</td>
@@ -106,8 +112,19 @@ $wrapperClass = $tableVisible ? '' : 'hidden';
                     <td class="px-3 md:px-5 py-1.5 md:py-2"></td>
                 </tr>
             </tfoot>
+            <?php endif; ?>
         </table>
     </div>
+
+    <?php if ($isReorderMode): ?>
+    <!-- ── Simpan Bar ───────────────────────────────────────────────── -->
+    <div class="mt-4 flex justify-end">
+        <button id="save-reorder-btn" type="button"
+            class="pointer inline-flex items-center gap-2 bg-primary hover:bg-primary-hover active:scale-95 text-white px-8 py-2.5 rounded-lg text-xs font-semibold tracking-wide shadow-md transition-all duration-150 focus:outline-none">
+            <i class="fas fa-save"></i> Simpan Urutan
+        </button>
+    </div>
+    <?php endif; ?>
 
     <!-- ═══════════════════════════════════════════════════════════════
          MODAL — Preview Import BOQ Excel (Direct Data Swipe)

@@ -1022,25 +1022,35 @@ class RapController extends BaseController
             $batchData = [];
             foreach ($items as $item) {
                 if (isset($item['id_rap_detail'], $item['urutan'])) {
-                    $batchData[] = [
+                    $row = [
                         'id_rap_detail' => (int) $item['id_rap_detail'],
                         'urutan'        => (int) $item['urutan'],
                     ];
+                    if (array_key_exists('id_parent', $item)) {
+                        $row['id_parent'] = ($item['id_parent'] === '' || $item['id_parent'] === null) ? null : (int) $item['id_parent'];
+                    }
+                    $batchData[] = $row;
                 }
             }
 
-            if (empty($batchData)) {
-                return $this->response->setStatusCode(400)->setJSON([
-                    'status'  => 'error',
-                    'message' => 'Format item tidak valid'
-                ]);
+            $db = db_connect();
+            $db->transStart();
+
+            foreach ($batchData as $data) {
+                $id = $data['id_rap_detail'];
+                unset($data['id_rap_detail']);
+                $this->rapDetailModel->update($id, $data);
             }
 
-            $this->rapDetailModel->updateBatch($batchData, 'id_rap_detail');
+            $db->transComplete();
+
+            if ($db->transStatus() === false) {
+                throw new \Exception('Gagal memperbarui urutan');
+            }
 
             return $this->response->setJSON([
                 'status'  => 'success',
-                'message' => 'Urutan berhasil disimpan'
+                'message' => 'Urutan dan hierarki berhasil disimpan'
             ]);
         } catch (Throwable $e) {
             return $this->response->setStatusCode(500)->setJSON([
