@@ -11,6 +11,7 @@ use App\Models\RapDetailItemModel;
 use App\Models\AhsModel;
 use App\Models\ProyekModel;
 use CodeIgniter\Database\Exceptions\DatabaseException;
+use CodeIgniter\HTTP\ResponseInterface;
 use Throwable;
 
 class RapController extends BaseController
@@ -1068,6 +1069,8 @@ class RapController extends BaseController
             $idProject = (int) ($payload['id_project'] ?? 0);
             $items = $payload['items'] ?? [];
 
+            file_put_contents(WRITEPATH . 'logs/import_dump.json', json_encode($items, JSON_PRETTY_PRINT));
+
             if ($idProject <= 0 || empty($items)) {
                 return $this->response->setStatusCode(400)->setJSON([
                     'status'  => 'error',
@@ -1109,23 +1112,28 @@ class RapController extends BaseController
 
     private function saveImportTree($items, $rapId, $idProject, $idUser, $idParent = null, $idKategori = null)
     {
+        $currentKategori = $idKategori;
+
         foreach ($items as $idx => $item) {
-            $currentKategori = $idKategori;
             $currentParent = $idParent;
 
             if ($item['type'] === 'kategori') {
-                $nama = trim($item['nama']);
-                $existing = $this->kategoriModel->where('nama_kategori', $nama)
-                    ->groupStart()->where('id_project', $idProject)->orWhere('id_project', null)->groupEnd()
-                    ->first();
-
-                if ($existing) {
-                    $catId = (int) $existing['id_kategori_pekerjaan'];
+                if (!empty($item['id_kategori_master'])) {
+                    $catId = (int) $item['id_kategori_master'];
                 } else {
-                    $this->kategoriModel->insert([
-                        'nama_kategori' => $nama, 'id_project' => $idProject, 'id_user' => $idUser, 'jenis_kategori' => 'custom'
-                    ]);
-                    $catId = (int) $this->kategoriModel->getInsertID();
+                    $nama = trim($item['nama']);
+                    $existing = $this->kategoriModel->where('nama_kategori', $nama)
+                        ->groupStart()->where('id_project', $idProject)->orWhere('id_project', null)->groupEnd()
+                        ->first();
+
+                    if ($existing) {
+                        $catId = (int) $existing['id_kategori_pekerjaan'];
+                    } else {
+                        $this->kategoriModel->insert([
+                            'nama_kategori' => $nama, 'id_project' => $idProject, 'id_user' => $idUser, 'jenis_kategori' => 'custom'
+                        ]);
+                        $catId = (int) $this->kategoriModel->getInsertID();
+                    }
                 }
 
                 $existsInRap = $this->rapKategoriModel->where('id_rap', $rapId)->where('id_kategori', $catId)->first();
@@ -1135,6 +1143,12 @@ class RapController extends BaseController
                 $currentKategori = $catId;
                 $currentParent = null; 
             } else {
+                if ($currentKategori === null) {
+                    // Fallback to error if frontend sends an item without a category above it
+                    // This throws an exception which rolls back the transaction safely
+                    throw new \Exception("Pekerjaan wajib diletakkan di bawah salah satu Kategori Pekerjaan");
+                }
+
                 $vol = (float)($item['volume'] ?? 1);
                 $bh = (float)($item['harga_bahan'] ?? 0);
                 $al = (float)($item['harga_alat'] ?? 0);

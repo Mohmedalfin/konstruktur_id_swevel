@@ -16,6 +16,15 @@ export async function refreshImportCategories() {
     if (!idProject) return;
     try {
         availableCategories = await fetchKategoriMaster(idProject);
+        const sel = document.getElementById('import-global-kategori');
+        if (sel) {
+            sel.innerHTML = '<option value="">-- Buat Otomatis Sesuai Baris --</option>';
+            availableCategories.forEach(cat => {
+                const id = cat.id_kategori_pekerjaan || cat.id;
+                const nama = cat.nama_kategori || cat.name || cat.nama;
+                sel.innerHTML += `<option value="${id}">${nama}</option>`;
+            });
+        }
     } catch (_) {
         availableCategories = [];
     }
@@ -69,6 +78,7 @@ function _setStep(step) {
     const btnBack = document.getElementById('import-rab-modal-back');
     const btnConfirm = document.getElementById('import-rab-modal-confirm');
     const btnCancel = document.getElementById('import-rab-modal-cancel');
+    const btnRepick = document.getElementById('import-rab-modal-repick');
 
     if (step === 1) {
         s1.classList.remove('hidden');
@@ -77,6 +87,7 @@ function _setStep(step) {
         btnBack.classList.add('hidden');
         btnConfirm.classList.add('hidden');
         btnCancel.classList.remove('hidden');
+        btnRepick?.classList.remove('hidden');
     } else {
         s1.classList.add('hidden');
         s2.classList.remove('hidden');
@@ -84,6 +95,7 @@ function _setStep(step) {
         btnBack.classList.remove('hidden');
         btnConfirm.classList.remove('hidden');
         btnCancel.classList.add('hidden');
+        btnRepick?.classList.add('hidden');
         _renderOrganizeList();
     }
 }
@@ -274,13 +286,22 @@ function _renderOrganizeList() {
     organizedItems.forEach((item, idx) => {
         const isSelected = selectedIndices.has(idx);
         const isCat = item.type === 'kategori';
+        const isInsertedKat = item.id.startsWith('temp-kat-');
         const indent = item.level * 1.5;
 
         html += `
             <div class="organize-item p-3 group transition-colors duration-150 flex items-center gap-3 ${isSelected ? 'bg-primary/5' : 'hover:bg-slate-50'}" data-index="${idx}">
-                <!-- Checkbox -->
-                <div class="flex-shrink-0 ml-1">
-                    <input type="checkbox" class="organize-check w-4 h-4 rounded text-primary cursor-pointer border-slate-300" ${isSelected ? 'checked' : ''} data-index="${idx}">
+                <!-- Left Slot (Checkbox or Trash) -->
+                <div class="flex-shrink-0 ml-1 w-5 flex justify-center">
+                    ${isInsertedKat ? `
+                        <button type="button" class="organize-delete-kat text-red-500 hover:text-red-700 transition-colors focus:outline-none" data-index="${idx}" title="Hapus Kategori">
+                            <i class="fas fa-trash text-xs"></i>
+                        </button>
+                    ` : isCat ? `
+                        <!-- Hidden checkbox for category -->
+                    ` : `
+                        <input type="checkbox" class="organize-check w-4 h-4 rounded text-primary cursor-pointer border-slate-300" ${isSelected ? 'checked' : ''} data-index="${idx}">
+                    `}
                 </div>
 
                 <!-- Drag Handle -->
@@ -297,11 +318,17 @@ function _renderOrganizeList() {
                     </div>
                 </div>
 
-                <!-- Type Badge -->
+                <!-- Type Toggle / Action -->
                 <div class="flex-shrink-0">
-                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-tight ${isCat ? 'bg-primary/10 text-primary' : 'bg-slate-100 text-slate-500'}">
-                        ${isCat ? 'KAT' : 'ITM'}
-                    </span>
+                    ${isInsertedKat ? `
+                        <span class="inline-flex items-center px-2 py-1 rounded text-[10px] bg-primary/10 text-primary font-bold uppercase border border-primary/20">
+                            <i class="fas fa-layer-group mr-1.5"></i> Kategori
+                        </span>
+                    ` : `
+                        <button type="button" class="organize-toggle-type inline-flex items-center px-2 py-1 rounded text-[10px] font-bold uppercase tracking-tight focus:outline-none transition-all shadow-sm ${isCat ? 'bg-amber-100 text-amber-700 hover:bg-amber-200 border border-amber-200' : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50 hover:text-primary'}" data-index="${idx}">
+                            ${isCat ? '<i class="fas fa-undo mr-1.5"></i> Jadikan Pekerjaan' : '<i class="fas fa-layer-group mr-1.5"></i> Jadikan Kategori'}
+                        </button>
+                    `}
                 </div>
             </div>
         `;
@@ -315,6 +342,38 @@ function _renderOrganizeList() {
             const idx = parseInt(e.target.dataset.index);
             if (e.target.checked) selectedIndices.add(idx);
             else selectedIndices.delete(idx);
+            _renderOrganizeList();
+        });
+    });
+
+    container.querySelectorAll('.organize-toggle-type').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const idx = parseInt(e.currentTarget.dataset.index);
+            const currentType = organizedItems[idx].type;
+            organizedItems[idx].type = currentType === 'kategori' ? 'item' : 'kategori';
+            if (organizedItems[idx].type === 'kategori') {
+                organizedItems[idx].level = 0; // Kategori is always root
+                selectedIndices.delete(idx); // Remove from selection if turning into kat
+            }
+            _renderOrganizeList();
+        });
+    });
+
+    container.querySelectorAll('.organize-delete-kat').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const idx = parseInt(e.currentTarget.dataset.index);
+            organizedItems.splice(idx, 1);
+            
+            // Adjust selectedIndices
+            const newIndices = new Set();
+            selectedIndices.forEach(val => {
+                if (val > idx) newIndices.add(val - 1);
+                else if (val < idx) newIndices.add(val);
+            });
+            selectedIndices = newIndices;
+            
             _renderOrganizeList();
         });
     });
@@ -373,12 +432,46 @@ export async function initImport() {
     const modalNext    = document.getElementById('import-rab-modal-next');
     const modalBack    = document.getElementById('import-rab-modal-back');
     const modalClose   = document.getElementById('import-rab-modal-close');
+    const modalRepick  = document.getElementById('import-rab-modal-repick');
     
     // Tools
-    document.getElementById('import-organize-as-cat')?.addEventListener('click', () => _setType('kategori'));
-    document.getElementById('import-organize-as-item')?.addEventListener('click', () => _setType('item'));
     document.getElementById('import-organize-indent-in')?.addEventListener('click', () => _indentItems(1));
     document.getElementById('import-organize-indent-out')?.addEventListener('click', () => _indentItems(-1));
+
+    document.getElementById('import-organize-insert-cat')?.addEventListener('click', () => {
+        const selKat = document.getElementById('import-global-kategori');
+        if (!selKat || !selKat.value) {
+            alert('Pilih Kategori Master terlebih dahulu dari menu dropdown!');
+            return;
+        }
+
+        const categoryId = selKat.value;
+        const categoryName = selKat.options[selKat.selectedIndex].text;
+
+        let insertIdx = 0;
+        if (selectedIndices.size > 0) {
+            insertIdx = Math.min(...Array.from(selectedIndices));
+        }
+
+        organizedItems.splice(insertIdx, 0, {
+            id: 'temp-kat-' + Date.now(),
+            nama: categoryName,
+            id_kategori_master: categoryId,
+            volume: 0,
+            satuan: '-',
+            type: 'kategori',
+            level: 0
+        });
+
+        // Shift down the selected indices since we inserted a new item before them
+        if (selectedIndices.size > 0) {
+            const newIndices = new Set();
+            selectedIndices.forEach(val => newIndices.add(val + 1));
+            selectedIndices = newIndices;
+        }
+
+        _renderOrganizeList();
+    });
 
     modalNext?.addEventListener('click', () => {
         _prepareOrganizedData();
@@ -387,6 +480,9 @@ export async function initImport() {
     modalBack?.addEventListener('click', () => _setStep(1));
     modalCancel?.addEventListener('click', () => _closeModal(modalOverlay));
     modalClose?.addEventListener('click', () => _closeModal(modalOverlay));
+    modalRepick?.addEventListener('click', () => {
+        if (fileInput) fileInput.click();
+    });
 
     if (fileInput) {
         fileInput.addEventListener('change', async (e) => {
@@ -415,6 +511,8 @@ export async function initImport() {
     modalConfirm?.addEventListener('click', async () => {
         const idProject = window.RAB_INIT?.idProject || window.RAB_INIT?.id;
         const hierarchicalData = _buildHierarchy(organizedItems);
+        const selKat = document.getElementById('import-global-kategori');
+        const idKategori = selKat && selKat.value ? parseInt(selKat.value) : null;
 
         modalConfirm.disabled = true;
         modalConfirm.innerHTML = '<span class="animate-spin mr-2">...</span> Menyimpan';
@@ -423,7 +521,11 @@ export async function initImport() {
             const res = await fetch('/api/rap/import', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id_project: Number(idProject), items: hierarchicalData })
+                body: JSON.stringify({ 
+                    id_project: Number(idProject), 
+                    id_kategori: idKategori,
+                    items: hierarchicalData 
+                })
             });
             const json = await res.json();
             if (!res.ok || json.status !== 'success') throw new Error(json.message);
