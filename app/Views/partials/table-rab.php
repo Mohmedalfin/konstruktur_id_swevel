@@ -144,7 +144,12 @@ $isReorderMode = isset($isReorderMode) && $isReorderMode;
                         <p class="text-[11px] text-white/70 mt-0.5">Urutan Kolom : URAIAN, VOLUME, SATUAN</p>
                     </div>
                 </div>
-                <button id="import-rab-modal-close" type="button" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 transition-colors focus:            <!-- Workspace Step 1: Mapping -->
+                <button id="import-rab-modal-close" type="button" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 transition-colors focus:outline-none">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            
+            <!-- Workspace Step 1: Mapping -->
             <div id="import-step-1" class="flex-1 overflow-auto bg-slate-50 p-4">
                 <div class="rounded-xl shadow-sm border border-table-border bg-white overflow-hidden h-full flex flex-col">
                     <div class="overflow-auto flex-1 pb-4">
@@ -164,22 +169,29 @@ $isReorderMode = isset($isReorderMode) && $isReorderMode;
             <div id="import-step-2" class="hidden flex-1 overflow-hidden bg-slate-50 flex flex-col">
                 <!-- Toolbar -->
                 <div class="px-6 py-3 bg-white border-b border-table-border flex items-center justify-between shadow-sm shrink-0">
-                    <div class="flex items-center gap-2">
-                        <button id="import-organize-as-cat" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 text-xs font-bold transition-all">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
-                            Jadikan Kategori
-                        </button>
-                        <button id="import-organize-as-item" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 text-xs font-bold transition-all">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-                            Jadikan Item
-                        </button>
-                        <div class="w-px h-6 bg-slate-200 mx-1"></div>
-                        <button id="import-organize-indent-in" type="button" title="Jadikan Sub (Indentasi Masuk)" class="p-1.5 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-all">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"/></svg>
-                        </button>
-                        <button id="import-organize-indent-out" type="button" title="Naikkan Level (Indentasi Keluar)" class="p-1.5 rounded-lg bg-amber-50 text-amber-600 hover:bg-amber-100 transition-all">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/></svg>
-                        </button>
+                    <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-3 w-full justify-between">
+                        <!-- Left: Selection Tools -->
+                        <div class="flex items-center gap-2 shrink-0">
+                            <button id="import-organize-indent-in" type="button" title="Jadikan Sub (Indentasi Masuk)" class="p-1.5 md:px-3 md:py-2 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-all text-xs font-bold flex items-center gap-1.5">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"/></svg>
+                                <span class="hidden md:inline">Jadikan Sub Pekerjaan</span>
+                            </button>
+                            <button id="import-organize-indent-out" type="button" title="Naikkan Level (Indentasi Keluar)" class="p-1.5 md:px-3 md:py-2 rounded-lg bg-amber-50 text-amber-600 hover:bg-amber-100 transition-all text-xs font-bold flex items-center gap-1.5">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/></svg>
+                                <span class="hidden md:inline">Naik Level</span>
+                            </button>
+                        </div>
+                        
+                        <!-- Right: Inject Category -->
+                        <div class="flex items-center gap-2 bg-slate-50 p-1 rounded-lg border border-slate-200">
+                            <select id="import-global-kategori" class="bg-transparent border-none text-slate-700 text-[11px] md:text-xs focus:ring-0 block p-1 md:p-1.5 font-medium min-w-[150px]">
+                                <option value="">-- Pilih Kategori --</option>
+                            </select>
+                            <button id="import-organize-insert-cat" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-primary text-white hover:bg-primary-hover text-[10px] md:text-xs font-bold transition-all whitespace-nowrap shadow-sm">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+                                Sisipkan Sebagai Kategori
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -203,6 +215,9 @@ $isReorderMode = isset($isReorderMode) && $isReorderMode;
                     <button id="import-rab-modal-back" type="button" class="hidden whitespace-nowrap px-4 py-1.5 md:py-2 rounded-lg border border-table-border bg-white hover:bg-slate-50 text-table-body text-[10px] md:text-xs font-medium transition-all focus:outline-none active:scale-95">
                         <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg> Kembali
                     </button>
+                    <button id="import-rab-modal-repick" type="button" class="whitespace-nowrap px-4 py-1.5 md:py-2 rounded-lg border border-table-border bg-white hover:bg-slate-50 text-table-body text-[10px] md:text-xs font-medium transition-all focus:outline-none active:scale-95">
+                        <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg> Ganti File Excel
+                    </button>
                     <button id="import-rab-modal-cancel" type="button" class="whitespace-nowrap px-4 py-1.5 md:py-2 rounded-lg border border-table-border bg-white hover:bg-slate-50 text-table-body text-[10px] md:text-xs font-medium transition-all focus:outline-none active:scale-95">
                         Batal
                     </button>
@@ -211,10 +226,6 @@ $isReorderMode = isset($isReorderMode) && $isReorderMode;
                     </button>
                     <button id="import-rab-modal-confirm" type="button" class="hidden whitespace-nowrap px-4 md:px-6 py-1.5 md:py-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] md:text-xs font-bold tracking-wide shadow-sm transition-all duration-150 focus:outline-none active:scale-95 disabled:opacity-50">
                         Simpan ke RAB <svg class="w-4 h-4 inline ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                    </button>
-                </div>
-            </div>impan ke RAB<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg></div>
-                    </button>
                 </div>
             </div>
         </div>
