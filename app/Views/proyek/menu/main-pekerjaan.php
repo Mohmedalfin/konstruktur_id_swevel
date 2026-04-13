@@ -30,8 +30,9 @@
         (function () {
             const params = new URLSearchParams(window.location.search);
 
-            const idProject   = params.get('id')           || sessionStorage.getItem('current_id_project') || null;
-            const kategoriId  = params.get('kategori_id')  || sessionStorage.getItem('rab_tambah_ahs_cat')  || null;
+            const idProject   = params.get('id_project')   || sessionStorage.getItem('current_id_project') || null;
+            const kategoriId  = params.get('id_kategori')  || sessionStorage.getItem('rab_tambah_ahs_cat')  || null;
+            const idParent    = params.get('id_parent')    || null;
             const slug        = params.get('slug')          || localStorage.getItem('lastProjectSlug')       || null;
 
             window.RAB_INIT = { idProject };

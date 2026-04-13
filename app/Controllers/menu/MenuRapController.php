@@ -40,11 +40,33 @@ class MenuRapController extends BaseController
     public function tambahPekerjaan()
     {
         $slug = $this->request->getGet('slug');
-        $idProject = $this->request->getGet('id');
+        $idProject = $this->request->getGet('id_project');
+        $idKategori = $this->request->getGet('id_kategori');
+        $idParent = $this->request->getGet('id_parent');
 
         return view('proyek/menu/main-pekerjaan', [
             'slug' => $slug,
             'idProject' => $idProject,
+            'idKategori' => $idKategori,
+            'idParent' => $idParent,
+        ]);
+    }
+    
+    public function aturUrutan()
+    {
+        $slug = $this->request->getGet('slug');
+        $idProject = $this->request->getGet('id_project');
+
+        $proyekModel = new \App\Models\ProyekModel();
+        $project = $proyekModel->where('id_project', $idProject)->first();
+
+        if (!$project) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
+        }
+
+        return view('proyek/menu/atur-urutan', [
+            'idProject' => $project['id_project'],
+            'slug' => $slug
         ]);
     }
     // public function kategoriMaster()

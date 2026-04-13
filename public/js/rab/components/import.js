@@ -5,6 +5,7 @@
  */
 
 import { fetchKategoriMaster } from '../core/data.js';
+import { generateTemplate } from './template.js';
 
 // Cache of available categories (loaded from API)
 let availableCategories = [];
@@ -15,6 +16,15 @@ export async function refreshImportCategories() {
     if (!idProject) return;
     try {
         availableCategories = await fetchKategoriMaster(idProject);
+        const sel = document.getElementById('import-global-kategori');
+        if (sel) {
+            sel.innerHTML = '<option value="">-- Buat Otomatis Sesuai Baris --</option>';
+            availableCategories.forEach(cat => {
+                const id = cat.id_kategori_pekerjaan || cat.id;
+                const nama = cat.nama_kategori || cat.name || cat.nama;
+                sel.innerHTML += `<option value="${id}">${nama}</option>`;
+            });
+        }
     } catch (_) {
         availableCategories = [];
     }
@@ -40,16 +50,54 @@ const SYSTEM_FIELDS = [
 ];
 
 let globalWorksheet = null;
-let excelColumns = []; // [{idxExcel: -1, name: '-- Kosongkan --'}, {idxExcel: 1, name: 'Uraian'}, ...]
-let rawDataStore = []; // The raw rows from excel (up to ~100 for preview)
-let currentMapping = {}; // key: index in excelColumns array (e.g., uraian: 1)
+let excelColumns = [];
+let rawDataStore = [];
+let currentMapping = {};
+let currentStep = 1;
+let organizedItems = []; // { id, nama, volume, satuan, type, level }
+let selectedIndices = new Set();
 
 function _openModal(overlay) {
-    if (overlay) { overlay.classList.remove('hidden'); overlay.classList.add('flex'); document.body.style.overflow = 'hidden'; }
+    if (overlay) {
+        overlay.classList.remove('hidden');
+        overlay.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+        _setStep(1);
+    }
 }
 
 function _closeModal(overlay) {
     if (overlay) { overlay.classList.add('hidden'); overlay.classList.remove('flex'); document.body.style.overflow = ''; }
+}
+
+function _setStep(step) {
+    currentStep = step;
+    const s1 = document.getElementById('import-step-1');
+    const s2 = document.getElementById('import-step-2');
+    const btnNext = document.getElementById('import-rab-modal-next');
+    const btnBack = document.getElementById('import-rab-modal-back');
+    const btnConfirm = document.getElementById('import-rab-modal-confirm');
+    const btnCancel = document.getElementById('import-rab-modal-cancel');
+    const btnRepick = document.getElementById('import-rab-modal-repick');
+
+    if (step === 1) {
+        s1.classList.remove('hidden');
+        s2.classList.add('hidden');
+        btnNext.classList.remove('hidden');
+        btnBack.classList.add('hidden');
+        btnConfirm.classList.add('hidden');
+        btnCancel.classList.remove('hidden');
+        btnRepick?.classList.remove('hidden');
+    } else {
+        s1.classList.add('hidden');
+        s2.classList.remove('hidden');
+        btnNext.classList.add('hidden');
+        btnBack.classList.remove('hidden');
+        btnConfirm.classList.remove('hidden');
+        btnCancel.classList.add('hidden');
+        btnRepick?.classList.add('hidden');
+        _renderOrganizeList();
+    }
 }
 
 function _autoMapColumns() {
@@ -58,12 +106,10 @@ function _autoMapColumns() {
     
     SYSTEM_FIELDS.forEach(sf => {
         if (sf.key === 'kategori') return; 
-        let foundIdx = 0; // Default '-- Kosongkan --'
+        let foundIdx = 0;
         for (let i = 1; i < excelColumns.length; i++) {
-            if (usedIndices.has(i)) continue; // Don't claim an already mapped column
-            
+            if (usedIndices.has(i)) continue;
             const colName = excelColumns[i].name.toLowerCase();
-            // exact word or very close substring match
             if (sf.keywords.some(kw => colName.includes(kw))) {
                 foundIdx = i;
                 usedIndices.add(i);
@@ -75,19 +121,12 @@ function _autoMapColumns() {
 }
 
 function _renderTableHeaders(thead) {
-    let colgroupHtml = '<colgroup><col style="width: 3.5rem">'; // No
-    
-    let trHtml = `
-        <tr>
-            <th class="px-2 py-3 text-center text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-100 border-r border-slate-200 sticky left-0 z-20 align-bottom pb-2">No</th>
-    `;
+    let colgroupHtml = '<colgroup><col style="width: 3.5rem">';
+    let trHtml = `<tr><th class="px-2 py-3 text-center text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-100 border-r border-slate-200 sticky left-0 z-20 align-bottom pb-2">No</th>`;
 
-    // Loop through ALL parsed Excel Columns (skipping index 0 which is our internal '-- Kosongkan --')
     for (let i = 1; i < excelColumns.length; i++) {
         const col = excelColumns[i];
         colgroupHtml += `<col style="width: 14rem">`;
-        
-        // Find if this excel column is currently mapped to a system field
         let mappedSysKey = '';
         Object.keys(currentMapping).forEach(sysKey => {
             if (currentMapping[sysKey] === i) mappedSysKey = sysKey;
@@ -105,14 +144,9 @@ function _renderTableHeaders(thead) {
 
         trHtml += `
             <th class="px-2 py-2 border-r border-slate-200 bg-slate-50 align-top group min-w-[180px]">
-                <!-- Native Excel Field Header -->
-                <div class="text-[11px] font-bold tracking-wider mb-2 flex items-center justify-center text-slate-700 truncate" title="${col.name}">
-                    [Excel] ${col.name}
-                </div>
-                
-                <!-- Dropdown to assign to System Column -->
+                <div class="text-[11px] font-bold tracking-wider mb-2 flex items-center justify-center text-slate-700 truncate" title="${col.name}">[Excel] ${col.name}</div>
                 <div class="flex items-center justify-between bg-white border ${headerTheme} rounded transition-colors duration-200 shadow-sm overflow-hidden mt-auto">
-                    <select class="sys-mapping-select w-full text-[10px] font-bold text-center appearance-none outline-none cursor-pointer truncate px-2 py-1.5 ${isMapped ? 'text-blue-700' : 'text-slate-500'} bg-transparent" data-col-idx="${i}" title="Petakan ke Kolom Sistem">
+                    <select class="sys-mapping-select w-full text-[10px] font-bold text-center appearance-none outline-none cursor-pointer truncate px-2 py-1.5 ${isMapped ? 'text-blue-700' : 'text-slate-500'} bg-transparent" data-col-idx="${i}">
                         ${selectOptions}
                     </select>
                 </div>
@@ -120,10 +154,6 @@ function _renderTableHeaders(thead) {
         `;
     }
     
-    // Always render Kategori at the far right
-    colgroupHtml += `<col style="width: 10rem">`;
-    trHtml += `<th class="px-3 py-3 text-center text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-100 align-bottom pb-2">Kategori (Sistem)</th>`;
-
     colgroupHtml += '</colgroup>';
     trHtml += '</tr>';
 
@@ -132,26 +162,21 @@ function _renderTableHeaders(thead) {
     const newThead = document.getElementById('import-rab-modal-thead');
     const newTbody = document.getElementById('import-rab-modal-tbody');
 
-    // Attach Mapping Change Event
     newThead.querySelectorAll('.sys-mapping-select').forEach(sel => {
         sel.addEventListener('change', (e) => {
             const colIdx = parseInt(e.currentTarget.dataset.colIdx);
             const selectedSysKey = e.currentTarget.value;
-            
-            // If another column already holds this system key, unmap it first
             if (selectedSysKey !== '') {
                 Object.keys(currentMapping).forEach(k => {
-                    if (currentMapping[k] === colIdx) currentMapping[k] = 0; // Clear old mapping for this column
-                    if (k === selectedSysKey) currentMapping[k] = 0; // Clear the system key from its previous owner
+                    if (currentMapping[k] === colIdx) currentMapping[k] = 0;
+                    if (k === selectedSysKey) currentMapping[k] = 0;
                 });
                 currentMapping[selectedSysKey] = colIdx;
             } else {
-                // Determine which sys key was removed
                 Object.keys(currentMapping).forEach(k => {
                     if (currentMapping[k] === colIdx) currentMapping[k] = 0;
                 });
             }
-
             const createdTbody = _renderTableHeaders(newThead);
             _renderTableBody(createdTbody);
             _validateImportState();
@@ -172,27 +197,19 @@ function _renderTableBody(tbody) {
 
     let html = '';
     rawDataStore.forEach((rowVals, index) => {
-        // Check if row operates as a "Header Row" 
         const rawVolCell = mapVolume !== 0 ? rowVals[excelColumns[mapVolume].idxExcel] : null;
-        let isVolEmpty = false;
-        if (mapVolume !== 0 && (rawVolCell === null || rawVolCell === undefined || rawVolCell.toString().trim() === '')) {
-            isVolEmpty = true;
-        }
-
+        let isVolEmpty = (mapVolume !== 0 && (rawVolCell === null || rawVolCell === undefined || rawVolCell.toString().trim() === ''));
         const hasUraian = mapUraian !== 0 && !!rowVals[excelColumns[mapUraian].idxExcel];
         const isHeaderStyle = isVolEmpty && hasUraian;
-        
         const bgClass   = isHeaderStyle ? 'bg-amber-50/50' : 'bg-white';
         const textClass = isHeaderStyle ? 'font-bold text-amber-900' : 'font-medium text-table-strong';
 
         html += `<tr class="border-b border-table-border ${bgClass} hover:bg-slate-50 transition-colors">`;
         html += `<td class="px-2 py-2 text-center text-table-subtle font-medium tabular-nums sticky left-0 ${bgClass} border-r border-slate-100">${index + 1}</td>`;
 
-        // Render ALL Excel columns
         for (let i = 1; i < excelColumns.length; i++) {
             const excelIdx = excelColumns[i].idxExcel;
             const rawVal = rowVals[excelIdx];
-            
             let mappedSysKey = '';
             Object.keys(currentMapping).forEach(sysKey => {
                 if (currentMapping[sysKey] === i) mappedSysKey = sysKey;
@@ -201,220 +218,560 @@ function _renderTableBody(tbody) {
             let cellVal = '';
             let align = 'text-left';
             let extraClasses = '';
-            
             if (rawVal !== null && rawVal !== undefined) {
                 const txt = typeof rawVal === 'object' ? (rawVal.result || '') : rawVal.toString();
-                
-                if (mappedSysKey.startsWith('harga_')) {
-                    const parsed = parseNumber(rawVal);
-                    cellVal = isHeaderStyle ? '' : ((parsed === 0 && txt.trim() !== '0') ? txt : formatRp(parsed));
-                    align = 'text-right tabular-nums';
-                    extraClasses = isHeaderStyle ? '' : 'font-medium';
-                } else if (mappedSysKey === 'volume' || mappedSysKey === 'satuan') {
-                    cellVal = isHeaderStyle ? '' : txt;
-                    align = 'text-center';
+                if (mappedSysKey === 'volume' || mappedSysKey === 'satuan') {
+                    cellVal = isHeaderStyle ? '' : txt; align = 'text-center';
                 } else if (mappedSysKey === 'uraian') {
-                    cellVal = txt;
-                    extraClasses = `${textClass} truncate max-w-[280px]`;
+                    cellVal = txt; extraClasses = `${textClass} truncate max-w-[280px]`;
                 } else {
-                    // Unmapped raw text
-                    cellVal = txt;
-                    extraClasses = 'text-slate-400 max-w-[200px] truncate';
+                    cellVal = txt; extraClasses = 'text-slate-400 max-w-[170px] truncate';
                 }
             }
-            
             html += `<td class="px-3 py-2 align-middle ${align} ${extraClasses}" title="${cellVal}">${cellVal || '-'}</td>`;
         }
-        
-
-        // Build category options from API data
-        const catOptions = availableCategories.length
-            ? availableCategories.map(c => `<option value="${c.id}">${c.nama}</option>`).join('')
-            : `<option value="">Pilih Kategori</option>`;
-
-        const selectCat = `
-            <select class="category-select w-full border border-slate-200 rounded text-[10px] px-1 py-1 focus:border-primary outline-none bg-white" data-index="${index}">
-                ${catOptions}
-            </select>`;
-        html += `<td class="px-2 py-2 text-center align-middle">${isHeaderStyle ? '' : selectCat}</td>`;
-        
         html += `</tr>`;
     });
-
     tbody.innerHTML = html;
 }
 
 function _validateImportState() {
-    const btnConfirm = document.getElementById('import-rab-modal-confirm');
-    if (!btnConfirm) return;
-
+    const btnNext = document.getElementById('import-rab-modal-next');
+    if (!btnNext) return;
     if (!currentMapping.uraian || !currentMapping.volume || !currentMapping.satuan) {
-        btnConfirm.disabled = true;
-        btnConfirm.title = 'Kolom data Excel untuk Uraian, Volume, dan Satuan wajib dipilih';
+        btnNext.disabled = true;
     } else {
-        btnConfirm.disabled = false;
-        btnConfirm.title = '';
+        btnNext.disabled = false;
     }
 }
 
-function _getFinalParsedData() {
-    if (!globalWorksheet) return [];
-    
-    // Convert mapping object values to the actual Excel Column Index 
-    // (In the new design `currentMapping[sysKey]` already stores the direct column index `i`,
-    // and `excelColumns[i].idxExcel` is the true excel index). 
-    // We get 0 if unmapped.
-    const _getExcelIdx = (sysKey) => {
-        const i = currentMapping[sysKey] || 0;
-        return i === 0 ? -1 : excelColumns[i].idxExcel;
-    };
+function _prepareOrganizedData() {
+    if (!globalWorksheet) return;
+    const mapUraian = currentMapping.uraian ? excelColumns[currentMapping.uraian].idxExcel : -1;
+    const mapVolume = currentMapping.volume ? excelColumns[currentMapping.volume].idxExcel : -1;
+    const mapSatuan = currentMapping.satuan ? excelColumns[currentMapping.satuan].idxExcel : -1;
 
-    const mapUraian = _getExcelIdx('uraian');
-    const mapVolume = _getExcelIdx('volume');
-    const mapSatuan = _getExcelIdx('satuan');
-    
-    const finalData = [];
-    let tbody = document.getElementById('import-rab-modal-tbody');
-
-    // Build a lookup map: rawDataStore index → selected category value
-    // Each <select class="category-select"> has data-index = its rawDataStore index.
-    // Header-style rows don't render a <select>, so they won't be in this map.
-    const categoryMap = {};
-    if (tbody) {
-        tbody.querySelectorAll('.category-select').forEach(sel => {
-            categoryMap[sel.dataset.index] = sel.value;
-        });
-    }
-
+    organizedItems = [];
     globalWorksheet.eachRow((row, rowNumber) => {
-        if (rowNumber === 1) return; // Skip header
-
+        if (rowNumber === 1) return;
         const vals = row.values;
-        const uraianTxt = mapUraian !== -1 && vals[mapUraian] ? (vals[mapUraian]).toString().trim() : '';
-        if (!uraianTxt) return;
+        const nama = mapUraian !== -1 && vals[mapUraian] ? vals[mapUraian].toString().trim() : '';
+        if (!nama) return;
 
-        const rawVolCell = mapVolume !== -1 ? vals[mapVolume] : null;
-        let isVolEmpty = false;
-        if (mapVolume !== -1 && (rawVolCell === null || rawVolCell === undefined || rawVolCell.toString().trim() === '')) {
-            isVolEmpty = true;
-        }
-
-        const volVal = isVolEmpty ? 0 : parseNumber(rawVolCell);
-
-        // rawDataStore index = rowNumber - 2 (excel row 2 → index 0, etc.)
-        const rawIdx = rowNumber - 2;
-        // Use the map keyed by data-index; fallback to first available category
-        const firstCat = Object.values(categoryMap)[0] || '';
-        const cat = (!isVolEmpty && categoryMap[rawIdx] !== undefined)
-            ? categoryMap[rawIdx]
-            : firstCat;
-
-        finalData.push({
-            id:          'import-' + Date.now() + '-' + rowNumber,
-            uraian:      uraianTxt,
-            volume:      volVal,
-            satuan:      mapSatuan !== -1 && vals[mapSatuan] ? (vals[mapSatuan]).toString().trim() : '-',
-            harga_bahan: 0,
-            harga_alat:  0,
-            harga_upah:  0,
-            type:        !isVolEmpty ? 'item' : 'header',
-            kategori:    cat
+        const volRaw = mapVolume !== -1 ? vals[mapVolume] : null;
+        const isVolEmpty = (volRaw === null || volRaw === undefined || volRaw.toString().trim() === '');
+        
+        organizedItems.push({
+            id: 'temp-' + Date.now() + '-' + rowNumber,
+            nama: nama,
+            volume: isVolEmpty ? 0 : parseNumber(volRaw),
+            satuan: mapSatuan !== -1 && vals[mapSatuan] ? vals[mapSatuan].toString().trim() : '-',
+            type: isVolEmpty ? 'kategori' : 'item',
+            level: 0
         });
     });
-    
-    return finalData;
+    selectedIndices.clear();
+}
+
+function _renderOrganizeList() {
+    const container = document.getElementById('import-organize-list');
+    if (!container) return;
+
+    if (organizedItems.length === 0) {
+        container.innerHTML = '<div class="py-20 text-center text-slate-400 text-sm italic">Data kosong.</div>';
+        return;
+    }
+
+    let html = '';
+    organizedItems.forEach((item, idx) => {
+        const isSelected = selectedIndices.has(idx);
+        const isCat = item.type === 'kategori';
+        const isInsertedKat = item.id.startsWith('temp-kat-');
+        const indent = item.level * 1.5;
+
+        html += `
+            <div class="organize-item p-3 group transition-colors duration-150 flex items-center gap-3 ${isSelected ? 'bg-primary/5' : 'hover:bg-slate-50'}" data-index="${idx}">
+                <!-- Left Slot (Checkbox or Trash) -->
+                <div class="flex-shrink-0 ml-1 w-5 flex justify-center">
+                    ${isInsertedKat ? `
+                        <button type="button" class="organize-delete-kat text-red-500 hover:text-red-700 transition-colors focus:outline-none" data-index="${idx}" title="Hapus Kategori">
+                            <i class="fas fa-trash text-xs"></i>
+                        </button>
+                    ` : isCat ? `
+                        <!-- Hidden checkbox for category -->
+                    ` : `
+                        <input type="checkbox" class="organize-check w-4 h-4 rounded text-primary cursor-pointer border-slate-300" ${isSelected ? 'checked' : ''} data-index="${idx}">
+                    `}
+                </div>
+
+                <!-- Drag Handle -->
+                <div class="cursor-grab text-slate-300 hover:text-slate-500 transition-colors drag-handle-organize">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"/></svg>
+                </div>
+
+                <!-- Content -->
+                <div class="flex-1 flex items-center min-w-0" style="padding-left: ${indent}rem">
+                    ${item.level > 0 ? `<span class="text-slate-300 mr-2 shrink-0">└─</span>` : ''}
+                    <div class="flex flex-col min-w-0">
+                        <span class="text-xs ${isCat ? 'font-bold text-slate-900 uppercase tracking-wide' : 'text-slate-700'} truncate">${item.nama}</span>
+                        ${!isCat ? `<span class="text-[10px] text-slate-400 font-medium">${item.volume} ${item.satuan}</span>` : ''}
+                    </div>
+                </div>
+
+                <!-- Type Toggle / Action -->
+                <div class="flex-shrink-0">
+                    ${isInsertedKat ? `
+                        <span class="inline-flex items-center px-2 py-1 rounded text-[10px] bg-primary/10 text-primary font-bold uppercase border border-primary/20">
+                            <i class="fas fa-layer-group mr-1.5"></i> Kategori
+                        </span>
+                    ` : `
+                        <button type="button" class="organize-toggle-type inline-flex items-center px-2 py-1 rounded text-[10px] font-bold uppercase tracking-tight focus:outline-none transition-all shadow-sm ${isCat ? 'bg-amber-100 text-amber-700 hover:bg-amber-200 border border-amber-200' : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50 hover:text-primary'}" data-index="${idx}">
+                            ${isCat ? '<i class="fas fa-undo mr-1.5"></i> Jadikan Pekerjaan' : '<i class="fas fa-layer-group mr-1.5"></i> Jadikan Kategori'}
+                        </button>
+                    `}
+                </div>
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
+
+    // Bind events
+    container.querySelectorAll('.organize-check').forEach(ck => {
+        ck.addEventListener('change', (e) => {
+            const idx = parseInt(e.target.dataset.index);
+            if (e.target.checked) selectedIndices.add(idx);
+            else selectedIndices.delete(idx);
+            _renderOrganizeList();
+        });
+    });
+
+    container.querySelectorAll('.organize-toggle-type').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const idx = parseInt(e.currentTarget.dataset.index);
+            const currentType = organizedItems[idx].type;
+            organizedItems[idx].type = currentType === 'kategori' ? 'item' : 'kategori';
+            if (organizedItems[idx].type === 'kategori') {
+                organizedItems[idx].level = 0; // Kategori is always root
+                selectedIndices.delete(idx); // Remove from selection if turning into kat
+            }
+            _renderOrganizeList();
+        });
+    });
+
+    container.querySelectorAll('.organize-delete-kat').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const idx = parseInt(e.currentTarget.dataset.index);
+            organizedItems.splice(idx, 1);
+            
+            // Adjust selectedIndices
+            const newIndices = new Set();
+            selectedIndices.forEach(val => {
+                if (val > idx) newIndices.add(val - 1);
+                else if (val < idx) newIndices.add(val);
+            });
+            selectedIndices = newIndices;
+            
+            _renderOrganizeList();
+        });
+    });
+
+    // Re-bind SortableJS
+    if (window.Sortable) {
+        if (window.organizeSortable) window.organizeSortable.destroy();
+        window.organizeSortable = new Sortable(container, {
+            animation: 150,
+            handle: '.drag-handle-organize',
+            forceFallback: true,       // Use custom engine for better DOM manipulation stability
+            fallbackOnBody: true,      // Essential for modals with scrolling
+            swapThreshold: 0.65,       // Less sensitive vertical swapping
+            invertSwap: true,          // More natural swap behavior
+            ghostClass: 'sortable-ghost',
+            onStart: function (evt) {
+                const item = evt.item;
+                const idx = parseInt(item.dataset.index);
+                const startLevel = organizedItems[idx].level;
+                const isCat = organizedItems[idx].type === 'kategori';
+
+                // Find family (descendants)
+                const childrenIdx = [];
+                for (let i = idx + 1; i < organizedItems.length; i++) {
+                    if (organizedItems[i].level > startLevel) {
+                        childrenIdx.push(i);
+                    } else {
+                        break;
+                    }
+                }
+                
+                // Hide children DOM elements
+                const childrenEls = [];
+                const allItems = Array.from(container.children);
+                childrenIdx.forEach(cIdx => {
+                    const el = allItems.find(el => parseInt(el.dataset.index) === cIdx);
+                    if (el) {
+                        el.style.display = 'none';
+                        childrenEls.push(el);
+                    }
+                });
+
+                item._dragChildren = childrenIdx;
+                item._dragChildrenEls = childrenEls;
+                item._originalLevel = startLevel;
+                item._currentLevel = startLevel;
+                item._dragStartX = null;
+                item._lastPrevSibling = null;
+                item._isCat = isCat;
+
+                // Calculate family height
+                let familyHeight = 0;
+                childrenIdx.forEach(cIdx => {
+                    familyHeight = Math.max(familyHeight, organizedItems[cIdx].level - startLevel);
+                });
+                item._familyHeight = familyHeight;
+
+                const handleDragMove = (e) => {
+                    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                    const ghostEl = document.querySelector('.sortable-ghost');
+                    if (!ghostEl) return;
+
+                    let prev = ghostEl.previousElementSibling;
+                    while (prev && (prev.classList.contains('sortable-drag') || prev.style.display === 'none')) {
+                        prev = prev.previousElementSibling;
+                    }
+
+                    if (item._lastPrevSibling !== prev) {
+                        item._lastPrevSibling = prev;
+                        item._dragStartX = clientX;
+                        item._currentLevel = startLevel;
+                    }
+
+                    if (item._dragStartX === null) item._dragStartX = clientX;
+
+                    const deltaX = clientX - item._dragStartX;
+                    const deltaLevel = Math.round(deltaX / 30);
+
+                    // Prev level from the array (find by index)
+                    let prevLevel = 0;
+                    if (prev) {
+                        const pIdx = parseInt(prev.dataset.index);
+                        prevLevel = organizedItems[pIdx].level;
+                    }
+
+                    // Constraints:
+                    // 1. Kategori stays at level 0
+                    // 2. Max Level 2 (1.1.1)
+                    // 3. Max prevLevel + 1
+                    let maxAllowed = item._isCat ? 0 : Math.min(2 - item._familyHeight, prevLevel + 1);
+                    let targetLevel = startLevel + deltaLevel;
+                    let clampedLevel = Math.max(0, Math.min(targetLevel, maxAllowed));
+
+                    // Visual Feedback
+                    let indicatorColor = 'border-primary';
+                    let bgColor = '';
+                    if (targetLevel > clampedLevel) { // Blocked
+                        bgColor = 'rgba(239, 68, 68, 0.15)'; indicatorColor = 'border-red-500';
+                    } else if (clampedLevel > startLevel) { // Indenting
+                        bgColor = 'rgba(34, 197, 94, 0.15)'; indicatorColor = 'border-emerald-500';
+                    } else if (clampedLevel < startLevel) { // Outdenting
+                        bgColor = 'rgba(234, 179, 8, 0.15)'; indicatorColor = 'border-yellow-500';
+                    }
+
+                    const contentSlot = ghostEl.querySelector('.flex-1');
+                    if (contentSlot) contentSlot.style.paddingLeft = (clampedLevel * 1.5) + 'rem';
+                    
+                    // Reset border classes
+                    ghostEl.className = ghostEl.className.replace(/border-l-4 border-[a-z]+-500/g, ' ').trim();
+                    ghostEl.classList.add('border-l-4', indicatorColor);
+                    ghostEl.style.backgroundColor = bgColor;
+
+                    item._currentLevel = clampedLevel;
+                };
+
+                document.addEventListener('mousemove', handleDragMove);
+                document.addEventListener('touchmove', handleDragMove);
+                item._cleanup = () => {
+                    document.removeEventListener('mousemove', handleDragMove);
+                    document.removeEventListener('touchmove', handleDragMove);
+                };
+            },
+            onEnd: function (evt) {
+                const item = evt.item;
+                if (item._cleanup) item._cleanup();
+
+                const oldIdx = evt.oldIndex;
+                const newIdx = evt.newIndex;
+                const originalLevel = item._originalLevel;
+                const newLevel = item._currentLevel;
+                const levelDelta = newLevel - originalLevel;
+                const childrenIdx = item._dragChildren || [];
+
+                // Reconstruct the array
+                // 1. Extract family (parent + children)
+                const family = organizedItems.splice(oldIdx, 1 + childrenIdx.length);
+                
+                // 2. Update levels
+                family.forEach(f => {
+                    f.level = Math.max(0, Math.min(2, f.level + levelDelta));
+                });
+
+                // 3. Find target index for insertion
+                // Since we spliced, the newIdx in the DOM might be different from the array index
+                // But Sortable handles the DOM move. We just need to insert it at the correct relative position.
+                let insertAt = newIdx;
+                // Adjust if we moved down (because splicing removed items above the new target)
+                // Actually, the easiest way is to just use the DOM order to rebuild the array.
+                
+                // Wait, easier: Just rebuild organizedItems from DOM dataset.index after updating the family.
+                // But dataset.index are currently the OLD indices.
+                
+                // Better approach: Relocate in array based on original indices
+                // If oldIdx < newIdx, the items in between shifted up.
+                organizedItems.splice(newIdx, 0, ...family);
+
+                selectedIndices.clear();
+                _renderOrganizeList();
+
+                delete item._dragChildren;
+                delete item._dragChildrenEls;
+                delete item._cleanup;
+            }
+        });
+    }
+}
+
+function _indentItems(delta) {
+    selectedIndices.forEach(idx => {
+        // Limit depth to level 2 (1.1.1)
+        organizedItems[idx].level = Math.max(0, Math.min(2, organizedItems[idx].level + delta));
+    });
+    _renderOrganizeList();
+}
+
+function _setType(type) {
+    selectedIndices.forEach(idx => {
+        organizedItems[idx].type = type;
+        if (type === 'kategori') organizedItems[idx].level = 0;
+    });
+    _renderOrganizeList();
+}
+
+function _buildHierarchy(items) {
+    const result = [];
+    const stack = [{ level: -1, children: result }];
+
+    items.forEach(item => {
+        const node = { ...item, children: [] };
+        while (stack.length > 1 && stack[stack.length - 1].level >= item.level) {
+            stack.pop();
+        }
+        stack[stack.length - 1].children.push(node);
+        stack.push(node);
+    });
+    return result;
 }
 
 export async function initImport() {
-    const importBtn    = document.getElementById('boq-import-btn');
     const fileInput    = document.getElementById('boq-file-input');
     const modalOverlay = document.getElementById('import-rab-modal-overlay');
-    const modalClose   = document.getElementById('import-rab-modal-close');
     const modalCancel  = document.getElementById('import-rab-modal-cancel');
     const modalConfirm = document.getElementById('import-rab-modal-confirm');
+    const modalNext    = document.getElementById('import-rab-modal-next');
+    const modalBack    = document.getElementById('import-rab-modal-back');
+    const modalClose   = document.getElementById('import-rab-modal-close');
+    const modalRepick  = document.getElementById('import-rab-modal-repick');
     
-    const countDisplay  = document.getElementById('import-rab-modal-count');
-    const fileNameDisp  = document.getElementById('import-file-name');
+    // Tools
+    document.getElementById('import-organize-indent-in')?.addEventListener('click', () => _indentItems(1));
+    document.getElementById('import-organize-indent-out')?.addEventListener('click', () => _indentItems(-1));
 
-    if (importBtn && fileInput) {
-        importBtn.addEventListener('click', () => { fileInput.value = ''; fileInput.click(); });
+    // Custom Category Creation (NEW)
+    const customKatInput = document.getElementById('import-custom-kategori-input');
+    const customKatBtn   = document.getElementById('import-custom-kategori-add');
+
+    if (customKatBtn && customKatInput) {
+        customKatBtn.addEventListener('click', async () => {
+            const val = customKatInput.value.trim();
+            if(!val) return;
+
+            customKatBtn.disabled = true;
+            try {
+                const idProject = window.RAB_INIT?.idProject || window.RAB_INIT?.id;
+                const res = await fetch('/api/rap/kategori', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        id_project: Number(idProject),
+                        kategori: [{ nama: val }],
+                        is_master_only: true
+                    })
+                });
+
+                const json = await res.json();
+                if (!res.ok || json.status !== 'success') throw new Error(json.message);
+
+                await refreshImportCategories();
+                
+                // Auto select the new category
+                const sel = document.getElementById('import-global-kategori');
+                if (sel && json.data && json.data.length > 0) {
+                    sel.value = json.data[0].id;
+                }
+
+                customKatInput.value = '';
+                if (window.Toast) window.Toast.show('Kategori master berhasil ditambah', 'success');
+            } catch (err) {
+                alert('Gagal tambah kategori: ' + err.message);
+            } finally {
+                customKatBtn.disabled = false;
+            }
+        });
+
+        customKatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') customKatBtn.click();
+        });
     }
+
+    document.getElementById('import-organize-insert-cat')?.addEventListener('click', () => {
+        const selKat = document.getElementById('import-global-kategori');
+        if (!selKat || !selKat.value) {
+            alert('Pilih Kategori Master terlebih dahulu dari menu dropdown!');
+            return;
+        }
+
+        const categoryId = selKat.value;
+        const categoryName = selKat.options[selKat.selectedIndex].text;
+
+        let insertIdx = 0;
+        if (selectedIndices.size > 0) {
+            insertIdx = Math.min(...Array.from(selectedIndices));
+        }
+
+        organizedItems.splice(insertIdx, 0, {
+            id: 'temp-kat-' + Date.now(),
+            nama: categoryName,
+            id_kategori_master: categoryId,
+            volume: 0,
+            satuan: '-',
+            type: 'kategori',
+            level: 0
+        });
+
+        // Shift down the selected indices since we inserted a new item before them
+        if (selectedIndices.size > 0) {
+            const newIndices = new Set();
+            selectedIndices.forEach(val => newIndices.add(val + 1));
+            selectedIndices = newIndices;
+        }
+
+        _renderOrganizeList();
+    });
+
+    modalNext?.addEventListener('click', () => {
+        _prepareOrganizedData();
+        _setStep(2);
+    });
+    modalBack?.addEventListener('click', () => _setStep(1));
+    modalCancel?.addEventListener('click', () => _closeModal(modalOverlay));
+    modalClose?.addEventListener('click', () => _closeModal(modalOverlay));
+    modalRepick?.addEventListener('click', () => {
+        if (fileInput) fileInput.click();
+    });
 
     if (fileInput) {
         fileInput.addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (!file) return;
-
-            // Refresh categories NOW — RAB_INIT is guaranteed to be set at this point
             await refreshImportCategories();
-
-            const thead = document.getElementById('import-rab-modal-thead');
-            const tbody = document.getElementById('import-rab-modal-tbody');
-            
-            modalConfirm.classList.remove('hidden');
-            modalConfirm.disabled = true;
-            if (fileNameDisp) fileNameDisp.textContent = file.name;
-            countDisplay.innerHTML = 'Membaca file Excel...';
-            
-            thead.innerHTML = '<tr><th class="px-4 py-3 text-center text-xs font-semibold text-table-subtle">Memuat Struktur...</th></tr>';
-            tbody.innerHTML = '<tr><td class="text-center py-20 text-table-subtle text-xs animate-pulse">Memproses Data Excel...</td></tr>';
-
+            document.getElementById('import-file-name').textContent = file.name;
             _openModal(modalOverlay);
-
             try {
                 const workbook = new ExcelJS.Workbook();
                 await workbook.xlsx.load(await file.arrayBuffer());
                 globalWorksheet = workbook.getWorksheet(1);
-                
-                excelColumns = [{ idxExcel: -1, name: '-- Kosongkan --', sample: '-' }];
+                excelColumns = [{ idxExcel: -1, name: '-- Kosongkan --' }];
                 rawDataStore = [];
-                
-                const headerRow = globalWorksheet.getRow(1);
-                headerRow.eachCell({ includeEmpty: false }, (cell, colNumber) => {
-                    const colName = cell.text ? cell.text.toString().trim() : `Kolom ${colNumber}`;
-                    excelColumns.push({ idxExcel: colNumber, name: colName });
-                });
-
-                if (excelColumns.length <= 1) throw new Error("Tidak menemukan header di baris pertama Excel.");
-
-                // Load preview data (up to 100 rows to keep UI snappy)
-                globalWorksheet.eachRow((row, rowNumber) => {
-                    if (rowNumber === 1) return;
-                    if (rowNumber <= 101) {
-                        rawDataStore.push(row.values);
-                    }
-                });
-
+                globalWorksheet.getRow(1).eachCell((c, colNum) => excelColumns.push({ idxExcel: colNum, name: c.text?.toString().trim() || `Kolom ${colNum}` }));
+                globalWorksheet.eachRow((row, rowNum) => { if (rowNum > 1 && rowNum <= 101) rawDataStore.push(row.values); });
                 _autoMapColumns();
-                
                 const newTbody = _renderTableHeaders(document.getElementById('import-rab-modal-thead'));
                 _renderTableBody(newTbody);
                 _validateImportState();
-                
-                const totalRows = Math.max(0, globalWorksheet.rowCount - 1);
-                countDisplay.innerHTML = `<span class="text-emerald-600 font-semibold">${totalRows} baris</span> tersedia. Tinjau mapping sebelum menyimpan.`;
-
-            } catch (err) {
-                console.error('Gagal membaca Excel: ', err);
-                const tbody = document.getElementById('import-rab-modal-tbody');
-                if (tbody) tbody.innerHTML = `<tr><td class="text-center py-20"><p class="text-red-500 text-xs font-semibold">Gagal membaca struktur Excel.</p><p class="text-[10px] text-red-400 mt-1">${err && err.message ? err.message : String(err)}</p></td></tr>`;
-            }
+                document.getElementById('import-rab-modal-count').innerHTML = `<span class="text-emerald-600 font-semibold">${globalWorksheet.rowCount - 1} baris</span> terbaca.`;
+            } catch (err) { alert('Gagal baca Excel: ' + err.message); }
         });
     }
 
-    if (modalConfirm) {
-        modalConfirm.addEventListener('click', () => {
-            const finalData = _getFinalParsedData();
-            if (finalData.length === 0) { 
-                alert('Tidak ada data valid yang bisa diimpor. Pastikan kolom Uraian telah dipetakan dengan benar.'); 
-                return; 
-            }
-            window.dispatchEvent(new CustomEvent('rabDataImported', { detail: finalData }));
-            _closeModal(modalOverlay);
-            if (fileInput) fileInput.value = '';
-        });
-    }
+    modalConfirm?.addEventListener('click', async () => {
+        const idProject = window.RAB_INIT?.idProject || window.RAB_INIT?.id;
+        const hierarchicalData = _buildHierarchy(organizedItems);
+        const selKat = document.getElementById('import-global-kategori');
+        const idKategori = selKat && selKat.value ? parseInt(selKat.value) : null;
 
-    if (modalClose)  modalClose.addEventListener('click',  () => _closeModal(modalOverlay));
-    if (modalCancel) modalCancel.addEventListener('click', () => _closeModal(modalOverlay));
+        modalConfirm.disabled = true;
+        modalConfirm.innerHTML = '<span class="animate-spin mr-2">...</span> Menyimpan';
+
+        try {
+            const res = await fetch('/api/rap/import', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    id_project: Number(idProject), 
+                    id_kategori: idKategori,
+                    items: hierarchicalData 
+                })
+            });
+            const json = await res.json();
+            if (!res.ok || json.status !== 'success') throw new Error(json.message);
+            
+            if (window.Toast) window.Toast.show('BOQ berhasil diimpor', 'success');
+            setTimeout(() => window.location.reload(), 1000);
+        } catch (err) {
+            alert('Gagal simpan: ' + err.message);
+            modalConfirm.disabled = false;
+            modalConfirm.textContent = 'Simpan ke RAB';
+        }
+    });
+
+    // Handle template generating & trigger
+    document.getElementById('boq-import-btn')?.addEventListener('click', () => {
+        const overlay = document.getElementById('import-prompt-modal-overlay');
+        const content = document.getElementById('import-prompt-modal-content');
+        
+        overlay?.classList.remove('hidden');
+        overlay?.classList.add('flex');
+        
+        setTimeout(() => {
+            overlay?.classList.remove('opacity-0');
+            overlay?.classList.add('opacity-100');
+            content?.classList.remove('scale-95');
+            content?.classList.add('scale-100');
+        }, 10);
+    });
+
+    document.getElementById('import-prompt-modal-excel')?.addEventListener('click', () => {
+        document.getElementById('import-prompt-modal-overlay')?.classList.add('hidden');
+        fileInput.click();
+    });
+
+    document.getElementById('import-prompt-modal-template')?.addEventListener('click', () => {
+        document.getElementById('import-prompt-modal-overlay')?.classList.add('hidden');
+        generateTemplate();
+    });
+
+    document.getElementById('import-prompt-modal-cancel')?.addEventListener('click', () => {
+        const overlay = document.getElementById('import-prompt-modal-overlay');
+        const content = document.getElementById('import-prompt-modal-content');
+        
+        overlay?.classList.add('opacity-0');
+        overlay?.classList.remove('opacity-100');
+        content?.classList.add('scale-95');
+        content?.classList.remove('scale-100');
+        
+        setTimeout(() => {
+            overlay?.classList.add('hidden');
+            overlay?.classList.remove('flex');
+        }, 300);
+    });
 }
