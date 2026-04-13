@@ -108,11 +108,32 @@ const AppSwal = Swal.mixin({
         cancelButton:  'app-swal-cancel',
         icon:          'app-swal-icon',
     },
-    buttonsStyling: false,
+    buttonsStyling:  false,
     reverseButtons:  true,
+    scrollbarPadding: false,
 });
 
 const baseUrl = '<?= base_url() ?>';
+
+// Tutup semua hs-dropdown yang sedang terbuka sebelum SweetAlert muncul
+// supaya dropdown tidak nyasar saat body mendapat overflow:hidden dari overlay.
+function closeAllDropdowns() {
+    document.querySelectorAll('.hs-dropdown.open, .hs-dropdown[open]').forEach(dd => {
+        // Gunakan Preline API jika tersedia
+        if (window.HSDropdown) {
+            const instance = HSDropdown.getInstance(dd, true);
+            if (instance?.element) instance.element.close();
+        }
+        // Fallback: hapus class open dan sembunyikan menu secara langsung
+        dd.removeAttribute('open');
+        dd.classList.remove('open');
+        const menu = dd.querySelector('.hs-dropdown-menu');
+        if (menu) {
+            menu.classList.add('hidden');
+            menu.classList.remove('block', 'opacity-100', 'pointer-events-auto');
+        }
+    });
+}
 
 document.addEventListener('click', async function (e) {
     const btn = e.target.closest('.btn-selesai-proyek');
@@ -122,6 +143,7 @@ document.addEventListener('click', async function (e) {
     const id   = btn.dataset.id;
     const nama = btn.dataset.nama;
 
+    closeAllDropdowns();
     const { isConfirmed } = await AppSwal.fire({
         icon:              'question',
         title:             'Tandai Proyek Selesai?',
@@ -183,6 +205,7 @@ document.addEventListener('click', async function (e) {
     const id   = btn.dataset.id;
     const nama = btn.dataset.nama;
 
+    closeAllDropdowns();
     const { isConfirmed } = await AppSwal.fire({
         icon:              'warning',
         title:             'Hapus Proyek Permanen?',

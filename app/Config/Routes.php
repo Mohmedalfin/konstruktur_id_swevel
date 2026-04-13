@@ -39,10 +39,14 @@ $routes->group('', function ($routes) {
     $routes->get('menu-rap/tambah-ahs', 'menu\MenuRapController::tambahAHS');
     $routes->get('menu-rap/tambah-pekerjaan', 'menu\MenuRapController::tambahPekerjaan');
 
-    // Schedule & Monitoring
-    $routes->get('schedule', 'ScheduleController::index');
+    // Schedule
+    $routes->get('schedule', 'menu\ScheduleController::index');
+    
+
+    // Monitoring
     $routes->get('monitoring', 'MonitoringController::index');
-    $routes->get('proyek/menu/main-pekerjaan', 'menu\MenuRapController::tambahPekerjaan');
+
+    // $routes->get('proyek/menu/main-pekerjaan', 'menu\MenuRapController::tambahPekerjaan');
 });
 
 
