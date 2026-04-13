@@ -16,7 +16,8 @@ import {
     kategoriModalOverlay,
     kategoriModalConfirm,
     kategoriManualAdd,
-    kategoriManualInput
+    kategoriManualInput,
+    resetDataBtn
 } from './core/state.js';
 
 import { fetchRabData } from './core/data.js';
@@ -39,6 +40,7 @@ import { initImport, refreshImportCategories } from './components/import.js';
 import { initTemplate } from './components/template.js';
 import { bindSearch } from './hooks/search.js';
 import { toast } from '../shared/ui/toast.js';
+import { confirmAction } from '../shared/ui/confirm.js';
 
 function applySourcePermission(data) {
     if (!tambahKategoriBtn) return;
@@ -52,6 +54,58 @@ if (!wrapper || !tbody) {
     bindSearch();
     initTemplate();
     initImport();
+
+    if (resetDataBtn) {
+        resetDataBtn.addEventListener('click', async function() {
+            const idProject = window.RAB_INIT?.idProject || window.RAB_INIT?.id;
+            if (!idProject) return;
+
+            const ok = await confirmAction(
+                'Kosongkan Seluruh RAP?',
+                'Semua data kategori, pekerjaan, dan rincian AHS dalam proyek ini akan <strong>dihapus permanen</strong>. Tindakan ini tidak dapat dibatalkan.',
+                'Ya, Kosongkan'
+            );
+
+            if (!ok) return;
+
+            try {
+                resetDataBtn.disabled = true;
+                const originalHtml = resetDataBtn.innerHTML;
+                resetDataBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+
+                const res = await fetch(`/api/rap/reset/${idProject}`, {
+                    method: 'DELETE',
+                    headers: { 'Accept': 'application/json' }
+                });
+
+                const json = await res.json();
+                if (!res.ok || json.status !== 'success') {
+                    throw new Error(json.message || 'Gagal reset data');
+                }
+
+                toast.show('Data RAP berhasil dikosongkan!', 'success');
+                
+                // Refresh data
+                renderLoading();
+                const freshData = await fetchRabData(idProject);
+                
+                state.activeCategories = (freshData.categories || []).map(cat => ({
+                    id: String(cat.id),
+                    nama: cat.name
+                }));
+
+                applySourcePermission(freshData);
+                renderReadonly(freshData);
+
+                resetDataBtn.disabled = false;
+                resetDataBtn.innerHTML = originalHtml;
+            } catch (err) {
+                console.error('Reset error:', err);
+                toast.show(err.message || 'Gagal mengosongkan data', 'error');
+                resetDataBtn.disabled = false;
+            }
+        });
+    }
 
     if (tambahKategoriBtn) {
         tambahKategoriBtn.addEventListener('click', function (e) {

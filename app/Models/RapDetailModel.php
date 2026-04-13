@@ -29,6 +29,7 @@ class RapDetailModel extends Model
         'urutan',
         'id_parent',
         'keterangan',
+        'sumber',
     ];
 
     protected $useTimestamps = false;

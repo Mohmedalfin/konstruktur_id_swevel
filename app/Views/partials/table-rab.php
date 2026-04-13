@@ -41,6 +41,12 @@ $isReorderMode = isset($isReorderMode) && $isReorderMode;
                     <i class="fas fa-file-import"></i> Import BOQ
                 </button>
                 <input id="boq-file-input" type="file" accept=".xlsx,.xls,.csv" class="hidden" />
+
+                <!-- Reset Data -->
+                <button id="reset-rap-btn" type="button" title="Kosongkan seluruh data pekerjaan"
+                    class="inline-flex items-center gap-1 md:gap-1.5 px-2 py-1.5 md:px-3 md:py-2 rounded-lg border border-red-500 text-red-500 hover:bg-red-50 text-[10px] md:text-xs font-semibold transition-all duration-150 shadow-sm">
+                    <i class="fas fa-trash-alt"></i> Kosongkan RAP
+                </button>
             <?php endif; ?>
         </div>
 
@@ -184,6 +190,14 @@ $isReorderMode = isset($isReorderMode) && $isReorderMode;
                         
                         <!-- Right: Inject Category -->
                         <div class="flex items-center gap-2 bg-slate-50 p-1 rounded-lg border border-slate-200">
+                            <!-- Custom Category Input (NEW) -->
+                            <div class="flex items-center gap-1.5 px-2 border-r border-slate-200">
+                                <input id="import-custom-kategori-input" type="text" placeholder="Tambah Kategori..." class="bg-transparent border-none text-[11px] md:text-xs focus:ring-0 p-1 w-32 md:w-40 font-medium placeholder:text-slate-400">
+                                <button id="import-custom-kategori-add" type="button" class="text-emerald-500 hover:text-emerald-700 p-1 transition-colors" title="Tambah Kategori Baru">
+                                    <i class="fas fa-plus-circle text-sm"></i>
+                                </button>
+                            </div>
+
                             <select id="import-global-kategori" class="bg-transparent border-none text-slate-700 text-[11px] md:text-xs focus:ring-0 block p-1 md:p-1.5 font-medium min-w-[150px]">
                                 <option value="">-- Pilih Kategori --</option>
                             </select>

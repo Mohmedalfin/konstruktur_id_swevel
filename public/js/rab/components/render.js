@@ -36,7 +36,11 @@ export function renderLoading() {
 export function renderReadonly(data) {
     const categories = data?.categories || [];
     const isReorderMode = window.RAB_INIT && window.RAB_INIT.isReorderMode;
-    const isEditable = isReorderMode ? true : (data?.sumber_data || 'manual') === 'manual';
+    const isProjectManual = (data?.sumber_data || 'manual') === 'manual';
+    const isEditable = isReorderMode ? true : isProjectManual;
+
+    // Specifically lock down structure for BOQ/Estimator source
+    const isAddDeleteAllowed = isProjectManual;
 
     const grandTotal = categories.reduce((sum, cat) => {
         const items = cat.items || [];
@@ -95,7 +99,7 @@ export function renderReadonly(data) {
                 </td>
 
                 <td class="px-2 md:px-3 py-2.5 md:py-3 text-center">
-                    ${isEditable ? `
+                    ${isAddDeleteAllowed ? `
                         <div class="inline-flex items-center gap-1">
                             <button
                                 type="button"
@@ -134,7 +138,7 @@ export function renderReadonly(data) {
                 </tr>
             `;
         } else {
-            html += renderItemRows(items, cat.id, subClass, isEditable);
+            html += renderItemRows(items, cat.id, subClass, isEditable, '', 0, isAddDeleteAllowed);
         }
     });
 
@@ -240,15 +244,27 @@ export function renderReadonly(data) {
                     }
                     
                     const deltaX = clientX - item._dragStartX;
-                    const deltaDepth = Math.round(deltaX / 30); // 30px per indent level for more deliberate intent
+                    const deltaDepth = Math.round(deltaX / 30); 
                     
                     let prevDepth = 0;
                     if (prev && prev.classList.contains('sortable-item')) {
                         prevDepth = parseInt(prev.dataset.depth || '0', 10);
                     }
                     
-                    // Max depth is 2 (level 3: 1.1.1) AND at most previous sibling's depth + 1
-                    const maxDepth = Math.min(2, prevDepth + 1);
+                    // Calculate "Family Height" (deepest child's relative depth from parent)
+                    let familyHeight = 0;
+                    if (item._dragChildren && item._dragChildren.length > 0) {
+                        item._dragChildren.forEach(child => {
+                            const relDepth = parseInt(child.dataset.depth || '0', 10) - startDepth;
+                            familyHeight = Math.max(familyHeight, relDepth);
+                        });
+                    }
+
+                    // Max absolute depth is 2 (level 3: 1.1.1)
+                    // The parent's max depth is (2 - familyHeight) to ensure the deepest child stays <= 2
+                    // AND at most previous sibling's depth + 1
+                    const maxAllowedForFamily = 2 - familyHeight;
+                    const maxDepth = Math.min(maxAllowedForFamily, prevDepth + 1);
                     
                     let targetDepth = startDepth + deltaDepth;
                     let clampedDepth = Math.max(0, Math.min(targetDepth, maxDepth));
@@ -298,11 +314,10 @@ export function renderReadonly(data) {
                 };
             },
             onMove: function (evt) {
-                const draggedCat = evt.dragged.dataset.cat;
                 const related = evt.related;
                 
-                // Only allow moving within the same category
-                if (related && related.classList.contains('sortable-item') && related.dataset.cat === draggedCat) {
+                // Allow moving to any sortable item regardless of category
+                if (related && related.classList.contains('sortable-item')) {
                     return true;
                 }
                 return false;
@@ -363,37 +378,48 @@ export function renderReadonly(data) {
 
                 if (evt.oldIndex === evt.newIndex && newDepth === originalDepth) return;
 
-                const catId = item.dataset.cat;
-                
-                // Parse the entire category to rebuild parent-child relationships robustly
-                const items = Array.from(tbody.querySelectorAll(`.sortable-item[data-cat="${catId}"]`));
+                // Full table sweep to handle cross-category reordering
+                const allRows = Array.from(tbody.children);
+                let currentCatId = null;
                 const countersByParent = {};
-                let currentParents = { 0: null };
-                
-                const reordered = items.map((el) => {
-                    const depth = parseInt(el.dataset.depth || '0', 10);
-                    
-                    const idParent = depth > 0 ? currentParents[depth - 1] : null;
-                    currentParents[depth] = el.dataset.idRapDetail;
-                    
-                    el.dataset.parentId = idParent || '';
-                    
-                    const pIdKey = idParent || 'root';
-                    if (!countersByParent[pIdKey]) countersByParent[pIdKey] = 0;
-                    countersByParent[pIdKey]++;
-                    
-                    return {
-                        id_rap_detail: el.dataset.idRapDetail,
-                        urutan: countersByParent[pIdKey],
-                        id_parent: idParent
-                    };
+                const currentParents = { 0: null };
+                const finalReorderedData = {};
+
+                allRows.forEach(row => {
+                    if (row.classList.contains('rab-category')) {
+                        currentCatId = row.dataset.cat;
+                        finalReorderedData[currentCatId] = [];
+                        return;
+                    }
+
+                    if (row.classList.contains('sortable-item')) {
+                        const depth = parseInt(row.dataset.depth || '0', 10);
+                        const idParent = depth > 0 ? currentParents[depth - 1] : null;
+
+                        // Link to new category and update classes
+                        if (row.dataset.cat !== currentCatId) {
+                            row.className = row.className.replace(/subrow-\d+/, `subrow-${currentCatId}`);
+                            row.dataset.cat = currentCatId;
+                        }
+
+                        currentParents[depth] = row.dataset.idRapDetail;
+                        row.dataset.parentId = idParent || '';
+
+                        const pIdKey = idParent || 'root';
+                        if (!countersByParent[pIdKey]) countersByParent[pIdKey] = 0;
+                        countersByParent[pIdKey]++;
+
+                        finalReorderedData[currentCatId].push({
+                            id_rap_detail: row.dataset.idRapDetail,
+                            id_kategori: currentCatId,
+                            urutan: countersByParent[pIdKey],
+                            id_parent: idParent
+                        });
+                    }
                 });
 
-                updateHierarchicalNumbers(); // Update UI immediately
-                window.reorderedDataCache = {
-                     ...(window.reorderedDataCache || {}), 
-                     [catId]: reordered
-                };
+                updateHierarchicalNumbers();
+                window.reorderedDataCache = finalReorderedData;
             }
         });
     }
@@ -437,7 +463,7 @@ function updateHierarchicalNumbers() {
     });
 }
 
-function renderItemRows(items, catId, subClass, isEditable, prefix = '', depth = 0) {
+function renderItemRows(items, catId, subClass, isEditable, prefix = '', depth = 0, isAddDeleteAllowed = true) {
     let html = '';
     const isReorderMode = window.RAB_INIT && window.RAB_INIT.isReorderMode;
     items.forEach((item, index) => {
@@ -503,6 +529,7 @@ function renderItemRows(items, catId, subClass, isEditable, prefix = '', depth =
                 <td class="px-3 md:px-5 py-2 md:py-2.5 text-center">
                     <div class="inline-flex items-center gap-1.5">
                         ${isEditable ? `
+                            ${isAddDeleteAllowed ? `
                             <button
                                 type="button"
                                 class="add-nested-item-btn inline-flex items-center justify-center w-7 h-7 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border border-emerald-200 transition-colors focus:outline-none"
@@ -513,6 +540,7 @@ function renderItemRows(items, catId, subClass, isEditable, prefix = '', depth =
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                 </svg>
                             </button>
+                            ` : ''}
 
                             <button
                                 type="button"
@@ -525,6 +553,7 @@ function renderItemRows(items, catId, subClass, isEditable, prefix = '', depth =
                                 </svg>
                             </button>
 
+                            ${isAddDeleteAllowed ? `
                             <button
                                 type="button"
                                 class="readonly-item-delete inline-flex items-center justify-center w-7 h-7 rounded-lg bg-white hover:bg-red-50 border border-table-border text-red-500 transition-colors focus:outline-none"
@@ -534,6 +563,7 @@ function renderItemRows(items, catId, subClass, isEditable, prefix = '', depth =
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                 </svg>
                             </button>
+                            ` : ''}
                         ` : ''}
                     </div>
                 </td>
@@ -542,7 +572,7 @@ function renderItemRows(items, catId, subClass, isEditable, prefix = '', depth =
         `;
 
         if (hasChildren) {
-            html += renderItemRows(item.children, catId, subClass, isEditable, currentNo, depth + 1);
+            html += renderItemRows(item.children, catId, subClass, isEditable, currentNo, depth + 1, isAddDeleteAllowed);
         }
     });
     return html;
