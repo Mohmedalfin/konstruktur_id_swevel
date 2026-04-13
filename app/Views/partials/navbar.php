@@ -119,4 +119,4 @@
 </header>
 <!-- ========== END HEADER ========== -->
 
-<script src="<?= base_url('assets/js/navbar.js') ?>"></script>
+<script src="<?= base_url('assets/js/partials/navbar.js') ?>"></script>

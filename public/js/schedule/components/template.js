@@ -77,21 +77,15 @@ function renderGanttCellTemplate(startStr, finishStr, barColor = 'bg-emerald-500
     const height = isCategory ? 'h-5' : 'h-4';
     const rounded = isCategory ? 'rounded' : 'rounded-sm';
 
-    let gridLines = '';
-    for (let i = 1; i < totalWeeksCount; i++) {
-        const leftPos = (i / totalWeeksCount) * 100;
-        gridLines += `<div class="absolute h-full border-l border-slate-200" style="left: ${leftPos}%"></div>`;
-    }
+    // Build CSS grid lines via repeating linear-gradient (zero extra DOM nodes)
+    const colWidth = (1 / totalWeeksCount) * 100;
+    const gridBg = `repeating-linear-gradient(to right, transparent, transparent calc(${colWidth}% - 1px), #e2e8f0 calc(${colWidth}% - 1px), #e2e8f0 ${colWidth}%)`;
 
     return `
-        <td colspan="${totalWeeksCount}" class="p-0 border-b border-l border-slate-200 relative align-middle group/timeline overflow-hidden bg-white/50" style="height: 48px;">
-            <!-- Vertical Grid Lines Layer -->
-            <div class="absolute inset-0 pointer-events-none">
-                ${gridLines}
-            </div>
+        <td colspan="${totalWeeksCount}" class="p-0 border-b border-l border-slate-200 relative align-middle overflow-hidden" style="height: 48px; background: ${gridBg};">
             <!-- Gantt Bar Layer -->
             ${(left !== null && width > 0) ? `
-                <div class="absolute top-1/2 -translate-y-1/2 ${height} ${barColor} ${opacity} ${rounded} shadow-sm z-10 transition-all duration-300 hover:opacity-100 hover:scale-[1.02] cursor-pointer" 
+                <div class="absolute top-1/2 -translate-y-1/2 ${height} ${barColor} ${opacity} ${rounded} shadow-sm z-10 transition-all duration-300 hover:opacity-100 hover:scale-[1.02] cursor-pointer"
                      style="left: ${left}%; width: ${width}%;"
                      title="${startStr} to ${finishStr}">
                 </div>
