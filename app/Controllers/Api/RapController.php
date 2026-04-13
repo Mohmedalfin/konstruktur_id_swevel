@@ -221,10 +221,11 @@ class RapController extends BaseController
                 ]);
             }
 
-            if (($project['sumber_data'] ?? 'manual') !== 'manual') {
+            // Allow adding categories if it's MASTER ONLY (to master list), even if project is BOQ
+            if (!$isMasterOnly && ($project['sumber_data'] ?? 'manual') !== 'manual') {
                 return $this->response->setStatusCode(403)->setJSON([
                     'status'  => 'error',
-                    'message' => 'Kategori proyek estimator tidak dapat diubah',
+                    'message' => 'Kategori pada proyek import tidak dapat diubah',
                 ]);
             }
 
@@ -487,7 +488,7 @@ class RapController extends BaseController
             if (($project['sumber_data'] ?? 'manual') !== 'manual') {
                 return $this->response->setStatusCode(403)->setJSON([
                     'status'  => 'error',
-                    'message' => 'Kategori proyek estimator tidak dapat dihapus',
+                    'message' => 'Kategori pada proyek import tidak dapat dihapus',
                 ]);
             }
 
@@ -605,7 +606,7 @@ class RapController extends BaseController
             if (($project['sumber_data'] ?? 'manual') !== 'manual') {
                 return $this->response->setStatusCode(403)->setJSON([
                     'status'  => 'error',
-                    'message' => 'Pekerjaan proyek estimator tidak dapat diubah',
+                    'message' => 'Pekerjaan pada proyek import tidak dapat diubah',
                 ]);
             }
 
@@ -786,7 +787,7 @@ class RapController extends BaseController
             if (($project['sumber_data'] ?? 'manual') !== 'manual') {
                 return $this->response->setStatusCode(403)->setJSON([
                     'status'  => 'error',
-                    'message' => 'Pekerjaan proyek estimator tidak dapat dihapus',
+                    'message' => 'Pekerjaan pada proyek import tidak dapat dihapus',
                 ]);
             }
 
@@ -1030,6 +1031,9 @@ class RapController extends BaseController
                     if (array_key_exists('id_parent', $item)) {
                         $row['id_parent'] = ($item['id_parent'] === '' || $item['id_parent'] === null) ? null : (int) $item['id_parent'];
                     }
+                    if (array_key_exists('id_kategori', $item)) {
+                        $row['id_kategori'] = (int) $item['id_kategori'];
+                    }
                     $batchData[] = $row;
                 }
             }
@@ -1096,6 +1100,9 @@ class RapController extends BaseController
 
             // Fungsi rekursif untuk simpan tree
             $this->saveImportTree($items, $rapId, $idProject, $idUser);
+
+            // Update project source to 'boq'
+            $this->proyekModel->update($idProject, ['sumber_data' => 'boq']);
 
             $this->recalculateRapTotal($rapId);
             $db->transComplete();
@@ -1168,7 +1175,8 @@ class RapController extends BaseController
                     'subtotal_upah' => $vol * $up,
                     'subtotal_alat' => $vol * $al,
                     'total_keseluruhan' => $vol * ($bh + $al + $up),
-                    'urutan' => $idx + 1
+                    'urutan' => $idx + 1,
+                    'sumber' => 'boq'
                 ];
                 $this->rapDetailModel->insert($data);
                 $currentParent = (int) $this->rapDetailModel->getInsertID();
@@ -1222,5 +1230,72 @@ class RapController extends BaseController
             }
         }
         return $branch;
+    }
+
+    public function reset($idProject)
+    {
+        $db = db_connect();
+        try {
+            $idProject = (int)$idProject;
+            if ($idProject <= 0) {
+                throw new \Exception('ID project tidak valid');
+            }
+
+            $project = $this->proyekModel->find($idProject);
+            if (!$project) {
+                throw new \Exception('Project tidak ditemukan');
+            }
+
+            $rap = $this->rapModel->where('id_project', $idProject)->first();
+            
+            $db->transStart();
+
+            if ($rap) {
+                $rapId = (int)$rap['id_rap'];
+
+                // 1. Get all detail IDs to clean up AHS items
+                $details = $this->rapDetailModel->where('id_rap', $rapId)->findAll();
+                $detailIds = array_column($details, 'id_rap_detail');
+
+                if (!empty($detailIds)) {
+                    // 2. Clear AHS details
+                    $this->rapDetailItemModel->whereIn('id_rap_detail', $detailIds)->delete();
+                    
+                    // 3. Clear RAP details
+                    $this->rapDetailModel->where('id_rap', $rapId)->delete();
+                }
+
+                // 4. Clear RAP categories relation
+                $this->rapKategoriModel->where('id_rap', $rapId)->delete();
+
+                // 5. Reset RAP totals
+                $this->rapModel->update($rapId, [
+                    'subtotal_bahan'    => 0,
+                    'subtotal_upah'     => 0,
+                    'subtotal_alat'     => 0,
+                    'total_keseluruhan' => 0
+                ]);
+            }
+
+            // 6. Revert project source to manual
+            $this->proyekModel->update($idProject, ['sumber_data' => 'manual']);
+
+            $db->transComplete();
+
+            if ($db->transStatus() === false) {
+                throw new \Exception('Gagal melakukan reset data');
+            }
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'message' => 'Seluruh data RAP berhasil dihapus'
+            ]);
+
+        } catch (Throwable $e) {
+            return $this->response->setStatusCode(500)->setJSON([
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ]);
+        }
     }
 }

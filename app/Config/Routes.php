@@ -73,6 +73,7 @@ $routes->group('api', ['namespace' => 'App\Controllers\Api'], function ($routes)
     $routes->post('rap/import', 'RapController::importBoq');
     $routes->put('rap/move', 'RapController::moveItem');
     $routes->post('rap/recalculate', 'RapController::recalculateFromAhs');
+    $routes->delete('rap/reset/(:num)', 'RapController::reset/$1');
 
     $routes->post('rap/copy-ahs-estimator', 'RapController::copyAhsEstimator');
 });

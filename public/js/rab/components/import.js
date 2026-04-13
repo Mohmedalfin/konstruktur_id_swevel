@@ -384,11 +384,158 @@ function _renderOrganizeList() {
         window.organizeSortable = new Sortable(container, {
             animation: 150,
             handle: '.drag-handle-organize',
-            onEnd: (evt) => {
-                const item = organizedItems.splice(evt.oldIndex, 1)[0];
-                organizedItems.splice(evt.newIndex, 0, item);
+            forceFallback: true,       // Use custom engine for better DOM manipulation stability
+            fallbackOnBody: true,      // Essential for modals with scrolling
+            swapThreshold: 0.65,       // Less sensitive vertical swapping
+            invertSwap: true,          // More natural swap behavior
+            ghostClass: 'sortable-ghost',
+            onStart: function (evt) {
+                const item = evt.item;
+                const idx = parseInt(item.dataset.index);
+                const startLevel = organizedItems[idx].level;
+                const isCat = organizedItems[idx].type === 'kategori';
+
+                // Find family (descendants)
+                const childrenIdx = [];
+                for (let i = idx + 1; i < organizedItems.length; i++) {
+                    if (organizedItems[i].level > startLevel) {
+                        childrenIdx.push(i);
+                    } else {
+                        break;
+                    }
+                }
+                
+                // Hide children DOM elements
+                const childrenEls = [];
+                const allItems = Array.from(container.children);
+                childrenIdx.forEach(cIdx => {
+                    const el = allItems.find(el => parseInt(el.dataset.index) === cIdx);
+                    if (el) {
+                        el.style.display = 'none';
+                        childrenEls.push(el);
+                    }
+                });
+
+                item._dragChildren = childrenIdx;
+                item._dragChildrenEls = childrenEls;
+                item._originalLevel = startLevel;
+                item._currentLevel = startLevel;
+                item._dragStartX = null;
+                item._lastPrevSibling = null;
+                item._isCat = isCat;
+
+                // Calculate family height
+                let familyHeight = 0;
+                childrenIdx.forEach(cIdx => {
+                    familyHeight = Math.max(familyHeight, organizedItems[cIdx].level - startLevel);
+                });
+                item._familyHeight = familyHeight;
+
+                const handleDragMove = (e) => {
+                    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                    const ghostEl = document.querySelector('.sortable-ghost');
+                    if (!ghostEl) return;
+
+                    let prev = ghostEl.previousElementSibling;
+                    while (prev && (prev.classList.contains('sortable-drag') || prev.style.display === 'none')) {
+                        prev = prev.previousElementSibling;
+                    }
+
+                    if (item._lastPrevSibling !== prev) {
+                        item._lastPrevSibling = prev;
+                        item._dragStartX = clientX;
+                        item._currentLevel = startLevel;
+                    }
+
+                    if (item._dragStartX === null) item._dragStartX = clientX;
+
+                    const deltaX = clientX - item._dragStartX;
+                    const deltaLevel = Math.round(deltaX / 30);
+
+                    // Prev level from the array (find by index)
+                    let prevLevel = 0;
+                    if (prev) {
+                        const pIdx = parseInt(prev.dataset.index);
+                        prevLevel = organizedItems[pIdx].level;
+                    }
+
+                    // Constraints:
+                    // 1. Kategori stays at level 0
+                    // 2. Max Level 2 (1.1.1)
+                    // 3. Max prevLevel + 1
+                    let maxAllowed = item._isCat ? 0 : Math.min(2 - item._familyHeight, prevLevel + 1);
+                    let targetLevel = startLevel + deltaLevel;
+                    let clampedLevel = Math.max(0, Math.min(targetLevel, maxAllowed));
+
+                    // Visual Feedback
+                    let indicatorColor = 'border-primary';
+                    let bgColor = '';
+                    if (targetLevel > clampedLevel) { // Blocked
+                        bgColor = 'rgba(239, 68, 68, 0.15)'; indicatorColor = 'border-red-500';
+                    } else if (clampedLevel > startLevel) { // Indenting
+                        bgColor = 'rgba(34, 197, 94, 0.15)'; indicatorColor = 'border-emerald-500';
+                    } else if (clampedLevel < startLevel) { // Outdenting
+                        bgColor = 'rgba(234, 179, 8, 0.15)'; indicatorColor = 'border-yellow-500';
+                    }
+
+                    const contentSlot = ghostEl.querySelector('.flex-1');
+                    if (contentSlot) contentSlot.style.paddingLeft = (clampedLevel * 1.5) + 'rem';
+                    
+                    // Reset border classes
+                    ghostEl.className = ghostEl.className.replace(/border-l-4 border-[a-z]+-500/g, ' ').trim();
+                    ghostEl.classList.add('border-l-4', indicatorColor);
+                    ghostEl.style.backgroundColor = bgColor;
+
+                    item._currentLevel = clampedLevel;
+                };
+
+                document.addEventListener('mousemove', handleDragMove);
+                document.addEventListener('touchmove', handleDragMove);
+                item._cleanup = () => {
+                    document.removeEventListener('mousemove', handleDragMove);
+                    document.removeEventListener('touchmove', handleDragMove);
+                };
+            },
+            onEnd: function (evt) {
+                const item = evt.item;
+                if (item._cleanup) item._cleanup();
+
+                const oldIdx = evt.oldIndex;
+                const newIdx = evt.newIndex;
+                const originalLevel = item._originalLevel;
+                const newLevel = item._currentLevel;
+                const levelDelta = newLevel - originalLevel;
+                const childrenIdx = item._dragChildren || [];
+
+                // Reconstruct the array
+                // 1. Extract family (parent + children)
+                const family = organizedItems.splice(oldIdx, 1 + childrenIdx.length);
+                
+                // 2. Update levels
+                family.forEach(f => {
+                    f.level = Math.max(0, Math.min(2, f.level + levelDelta));
+                });
+
+                // 3. Find target index for insertion
+                // Since we spliced, the newIdx in the DOM might be different from the array index
+                // But Sortable handles the DOM move. We just need to insert it at the correct relative position.
+                let insertAt = newIdx;
+                // Adjust if we moved down (because splicing removed items above the new target)
+                // Actually, the easiest way is to just use the DOM order to rebuild the array.
+                
+                // Wait, easier: Just rebuild organizedItems from DOM dataset.index after updating the family.
+                // But dataset.index are currently the OLD indices.
+                
+                // Better approach: Relocate in array based on original indices
+                // If oldIdx < newIdx, the items in between shifted up.
+                organizedItems.splice(newIdx, 0, ...family);
+
                 selectedIndices.clear();
                 _renderOrganizeList();
+
+                delete item._dragChildren;
+                delete item._dragChildrenEls;
+                delete item._cleanup;
             }
         });
     }
@@ -396,7 +543,8 @@ function _renderOrganizeList() {
 
 function _indentItems(delta) {
     selectedIndices.forEach(idx => {
-        organizedItems[idx].level = Math.max(0, organizedItems[idx].level + delta);
+        // Limit depth to level 2 (1.1.1)
+        organizedItems[idx].level = Math.max(0, Math.min(2, organizedItems[idx].level + delta));
     });
     _renderOrganizeList();
 }
@@ -437,6 +585,53 @@ export async function initImport() {
     // Tools
     document.getElementById('import-organize-indent-in')?.addEventListener('click', () => _indentItems(1));
     document.getElementById('import-organize-indent-out')?.addEventListener('click', () => _indentItems(-1));
+
+    // Custom Category Creation (NEW)
+    const customKatInput = document.getElementById('import-custom-kategori-input');
+    const customKatBtn   = document.getElementById('import-custom-kategori-add');
+
+    if (customKatBtn && customKatInput) {
+        customKatBtn.addEventListener('click', async () => {
+            const val = customKatInput.value.trim();
+            if(!val) return;
+
+            customKatBtn.disabled = true;
+            try {
+                const idProject = window.RAB_INIT?.idProject || window.RAB_INIT?.id;
+                const res = await fetch('/api/rap/kategori', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        id_project: Number(idProject),
+                        kategori: [{ nama: val }],
+                        is_master_only: true
+                    })
+                });
+
+                const json = await res.json();
+                if (!res.ok || json.status !== 'success') throw new Error(json.message);
+
+                await refreshImportCategories();
+                
+                // Auto select the new category
+                const sel = document.getElementById('import-global-kategori');
+                if (sel && json.data && json.data.length > 0) {
+                    sel.value = json.data[0].id;
+                }
+
+                customKatInput.value = '';
+                if (window.Toast) window.Toast.show('Kategori master berhasil ditambah', 'success');
+            } catch (err) {
+                alert('Gagal tambah kategori: ' + err.message);
+            } finally {
+                customKatBtn.disabled = false;
+            }
+        });
+
+        customKatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') customKatBtn.click();
+        });
+    }
 
     document.getElementById('import-organize-insert-cat')?.addEventListener('click', () => {
         const selKat = document.getElementById('import-global-kategori');
