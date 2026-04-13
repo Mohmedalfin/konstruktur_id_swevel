@@ -25,6 +25,7 @@ const AppSwal = Swal.mixin({
     },
     buttonsStyling: false,   // ← We supply our own Tailwind classes
     reverseButtons:  true,   // Cancel on left, Confirm on right
+    scrollbarPadding: false, // Prevent background layout shift
 });
 
 // -------------------------------------------------------------------
