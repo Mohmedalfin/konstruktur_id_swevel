@@ -11,6 +11,7 @@ use App\Models\RapDetailItemModel;
 use App\Models\AhsModel;
 use App\Models\ProyekModel;
 use CodeIgniter\Database\Exceptions\DatabaseException;
+use CodeIgniter\HTTP\ResponseInterface;
 use Throwable;
 
 class RapController extends BaseController
@@ -113,31 +114,16 @@ class RapController extends BaseController
                 ];
             }
 
+            // Organisasi item ke kategori dulu
+            $itemsByCategory = [];
             foreach ($detailRows as $row) {
                 $catId = (string) ($row['id_kategori'] ?? '0');
+                $itemsByCategory[$catId][] = $row;
+            }
 
-                if (!isset($grouped[$catId])) {
-                    $kategori = $this->kategoriModel->find((int) $catId);
-
-                    $grouped[$catId] = [
-                        'id'    => $catId,
-                        'name'  => $kategori['nama_kategori'] ?? 'Tanpa Kategori',
-                        'items' => [],
-                    ];
-                }
-
-                $grouped[$catId]['items'][] = [
-                    'id_rap_detail'    => (int) $row['id_rap_detail'],
-                    'no'               => count($grouped[$catId]['items']) + 1,
-                    'uraian'           => $row['pekerjaan'],
-                    'volume'           => (float) ($row['volume'] ?? 0),
-                    'satuan'           => $row['satuan'] ?? '',
-                    'hargaBahan'       => (float) ($row['harga_bahan'] ?? 0),
-                    'hargaAlat'        => (float) ($row['harga_alat'] ?? 0),
-                    'hargaUpah'        => (float) ($row['harga_upah'] ?? 0),
-                    'hargaKeseluruhan' => (float) ($row['total_keseluruhan'] ?? 0),
-                    'keterangan'       => $row['keterangan'] ?? null,
-                ];
+            foreach ($grouped as $catId => &$data) {
+                $categoryItems = $itemsByCategory[$catId] ?? [];
+                $data['items'] = $this->buildTree($categoryItems);
             }
 
             return $this->response->setJSON([
@@ -235,10 +221,11 @@ class RapController extends BaseController
                 ]);
             }
 
-            if (($project['sumber_data'] ?? 'manual') !== 'manual') {
+            // Allow adding categories if it's MASTER ONLY (to master list), even if project is BOQ
+            if (!$isMasterOnly && ($project['sumber_data'] ?? 'manual') !== 'manual') {
                 return $this->response->setStatusCode(403)->setJSON([
                     'status'  => 'error',
-                    'message' => 'Kategori proyek estimator tidak dapat diubah',
+                    'message' => 'Kategori pada proyek import tidak dapat diubah',
                 ]);
             }
 
@@ -501,7 +488,7 @@ class RapController extends BaseController
             if (($project['sumber_data'] ?? 'manual') !== 'manual') {
                 return $this->response->setStatusCode(403)->setJSON([
                     'status'  => 'error',
-                    'message' => 'Kategori proyek estimator tidak dapat dihapus',
+                    'message' => 'Kategori pada proyek import tidak dapat dihapus',
                 ]);
             }
 
@@ -595,6 +582,7 @@ class RapController extends BaseController
 
             $idProject  = (int) ($payload['id_project'] ?? 0);
             $idKategori = (int) ($payload['id_kategori'] ?? 0);
+            $idParent   = isset($payload['id_parent']) ? (int) $payload['id_parent'] : null;
             $items      = $payload['pekerjaan'] ?? [];
 
             if ($idProject <= 0 || $idKategori <= 0) {
@@ -618,7 +606,7 @@ class RapController extends BaseController
             if (($project['sumber_data'] ?? 'manual') !== 'manual') {
                 return $this->response->setStatusCode(403)->setJSON([
                     'status'  => 'error',
-                    'message' => 'Pekerjaan proyek estimator tidak dapat diubah',
+                    'message' => 'Pekerjaan pada proyek import tidak dapat diubah',
                 ]);
             }
 
@@ -683,6 +671,7 @@ class RapController extends BaseController
                 ->selectMax('urutan')
                 ->where('id_rap', $rapId)
                 ->where('id_kategori', $idKategori)
+                ->where('id_parent', $idParent)
                 ->first();
 
             $urutan = (int) ($lastUrutan['urutan'] ?? 0);
@@ -714,6 +703,7 @@ class RapController extends BaseController
                 $this->rapDetailModel->insert([
                     'id_rap'            => $rapId,
                     'id_kategori'       => $idKategori,
+                    'id_parent'         => $idParent,
                     'pekerjaan'         => $nama,
                     'volume'            => $volume,
                     'satuan'            => $satuan,
@@ -797,7 +787,7 @@ class RapController extends BaseController
             if (($project['sumber_data'] ?? 'manual') !== 'manual') {
                 return $this->response->setStatusCode(403)->setJSON([
                     'status'  => 'error',
-                    'message' => 'Pekerjaan proyek estimator tidak dapat dihapus',
+                    'message' => 'Pekerjaan pada proyek import tidak dapat dihapus',
                 ]);
             }
 
@@ -1014,6 +1004,297 @@ class RapController extends BaseController
             return $this->response->setStatusCode(500)->setJSON([
                 'status'  => 'error',
                 'message' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    public function reorderPekerjaan()
+    {
+        try {
+            $payload = $this->request->getJSON(true);
+            $items   = $payload['items'] ?? [];
+
+            if (!is_array($items) || empty($items)) {
+                return $this->response->setStatusCode(400)->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Data items wajib diisi berupa array'
+                ]);
+            }
+
+            $batchData = [];
+            foreach ($items as $item) {
+                if (isset($item['id_rap_detail'], $item['urutan'])) {
+                    $row = [
+                        'id_rap_detail' => (int) $item['id_rap_detail'],
+                        'urutan'        => (int) $item['urutan'],
+                    ];
+                    if (array_key_exists('id_parent', $item)) {
+                        $row['id_parent'] = ($item['id_parent'] === '' || $item['id_parent'] === null) ? null : (int) $item['id_parent'];
+                    }
+                    if (array_key_exists('id_kategori', $item)) {
+                        $row['id_kategori'] = (int) $item['id_kategori'];
+                    }
+                    $batchData[] = $row;
+                }
+            }
+
+            $db = db_connect();
+            $db->transStart();
+
+            foreach ($batchData as $data) {
+                $id = $data['id_rap_detail'];
+                unset($data['id_rap_detail']);
+                $this->rapDetailModel->update($id, $data);
+            }
+
+            $db->transComplete();
+
+            if ($db->transStatus() === false) {
+                throw new \Exception('Gagal memperbarui urutan');
+            }
+
+            return $this->response->setJSON([
+                'status'  => 'success',
+                'message' => 'Urutan dan hierarki berhasil disimpan'
+            ]);
+        } catch (Throwable $e) {
+            return $this->response->setStatusCode(500)->setJSON([
+                'status'  => 'error',
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
+    public function importBoq()
+    {
+        $db = db_connect();
+
+        try {
+            $payload = $this->request->getJSON(true);
+            $idProject = (int) ($payload['id_project'] ?? 0);
+            $items = $payload['items'] ?? [];
+
+            file_put_contents(WRITEPATH . 'logs/import_dump.json', json_encode($items, JSON_PRETTY_PRINT));
+
+            if ($idProject <= 0 || empty($items)) {
+                return $this->response->setStatusCode(400)->setJSON([
+                    'status'  => 'error',
+                    'message' => 'id_project dan items wajib diisi',
+                ]);
+            }
+
+            $idUser = session()->get('id_user');
+            $db->transStart();
+
+            $rap = $this->rapModel->where('id_project', $idProject)->first();
+            if (!$rap) {
+                $this->rapModel->insert([
+                    'id_project'        => $idProject,
+                    'nama_rap'          => 'RAP Proyek ' . $idProject,
+                    'subtotal_bahan'    => 0, 'subtotal_upah' => 0, 'subtotal_alat' => 0,
+                    'total_keseluruhan' => 0, 'status_rap' => 'draft'
+                ]);
+                $rapId = (int) $this->rapModel->getInsertID();
+            } else {
+                $rapId = (int) $rap['id_rap'];
+            }
+
+            // Fungsi rekursif untuk simpan tree
+            $this->saveImportTree($items, $rapId, $idProject, $idUser);
+
+            // Update project source to 'boq'
+            $this->proyekModel->update($idProject, ['sumber_data' => 'boq']);
+
+            $this->recalculateRapTotal($rapId);
+            $db->transComplete();
+
+            if ($db->transStatus() === false) {
+                throw new DatabaseException('Gagal import BOQ');
+            }
+
+            return $this->response->setJSON(['status' => 'success', 'message' => 'BOQ berhasil diimport']);
+        } catch (Throwable $e) {
+            return $this->response->setStatusCode(500)->setJSON(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    private function saveImportTree($items, $rapId, $idProject, $idUser, $idParent = null, $idKategori = null)
+    {
+        $currentKategori = $idKategori;
+
+        foreach ($items as $idx => $item) {
+            $currentParent = $idParent;
+
+            if ($item['type'] === 'kategori') {
+                if (!empty($item['id_kategori_master'])) {
+                    $catId = (int) $item['id_kategori_master'];
+                } else {
+                    $nama = trim($item['nama']);
+                    $existing = $this->kategoriModel->where('nama_kategori', $nama)
+                        ->groupStart()->where('id_project', $idProject)->orWhere('id_project', null)->groupEnd()
+                        ->first();
+
+                    if ($existing) {
+                        $catId = (int) $existing['id_kategori_pekerjaan'];
+                    } else {
+                        $this->kategoriModel->insert([
+                            'nama_kategori' => $nama, 'id_project' => $idProject, 'id_user' => $idUser, 'jenis_kategori' => 'custom'
+                        ]);
+                        $catId = (int) $this->kategoriModel->getInsertID();
+                    }
+                }
+
+                $existsInRap = $this->rapKategoriModel->where('id_rap', $rapId)->where('id_kategori', $catId)->first();
+                if (!$existsInRap) {
+                    $this->rapKategoriModel->insert(['id_rap' => $rapId, 'id_kategori' => $catId]);
+                }
+                $currentKategori = $catId;
+                $currentParent = null; 
+            } else {
+                if ($currentKategori === null) {
+                    // Fallback to error if frontend sends an item without a category above it
+                    // This throws an exception which rolls back the transaction safely
+                    throw new \Exception("Pekerjaan wajib diletakkan di bawah salah satu Kategori Pekerjaan");
+                }
+
+                $vol = (float)($item['volume'] ?? 1);
+                $bh = (float)($item['harga_bahan'] ?? 0);
+                $al = (float)($item['harga_alat'] ?? 0);
+                $up = (float)($item['harga_upah'] ?? 0);
+                
+                $data = [
+                    'id_rap' => $rapId,
+                    'id_kategori' => $currentKategori,
+                    'id_parent' => $currentParent,
+                    'pekerjaan' => $item['nama'],
+                    'volume' => $vol,
+                    'satuan' => $item['satuan'] ?? '-',
+                    'harga_bahan' => $bh,
+                    'harga_upah' => $up,
+                    'harga_alat' => $al,
+                    'subtotal_bahan' => $vol * $bh,
+                    'subtotal_upah' => $vol * $up,
+                    'subtotal_alat' => $vol * $al,
+                    'total_keseluruhan' => $vol * ($bh + $al + $up),
+                    'urutan' => $idx + 1,
+                    'sumber' => 'boq'
+                ];
+                $this->rapDetailModel->insert($data);
+                $currentParent = (int) $this->rapDetailModel->getInsertID();
+            }
+
+            if (!empty($item['children'])) {
+                $this->saveImportTree($item['children'], $rapId, $idProject, $idUser, $currentParent, $currentKategori);
+            }
+        }
+    }
+
+    public function moveItem()
+    {
+        try {
+            $payload = $this->request->getJSON(true);
+            $id = (int)($payload['id'] ?? 0);
+            $newParentId = isset($payload['new_parent_id']) ? (int)$payload['new_parent_id'] : null;
+
+            if ($id <= 0) {
+                return $this->response->setStatusCode(400)->setJSON(['status' => 'error', 'message' => 'id wajib diisi']);
+            }
+
+            $this->rapDetailModel->update($id, ['id_parent' => $newParentId]);
+
+            return $this->response->setJSON(['status' => 'success', 'message' => 'Item berhasil dipindahkan']);
+        } catch (Throwable $e) {
+            return $this->response->setStatusCode(500)->setJSON(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    private function buildTree(array $elements, $parentId = null)
+    {
+        $branch = [];
+        foreach ($elements as $element) {
+            if ($element['id_parent'] == $parentId) {
+                $children = $this->buildTree($elements, $element['id_rap_detail']);
+                $item = [
+                    'id_rap_detail'    => (int) $element['id_rap_detail'],
+                    'id_parent'        => $element['id_parent'] ? (int)$element['id_parent'] : null,
+                    'uraian'           => $element['pekerjaan'],
+                    'volume'           => (float) ($element['volume'] ?? 0),
+                    'satuan'           => $element['satuan'] ?? '',
+                    'hargaBahan'       => (float) ($element['harga_bahan'] ?? 0),
+                    'hargaAlat'        => (float) ($element['harga_alat'] ?? 0),
+                    'hargaUpah'        => (float) ($element['harga_upah'] ?? 0),
+                    'hargaKeseluruhan' => (float) ($element['total_keseluruhan'] ?? 0),
+                    'keterangan'       => $element['keterangan'] ?? null,
+                    'children'         => $children
+                ];
+                $branch[] = $item;
+            }
+        }
+        return $branch;
+    }
+
+    public function reset($idProject)
+    {
+        $db = db_connect();
+        try {
+            $idProject = (int)$idProject;
+            if ($idProject <= 0) {
+                throw new \Exception('ID project tidak valid');
+            }
+
+            $project = $this->proyekModel->find($idProject);
+            if (!$project) {
+                throw new \Exception('Project tidak ditemukan');
+            }
+
+            $rap = $this->rapModel->where('id_project', $idProject)->first();
+            
+            $db->transStart();
+
+            if ($rap) {
+                $rapId = (int)$rap['id_rap'];
+
+                // 1. Get all detail IDs to clean up AHS items
+                $details = $this->rapDetailModel->where('id_rap', $rapId)->findAll();
+                $detailIds = array_column($details, 'id_rap_detail');
+
+                if (!empty($detailIds)) {
+                    // 2. Clear AHS details
+                    $this->rapDetailItemModel->whereIn('id_rap_detail', $detailIds)->delete();
+                    
+                    // 3. Clear RAP details
+                    $this->rapDetailModel->where('id_rap', $rapId)->delete();
+                }
+
+                // 4. Clear RAP categories relation
+                $this->rapKategoriModel->where('id_rap', $rapId)->delete();
+
+                // 5. Reset RAP totals
+                $this->rapModel->update($rapId, [
+                    'subtotal_bahan'    => 0,
+                    'subtotal_upah'     => 0,
+                    'subtotal_alat'     => 0,
+                    'total_keseluruhan' => 0
+                ]);
+            }
+
+            // 6. Revert project source to manual
+            $this->proyekModel->update($idProject, ['sumber_data' => 'manual']);
+
+            $db->transComplete();
+
+            if ($db->transStatus() === false) {
+                throw new \Exception('Gagal melakukan reset data');
+            }
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'message' => 'Seluruh data RAP berhasil dihapus'
+            ]);
+
+        } catch (Throwable $e) {
+            return $this->response->setStatusCode(500)->setJSON([
+                'status' => 'error',
+                'message' => $e->getMessage()
             ]);
         }
     }
