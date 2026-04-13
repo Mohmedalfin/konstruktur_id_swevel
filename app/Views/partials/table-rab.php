@@ -50,9 +50,7 @@ $wrapperClass = $tableVisible ? '' : 'hidden';
 
             <!-- Hidden file input -->
             <input id="boq-file-input" type="file" accept=".xlsx,.xls,.csv" class="hidden" />
-
         </div>
-
     </div>
 
     <div class="overflow-x-auto rounded-xl shadow-md border border-table-border bg-white pb-4 w-full">
@@ -233,5 +231,4 @@ $wrapperClass = $tableVisible ? '' : 'hidden';
             </div>
         </div>
     </div>
-
 </div>

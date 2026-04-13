@@ -26,17 +26,13 @@ function clearFieldError(inputId, errorId) {
   const error = document.getElementById(errorId);
   if (!input || !error) return;
 
-  // Hide error message
   error.textContent = '';
   error.classList.remove('block');
   error.classList.add('hidden');
 
-  // Restore normal border
   input.classList.remove('border-red-500', 'focus:border-red-500');
   input.classList.add('border-gray-300', 'focus:border-brand-dark');
 }
-
-// ─── Toast Notification (for wrong credentials only) ─────────────────────────
 
 function showToast(type, title, message) {
   const isSuccess = type === 'success';

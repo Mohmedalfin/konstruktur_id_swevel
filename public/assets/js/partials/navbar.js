@@ -19,7 +19,6 @@
         if (isRoot) {
             isActive = currentPath === '' || currentPath === '/';
         } else if (navPath === '/menu-rap') {
-            // RAB & RAP is active on /menu-rap/*, /proyek/* (project detail) and /proyek/menu/*
             isActive = currentPath === navPath
                 || currentPath.startsWith(navPath + '/')
                 || currentPath.startsWith('/proyek/')
@@ -44,7 +43,6 @@
     if (rabLink) {
         const lastSlug = localStorage.getItem('lastProjectSlug');
         if (lastSlug) {
-            // Point directly back to the last visited project
             const baseOrigin = window.location.origin;
             rabLink.href = baseOrigin + '/proyek/' + lastSlug;
         }
@@ -53,7 +51,6 @@
     // Make dropdown button active if its internal links correspond to the current page
     const dropBtn = document.getElementById('hs-header-base-dropdown');
     if (dropBtn) {
-        // Here you can define which paths make the profile dropdown "active" (e.g. /profile)
         const profilePaths = ['/profile', '/account', '/settings']; 
         let isDropdownActive = profilePaths.some(path => currentPath.startsWith(path));
 
@@ -83,12 +80,12 @@
     const header = document.querySelector('header');
     if (header) {
         const floatAdd = [
-            'top-3',          // gap from viewport top (works with sticky)
-            'mx-3',           // horizontal gap
+            'top-3',          
+            'mx-3',           
             'sm:mx-6',
             'lg:mx-10',
-            'rounded-2xl',    // rounded pill corners
-            'shadow-xl',      // elevated shadow
+            'rounded-2xl',    
+            'shadow-xl',      
             'border',
             'border-white/10',
         ];
@@ -109,11 +106,11 @@
             floating = shouldFloat;
 
             if (shouldFloat) {
-                floatAdd.forEach(cls    => header.classList.add(cls));
-                floatRemove.forEach(cls => header.classList.remove(cls));
+                header.classList.add(...floatAdd);
+                header.classList.remove(...floatRemove);
             } else {
-                floatAdd.forEach(cls    => header.classList.remove(cls));
-                floatRemove.forEach(cls => header.classList.add(cls));
+                header.classList.remove(...floatAdd);
+                header.classList.add(...floatRemove);
             }
         }
 

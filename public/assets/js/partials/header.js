@@ -62,12 +62,12 @@
     const header = document.querySelector('header');
     if (header) {
         const floatAdd = [
-            'top-3',          // gap from viewport top (works with sticky)
-            'mx-3',           // horizontal gap
+            'top-3',          
+            'mx-3',           
             'sm:mx-6',
             'lg:mx-10',
-            'rounded-2xl',    // rounded corners
-            'shadow-xl',      // elevated shadow
+            'rounded-2xl',    
+            'shadow-xl',      
             'border',
             'border-white/10',
         ];
@@ -80,11 +80,11 @@
             if (shouldFloat === floating) return;
             floating = shouldFloat;
             if (shouldFloat) {
-                floatAdd.forEach(c    => header.classList.add(c));
-                floatRemove.forEach(c => header.classList.remove(c));
+                header.classList.add(...floatAdd);
+                header.classList.remove(...floatRemove);
             } else {
-                floatAdd.forEach(c    => header.classList.remove(c));
-                floatRemove.forEach(c => header.classList.add(c));
+                header.classList.remove(...floatAdd);
+                header.classList.add(...floatRemove);
             }
         }
 
@@ -97,5 +97,4 @@
 
         applyFloatState();
     }
-
 })();
