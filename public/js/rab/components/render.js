@@ -156,7 +156,12 @@ export function renderReadonly(data) {
     if (saveBtn) {
         saveBtn.addEventListener('click', async () => {
             if (!window.reorderedDataCache || Object.keys(window.reorderedDataCache).length === 0) {
-                Swal.fire('Info', 'Tidak ada perubahan urutan yang perlu disimpan.', 'info');
+                Swal.fire({
+                    title: 'Info', 
+                    text: 'Tidak ada perubahan urutan yang perlu disimpan.', 
+                    icon: 'info',
+                    scrollbarPadding: false
+                });
                 return;
             }
             
