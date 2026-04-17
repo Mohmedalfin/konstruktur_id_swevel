@@ -19,6 +19,7 @@ export function bindSubmit() {
         }
 
         const payloadItems = items.map(item => ({
+            id: item.id,
             nama: item.nama,
             volume: 1,
             satuan: item.satuan || '',

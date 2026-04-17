@@ -18,6 +18,7 @@ class ProyekModel extends Model
         'nama_proyek',
         'slug',
         'lokasi_proyek',
+        'id_template',      // ID template harga resmi dari DB estimator
         'tanggal_mulai',
         'estimasi_selesai',
         'nama_owner',
@@ -26,6 +27,7 @@ class ProyekModel extends Model
         'keterangan',
         'foto_proyek',
         'harga_deal',
+        'id_wilayah',
         'jenis_proyek',
         'sumber_data',
         'id_ref_sumber',

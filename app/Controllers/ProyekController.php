@@ -66,21 +66,25 @@ class ProyekController extends BaseController
 
         // Map form data to database fields
         $data = [
-            'kode_proyek' => $kodeProyek,
-            'nama_proyek' => $namaProyek,
-            'slug' => $slug,
-            'lokasi_proyek' => $this->request->getPost('lokasi_proyek'),
-            'jenis_proyek' => $this->request->getPost('jenis_proyek'),
-            'tanggal_mulai' => $this->request->getPost('tanggal_mulai') ? date('Y-m-d', strtotime(str_replace('.', '-', $this->request->getPost('tanggal_mulai')))) : null,
-            'estimasi_selesai' => $this->request->getPost('estimasi_selesai') ? date('Y-m-d', strtotime(str_replace('.', '-', $this->request->getPost('estimasi_selesai')))) : null,
-            'nama_owner' => $this->request->getPost('nama_owner'),
+            'kode_proyek'     => $kodeProyek,
+            'nama_proyek'     => $namaProyek,
+            'slug'            => $slug,
+            'lokasi_proyek'   => $this->request->getPost('lokasi_proyek'),
+            'id_template'     => ($this->request->getPost('id_template') !== null && $this->request->getPost('id_template') !== '')
+                                     ? (int) $this->request->getPost('id_template')
+                                     : null,
+            'jenis_proyek'    => $this->request->getPost('jenis_proyek'),
+            'tanggal_mulai'   => $this->request->getPost('tanggal_mulai') ? date('Y-m-d', strtotime(str_replace('.', '-', $this->request->getPost('tanggal_mulai')))) : null,
+            'estimasi_selesai'=> $this->request->getPost('estimasi_selesai') ? date('Y-m-d', strtotime(str_replace('.', '-', $this->request->getPost('estimasi_selesai')))) : null,
+            'nama_owner'      => $this->request->getPost('nama_owner'),
             'nama_perusahaan' => $this->request->getPost('perusahaan'),
-            'nomor_kontrak' => $this->request->getPost('nomor_kontrak'),
-            'keterangan' => $this->request->getPost('keterangan_lain'),
-            'status_proyek' => 'draft',
-            'sumber_data' => 'manual',
-            'harga_deal' => $hargaDeal,
-            'foto_proyek' => null,
+            'nomor_kontrak'   => $this->request->getPost('nomor_kontrak'),
+            'keterangan'      => $this->request->getPost('keterangan_lain'),
+            'status_proyek'   => 'draft',
+            'sumber_data'     => 'manual',
+            'harga_deal'      => $hargaDeal,
+            'id_wilayah'      => $this->request->getPost('id_wilayah'),
+            'foto_proyek'     => null,
         ];
 
         // Process Upload Foto Proyek
@@ -119,7 +123,20 @@ class ProyekController extends BaseController
             return redirect()->to(base_url('proyek'))->with('error', 'Proyek tidak ditemukan.');
         }
 
-        return view('proyek/edit', ['proyek' => $proyek]);
+        // Cari id_prov untuk pre-fill dropdown wilayah di frontend
+        $idProv = null;
+        if (!empty($proyek['id_wilayah'])) {
+            try {
+                $dbEst = \Config\Database::connect('estimator');
+                $w = $dbEst->query("SELECT id_prov FROM wilayah WHERE id_wilayah = ?", [$proyek['id_wilayah']])->getRowArray();
+                $idProv = $w['id_prov'] ?? null;
+            } catch (\Throwable $e) {}
+        }
+
+        return view('proyek/edit', [
+            'proyek' => $proyek,
+            'id_prov' => $idProv
+        ]);
     }
 
     public function update($id)
@@ -139,17 +156,21 @@ class ProyekController extends BaseController
         $slug = $proyekModel->generateUniqueSlug($namaProyek, (int) $id);
 
         $data = [
-            'nama_proyek' => $namaProyek,
-            'slug' => $slug,
-            'lokasi_proyek' => $this->request->getPost('lokasi_proyek'),
-            'jenis_proyek' => $this->request->getPost('jenis_proyek'),
-            'tanggal_mulai' => $this->request->getPost('tanggal_mulai') ? date('Y-m-d', strtotime(str_replace('.', '-', $this->request->getPost('tanggal_mulai')))) : null,
-            'estimasi_selesai' => $this->request->getPost('estimasi_selesai') ? date('Y-m-d', strtotime(str_replace('.', '-', $this->request->getPost('estimasi_selesai')))) : null,
-            'nama_owner' => $this->request->getPost('nama_owner'),
+            'nama_proyek'     => $namaProyek,
+            'slug'            => $slug,
+            'lokasi_proyek'   => $this->request->getPost('lokasi_proyek'),
+            'id_template'     => ($this->request->getPost('id_template') !== null && $this->request->getPost('id_template') !== '')
+                                     ? (int) $this->request->getPost('id_template')
+                                     : null,
+            'id_wilayah'      => $this->request->getPost('id_wilayah'),
+            'jenis_proyek'    => $this->request->getPost('jenis_proyek'),
+            'tanggal_mulai'   => $this->request->getPost('tanggal_mulai') ? date('Y-m-d', strtotime(str_replace('.', '-', $this->request->getPost('tanggal_mulai')))) : null,
+            'estimasi_selesai'=> $this->request->getPost('estimasi_selesai') ? date('Y-m-d', strtotime(str_replace('.', '-', $this->request->getPost('estimasi_selesai')))) : null,
+            'nama_owner'      => $this->request->getPost('nama_owner'),
             'nama_perusahaan' => $this->request->getPost('perusahaan'),
-            'nomor_kontrak' => $this->request->getPost('nomor_kontrak'),
-            'keterangan' => $this->request->getPost('keterangan_lain'),
-            'harga_deal' => $hargaDeal,
+            'nomor_kontrak'   => $this->request->getPost('nomor_kontrak'),
+            'keterangan'      => $this->request->getPost('keterangan_lain'),
+            'harga_deal'      => $hargaDeal,
         ];
 
         // Process Upload Foto Proyek (Only overwrite if a new one is uploaded)

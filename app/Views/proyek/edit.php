@@ -117,9 +117,46 @@
                         </div>
 
                         <div>
-                            <label class="mb-1 block text-md font-semibold text-text-primary">Lokasi Proyek</label>
-                            <input name="lokasi_proyek" type="text" placeholder="Masukkan Lokasi Proyek" value="<?= esc($proyek['lokasi_proyek']) ?>"
-                                class="w-full  border border-gray-300 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                            <label class="mb-1 block text-md font-semibold text-text-primary">
+                                Lokasi & Referensi Harga
+                                <span class="ml-1 text-xs font-normal text-slate-500">(Provinsi -> Kab/Kota -> Tahun)</span>
+                            </label>
+
+                            <div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                                <!-- Dropdown Provinsi -->
+                                <select id="sel_provinsi"
+                                    class="w-full border border-gray-300 bg-white px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                    <option value="">-- Pilih Provinsi --</option>
+                                </select>
+
+                                <!-- Dropdown Kab/Kota -->
+                                <select id="sel_kota" disabled
+                                    class="w-full border border-gray-300 bg-white px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                    <option value="">Pilih Provinsi dahulu</option>
+                                </select>
+
+                                <!-- Dropdown Tahun -->
+                                <select id="sel_template" disabled
+                                    class="w-full border border-gray-300 bg-white px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                    <option value="">Pilih Kab/Kota dahulu</option>
+                                </select>
+                            </div>
+
+                            <!-- Hidden fields yang dikirim ke server -->
+                            <input type="hidden" name="id_wilayah" id="id_wilayah" value="<?= esc($proyek['id_wilayah'] ?? '') ?>" />
+                            <input type="hidden" name="id_template" id="id_template" value="<?= esc($proyek['id_template'] ?? '') ?>" />
+                            <input type="hidden" name="lokasi_proyek" id="lokasi_proyek" value="<?= esc($proyek['lokasi_proyek'] ?? '') ?>" />
+
+                            <?php if (!empty($proyek['id_wilayah'])): ?>
+                            <p id="lokasi-info" class="mt-1 text-xs text-green-600 font-medium">
+                                <i class="fa-solid fa-circle-check mr-1"></i>
+                                Tersimpan: <?= esc($proyek['lokasi_proyek'] ?? 'Wilayah #' . $proyek['id_wilayah']) ?>
+                            </p>
+                            <?php else: ?>
+                            <p id="lokasi-info" class="mt-1 text-xs text-slate-500">
+                                Pilih lokasi untuk menggunakan harga satuan resmi (BPS/PUPR) sesuai wilayah.
+                            </p>
+                            <?php endif; ?>
                         </div>
 
                         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -221,8 +258,16 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
+<script src="<?= base_url('js/wilayah-selector.js') ?>"></script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
+        // Init wilayah selector — pre-fill jika sudah ada id_template/id_wilayah tersimpan
+        WilayahSelector.init({
+            idProv: '<?= $id_prov ?? '' ?>',
+            idWilayah: '<?= $proyek['id_wilayah'] ?? '' ?>',
+            idTemplate: '<?= $proyek['id_template'] ?? '' ?>'
+        });
+
         // =========================
         // 0) FORMAT HARGA DEAL
         // =========================

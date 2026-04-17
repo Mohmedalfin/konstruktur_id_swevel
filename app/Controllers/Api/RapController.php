@@ -8,7 +8,6 @@ use App\Models\RapDetailModel;
 use App\Models\KategoriPekerjaanModel;
 use App\Models\RapKategoriModel;
 use App\Models\RapDetailItemModel;
-use App\Models\AhsModel;
 use App\Models\ProyekModel;
 use CodeIgniter\Database\Exceptions\DatabaseException;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -21,7 +20,6 @@ class RapController extends BaseController
     protected KategoriPekerjaanModel $kategoriModel;
     protected RapKategoriModel $rapKategoriModel;
     protected RapDetailItemModel $rapDetailItemModel;
-    protected AhsModel $ahsModel;
     protected ProyekModel $proyekModel;
 
     public function __construct()
@@ -31,7 +29,6 @@ class RapController extends BaseController
         $this->kategoriModel      = new KategoriPekerjaanModel();
         $this->rapKategoriModel   = new RapKategoriModel();
         $this->rapDetailItemModel = new RapDetailItemModel();
-        $this->ahsModel           = new AhsModel();
         $this->proyekModel        = new ProyekModel();
     }
 
@@ -676,6 +673,85 @@ class RapController extends BaseController
 
             $urutan = (int) ($lastUrutan['urutan'] ?? 0);
 
+            // 1. Bulk-Fetch AHS items from Estimator's "ahs_utama"
+            $masterIds = [];
+            foreach ($items as $item) {
+                if (!empty($item['id'])) {
+                    $masterIds[] = (string) $item['id'];
+                }
+            }
+            $masterIds = array_unique($masterIds);
+
+            $bulkAhs = [];
+            if (!empty($masterIds)) {
+                $dbEstimator = \Config\Database::connect('estimator');
+                $idWilayah   = $project['id_wilayah'] ?? null;
+                $tahun       = $project['id_template'] ?? null; // Kita simpan tahun di id_template untuk BPS
+
+                $inPlaceholders = implode(',', array_fill(0, count($masterIds), '?'));
+
+                if (!empty($idWilayah)) {
+                    // ── HARGA REGIONAL: pakai bua_bps_utama berdasarkan wilayah & tahun ──
+                    $yearFilter = !empty($tahun) ? "AND btp.tahun = '{$tahun}'" : "";
+                    
+                    $sql = "
+                        SELECT
+                            au.id_ahs,
+                            au.id_pekerjaan,
+                            au.nama_pekerjaan,
+                            au.kategori,
+                            au.id_kategori,
+                            au.nama_kategori,
+                            au.koefisien,
+                            au.satuan_kategori,
+                            au.merk,
+                            au.spesifikasi,
+                            COALESCE(btp.harga_dasar, 0) AS master_harga_dasar,
+                            COALESCE(btp.satuan, au.satuan_kategori) AS satuan_final
+                        FROM ahs_utama au
+                        LEFT JOIN bua_bps_utama btp
+                            ON  btp.id_wilayah  = '{$idWilayah}'
+                            AND btp.id_kategori = au.id_kategori
+                            AND btp.kategori    = au.kategori
+                            {$yearFilter}
+                            AND (btp.utama = '1' OR btp.utama IS NULL OR btp.utama = '')
+                        WHERE au.id_pekerjaan IN ($inPlaceholders)
+                        GROUP BY au.id_ahs -- Hindari duplikat jika ada multiple entry di BPS
+                        ORDER BY au.kategori, au.id_ahs
+                    ";
+                } else {
+                    // ── FALLBACK: tidak ada wilayah, pakai ahs_utama saja (harga 0) ──
+                    $sql = "
+                        SELECT
+                            au.id_ahs,
+                            au.id_pekerjaan,
+                            au.nama_pekerjaan,
+                            au.kategori,
+                            au.id_kategori,
+                            au.nama_kategori,
+                            au.koefisien,
+                            au.satuan_kategori,
+                            au.merk,
+                            au.spesifikasi,
+                            0 AS master_harga_dasar,
+                            au.satuan_kategori AS satuan_final
+                        FROM ahs_utama au
+                        WHERE au.id_pekerjaan IN ($inPlaceholders)
+                        ORDER BY au.kategori, au.id_ahs
+                    ";
+                }
+
+                $ahsUtamaRows = $dbEstimator->query($sql, $masterIds)->getResultArray();
+
+                foreach ($ahsUtamaRows as $row) {
+                    $jobId = $row['id_pekerjaan'];
+                    $bulkAhs[$jobId][] = $row;
+                }
+            }
+
+            $bulkAhsItemsToInsert = [];
+
+            // 2. Loop Pekerjaan & Queue up AHS insertions
             foreach ($items as $item) {
                 $urutan++;
 
@@ -686,6 +762,7 @@ class RapController extends BaseController
                 $hargaAlat  = (float) ($item['harga_alat'] ?? 0);
                 $hargaUpah  = (float) ($item['harga_upah'] ?? 0);
                 $keterangan = $item['keterangan'] ?? null;
+                $idMaster   = isset($item['id']) && $item['id'] ? (string) $item['id'] : null;
 
                 if ($nama === '') {
                     continue;
@@ -717,6 +794,46 @@ class RapController extends BaseController
                     'urutan'            => $urutan,
                     'keterangan'        => $keterangan,
                 ]);
+
+                $idRapDetail = $this->rapDetailModel->getInsertID();
+
+                // Build AHS batch
+                if ($idMaster && isset($bulkAhs[$idMaster])) {
+                    $ahsUrutan = 0;
+                    foreach ($bulkAhs[$idMaster] as $row) {
+                        $ahsUrutan++;
+
+                        // Remap Estimator Categories
+                        $katRaw = strtoupper(trim((string) ($row['kategori'] ?? '')));
+                        if ($katRaw === 'A') $jenis = 'bahan';
+                        elseif ($katRaw === 'B') $jenis = 'upah';
+                        elseif ($katRaw === 'C') $jenis = 'alat';
+                        else $jenis = 'bahan';
+
+                        $koefisien = (float) ($row['koefisien'] ?? 0);
+                        $hargaDasar = (float) ($row['master_harga_dasar'] ?? 0);
+                        $hargaSatuan = $koefisien * $hargaDasar;
+
+                        $bulkAhsItemsToInsert[] = [
+                            'id_rap_detail' => $idRapDetail,
+                            'jenis_item'    => $jenis,
+                            'nama_item'     => $row['nama_kategori'] ?? '-',
+                            'koefisien'     => $koefisien,
+                            'satuan'        => $row['satuan_final'] ?? $row['satuan_kategori'] ?? '',
+                            'harga_dasar'   => $hargaDasar,
+                            'harga_satuan'  => $hargaSatuan,
+                            'merk'          => $row['merk'] ?? null,
+                            'spesifikasi'   => $row['spesifikasi'] ?? null,
+                            'urutan'        => $ahsUrutan,
+                            'keterangan'    => null,
+                        ];
+                    }
+                }
+            }
+
+            // 3. Insert AHS in 1 query
+            if (!empty($bulkAhsItemsToInsert)) {
+                $this->rapDetailItemModel->insertBatch($bulkAhsItemsToInsert);
             }
 
             $this->recalculateRapTotal($rapId);
@@ -828,53 +945,9 @@ class RapController extends BaseController
                 ]);
             }
 
-            $ahsRows = $this->ahsModel
-                ->where('id_pekerjaan', $idPekerjaan)
-                ->orderBy('kategori', 'ASC')
-                ->orderBy('id_ahs', 'ASC')
-                ->findAll();
-
-            if (empty($ahsRows)) {
-                return $this->response->setJSON([
-                    'status'  => 'success',
-                    'message' => 'Tidak ada rincian AHS pada estimator',
-                ]);
-            }
-
             $db->transStart();
 
-            $this->rapDetailItemModel
-                ->where('id_rap_detail', $idRapDetail)
-                ->delete();
-
-            $urutan = 0;
-
-            foreach ($ahsRows as $row) {
-                $urutan++;
-
-                $jenis = strtolower(trim((string) ($row['kategori'] ?? '')));
-                if (!in_array($jenis, ['bahan', 'alat', 'upah'], true)) {
-                    $jenis = 'bahan';
-                }
-
-                $koefisien   = (float) ($row['koefisien'] ?? 0);
-                $hargaDasar  = (float) ($row['harga_dasar'] ?? 0);
-                $hargaSatuan = $koefisien * $hargaDasar;
-
-                $this->rapDetailItemModel->insert([
-                    'id_rap_detail' => $idRapDetail,
-                    'jenis_item'    => $jenis,
-                    'nama_item'     => $row['nama_kategori'] ?? '-',
-                    'koefisien'     => $koefisien,
-                    'satuan'        => $row['satuan_kategori'] ?? '',
-                    'harga_dasar'   => $hargaDasar,
-                    'harga_satuan'  => $hargaSatuan,
-                    'merk'          => $row['merk'] ?? null,
-                    'spesifikasi'   => $row['spesifikasi'] ?? null,
-                    'urutan'        => $urutan,
-                    'keterangan'    => $row['keterangan'] ?? null,
-                ]);
-            }
+            $this->_copyAhsEstimatorInternal($idRapDetail, $idPekerjaan);
 
             $db->transComplete();
 
@@ -895,6 +968,62 @@ class RapController extends BaseController
                 'status'  => 'error',
                 'message' => $e->getMessage(),
             ]);
+        }
+    }
+
+    protected function _copyAhsEstimatorInternal(int $idRapDetail, string $idPekerjaan): void
+    {
+        $dbEstimator = \Config\Database::connect('estimator');
+        $ahsRows = $dbEstimator->table('ahs a')
+            ->select('a.*, COALESCE(b.harga_dasar, u.harga_dasar, al.harga_dasar, 0) as master_harga_dasar')
+            ->join('bahan_utama b', "a.id_kategori = b.id_bahan AND a.kategori = 'A'", 'left')
+            ->join('upah_utama u', "a.id_kategori = u.id_upah AND a.kategori = 'B'", 'left')
+            ->join('alat_utama al', "a.id_kategori = al.id_alat AND a.kategori = 'C'", 'left')
+            ->where('a.id_proyek', 1)
+            ->where('a.id_pekerjaan', $idPekerjaan)
+            ->get()->getResultArray();
+
+        if (empty($ahsRows)) {
+            return;
+        }
+
+        $this->rapDetailItemModel
+            ->where('id_rap_detail', $idRapDetail)
+            ->delete();
+
+        $urutan = 0;
+        $toInsert = [];
+
+        foreach ($ahsRows as $row) {
+            $urutan++;
+
+            $katRaw = strtoupper(trim((string) ($row['kategori'] ?? '')));
+            if ($katRaw === 'A') $jenis = 'bahan';
+            elseif ($katRaw === 'B') $jenis = 'upah';
+            elseif ($katRaw === 'C') $jenis = 'alat';
+            else $jenis = 'bahan';
+
+            $koefisien   = (float) ($row['koefisien'] ?? 0);
+            $hargaDasar  = (float) ($row['master_harga_dasar'] ?? 0);
+            $hargaSatuan = $koefisien * $hargaDasar;
+
+            $toInsert[] = [
+                'id_rap_detail' => $idRapDetail,
+                'jenis_item'    => $jenis,
+                'nama_item'     => $row['nama_kategori'] ?? '-',
+                'koefisien'     => $koefisien,
+                'satuan'        => $row['satuan_kategori'] ?? '',
+                'harga_dasar'   => $hargaDasar,
+                'harga_satuan'  => $hargaSatuan,
+                'merk'          => $row['merk'] ?? null,
+                'spesifikasi'   => $row['spesifikasi'] ?? null,
+                'urutan'        => $urutan,
+                'keterangan'    => $row['keterangan'] ?? null,
+            ];
+        }
+
+        if (!empty($toInsert)) {
+            $this->rapDetailItemModel->insertBatch($toInsert);
         }
     }
 

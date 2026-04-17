@@ -27,7 +27,8 @@ export function bindSave() {
                 spesifikasi: (tr.querySelector('.ahs-spesifikasi')?.value || '').trim(),
                 koefisien:   parseFloat(tr.querySelector('.ahs-koef')?.value) || 0,
                 satuan:      (tr.querySelector('.ahs-satuan')?.value      || '').trim(),
-                hargaSatuan: parseFloat(tr.querySelector('.ahs-harga-satuan')?.value) || 0,
+                hargaSatuan: parseFloat(tr.querySelector('.ahs-harga-dasar')?.value)  || 
+                             parseFloat(tr.querySelector('.ahs-harga-satuan')?.value) || 0,
                 sumber:      (tr.querySelector('.ahs-sumber')?.value      || '').trim(),
             };
             

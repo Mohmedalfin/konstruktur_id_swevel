@@ -9,7 +9,8 @@
 
 import { state, tbody, itemLabel, addBahanBtn, addAlatBtn, addUpahBtn,
          fromDbBtn, modalClose, modalCancel, modalConfirm,
-         modalSearch, modalCheckAll, filterBtns, modalTbody } from './core/state.js';
+         modalSearch, modalCheckAll, filterBtns, modalTbody,
+         tableSearch, sourceLabel } from './core/state.js';
 import { fetchAhsDatabase, fetchRincianAHS }               from './core/data.js';
 import { addRow, renderRow, recalcTotals }                     from './components/render.js';
 import { openModal, closeModal, renderModalRows, updateModalCount,
@@ -30,6 +31,9 @@ if (!tbody) {
         try {
             const namaItem = sessionStorage.getItem('ahs_item_label') || '—';
             if (itemLabel) itemLabel.textContent = namaItem.toUpperCase();
+            
+            const sumber = sessionStorage.getItem('ahs_item_source') || 'PUPR';
+            if (sourceLabel) sourceLabel.textContent = sumber.toUpperCase();
         } catch (_) {}
 
         // ── Render initial rows ───────────────────────────────────────────
@@ -55,6 +59,47 @@ if (!tbody) {
         addAlatBtn?.addEventListener('click',  () => addRow('alat'));
         addUpahBtn?.addEventListener('click',  () => addRow('upah'));
         fromDbBtn?.addEventListener('click',   () => openModal());
+
+        // ── Table Search (Local) ─────────────────────────────────────────
+        let tableSearchTimeout = null;
+        tableSearch?.addEventListener('input', function() {
+            if (tableSearchTimeout) clearTimeout(tableSearchTimeout);
+            tableSearchTimeout = setTimeout(() => {
+                const q = (tableSearch.value || '').trim().toLowerCase();
+                const rows = tbody.querySelectorAll('.ahs-row');
+                rows.forEach(row => {
+                    const text = row.querySelector('.ahs-uraian')?.value.toLowerCase() || '';
+                    if (text.includes(q)) {
+                        row.classList.remove('hidden');
+                    } else {
+                        row.classList.add('hidden');
+                    }
+                });
+                
+                // Toggle headers/footers if their rows are all hidden
+                ['bahan', 'upah', 'alat'].forEach(tipe => {
+                    const typeRows = Array.from(tbody.querySelectorAll(`.ahs-row[data-tipe="${tipe}"]`));
+                    const anyVisible = typeRows.some(r => !r.classList.contains('hidden'));
+                    
+                    const header = tbody.querySelector(`.ahs-category-header[data-tipe="${tipe}"]`);
+                    const f1 = tbody.querySelector(`.ahs-group-f1-${tipe}`);
+                    const f2 = tbody.querySelector(`.ahs-group-f2-${tipe}`);
+                    const f3 = tbody.querySelector(`.ahs-group-f3-${tipe}`);
+                    
+                    if (!anyVisible && q !== '') {
+                        header?.classList.add('hidden');
+                        f1?.classList.add('hidden');
+                        f2?.classList.add('hidden');
+                        f3?.classList.add('hidden');
+                    } else {
+                        header?.classList.remove('hidden');
+                        f1?.classList.remove('hidden');
+                        f2?.classList.remove('hidden');
+                        f3?.classList.remove('hidden');
+                    }
+                });
+            }, 300);
+        });
 
         // ── Modal events ──────────────────────────────────────────────────
         modalClose?.addEventListener('click',   closeModal);
@@ -129,6 +174,13 @@ if (!tbody) {
     });
 
 } // end guard
+
+// Global helper for Back button
+window.goBackToRab = function() {
+    let returnUrl = '';
+    try { returnUrl = sessionStorage.getItem('rab_return_url'); } catch (_) {}
+    window.location.href = returnUrl ? returnUrl : '/menu-rap?mode=new';
+};
 
 // Global helper for Back button
 window.goBackToRab = function() {

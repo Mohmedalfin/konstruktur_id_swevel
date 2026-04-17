@@ -4,128 +4,114 @@ $wrapperClass = $wrapperClass ?? 'w-full';
 
 <div class="<?= $wrapperClass ?> px-3 sm:px-6 lg:px-8 py-4 md:py-8">
 
-    <!-- ── Context Banner ──────────────────────────────────────────── -->
-    <div class="flex items-center gap-3 bg-primary text-white px-5 py-3 rounded-xl text-sm shadow-sm mb-6">
-        <svg class="w-4 h-4 shrink-0 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-        </svg>
-        <span class="text-white/70 text-xs uppercase tracking-widest font-semibold shrink-0">Item BOQ</span>
-        <span class="w-px h-4 bg-white/20 shrink-0"></span>
-        <span id="ahs-item-label" class="text-secondary font-bold tracking-wide truncate">—</span>
+    <!-- ── Header Info (Branding Blue) ──────────────────────────────── -->
+    <div class="bg-navbar text-white px-5 py-3.5 rounded-t-xl text-sm shadow-sm flex items-center justify-between border-b border-navbar-line">
+        <div class="flex items-center gap-3">
+            <div class="p-1.5 bg-blue-500/10 rounded-lg text-blue-400">
+                <i class="fas fa-file-invoice text-sm"></i>
+            </div>
+            <div class="flex flex-col md:flex-row md:items-center md:gap-2">
+                <span class="text-white font-bold tracking-tight">Rincian AHS:</span>
+                <span id="ahs-item-label" class="text-white/80 font-medium truncate italic text-xs md:text-sm">—</span>
+            </div>
+        </div>
+        <div class="text-[10px] md:text-xs font-semibold opacity-80 uppercase tracking-widest hidden sm:block">
+            Sumber: <span id="ahs-source-label" class="text-blue-400 font-bold">PUPR</span>
+        </div>
+    </div>
+
+    <!-- ── Summary Section (Centered Price & Right Search) ───────────── -->
+    <div class="bg-white border-x border-table-border py-6 px-4 md:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
+        
+        <!-- Left Spacer (to keep price centered) -->
+        <div class="hidden md:block w-64"></div>
+
+        <!-- Center: Price Highlight -->
+        <div class="flex flex-col items-center gap-2">
+            <p class="text-[10px] md:text-xs font-bold text-table-subtle uppercase tracking-[0.2em]">Harga Satuan</p>
+            <div class="bg-[#eef2ff] border border-blue-200 px-10 py-2.5 rounded-xl shadow-[0_0_20px_rgba(59,130,246,0.1)] transition-transform hover:scale-105 duration-300">
+                <span id="ahs-total-keseluruhan" class="text-2xl md:text-3xl font-black text-blue-700 tabular-nums tracking-tighter">Rp 0</span>
+            </div>
+        </div>
+
+        <!-- Right: Search -->
+        <div class="w-full md:w-64 flex flex-col gap-1.5 self-end">
+            <label class="text-[10px] font-bold text-table-subtle uppercase tracking-wider ml-1">Cari Data:</label>
+            <div class="relative">
+                <input type="text" id="ahs-table-search" placeholder="Masukkan kata kunci..."
+                    class="w-full pl-9 pr-4 py-2.5 border border-table-border rounded-xl text-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none bg-slate-50/50 shadow-inner"/>
+                <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-table-subtle text-xs"></i>
+            </div>
+        </div>
     </div>
 
     <!-- ── Toolbar ─────────────────────────────────────────────────── -->
-    <div class="flex flex-wrap items-center gap-2 mb-5">
-
-            <!-- Dari Daftar AHS (modal) -->
-            <button id="ahs-from-db-btn" type="button"
-                class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-amber-400 hover:bg-amber-500 text-black text-xs font-semibold transition-all duration-150 focus:outline-none active:scale-95 shadow-sm">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"/>
-                </svg>
-                Daftar AHS
+    <div class="bg-slate-50/80 border border-table-border p-3 flex flex-wrap items-center justify-center gap-2 mb-6 rounded-b-xl shadow-sm backdrop-blur-sm">
+        <button id="ahs-from-db-btn" type="button"
+            class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg bg-slate-800 hover:bg-black text-white text-[11px] font-bold transition-all duration-150 focus:outline-none active:scale-95 shadow-md">
+            <i class="fas fa-database text-xs text-blue-400"></i>
+            DAFTAR AHS
+        </button>
+        <span class="w-px h-8 bg-slate-300 mx-2 hidden sm:block"></span>
+        <div class="flex items-center gap-2 bg-white p-1 rounded-lg border border-slate-200 shadow-inner">
+            <button id="ahs-add-bahan-btn" type="button" class="group flex items-center gap-1.5 px-3 py-2 rounded-md hover:bg-blue-50 text-blue-600 text-[10px] font-bold transition-all">
+                <i class="fas fa-plus-circle text-blue-400 group-hover:text-blue-600"></i> BAHAN
             </button>
-
-            <!-- Tambah Bahan -->
-            <button id="ahs-add-bahan-btn" type="button"
-                class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-semibold transition-all duration-150 focus:outline-none active:scale-95 shadow-sm">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                </svg>
-                Bahan
+            <button id="ahs-add-upah-btn" type="button" class="group flex items-center gap-1.5 px-3 py-2 rounded-md hover:bg-indigo-50 text-indigo-600 text-[10px] font-bold transition-all">
+                <i class="fas fa-plus-circle text-indigo-400 group-hover:text-indigo-600"></i> UPAH
             </button>
-
-            <!-- Tambah Alat -->
-            <button id="ahs-add-alat-btn" type="button"
-                class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold transition-all duration-150 focus:outline-none active:scale-95 shadow-sm">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                </svg>
-                Alat
+            <button id="ahs-add-alat-btn" type="button" class="group flex items-center gap-1.5 px-3 py-2 rounded-md hover:bg-cyan-50 text-cyan-600 text-[10px] font-bold transition-all">
+                <i class="fas fa-plus-circle text-cyan-400 group-hover:text-cyan-600"></i> ALAT
             </button>
-
-            <!-- Tambah Upah -->
-            <button id="ahs-add-upah-btn" type="button"
-                class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-violet-500 hover:bg-violet-600 text-white text-xs font-semibold transition-all duration-150 focus:outline-none active:scale-95 shadow-sm">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                </svg>
-                Upah
-            </button>
-
+        </div>
     </div>
 
     <!-- ── Table Container ──────────────────────────────────────────── -->
-    <div class="overflow-x-auto rounded-xl shadow-md border border-table-border bg-white">
+    <div class="overflow-x-auto rounded-xl shadow-lg border border-table-border bg-white">
         <table class="w-full text-left border-collapse min-w-[1300px]" id="ahs-table">
 
             <colgroup>
-                <col style="width: 3rem">
-                <col style="width: 6rem">
-                <col style="min-width: 18rem">
-                <col style="width: 8rem">
-                <col style="width: 10rem">
-                <col style="width: 7rem">
-                <col style="width: 6rem">
-                <col style="width: 10rem">
-                <col style="width: 8rem">
-                <col style="width: 10rem">
-                <col style="width: 4rem">
+                <col style="width: 4rem">  <!-- No -->
+                <col style="min-width: 25rem"> <!-- Uraian -->
+                <col style="width: 8rem">  <!-- Koefisien -->
+                <col style="width: 6rem">  <!-- Satuan -->
+                <col style="width: 10rem"> <!-- Harga Dasar -->
+                <col style="width: 10rem"> <!-- Harga Satuan (Total) -->
+                <col style="width: 8rem">  <!-- Aksi -->
+                <col style="width: 10rem"> <!-- Merk -->
+                <col style="width: 10rem"> <!-- Spesifikasi -->
             </colgroup>
 
             <thead>
                 <tr class="bg-primary text-white">
-                    <th scope="col" class="px-3 md:px-4 py-3 md:py-3.5 text-center text-[10px] md:text-xs font-semibold uppercase tracking-wider">No</th>
-                    <th scope="col" class="px-3 md:px-4 py-3 md:py-3.5 text-center text-[10px] md:text-xs font-semibold uppercase tracking-wider">Tipe</th>
-                    <th scope="col" class="px-3 md:px-4 py-3 md:py-3.5 text-[10px] md:text-xs font-semibold uppercase tracking-wider">Uraian</th>
-                    <th scope="col" class="px-3 md:px-4 py-3 md:py-3.5 text-[10px] md:text-xs font-semibold uppercase tracking-wider">Merk</th>
-                    <th scope="col" class="px-3 md:px-4 py-3 md:py-3.5 text-[10px] md:text-xs font-semibold uppercase tracking-wider">Spesifikasi</th>
-                    <th scope="col" class="px-3 md:px-4 py-3 md:py-3.5 text-center text-[10px] md:text-xs font-semibold uppercase tracking-wider">Koefisien</th>
-                    <th scope="col" class="px-3 md:px-4 py-3 md:py-3.5 text-center text-[10px] md:text-xs font-semibold uppercase tracking-wider">Satuan</th>
-                    <th scope="col" class="px-3 md:px-4 py-3 md:py-3.5 text-right text-[10px] md:text-xs font-semibold uppercase tracking-wider">Harga Satuan</th>
-                    <th scope="col" class="px-3 md:px-4 py-3 md:py-3.5 text-[10px] md:text-xs font-semibold uppercase tracking-wider">Sumber</th>
-                    <th scope="col" class="px-3 md:px-4 py-3 md:py-3.5 text-right text-[10px] md:text-xs font-semibold uppercase tracking-wider">Jumlah Harga</th>
-                    <th scope="col" class="px-3 md:px-4 py-3 md:py-3.5 text-center text-[10px] md:text-xs font-semibold uppercase tracking-wider">Aksi</th>
+                    <th class="px-3 md:px-4 py-3 md:py-3.5 text-center text-[10px] md:text-xs font-bold uppercase tracking-wider whitespace-nowrap">No.</th>
+                    <th class="px-3 md:px-4 py-3 md:py-3.5 text-[10px] md:text-xs font-bold uppercase tracking-wider whitespace-nowrap">Uraian Pekerjaan</th>
+                    <th class="px-3 md:px-4 py-3 md:py-3.5 text-center text-[10px] md:text-xs font-bold uppercase tracking-wider whitespace-nowrap">Koefisien</th>
+                    <th class="px-3 md:px-4 py-3 md:py-3.5 text-center text-[10px] md:text-xs font-bold uppercase tracking-wider whitespace-nowrap">Satuan</th>
+                    <th class="px-3 md:px-4 py-3 md:py-3.5 text-right text-[10px] md:text-xs font-bold uppercase tracking-wider whitespace-nowrap">Harga Dasar</th>
+                    <th class="px-3 md:px-4 py-3.5 text-right text-[10px] md:text-xs font-bold uppercase tracking-wider whitespace-nowrap">Harga Satuan</th>
+                    <th class="px-3 md:px-4 py-3.5 text-center text-[10px] md:text-xs font-bold uppercase tracking-wider whitespace-nowrap">Aksi</th>
+                    <th class="px-3 md:px-4 py-3.5 text-[10px] md:text-xs font-bold uppercase tracking-wider whitespace-nowrap">Merk</th>
+                    <th class="px-3 md:px-4 py-3.5 text-[10px] md:text-xs font-bold uppercase tracking-wider whitespace-nowrap">Spesifikasi</th>
                 </tr>
             </thead>
 
             <tbody id="ahs-tbody" class="text-table-body text-[11px] md:text-[13px]">
-                <!-- rows injected by ajax_ahs.js -->
+                <!-- rows injected by javascript -->
             </tbody>
 
-            <tfoot id="ahs-tfoot">
-                <tr class="bg-emerald-50 border-t border-emerald-200">
-                    <td colspan="9" class="px-3 md:px-4 py-1.5 text-right text-[10px] md:text-xs font-semibold text-emerald-700 uppercase tracking-wide whitespace-nowrap">Total Bahan</td>
-                    <td id="ahs-total-bahan" class="px-3 md:px-4 py-1.5 text-right text-[10px] md:text-xs font-bold tabular-nums text-emerald-700 whitespace-nowrap">Rp 0</td>
-                    <td class="px-3 md:px-4 py-1.5"></td>
-                </tr>
-                <tr class="bg-blue-50 border-t border-blue-200">
-                    <td colspan="9" class="px-3 md:px-4 py-1.5 text-right text-[10px] md:text-xs font-semibold text-blue-700 uppercase tracking-wide whitespace-nowrap">Total Alat</td>
-                    <td id="ahs-total-alat" class="px-3 md:px-4 py-1.5 text-right text-[10px] md:text-xs font-bold tabular-nums text-blue-700 whitespace-nowrap">Rp 0</td>
-                    <td class="px-3 md:px-4 py-1.5"></td>
-                </tr>
-                <tr class="bg-violet-50 border-t border-violet-200">
-                    <td colspan="9" class="px-3 md:px-4 py-1.5 text-right text-[10px] md:text-xs font-semibold text-violet-700 uppercase tracking-wide whitespace-nowrap">Total Upah</td>
-                    <td id="ahs-total-upah" class="px-3 md:px-4 py-1.5 text-right text-[10px] md:text-xs font-bold tabular-nums text-violet-700 whitespace-nowrap">Rp 0</td>
-                    <td class="px-3 md:px-4 py-1.5"></td>
-                </tr>
-                <tr class="bg-table-category text-white">
-                    <td colspan="9" class="px-3 md:px-4 py-2 text-center text-[10px] md:text-xs font-bold uppercase tracking-wide whitespace-nowrap">Total Keseluruhan</td>
-                    <td id="ahs-total-keseluruhan" class="px-3 md:px-4 py-2 text-right text-[10px] md:text-xs font-bold tabular-nums whitespace-nowrap">Rp 0</td>
-                    <td class="px-3 md:px-4 py-2"></td>
-                </tr>
-            </tfoot>
+        </table>
+    </div>
 
         </table>
     </div>
 
     <!-- ── Simpan Bar ───────────────────────────────────────────────── -->
-    <div class="mt-4 flex justify-end">
+    <div class="mt-8 mb-10 flex justify-center">
         <button id="ahs-simpan-btn" type="button"
-            class="pointer inline-flex items-center gap-2 bg-primary hover:bg-primary-hover active:scale-95 text-white px-8 py-2.5 rounded-lg text-xs font-semibold tracking-wide shadow-md transition-all duration-150 focus:outline-none">
-            Simpan Rincian AHS
+            class="pointer inline-flex items-center gap-2 bg-primary hover:bg-primary-hover active:scale-95 text-white px-10 py-2.5 rounded-lg text-xs font-bold tracking-widest shadow-md transition-all duration-150 focus:outline-none uppercase">
+            <i class="fas fa-check-circle"></i>
+            Selesai
         </button>
     </div>
 

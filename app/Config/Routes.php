@@ -54,6 +54,13 @@ $routes->group('api', ['namespace' => 'App\Controllers\Api'], function ($routes)
     $routes->post('pekerjaan/custom', 'PekerjaanController::storeCustom');
     $routes->put('pekerjaan/custom/(:num)', 'PekerjaanController::updateCustom/$1');
     $routes->delete('pekerjaan/custom/(:num)', 'PekerjaanController::deleteCustom/$1');
+    
+    // Wilayah & Template (untuk pemilihan harga resmi per proyek)
+    $routes->get('wilayah', 'WilayahController::index');
+    $routes->get('wilayah/provinces', 'WilayahController::provinces');
+    $routes->get('wilayah/cities', 'WilayahController::cities');
+    $routes->get('wilayah/templates', 'WilayahController::templates');
+
     $routes->get('ahs', 'AhsController::index');
     $routes->get('ahs/rincian/(:num)', 'AhsController::getRincian/$1');
     $routes->post('ahs/rincian', 'AhsController::saveRincian');

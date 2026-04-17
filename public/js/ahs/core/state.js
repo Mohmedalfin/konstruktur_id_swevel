@@ -10,9 +10,8 @@ export const addBahanBtn   = document.getElementById('ahs-add-bahan-btn');
 export const addAlatBtn    = document.getElementById('ahs-add-alat-btn');
 export const addUpahBtn    = document.getElementById('ahs-add-upah-btn');
 export const simpanBtn     = document.getElementById('ahs-simpan-btn');
-export const totalBahanEl  = document.getElementById('ahs-total-bahan');
-export const totalAlatEl   = document.getElementById('ahs-total-alat');
-export const totalUpahEl   = document.getElementById('ahs-total-upah');
+export const tableSearch   = document.getElementById('ahs-table-search');
+export const sourceLabel    = document.getElementById('ahs-source-label');
 export const totalKeselEl  = document.getElementById('ahs-total-keseluruhan');
 
 // ── Modal ──────────────────────────────────────────────────────────────────
