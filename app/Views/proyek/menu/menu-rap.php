@@ -1,16 +1,17 @@
 <?php
 // Read GET params passed from dashboard.php links
-$rabId   = $idProject ?? null;
+$rabId = $idProject ?? null;
 $rabMode = $rabId ? 'readonly' : null;
 
 // Sanitize mode
-if (! in_array($rabMode, ['readonly', 'new'], true)) {
+if (!in_array($rabMode, ['readonly', 'new'], true)) {
     $rabMode = null;
 }
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,9 +19,10 @@ if (! in_array($rabMode, ['readonly', 'new'], true)) {
     <link href="<?= base_url('assets/css/output.css') ?>" rel="stylesheet">
     <link rel="stylesheet" href="<?= base_url('assets/fontawesome/css/all.min.css') ?>">
 </head>
+
 <body class="bg-gray-50 min-h-screen">
     <?php echo view('partials/navbar'); ?>
-    <?php echo view('partials/topbar', ['title' => 'RAP Realisasi', 'subtitle' => '']); ?>
+    <?php echo view('partials/topbar', ['title' => 'RAP Rencana', 'subtitle' => '']); ?>
 
     <?php echo view('partials/table-rab', ['tableVisible' => true]); ?>
 
@@ -66,4 +68,5 @@ if (! in_array($rabMode, ['readonly', 'new'], true)) {
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <script type="module" src="<?= base_url('js/rab/index.js') ?>"></script>
 </body>
+
 </html>

@@ -528,7 +528,7 @@ function renderItemRows(items, catId, subClass, isEditable, prefix = '', depth =
                 </td>
                 <td class="px-3 md:px-5 py-2 md:py-2.5 text-center">
                     <div class="inline-flex items-center gap-1.5">
-                        ${isEditable && isAddDeleteAllowed ? `
+                        ${isEditable && isAddDeleteAllowed && depth < 2 ? `
                             <button
                                 type="button"
                                 class="add-nested-item-btn inline-flex items-center justify-center w-7 h-7 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border border-emerald-200 transition-colors focus:outline-none"
