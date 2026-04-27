@@ -685,61 +685,29 @@ class RapController extends BaseController
             $bulkAhs = [];
             if (!empty($masterIds)) {
                 $dbEstimator = \Config\Database::connect('estimator');
-                $idWilayah   = $project['id_wilayah'] ?? null;
-                $tahun       = $project['id_template'] ?? null; // Kita simpan tahun di id_template untuk BPS
-
                 $inPlaceholders = implode(',', array_fill(0, count($masterIds), '?'));
 
-                if (!empty($idWilayah)) {
-                    // ── HARGA REGIONAL: pakai bua_bps_utama berdasarkan wilayah & tahun ──
-                    $yearFilter = !empty($tahun) ? "AND btp.tahun = '{$tahun}'" : "";
-                    
-                    $sql = "
-                        SELECT
-                            au.id_ahs,
-                            au.id_pekerjaan,
-                            au.nama_pekerjaan,
-                            au.kategori,
-                            au.id_kategori,
-                            au.nama_kategori,
-                            au.koefisien,
-                            au.satuan_kategori,
-                            au.merk,
-                            au.spesifikasi,
-                            COALESCE(btp.harga_dasar, 0) AS master_harga_dasar,
-                            COALESCE(btp.satuan, au.satuan_kategori) AS satuan_final
-                        FROM ahs_utama au
-                        LEFT JOIN bua_bps_utama btp
-                            ON  btp.id_wilayah  = '{$idWilayah}'
-                            AND btp.id_kategori = au.id_kategori
-                            AND btp.kategori    = au.kategori
-                            {$yearFilter}
-                            AND (btp.utama = '1' OR btp.utama IS NULL OR btp.utama = '')
-                        WHERE au.id_pekerjaan IN ($inPlaceholders)
-                        GROUP BY au.id_ahs -- Hindari duplikat jika ada multiple entry di BPS
-                        ORDER BY au.kategori, au.id_ahs
-                    ";
-                } else {
-                    // ── FALLBACK: tidak ada wilayah, pakai ahs_utama saja (harga 0) ──
-                    $sql = "
-                        SELECT
-                            au.id_ahs,
-                            au.id_pekerjaan,
-                            au.nama_pekerjaan,
-                            au.kategori,
-                            au.id_kategori,
-                            au.nama_kategori,
-                            au.koefisien,
-                            au.satuan_kategori,
-                            au.merk,
-                            au.spesifikasi,
-                            0 AS master_harga_dasar,
-                            au.satuan_kategori AS satuan_final
-                        FROM ahs_utama au
-                        WHERE au.id_pekerjaan IN ($inPlaceholders)
-                        ORDER BY au.kategori, au.id_ahs
-                    ";
-                }
+                $sql = "
+                    SELECT
+                        a.id_ahs,
+                        a.id_pekerjaan,
+                        a.nama_pekerjaan,
+                        a.kategori,
+                        a.id_kategori,
+                        a.nama_kategori,
+                        a.koefisien,
+                        a.satuan_kategori,
+                        a.merk,
+                        a.spesifikasi,
+                        COALESCE(b.harga_dasar, u.harga_dasar, al.harga_dasar, 0) AS master_harga_dasar,
+                        a.satuan_kategori AS satuan_final
+                    FROM ahs a
+                    LEFT JOIN bahan_utama b ON a.id_kategori = b.id_bahan AND a.kategori = 'A'
+                    LEFT JOIN upah_utama u ON a.id_kategori = u.id_upah AND a.kategori = 'B'
+                    LEFT JOIN alat_utama al ON a.id_kategori = al.id_alat AND a.kategori = 'C'
+                    WHERE a.id_proyek = 1 AND a.id_pekerjaan IN ($inPlaceholders)
+                    ORDER BY a.kategori, a.id_ahs
+                ";
 
                 $ahsUtamaRows = $dbEstimator->query($sql, $masterIds)->getResultArray();
 

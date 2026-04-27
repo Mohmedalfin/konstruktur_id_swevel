@@ -45,25 +45,12 @@ $wrapperClass = $wrapperClass ?? 'w-full';
         </div>
     </div>
 
-    <!-- ── Toolbar ─────────────────────────────────────────────────── -->
-    <div class="bg-slate-50/80 border border-table-border p-3 flex flex-wrap items-center justify-center gap-2 mb-6 rounded-b-xl shadow-sm backdrop-blur-sm">
-        <button id="ahs-from-db-btn" type="button"
-            class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg bg-slate-800 hover:bg-black text-white text-[11px] font-bold transition-all duration-150 focus:outline-none active:scale-95 shadow-md">
-            <i class="fas fa-database text-xs text-blue-400"></i>
-            DAFTAR AHS
-        </button>
-        <span class="w-px h-8 bg-slate-300 mx-2 hidden sm:block"></span>
-        <div class="flex items-center gap-2 bg-white p-1 rounded-lg border border-slate-200 shadow-inner">
-            <button id="ahs-add-bahan-btn" type="button" class="group flex items-center gap-1.5 px-3 py-2 rounded-md hover:bg-blue-50 text-blue-600 text-[10px] font-bold transition-all">
-                <i class="fas fa-plus-circle text-blue-400 group-hover:text-blue-600"></i> BAHAN
-            </button>
-            <button id="ahs-add-upah-btn" type="button" class="group flex items-center gap-1.5 px-3 py-2 rounded-md hover:bg-indigo-50 text-indigo-600 text-[10px] font-bold transition-all">
-                <i class="fas fa-plus-circle text-indigo-400 group-hover:text-indigo-600"></i> UPAH
-            </button>
-            <button id="ahs-add-alat-btn" type="button" class="group flex items-center gap-1.5 px-3 py-2 rounded-md hover:bg-cyan-50 text-cyan-600 text-[10px] font-bold transition-all">
-                <i class="fas fa-plus-circle text-cyan-400 group-hover:text-cyan-600"></i> ALAT
-            </button>
-        </div>
+    <!-- ── Toolbar (Hidden) ─────────────────────────────────────────────────── -->
+    <div id="ahs-toolbar-old" class="hidden">
+        <button id="ahs-from-db-btn"></button>
+        <button id="ahs-add-bahan-btn"></button>
+        <button id="ahs-add-upah-btn"></button>
+        <button id="ahs-add-alat-btn"></button>
     </div>
 
     <!-- ── Table Container ──────────────────────────────────────────── -->
@@ -122,103 +109,116 @@ $wrapperClass = $wrapperClass ?? 'w-full';
      MODAL — Pilih dari Daftar AHS
 ════════════════════════════════════════════════════════════════ -->
 <div id="ahs-modal-overlay"
-    class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+    class="fixed inset-0 z-50 hidden opacity-0 transition-opacity duration-300 flex flex-col" style="background:#fff">
 
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl h-[600px] flex flex-col overflow-hidden">
+    <div id="ahs-modal-content" class="w-full h-full flex flex-col transform -translate-y-full transition-transform duration-500 ease-out overflow-hidden">
 
-        <!-- Modal Header -->
-        <div class="flex items-center justify-between px-6 py-4 border-b border-table-border bg-primary text-white rounded-t-2xl shrink-0">
-            <div class="flex items-center gap-3">
-                <svg class="w-5 h-5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"/>
-                </svg>
-                <div>
-                    <h3 class="text-sm font-bold tracking-wide">Pilih dari Daftar AHS</h3>
-                    <p class="text-[11px] text-white/60">Cari dan pilih item AHS untuk ditambahkan</p>
+        <!-- Body: Left Filter + Right Table -->
+        <div class="flex flex-1 overflow-hidden">
+
+            <!-- ── Left Panel: Filter ───────────────────────── -->
+            <div class="w-56 shrink-0 flex flex-col bg-white border-r border-gray-200 overflow-y-auto">
+
+                <!-- Filter Header -->
+                <div class="bg-brand-dark text-white px-4 py-3 flex items-center gap-2 shrink-0">
+                    <i class="fas fa-filter text-xs"></i>
+                    <span class="text-xs font-bold uppercase tracking-wider">Filter Material</span>
+                </div>
+
+                <div class="p-3 flex flex-col gap-4">
+                    <!-- Search Nama -->
+                    <div>
+                        <label class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block mb-1" id="ahs-filter-label-nama">Nama Bahan</label>
+                        <input id="ahs-modal-search" type="text" placeholder="Ketik Nama Bahan"
+                            class="w-full px-2.5 py-1.5 border border-gray-200 text-xs focus:outline-none focus:border-brand-dark bg-white"/>
+                    </div>
+
+                    <!-- Filter Tipe (hidden buttons kept for JS compatibility) -->
+                    <div class="hidden">
+                        <button data-filter="all"   class="ahs-modal-filter-btn">Semua</button>
+                        <button data-filter="bahan" class="ahs-modal-filter-btn">Bahan</button>
+                        <button data-filter="alat"  class="ahs-modal-filter-btn">Alat</button>
+                        <button data-filter="upah"  class="ahs-modal-filter-btn">Upah</button>
+                    </div>
                 </div>
             </div>
-            <button id="ahs-modal-close" type="button"
-                class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 transition-colors focus:outline-none">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
+
+            <!-- ── Right Panel: Tabs + Table ────────────────── -->
+            <div class="flex-1 flex flex-col overflow-hidden">
+
+                <!-- Tab Bar -->
+                <div class="flex border-b border-gray-200 bg-white shrink-0">
+                    <button class="ahs-source-tab px-5 py-3 text-xs font-semibold border-b-2 border-transparent text-slate-500 hover:text-brand-dark transition-colors whitespace-nowrap focus:outline-none" data-source="proyek">Proyek Terkini</button>
+                    <button class="ahs-source-tab px-5 py-3 text-xs font-semibold border-b-2 border-transparent text-slate-500 hover:text-brand-dark transition-colors whitespace-nowrap focus:outline-none" data-source="suplier">Suplier</button>
+                    <button class="ahs-source-tab px-5 py-3 text-xs font-semibold border-b-2 border-transparent text-slate-500 hover:text-brand-dark transition-colors whitespace-nowrap focus:outline-none" data-source="shbj">SHBJ</button>
+                    <button class="ahs-source-tab px-5 py-3 text-xs font-semibold border-b-2 border-transparent text-slate-500 hover:text-brand-dark transition-colors whitespace-nowrap focus:outline-none" data-source="ikkbps">IKK BPS</button>
+                    <button class="ahs-source-tab px-5 py-3 text-xs font-semibold border-b-2 border-transparent text-slate-500 hover:text-brand-dark transition-colors whitespace-nowrap focus:outline-none" data-source="estimatorid">Estimator.id</button>
+                    <button class="ahs-source-tab px-5 py-3 text-xs font-semibold border-b-2 border-transparent text-slate-500 hover:text-brand-dark transition-colors whitespace-nowrap focus:outline-none" data-source="survey">Survey</button>
+                </div>
+
+                <!-- Table -->
+                <div class="flex-1 overflow-auto">
+                    <table class="w-full text-left border-collapse" id="ahs-modal-table">
+                        <colgroup>
+                            <col style="width: 3rem">   <!-- No -->
+                            <col>                       <!-- Nama Bahan -->
+                            <col style="width: 6rem">   <!-- Satuan -->
+                            <col style="width: 9rem">   <!-- Harga Dasar -->
+                            <col style="width: 8rem">   <!-- Merk -->
+                            <col style="width: 10rem">  <!-- Spesifikasi -->
+                            <col style="width: 10rem">  <!-- Sumber -->
+                            <col style="width: 3rem">   <!-- Checkbox -->
+                        </colgroup>
+                        <thead class="sticky top-0 z-10">
+                            <tr class="bg-brand-dark text-white">
+                                <th class="px-3 py-2.5 text-center text-[10px] font-bold uppercase tracking-wider">No.</th>
+                                <th class="px-3 py-2.5 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
+                                    Nama Bahan
+                                    <i class="fas fa-sort text-[8px] opacity-60 ml-1"></i>
+                                </th>
+                                <th class="px-3 py-2.5 text-center text-[10px] font-bold uppercase tracking-wider">
+                                    Satuan <i class="fas fa-sort text-[8px] opacity-60 ml-0.5"></i>
+                                </th>
+                                <th class="px-3 py-2.5 text-right text-[10px] font-bold uppercase tracking-wider">
+                                    Harga Dasar <i class="fas fa-sort text-[8px] opacity-60 ml-0.5"></i>
+                                </th>
+                                <th class="px-3 py-2.5 text-[10px] font-bold uppercase tracking-wider">
+                                    Merk <i class="fas fa-sort text-[8px] opacity-60 ml-0.5"></i>
+                                </th>
+                                <th class="px-3 py-2.5 text-[10px] font-bold uppercase tracking-wider">
+                                    Spesifikasi <i class="fas fa-sort text-[8px] opacity-60 ml-0.5"></i>
+                                </th>
+                                <th class="px-3 py-2.5 text-[10px] font-bold uppercase tracking-wider">
+                                    Sumber <i class="fas fa-sort text-[8px] opacity-60 ml-0.5"></i>
+                                </th>
+                                <th class="px-3 py-2.5 text-center text-[10px] font-bold uppercase tracking-wider">
+                                    <input id="ahs-modal-check-all" type="checkbox" class="w-3.5 h-3.5 accent-brand-dark cursor-pointer"/>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="ahs-modal-tbody" class="text-[12px] text-slate-700">
+                            <!-- injected by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Footer ───────────────────────────────────────── -->
+        <div class="shrink-0 flex items-center justify-center gap-3 py-3 border-t border-gray-200 bg-slate-50">
+            <p id="ahs-modal-selected-count" class="text-xs text-table-subtle font-medium absolute left-6"></p>
+            <button id="ahs-modal-confirm" type="button" disabled
+                class="px-6 py-2 rounded-full bg-brand-dark hover:bg-brand-dark/90 text-white text-xs font-bold tracking-wide shadow-sm transition-all duration-150 focus:outline-none active:scale-95 disabled:opacity-40 disabled:pointer-events-none">
+                <i class="fas fa-check mr-1.5"></i> Pilih
             </button>
-        </div>
-
-        <!-- Search + Filter -->
-        <div class="px-6 py-4 border-b border-table-border bg-slate-50 shrink-0">
-            <div class="flex flex-col sm:flex-row gap-3">
-
-                <!-- Search -->
-                <div class="relative flex-1">
-                    <input id="ahs-modal-search" type="text" placeholder="Cari nama bahan / alat / pekerja..."
-                        class="w-full pl-9 pr-4 py-2 text-xs border border-table-border rounded-lg bg-white placeholder-table-subtle focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"/>
-                    <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-table-subtle" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
-                </div>
-
-                <!-- Filter Tipe -->
-                <div class="flex items-center gap-1.5 shrink-0">
-                    <button data-filter="all"   class="ahs-modal-filter-btn active-filter px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-150 focus:outline-none">Semua</button>
-                    <button data-filter="bahan" class="ahs-modal-filter-btn px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-150 focus:outline-none">Bahan</button>
-                    <button data-filter="alat"  class="ahs-modal-filter-btn px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-150 focus:outline-none">Alat</button>
-                    <button data-filter="upah"  class="ahs-modal-filter-btn px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-150 focus:outline-none">Upah</button>
-                </div>
-
-            </div>
-        </div>
-
-
-        <div class="flex-1 overflow-auto">
-            <table class="w-full text-left border-collapse table-fixed min-w-[1200px]" id="ahs-modal-table">
-                <colgroup>
-                    <col style="width: 3.25rem">  <!-- Checkbox -->
-                    <col style="width: 6rem">     <!-- ID Item -->
-                    <col style="width: 18rem">    <!-- Uraian -->
-                    <col style="width: 8rem">     <!-- Merk -->
-                    <col style="width: 10rem">    <!-- Spesifikasi -->
-                    <col style="width: 5.5rem">   <!-- Satuan -->
-                    <col style="width: 8rem">     <!-- Harga Satuan -->
-                    <col style="width: 14rem">    <!-- Sumber -->
-                </colgroup>
-                <thead class="sticky top-0 bg-slate-100/90 backdrop-blur-sm z-10 shadow-sm">
-                    <tr>
-                        <th class="px-4 py-3 text-center text-[10px] font-semibold uppercase tracking-wider text-table-subtle">
-                            <input id="ahs-modal-check-all" type="checkbox" class="w-3.5 h-3.5 rounded accent-primary cursor-pointer"/>
-                        </th>
-                        <th class="px-4 py-3 text-center text-[10px] font-semibold uppercase tracking-wider text-table-subtle">ID Item</th>
-                        <th class="px-4 py-3 text-[10px] font-semibold uppercase tracking-wider text-table-subtle">Uraian</th>
-                        <th class="px-4 py-3 text-[10px] font-semibold uppercase tracking-wider text-table-subtle">Merk</th>
-                        <th class="px-4 py-3 text-[10px] font-semibold uppercase tracking-wider text-table-subtle">Spesifikasi</th>
-                        <th class="px-4 py-3 text-center text-[10px] font-semibold uppercase tracking-wider text-table-subtle">Satuan</th>
-                        <th class="px-4 py-3 text-right text-[10px] font-semibold uppercase tracking-wider text-table-subtle">Harga Satuan</th>
-                        <th class="px-4 py-3 text-[10px] font-semibold uppercase tracking-wider text-table-subtle">Sumber</th>
-                    </tr>
-                </thead>
-                <tbody id="ahs-modal-tbody" class="text-[11px] md:text-[13px] text-table-body">
-                    <!-- injected by JS -->
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Modal Footer -->
-        <div class="flex items-center justify-between px-6 py-4 border-t border-table-border bg-slate-50 shrink-0 rounded-b-2xl">
-            <p id="ahs-modal-selected-count" class="text-xs text-table-subtle font-medium">
-                Belum ada item dipilih
-            </p>
-            <div class="flex items-center gap-2">
-                <button id="ahs-modal-cancel" type="button"
-                    class="px-4 py-2 rounded-lg border border-table-border bg-white hover:bg-slate-50 text-table-body text-xs font-medium transition-all focus:outline-none active:scale-95">
-                    Batal
-                </button>
-                <button id="ahs-modal-confirm" type="button" disabled
-                    class="px-5 py-2 rounded-lg bg-primary hover:bg-primary-hover text-white text-xs font-semibold tracking-wide shadow-sm transition-all duration-150 focus:outline-none active:scale-95 disabled:opacity-40 disabled:pointer-events-none">
-                    Tambahkan AHS
-                </button>
-            </div>
+            <button id="ahs-modal-cancel" type="button"
+                class="px-6 py-2 rounded-full border border-brand-dark text-brand-dark text-xs font-bold tracking-wide transition-all focus:outline-none active:scale-95 hover:bg-brand-dark/5">
+                <i class="fas fa-times mr-1.5"></i> BATAL
+            </button>
+            <!-- Hidden close button for JS compat -->
+            <button id="ahs-modal-close" class="hidden"></button>
         </div>
 
     </div>
 </div>
+

@@ -98,9 +98,25 @@ function _ensureHeader(tipe) {
             <td colspan="5" class="px-3 md:px-4 py-2 text-[11px] font-bold uppercase tracking-widest text-white">
                 ${cfg.label}
             </td>
-            <td class="text-center py-2"></td>
+            <td class="text-center py-2">
+                <button type="button" class="btn-tambah-dari-modal inline-flex items-center justify-center w-6 h-6 rounded bg-white text-brand-dark hover:bg-brand-dark/5 shadow-sm border border-brand-dark/20 focus:outline-none transition-transform active:scale-95" data-tipe="${tipe}" title="Tambah ${cfg.label}">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                </button>
+            </td>
             <td colspan="2" class="bg-slate-800 border-l border-slate-700"></td>
         `;
+
+        const btnAdd = header.querySelector('.btn-tambah-dari-modal');
+        if (btnAdd) {
+            btnAdd.addEventListener('click', () => {
+                if(window.ahsOpenModalWithFilter) {
+                    window.ahsOpenModalWithFilter(tipe);
+                } else if(window.ahsOpenModal) {
+                    window.ahsOpenModal();
+                }
+            });
+        }
+
 
         // Maintain order: Bahan -> Upah -> Alat
         const types = ['bahan', 'upah', 'alat'];

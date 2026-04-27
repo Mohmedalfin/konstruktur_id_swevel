@@ -210,6 +210,9 @@ $isReorderMode = isset($isReorderMode) && $isReorderMode;
                 </div>
 
                 <div class="flex-1 overflow-auto p-4 lg:p-6">
+                    <!-- Real-time Validation Alerts -->
+                    <div id="import-organize-alerts" class="max-w-4xl mx-auto mb-4 hidden flex-col gap-2"></div>
+
                     <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-sm border border-table-border overflow-hidden">
                         <div id="import-organize-list" class="divide-y divide-slate-100 select-none">
                             <!-- Injected by import.js -->

@@ -15,7 +15,7 @@ import { fetchAhsDatabase, fetchRincianAHS }               from './core/data.js'
 import { addRow, renderRow, recalcTotals }                     from './components/render.js';
 import { openModal, closeModal, renderModalRows, updateModalCount,
          syncFilterButtons, confirmModalSelection,
-         bindModalInfiniteScroll }                             from './components/modal.js';
+         bindModalInfiniteScroll, bindSourceTabs }             from './components/modal.js';
 import { bindSave }                                            from './hooks/save.js';
 
 // Guard: not an AHS page
@@ -54,11 +54,11 @@ if (!tbody) {
         // ── Fetch master for autocomplete ─────────────────────────────────
         fetchAhsDatabase(1);
 
-        // ── Toolbar ───────────────────────────────────────────────────────
-        addBahanBtn?.addEventListener('click', () => addRow('bahan'));
-        addAlatBtn?.addEventListener('click',  () => addRow('alat'));
-        addUpahBtn?.addEventListener('click',  () => addRow('upah'));
-        fromDbBtn?.addEventListener('click',   () => openModal());
+        // ── Expose Modal ──────────────────────────────────────────────────
+        window.ahsOpenModalWithFilter = openModal;
+        window.ahsOpenModal = openModal;
+
+        // Old toolbar buttons removed or hidden, no need to bind them.
 
         // ── Table Search (Local) ─────────────────────────────────────────
         let tableSearchTimeout = null;
@@ -158,6 +158,7 @@ if (!tbody) {
         // Infinite scroll
         bindModalInfiniteScroll();
         syncFilterButtons();
+        bindSourceTabs();
 
         // ── Save ──────────────────────────────────────────────────────────
         bindSave();

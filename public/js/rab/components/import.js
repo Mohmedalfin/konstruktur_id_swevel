@@ -56,6 +56,7 @@ let currentMapping = {};
 let currentStep = 1;
 let organizedItems = []; // { id, nama, volume, satuan, type, level }
 let selectedIndices = new Set();
+let lastSelectedIdx = null;
 
 function _openModal(overlay) {
     if (overlay) {
@@ -252,6 +253,7 @@ function _prepareOrganizedData() {
     const mapSatuan = currentMapping.satuan ? excelColumns[currentMapping.satuan].idxExcel : -1;
 
     organizedItems = [];
+    let currentLevelForItems = 0;
     globalWorksheet.eachRow((row, rowNumber) => {
         if (rowNumber === 1) return;
         const vals = row.values;
@@ -261,16 +263,76 @@ function _prepareOrganizedData() {
         const volRaw = mapVolume !== -1 ? vals[mapVolume] : null;
         const isVolEmpty = (volRaw === null || volRaw === undefined || volRaw.toString().trim() === '');
         
+        if (isVolEmpty) {
+            currentLevelForItems = 1;
+        }
+
         organizedItems.push({
             id: 'temp-' + Date.now() + '-' + rowNumber,
             nama: nama,
             volume: isVolEmpty ? 0 : parseNumber(volRaw),
             satuan: mapSatuan !== -1 && vals[mapSatuan] ? vals[mapSatuan].toString().trim() : '-',
             type: isVolEmpty ? 'kategori' : 'item',
-            level: 0
+            level: isVolEmpty ? 0 : currentLevelForItems
         });
     });
     selectedIndices.clear();
+}
+
+function _validateHierarchy() {
+    const errors = new Set();
+    let hasKategori = false;
+    let prevLevel = -1;
+
+    for (let i = 0; i < organizedItems.length; i++) {
+        const item = organizedItems[i];
+        
+        if (item.type === 'kategori') {
+            hasKategori = true;
+            if (item.level !== 0) {
+                errors.add('Kategori harus berada di level paling luar (Root).');
+            }
+        } else {
+            if (!hasKategori) {
+                errors.add('Peringatan: Terdapat pekerjaan sebelum kategori pertama. Setiap pekerjaan harus terkelompok ke dalam sebuah Kategori (Head Kategori).');
+            }
+            if (item.level === 0) {
+                errors.add('Peringatan: Pekerjaan biasa tidak boleh berada di luar kategori. Harus ada Head Kategori yang membawahinya.');
+            }
+            if (item.level > prevLevel + 1 && prevLevel !== -1) {
+                errors.add('Peringatan: Terdapat sub-pekerjaan yang tidak memiliki parent (induk) langsung di atasnya. Level indentasi melompat.');
+            }
+        }
+        prevLevel = item.level;
+    }
+
+    const alertContainer = document.getElementById('import-organize-alerts');
+    if (!alertContainer) return;
+
+    if (errors.size > 0) {
+        let html = '';
+        errors.forEach(err => {
+            html += `
+                <div class="bg-red-50 border-l-4 border-red-500 p-3 rounded-r shadow-sm">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-exclamation-triangle text-red-500 mt-0.5"></i>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-[11px] md:text-xs text-red-700 font-medium">${err}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        alertContainer.innerHTML = html;
+        alertContainer.classList.remove('hidden');
+        alertContainer.classList.add('flex');
+    } else {
+        alertContainer.innerHTML = '';
+        alertContainer.classList.remove('flex');
+        alertContainer.classList.add('hidden');
+    }
 }
 
 function _renderOrganizeList() {
@@ -337,11 +399,42 @@ function _renderOrganizeList() {
     container.innerHTML = html;
 
     // Bind events
-    container.querySelectorAll('.organize-check').forEach(ck => {
-        ck.addEventListener('change', (e) => {
-            const idx = parseInt(e.target.dataset.index);
-            if (e.target.checked) selectedIndices.add(idx);
-            else selectedIndices.delete(idx);
+    container.querySelectorAll('.organize-item').forEach(row => {
+        row.addEventListener('click', (e) => {
+            // Abaikan jika yang diklik adalah tombol aksi atau drag handle
+            if (e.target.closest('button') || e.target.closest('.drag-handle-organize')) {
+                return;
+            }
+            
+            const idx = parseInt(e.currentTarget.dataset.index);
+            if (organizedItems[idx].type === 'kategori') return;
+            
+            const isDirectCheckboxClick = e.target.classList.contains('organize-check');
+            let isChecked;
+            if (isDirectCheckboxClick) {
+                isChecked = e.target.checked;
+            } else {
+                isChecked = !selectedIndices.has(idx);
+            }
+
+            if (e.shiftKey && lastSelectedIdx !== null) {
+                // Prevent text selection blinking
+                document.getSelection().removeAllRanges();
+                
+                const start = Math.min(lastSelectedIdx, idx);
+                const end = Math.max(lastSelectedIdx, idx);
+                for (let i = start; i <= end; i++) {
+                    if (organizedItems[i].type !== 'kategori') {
+                        if (isChecked) selectedIndices.add(i);
+                        else selectedIndices.delete(i);
+                    }
+                }
+            } else {
+                if (isChecked) selectedIndices.add(idx);
+                else selectedIndices.delete(idx);
+            }
+
+            lastSelectedIdx = idx;
             _renderOrganizeList();
         });
     });
@@ -355,6 +448,23 @@ function _renderOrganizeList() {
             if (organizedItems[idx].type === 'kategori') {
                 organizedItems[idx].level = 0; // Kategori is always root
                 selectedIndices.delete(idx); // Remove from selection if turning into kat
+                // Auto indent items below it
+                for (let i = idx + 1; i < organizedItems.length; i++) {
+                    if (organizedItems[i].type === 'kategori') break;
+                    if (organizedItems[i].level === 0) {
+                        organizedItems[i].level = 1;
+                    }
+                }
+            } else {
+                // Dimajukan ke kiri (kembali ke root) kalau berubah jadi item kembali
+                organizedItems[idx].level = 0; 
+                // Auto outdent items below it
+                for (let i = idx + 1; i < organizedItems.length; i++) {
+                    if (organizedItems[i].type === 'kategori') break;
+                    if (organizedItems[i].level > 0) {
+                        organizedItems[i].level -= 1;
+                    }
+                }
             }
             _renderOrganizeList();
         });
@@ -377,6 +487,9 @@ function _renderOrganizeList() {
             _renderOrganizeList();
         });
     });
+
+    // Validasi hirarki setiap selesai render
+    _validateHierarchy();
 
     // Re-bind SortableJS
     if (window.Sortable) {
@@ -460,12 +573,13 @@ function _renderOrganizeList() {
                     }
 
                     // Constraints:
-                    // 1. Kategori stays at level 0
-                    // 2. Max Level 2 (1.1.1)
+                    // 1. Kategori stays at level 0, item min level 1
+                    // 2. Max Level 3 (1.1.1.1)
                     // 3. Max prevLevel + 1
-                    let maxAllowed = item._isCat ? 0 : Math.min(2 - item._familyHeight, prevLevel + 1);
+                    let minAllowed = item._isCat ? 0 : 1;
+                    let maxAllowed = item._isCat ? 0 : Math.min(3 - item._familyHeight, prevLevel + 1);
                     let targetLevel = startLevel + deltaLevel;
-                    let clampedLevel = Math.max(0, Math.min(targetLevel, maxAllowed));
+                    let clampedLevel = Math.max(minAllowed, Math.min(targetLevel, maxAllowed));
 
                     // Visual Feedback
                     let indicatorColor = 'border-primary';
@@ -513,7 +627,7 @@ function _renderOrganizeList() {
                 
                 // 2. Update levels
                 family.forEach(f => {
-                    f.level = Math.max(0, Math.min(2, f.level + levelDelta));
+                    f.level = Math.max(0, Math.min(3, f.level + levelDelta));
                 });
 
                 // 3. Find target index for insertion
@@ -542,9 +656,63 @@ function _renderOrganizeList() {
 }
 
 function _indentItems(delta) {
+    if (delta > 0) {
+        let hasError = false;
+        let errorMsg = 'Peringatan: Tidak dapat menjadikan sub-pekerjaan karena tidak ada parent (induk) yang sesuai tepat di atasnya.';
+
+        // Simulate changes to see if it violates hierarchy
+        const tempItems = organizedItems.map(item => ({...item}));
+        selectedIndices.forEach(idx => {
+            tempItems[idx].level = Math.max(0, Math.min(3, tempItems[idx].level + delta));
+        });
+
+        let prevLevel = 0;
+        for (let i = 0; i < tempItems.length; i++) {
+            const item = tempItems[i];
+            
+            if (i === 0 && item.level > 0) {
+                hasError = true;
+                break;
+            }
+            if (i > 0 && item.level > prevLevel + 1) {
+                hasError = true;
+                break;
+            }
+            prevLevel = item.level;
+        }
+
+        if (hasError) {
+            if (window.Toast) {
+                window.Toast.show(errorMsg, 'error');
+            } else {
+                alert(errorMsg);
+            }
+            return; // Batalkan indentasi
+        }
+    } else if (delta < 0) {
+        let hasError = false;
+        let errorMsg = 'Peringatan: Pekerjaan biasa tidak dapat disejajarkan dengan Head Kategori (harus menjorok minimal 1 level).';
+        
+        selectedIndices.forEach(idx => {
+            if (organizedItems[idx].type !== 'kategori' && organizedItems[idx].level + delta <= 0) {
+                hasError = true;
+            }
+        });
+
+        if (hasError) {
+            if (window.Toast) {
+                window.Toast.show(errorMsg, 'error');
+            } else {
+                alert(errorMsg);
+            }
+            return; // Batalkan outdent
+        }
+    }
+
     selectedIndices.forEach(idx => {
-        // Limit depth to level 2 (1.1.1)
-        organizedItems[idx].level = Math.max(0, Math.min(2, organizedItems[idx].level + delta));
+        // Limit depth to level 3 (1.1.1.1) for items, level 0 for categories
+        let minLvl = organizedItems[idx].type === 'kategori' ? 0 : 1;
+        organizedItems[idx].level = Math.max(minLvl, Math.min(3, organizedItems[idx].level + delta));
     });
     _renderOrganizeList();
 }
@@ -657,6 +825,13 @@ export async function initImport() {
             type: 'kategori',
             level: 0
         });
+
+        for (let i = insertIdx + 1; i < organizedItems.length; i++) {
+            if (organizedItems[i].type === 'kategori') break;
+            if (organizedItems[i].level === 0) {
+                organizedItems[i].level = 1;
+            }
+        }
 
         // Shift down the selected indices since we inserted a new item before them
         if (selectedIndices.size > 0) {
