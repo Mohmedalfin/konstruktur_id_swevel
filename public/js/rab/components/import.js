@@ -868,7 +868,25 @@ export async function initImport() {
                 excelColumns = [{ idxExcel: -1, name: '-- Kosongkan --' }];
                 rawDataStore = [];
                 globalWorksheet.getRow(1).eachCell((c, colNum) => excelColumns.push({ idxExcel: colNum, name: c.text?.toString().trim() || `Kolom ${colNum}` }));
-                globalWorksheet.eachRow((row, rowNum) => { if (rowNum > 1 && rowNum <= 101) rawDataStore.push(row.values); });
+                globalWorksheet.eachRow((row, rowNum) => { 
+                    if (rowNum > 1 && rowNum <= 101) {
+                        const rowVals = [];
+                        row.eachCell({ includeEmpty: true }, (cell, colNum) => {
+                            if (cell.isMerged && cell.master) {
+                                // Jika merge vertikal (kolom sama), turunkan nilainya. 
+                                // Jika merge horizontal (kolom beda), biarkan kosong agar tidak merusak kolom Volume/Satuan.
+                                if (cell.col === cell.master.col) {
+                                    rowVals[colNum] = cell.master.value;
+                                } else {
+                                    rowVals[colNum] = null;
+                                }
+                            } else {
+                                rowVals[colNum] = cell.value;
+                            }
+                        });
+                        rawDataStore.push(rowVals);
+                    }
+                });
                 _autoMapColumns();
                 const newTbody = _renderTableHeaders(document.getElementById('import-rab-modal-thead'));
                 _renderTableBody(newTbody);
