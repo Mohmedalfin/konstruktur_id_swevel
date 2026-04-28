@@ -14,7 +14,7 @@ import Swal from 'https://cdn.jsdelivr.net/npm/sweetalert2@11/+esm';
 // -------------------------------------------------------------------
 // Base Swal instance styled to match the app's design tokens
 // -------------------------------------------------------------------
-const AppSwal = Swal.mixin({
+export const AppSwal = Swal.mixin({
     customClass: {
         popup:          'app-swal-popup',
         title:          'app-swal-title',

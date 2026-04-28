@@ -44,14 +44,27 @@ export function renderRows(result) {
     const end   = Math.min(page * PAGE_SIZE, total);
 
     if (countEl) {
-        countEl.textContent = total > 0
-            ? `Menampilkan ${start} sampai ${end} dari ${total.toLocaleString('id-ID')} data`
-            : 'Tidak ada data yang cocok';
+        if (result.isError) {
+            countEl.textContent = 'Gagal memuat data';
+        } else {
+            countEl.textContent = total > 0
+                ? `Menampilkan ${start} sampai ${end} dari ${total.toLocaleString('id-ID')} data`
+                : 'Tidak ada data yang cocok';
+        }
     }
     if (paginationInfo) {
         paginationInfo.textContent = total > 0
             ? `Halaman ${page} dari ${Math.ceil(total / PAGE_SIZE)}`
             : '';
+    }
+
+    if (result.isError) {
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-rose-500 text-xs font-semibold">
+            <svg class="w-6 h-6 mx-auto mb-2 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            Koneksi jaringan terganggu. Gagal memuat data.
+        </td></tr>`;
+        renderPagination(0, 1);
+        return;
     }
 
     if (data.length === 0) {

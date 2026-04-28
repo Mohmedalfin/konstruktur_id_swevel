@@ -356,4 +356,8 @@ export function addRow(tipe) {
     const tipeLabel = tipeConfig[tipe]?.label || tipe;
     toast.show(`Baris ${tipeLabel} baru ditambahkan`, 'success', 2000);
 }
-
+export function initEmptyFramework() {
+    _ensureFooter('bahan');
+    _ensureFooter('upah');
+    _ensureFooter('alat');
+}

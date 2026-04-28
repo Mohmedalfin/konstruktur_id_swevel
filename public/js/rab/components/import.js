@@ -6,6 +6,7 @@
 
 import { fetchKategoriMaster } from '../core/data.js';
 import { generateTemplate } from './template.js';
+import { AppSwal } from '../../shared/ui/confirm.js';
 
 // Cache of available categories (loaded from API)
 let availableCategories = [];
@@ -685,7 +686,7 @@ function _indentItems(delta) {
             if (window.Toast) {
                 window.Toast.show(errorMsg, 'error');
             } else {
-                alert(errorMsg);
+                AppSwal.fire({ icon: 'warning', title: 'Peringatan', text: errorMsg, confirmButtonText: 'Mengerti', showCancelButton: false });
             }
             return; // Batalkan indentasi
         }
@@ -703,7 +704,7 @@ function _indentItems(delta) {
             if (window.Toast) {
                 window.Toast.show(errorMsg, 'error');
             } else {
-                alert(errorMsg);
+                AppSwal.fire({ icon: 'warning', title: 'Peringatan', text: errorMsg, confirmButtonText: 'Mengerti', showCancelButton: false });
             }
             return; // Batalkan outdent
         }
@@ -790,7 +791,7 @@ export async function initImport() {
                 customKatInput.value = '';
                 if (window.Toast) window.Toast.show('Kategori master berhasil ditambah', 'success');
             } catch (err) {
-                alert('Gagal tambah kategori: ' + err.message);
+                AppSwal.fire({ icon: 'error', title: 'Gagal', text: 'Gagal tambah kategori: ' + err.message, confirmButtonText: 'Oke', showCancelButton: false });
             } finally {
                 customKatBtn.disabled = false;
             }
@@ -804,7 +805,7 @@ export async function initImport() {
     document.getElementById('import-organize-insert-cat')?.addEventListener('click', () => {
         const selKat = document.getElementById('import-global-kategori');
         if (!selKat || !selKat.value) {
-            alert('Pilih Kategori Master terlebih dahulu dari menu dropdown!');
+            AppSwal.fire({ icon: 'warning', title: 'Peringatan', text: 'Pilih Kategori Master terlebih dahulu dari menu dropdown!', confirmButtonText: 'Oke', showCancelButton: false });
             return;
         }
 
@@ -892,7 +893,9 @@ export async function initImport() {
                 _renderTableBody(newTbody);
                 _validateImportState();
                 document.getElementById('import-rab-modal-count').innerHTML = `<span class="text-emerald-600 font-semibold">${globalWorksheet.rowCount - 1} baris</span> terbaca.`;
-            } catch (err) { alert('Gagal baca Excel: ' + err.message); }
+            } catch (err) { 
+                AppSwal.fire({ icon: 'error', title: 'Gagal', text: 'Gagal baca Excel: ' + err.message, confirmButtonText: 'Oke', showCancelButton: false });
+            }
         });
     }
 
@@ -921,7 +924,7 @@ export async function initImport() {
             if (window.Toast) window.Toast.show('BOQ berhasil diimpor', 'success');
             setTimeout(() => window.location.reload(), 1000);
         } catch (err) {
-            alert('Gagal simpan: ' + err.message);
+            AppSwal.fire({ icon: 'error', title: 'Gagal', text: 'Gagal simpan: ' + err.message, confirmButtonText: 'Oke', showCancelButton: false });
             modalConfirm.disabled = false;
             modalConfirm.textContent = 'Simpan ke RAB';
         }

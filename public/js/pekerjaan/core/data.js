@@ -4,6 +4,7 @@
  */
 
 import { PAGE_SIZE } from './state.js';
+import { toast } from '../../shared/ui/toast.js';
 
 export async function fetchTambahAhsData(query, sources, page) {
     try {
@@ -21,6 +22,10 @@ export async function fetchTambahAhsData(query, sources, page) {
         return { total: result.total || 0, page: result.page || 1, data: result.data || [] };
     } catch (err) {
         console.error('API Fetch Error:', err);
-        return { total: 0, page: 1, data: [] };
+        // Tampilkan peringatan jaringan
+        if (err.name !== 'AbortError') {
+            toast.show('Koneksi jaringan terganggu atau lambat. Gagal memuat data.', 'error');
+        }
+        return { total: 0, page: 1, data: [], isError: true };
     }
 }

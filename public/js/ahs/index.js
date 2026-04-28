@@ -12,7 +12,7 @@ import { state, tbody, itemLabel, addBahanBtn, addAlatBtn, addUpahBtn,
          modalSearch, modalCheckAll, filterBtns, modalTbody,
          tableSearch, sourceLabel } from './core/state.js';
 import { fetchAhsDatabase, fetchRincianAHS }               from './core/data.js';
-import { addRow, renderRow, recalcTotals }                     from './components/render.js';
+import { addRow, renderRow, recalcTotals, initEmptyFramework }                     from './components/render.js';
 import { openModal, closeModal, renderModalRows, updateModalCount,
          syncFilterButtons, confirmModalSelection,
          bindModalInfiniteScroll, bindSourceTabs }             from './components/modal.js';
@@ -40,10 +40,12 @@ if (!tbody) {
         if (idDetail) {
             const existing = await fetchRincianAHS(idDetail);
             if (existing && existing.length > 0) {
-                document.getElementById('ahs-empty-row')?.remove();
+                tbody.innerHTML = '';
+                initEmptyFramework();
                 existing.forEach(item => renderRow(item));
             } else {
-                tbody.innerHTML = `<tr id="ahs-empty-row"><td colspan="11" class="text-center py-10 text-table-subtle text-xs italic">Belum ada rincian AHS. Tambahkan item untuk memulai.</td></tr>`;
+                tbody.innerHTML = '';
+                initEmptyFramework();
             }
         } else {
             tbody.innerHTML = `<tr id="ahs-empty-row"><td colspan="11" class="text-center py-10 text-table-subtle text-xs italic">ID Detail tidak valid.</td></tr>`;
