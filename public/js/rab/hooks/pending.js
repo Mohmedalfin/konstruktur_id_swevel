@@ -127,9 +127,12 @@ export function injectPendingItems() {
                     sessionStorage.setItem('ahs_item_label', item.nama || '');
                     sessionStorage.setItem('rab_return_url', window.location.href);
                 } catch (_) {}
-                window.location.href = (window.RAB_INIT && window.RAB_INIT.rincianAhsUrl)
+                const baseUrl   = (window.RAB_INIT && window.RAB_INIT.rincianAhsUrl)
                     ? window.RAB_INIT.rincianAhsUrl
                     : '/menu-rap/rincian-ahs';
+                const idProject = window.RAB_INIT?.idProject || window.RAB_INIT?.id || '';
+                const projParam = idProject ? `&id_project=${encodeURIComponent(idProject)}` : '';
+                window.location.href = baseUrl + projParam;
             });
         });
     });

@@ -47,6 +47,16 @@
         <div class="py-2 md:py-0 flex flex-col md:flex-row md:items-stretch gap-0.5 md:gap-0">
           <div class="grow">
             <div class="flex flex-col md:flex-row md:justify-end md:items-stretch gap-0.5 md:gap-0">
+              
+              <!-- Tombol Kembali ke Proyek -->
+              <div class="flex items-center px-2 py-2 md:py-0 md:px-3 md:mr-1 border-b border-navbar-line md:border-b-0 md:border-r border-navbar-line">
+                <a href="<?= base_url('proyek') ?>" class="inline-flex items-center justify-center gap-2 px-3 py-1.5 text-sm md:text-xs font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/10 rounded-md transition-all duration-200 w-full md:w-auto focus:outline-hidden focus:ring-2 focus:ring-white/20">
+                  <svg class="size-4 md:size-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m15 18-6-6 6-6"/>
+                  </svg>
+                  Kembali ke Proyek
+                </a>
+              </div>
               <a class="<?= get_nav_class('dashboard') ?>" href="<?= base_url('dashboard') ?>" data-nav-path="dashboard"
                 <?= is_nav_active('dashboard') ? 'aria-current="page"' : '' ?>>
                 <svg class="shrink-0 size-4 me-3 md:me-2 block md:hidden" xmlns="http://www.w3.org/2000/svg" width="24"

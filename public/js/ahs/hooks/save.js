@@ -29,8 +29,19 @@ export function bindSave() {
                 satuan:      (tr.querySelector('.ahs-satuan')?.value      || '').trim(),
                 hargaSatuan: parseFloat(tr.querySelector('.ahs-harga-dasar')?.value)  || 
                              parseFloat(tr.querySelector('.ahs-harga-satuan')?.value) || 0,
-                sumber:      (tr.querySelector('.ahs-sumber')?.value      || '').trim(),
+                // Custom items: combine nama + link → "Pergub 2019|https://..."
+                // System items: use the original sumber stored in data-sumber attribute
+                sumber: (() => {
+                    const namaNama = tr.querySelector('.ahs-sumber-nama');
+                    if (namaNama !== null) {
+                        const nama = (namaNama.value || '').trim();
+                        const link = (tr.querySelector('.ahs-sumber-link')?.value || '').trim();
+                        return link ? `${nama}|${link}` : nama;
+                    }
+                    return tr.dataset.sumber || '';
+                })(),
             };
+
             
             if (rowData.uraian) {
                 items.push(rowData);

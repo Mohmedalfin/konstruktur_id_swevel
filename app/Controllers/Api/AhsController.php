@@ -8,6 +8,7 @@ use Throwable;
 use App\Models\RapDetailItemModel;
 use App\Models\RapDetailModel;
 use App\Models\RapModel;
+use App\Models\RapKategoriModel;
 
 class AhsController extends BaseController
 {
@@ -193,6 +194,313 @@ class AhsController extends BaseController
                 'message' => $e->getMessage()
             ]);
         }
+    }
+
+    /**
+     * GET /api/ahs/proyek
+     * Returns unique bahan/upah/alat items that have been inputted in a given project.
+     * Pulls from rap_detail_item → rap_detail → rap → projects chain.
+     *
+     * Query Params:
+     *   id_project    int     – ID of the current project (preferred)
+     *   id_rap_detail int     – fallback: derive id_project from this detail ID
+     *   q             string  – search keyword on nama_item
+     *   tipe          string  – filter by type: 'bahan', 'alat', 'upah', or 'all'
+     *   page          int     – page number (default 1)
+     */
+    public function getProyek(): ResponseInterface
+    {
+        try {
+            $db        = \Config\Database::connect();
+            $idProject = (int) $this->request->getGet('id_project');
+            $idDetail  = (int) $this->request->getGet('id_rap_detail');
+            $search    = $this->request->getGet('q');
+            $tipe      = $this->request->getGet('tipe');
+            $page      = max(1, (int) $this->request->getGet('page'));
+            $limit     = 50;
+            $offset    = ($page - 1) * $limit;
+
+            // ── Auto-derive id_project from id_rap_detail if not supplied ────
+            if ($idProject <= 0 && $idDetail > 0) {
+                $row = $db->query(
+                    "SELECT r.id_project
+                     FROM rap_detail rd
+                     INNER JOIN rap r ON r.id_rap = rd.id_rap
+                     WHERE rd.id_rap_detail = ?
+                     LIMIT 1",
+                    [$idDetail]
+                )->getRowArray();
+
+                $idProject = (int) ($row['id_project'] ?? 0);
+            }
+
+            if ($idProject <= 0) {
+                return $this->response->setStatusCode(400)->setJSON([
+                    'status'  => 'error',
+                    'message' => 'id_project atau id_rap_detail wajib diisi',
+                ]);
+            }
+
+            // Join rap_detail_item → rap_detail → rap, filter by id_project
+            // Group by nama_item + satuan + jenis_item to get unique rows
+            // Use MAX(harga_satuan) as representative price
+            $sql = "
+                SELECT
+                    rdi.jenis_item                         AS tipe,
+                    rdi.nama_item                          AS uraian,
+                    rdi.satuan,
+                    MAX(rdi.harga_satuan)                  AS hargaSatuan,
+                    MAX(rdi.merk)                          AS merk,
+                    MAX(rdi.spesifikasi)                   AS spesifikasi,
+                    MAX(rdi.keterangan)                    AS sumber,
+                    COUNT(*)                               AS frekuensi
+                FROM rap_detail_item rdi
+                INNER JOIN rap_detail rd  ON rd.id_rap_detail = rdi.id_rap_detail
+                INNER JOIN rap r          ON r.id_rap         = rd.id_rap
+                WHERE r.id_project = ?
+            ";
+
+            $params = [$idProject];
+
+            if (!empty($search)) {
+                $sql      .= ' AND rdi.nama_item LIKE ?';
+                $params[]  = "%{$search}%";
+            }
+
+            if (!empty($tipe) && $tipe !== 'all') {
+                $sql      .= ' AND rdi.jenis_item = ?';
+                $params[]  = $tipe;
+            }
+
+            $sql .= "
+                GROUP BY rdi.jenis_item, rdi.nama_item, rdi.satuan
+                ORDER BY rdi.jenis_item ASC, rdi.nama_item ASC
+                LIMIT {$limit} OFFSET {$offset}
+            ";
+
+            $rows = $db->query($sql, $params)->getResultArray();
+
+            // Assign UID and cast numerics
+            foreach ($rows as $i => &$row) {
+                $row['hargaSatuan'] = (float) $row['hargaSatuan'];
+                $row['id']         = $i + 1 + $offset; // pseudo-id
+                $safeUraian        = preg_replace('/\W/', '', $row['uraian']);
+                $safeUraian        = substr($safeUraian, 0, 15);
+                $row['_uid']       = $row['tipe'] . '_prj_' . $safeUraian . '_' . $i;
+            }
+            unset($row);
+
+            return $this->response->setStatusCode(200)->setJSON([
+                'status'     => 'success',
+                'id_project' => $idProject,
+                'page'       => $page,
+                'limit'      => $limit,
+                'data'       => $rows,
+            ]);
+
+        } catch (Throwable $e) {
+            log_message('error', '[AhsController::getProyek] ' . $e->getMessage());
+            return $this->response->setStatusCode(500)->setJSON([
+                'status'  => 'error',
+                'message' => 'Gagal memuat data proyek terkini.',
+            ]);
+        }
+    }
+
+    /**
+     * GET /api/ahs/shbj
+     * Returns unique bahan/upah/alat items sourced from regional government regulations
+     * (Kepgub, Pergub, Kepbup, Perbup, Perda, SK, dll).
+     * Filters rap_detail_item.keterangan for known regulation keywords.
+     *
+     * Query Params:
+     *   q      string  – search keyword on nama_item
+     *   tipe   string  – filter by type: 'bahan', 'alat', 'upah', or 'all'
+     *   page   int     – page number (default 1)
+     */
+    private function getMergedItemsByRegex(string $regexKeywords, string $sourceId): ResponseInterface
+    {
+        try {
+            $dbDefault   = \Config\Database::connect();
+            $dbEstimator = \Config\Database::connect('estimator');
+
+            $search = $this->request->getGet('q');
+            $tipe   = $this->request->getGet('tipe');
+            $page   = max(1, (int) $this->request->getGet('page'));
+            $limit  = 50;
+            $offset = ($page - 1) * $limit;
+
+            // 1. Fetch from Estimator DB (Master)
+            $sqlEstimator = "
+                SELECT * FROM (
+                    SELECT
+                        id_bahan      AS id,
+                        nama_bahan    AS uraian,
+                        satuan,
+                        keterangan    AS sumber,
+                        spesifikasi,
+                        merk,
+                        'bahan'       AS tipe,
+                        harga_dasar   AS hargaSatuan
+                    FROM bahan_utama
+
+                    UNION ALL
+
+                    SELECT
+                        id_upah       AS id,
+                        nama_upah     AS uraian,
+                        satuan,
+                        keterangan    AS sumber,
+                        spesifikasi,
+                        merk,
+                        'upah'        AS tipe,
+                        harga_dasar   AS hargaSatuan
+                    FROM upah_utama
+
+                    UNION ALL
+
+                    SELECT
+                        id_alat       AS id,
+                        nama_alat     AS uraian,
+                        satuan,
+                        keterangan    AS sumber,
+                        spesifikasi,
+                        merk,
+                        'alat'        AS tipe,
+                        harga_dasar   AS hargaSatuan
+                    FROM alat_utama
+                ) AS master_bua
+                WHERE master_bua.sumber IS NOT NULL
+                  AND master_bua.sumber REGEXP ?
+            ";
+
+            $paramsEstimator = [$regexKeywords];
+
+            if (!empty($search)) {
+                $sqlEstimator .= ' AND master_bua.uraian LIKE ?';
+                $paramsEstimator[] = "%{$search}%";
+            }
+
+            if (!empty($tipe) && $tipe !== 'all') {
+                $sqlEstimator .= ' AND master_bua.tipe = ?';
+                $paramsEstimator[] = $tipe;
+            }
+
+            $rowsEstimator = $dbEstimator->query($sqlEstimator, $paramsEstimator)->getResultArray();
+
+            // 2. Fetch from Default DB (Project History)
+            $sqlDefault = "
+                SELECT
+                    rdi.jenis_item                         AS tipe,
+                    rdi.nama_item                          AS uraian,
+                    rdi.satuan,
+                    MAX(rdi.harga_satuan)                  AS hargaSatuan,
+                    MAX(rdi.merk)                          AS merk,
+                    MAX(rdi.spesifikasi)                   AS spesifikasi,
+                    MAX(rdi.keterangan)                    AS sumber,
+                    COUNT(*)                               AS frekuensi
+                FROM rap_detail_item rdi
+                WHERE rdi.keterangan IS NOT NULL
+                  AND rdi.keterangan REGEXP ?
+            ";
+
+            $paramsDefault = [$regexKeywords];
+
+            if (!empty($search)) {
+                $sqlDefault .= ' AND rdi.nama_item LIKE ?';
+                $paramsDefault[]  = "%{$search}%";
+            }
+
+            if (!empty($tipe) && $tipe !== 'all') {
+                $sqlDefault .= ' AND rdi.jenis_item = ?';
+                $paramsDefault[]  = $tipe;
+            }
+
+            $sqlDefault .= " GROUP BY rdi.jenis_item, rdi.nama_item, rdi.satuan";
+
+            $rowsDefault = $dbDefault->query($sqlDefault, $paramsDefault)->getResultArray();
+
+            // 3. Merge and Deduplicate
+            $merged = [];
+
+            // Process Estimator first (acts as primary master data)
+            foreach ($rowsEstimator as $row) {
+                $key = strtolower(trim($row['tipe']) . '|' . trim($row['uraian']) . '|' . trim($row['satuan']));
+                $row['frekuensi'] = 1; // Default frekuensi for master DB items
+                $merged[$key] = $row;
+            }
+
+            // Merge Project History
+            foreach ($rowsDefault as $row) {
+                $key = strtolower(trim($row['tipe']) . '|' . trim($row['uraian']) . '|' . trim($row['satuan']));
+                if (!isset($merged[$key])) {
+                    $merged[$key] = $row;
+                } else {
+                    // Update frequency if it already exists from Master
+                    $merged[$key]['frekuensi'] += $row['frekuensi'];
+                }
+            }
+
+            $combinedRows = array_values($merged);
+
+            // Sort by tipe ASC, uraian ASC
+            usort($combinedRows, function($a, $b) {
+                $cmpTipe = strcmp($a['tipe'], $b['tipe']);
+                if ($cmpTipe !== 0) return $cmpTipe;
+                return strcmp($a['uraian'], $b['uraian']);
+            });
+
+            // 4. Pagination
+            $pagedRows = array_slice($combinedRows, $offset, $limit);
+
+            // Assign UID and cast numerics
+            foreach ($pagedRows as $i => &$row) {
+                $row['hargaSatuan'] = (float) $row['hargaSatuan'];
+                $row['id']         = $i + 1 + $offset;
+                $safeUraian        = preg_replace('/\W/', '', $row['uraian']);
+                $safeUraian        = substr($safeUraian, 0, 15);
+                $row['_uid']       = $row['tipe'] . '_' . $sourceId . '_' . $safeUraian . '_' . $i;
+            }
+            unset($row);
+
+            return $this->response->setStatusCode(200)->setJSON([
+                'status' => 'success',
+                'page'   => $page,
+                'limit'  => $limit,
+                'data'   => $pagedRows,
+            ]);
+
+        } catch (Throwable $e) {
+            log_message('error', '[AhsController::getMergedItemsByRegex] ' . $e->getMessage());
+            return $this->response->setStatusCode(500)->setJSON([
+                'status'  => 'error',
+                'message' => 'Gagal memuat data sumber ' . strtoupper($sourceId) . '.',
+            ]);
+        }
+    }
+
+    /**
+     * GET /api/ahs/shbj
+     */
+    public function getShbj(): ResponseInterface
+    {
+        return $this->getMergedItemsByRegex('kepgub|pergub|kepbup|perbup|perda|peraturan bupati|peraturan gubernur|keputusan gubernur|keputusan bupati|sk bupati|sk gubernur|surat keputusan|sk walikota|perwal|perwali|instruksi bupati', 'shbj');
+    }
+
+    /**
+     * GET /api/ahs/survey
+     */
+    public function getSurvey(): ResponseInterface
+    {
+        return $this->getMergedItemsByRegex('survey|survei', 'survey');
+    }
+
+    /**
+     * GET /api/ahs/estimatorid
+     */
+    public function getEstimatorId(): ResponseInterface
+    {
+        return $this->getMergedItemsByRegex('estimator\.id', 'estimatorid');
     }
 
     /**

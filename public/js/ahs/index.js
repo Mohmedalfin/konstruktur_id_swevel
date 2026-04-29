@@ -11,7 +11,7 @@ import { state, tbody, itemLabel, addBahanBtn, addAlatBtn, addUpahBtn,
          fromDbBtn, modalClose, modalCancel, modalConfirm,
          modalSearch, modalCheckAll, filterBtns, modalTbody,
          tableSearch, sourceLabel } from './core/state.js';
-import { fetchAhsDatabase, fetchRincianAHS }               from './core/data.js';
+import { fetchAhsDatabase, fetchProyekItems, fetchShbjItems, fetchSurveyItems, fetchEstimatorIdItems, fetchRincianAHS } from './core/data.js';
 import { addRow, renderRow, recalcTotals, initEmptyFramework }                     from './components/render.js';
 import { openModal, closeModal, renderModalRows, updateModalCount,
          syncFilterButtons, confirmModalSelection,
@@ -34,6 +34,19 @@ if (!tbody) {
             
             const sumber = sessionStorage.getItem('ahs_item_source') || 'PUPR';
             if (sourceLabel) sourceLabel.textContent = sumber.toUpperCase();
+        } catch (_) {}
+
+        // ── Ambil id_project dan id_rap_detail dari URL atau sessionStorage ───
+        try {
+            const urlParams  = new URLSearchParams(window.location.search);
+            const idFromUrl  = urlParams.get('id_project');
+            const idFromSess = sessionStorage.getItem('id_project') ||
+                               sessionStorage.getItem('rap_id_project');
+            state.idProject  = idFromUrl ? parseInt(idFromUrl, 10)
+                                         : (idFromSess ? parseInt(idFromSess, 10) : null);
+            // Store id_rap_detail for backend fallback
+            const detailFromUrl = urlParams.get('id_rap_detail');
+            state.idDetail = detailFromUrl ? parseInt(detailFromUrl, 10) : null;
         } catch (_) {}
 
         // ── Render initial rows ───────────────────────────────────────────
@@ -111,30 +124,53 @@ if (!tbody) {
             if (e.target === document.getElementById('ahs-modal-overlay')) closeModal();
         });
 
-        // Modal search (debounced server fetch)
+        // Modal search (debounced — reuses active source)
         let searchTimeout = null;
         modalSearch?.addEventListener('input', function () {
             if (searchTimeout) clearTimeout(searchTimeout);
             searchTimeout = setTimeout(async () => {
-                const q = (modalSearch.value || '').trim();
+                const q   = (modalSearch.value || '').trim();
+                const src = state.activeSource;
                 state.currentPage = 1;
                 state.hasMoreData = true;
                 modalTbody.innerHTML = '<tr><td colspan="8" class="text-center py-8 text-table-subtle text-xs italic">Mencari...</td></tr>';
-                await fetchAhsDatabase(1, q, false);
+
+                if (src === 'proyek') {
+                    await fetchProyekItems(state.idProject, state.idDetail, 1, q, false);
+                } else if (src === 'shbj') {
+                    await fetchShbjItems(1, q, false);
+                } else if (src === 'survey') {
+                    await fetchSurveyItems(1, q, false);
+                } else if (src === 'estimatorid') {
+                    await fetchEstimatorIdItems(1, q, false);
+                } else {
+                    await fetchAhsDatabase(1, q, false);
+                }
                 renderModalRows(state.ahsDatabase);
             }, 500);
         });
 
-        // Modal filter buttons
+        // Modal filter buttons — respects active source tab
         filterBtns.forEach(btn => {
             btn.addEventListener('click', async function () {
                 state.activeFilter = btn.dataset.filter;
                 syncFilterButtons();
                 state.currentPage = 1;
                 state.hasMoreData = true;
-                const q = (modalSearch?.value || '').trim();
+                const q   = (modalSearch?.value || '').trim();
+                const src = state.activeSource;
                 modalTbody.innerHTML = '<tr><td colspan="8" class="text-center py-8 text-table-subtle text-xs italic">Memuat data filter...</td></tr>';
-                await fetchAhsDatabase(1, q, false);
+                if (src === 'proyek') {
+                    await fetchProyekItems(state.idProject, state.idDetail, 1, q, false);
+                } else if (src === 'shbj') {
+                    await fetchShbjItems(1, q, false);
+                } else if (src === 'survey') {
+                    await fetchSurveyItems(1, q, false);
+                } else if (src === 'estimatorid') {
+                    await fetchEstimatorIdItems(1, q, false);
+                } else {
+                    await fetchAhsDatabase(1, q, false);
+                }
                 renderModalRows(state.ahsDatabase);
             });
         });
@@ -177,13 +213,6 @@ if (!tbody) {
     });
 
 } // end guard
-
-// Global helper for Back button
-window.goBackToRab = function() {
-    let returnUrl = '';
-    try { returnUrl = sessionStorage.getItem('rab_return_url'); } catch (_) {}
-    window.location.href = returnUrl ? returnUrl : '/menu-rap?mode=new';
-};
 
 // Global helper for Back button
 window.goBackToRab = function() {

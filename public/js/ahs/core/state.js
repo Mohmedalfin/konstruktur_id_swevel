@@ -30,6 +30,9 @@ export const filterBtns    = document.querySelectorAll('.ahs-modal-filter-btn');
 export const state = {
     rowCounter:         0,
     activeFilter:       'all',
+    activeSource:       'proyek',   // current tab: 'proyek' | 'shbj' | 'suplier' | 'ikkbps' | 'estimatorid' | 'survey'
+    idProject:          null,       // populated from URL / sessionStorage when modal opens
+    idDetail:           null,       // id_rap_detail from URL — used as fallback to derive id_project
     modalSelected:      new Map(),
     autocompleteActive: null,
     ahsDatabase:        [],

@@ -62,6 +62,10 @@ $routes->group('api', ['namespace' => 'App\Controllers\Api'], function ($routes)
     $routes->get('wilayah/templates', 'WilayahController::templates');
 
     $routes->get('ahs', 'AhsController::index');
+    $routes->get('ahs/proyek', 'AhsController::getProyek');
+    $routes->get('ahs/shbj', 'AhsController::getShbj');
+    $routes->get('ahs/survey', 'AhsController::getSurvey');
+    $routes->get('ahs/estimatorid', 'AhsController::getEstimatorId');
     $routes->get('ahs/rincian/(:num)', 'AhsController::getRincian/$1');
     $routes->post('ahs/rincian', 'AhsController::saveRincian');
     $routes->delete('ahs/rincian/item/(:num)', 'AhsController::deleteItem/$1');

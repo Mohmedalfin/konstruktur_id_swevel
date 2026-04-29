@@ -17,7 +17,12 @@ $rabId   = $idProject ?? null;
     <?php echo view('partials/navbar'); ?>
     <?php echo view('partials/topbar', ['title' => 'Sesuaikan urutan uraian pekerjaan', 'subtitle' => '']); ?>
 
-    <div class="w-full px-3 sm:px-6 lg:px-8 mt-6 mb-2">
+    <div class="w-full px-3 sm:px-6 lg:px-8 mt-6 mb-2 flex flex-col sm:flex-row sm:items-center gap-3">
+        <a href="<?= base_url('proyek/' . ($slug ?? '')) ?>" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-slate-600 bg-white border border-slate-300 rounded-lg shadow-sm hover:bg-slate-50 hover:text-slate-800 transition-colors focus:outline-hidden focus:ring-2 focus:ring-primary/20 w-fit">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            Kembali
+        </a>
+        <div class="hidden sm:block w-px h-5 bg-slate-300"></div>
         <nav class="flex items-center text-sm font-medium text-table-subtle">
             <a href="<?= base_url('proyek/' . ($slug ?? '')) ?>" class="hover:text-primary transition-colors focus:outline-none">Menu RAP</a>
             <svg class="w-3 h-3 mx-2 shrink-0 text-table-border" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>

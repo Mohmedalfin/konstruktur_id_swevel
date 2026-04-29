@@ -789,7 +789,7 @@ export function bindCategoryToggle() {
 export function bindReadonlyDropdowns() {
     tbody.querySelectorAll('.readonly-item-detail').forEach(btn => {
         btn.addEventListener('click', function () {
-            const baseUrl = btn.dataset.url || '/menu-rap/rincian-ahs';
+            const baseUrl    = btn.dataset.url || '/menu-rap/rincian-ahs';
             const idRapDetail = btn.dataset.idRapDetail || '';
 
             if (!idRapDetail) {
@@ -797,8 +797,10 @@ export function bindReadonlyDropdowns() {
                 return;
             }
 
-            const separator = baseUrl.includes('?') ? '&' : '?';
-            window.location.href = `${baseUrl}${separator}id_rap_detail=${encodeURIComponent(idRapDetail)}`;
+            const idProject  = window.RAB_INIT?.idProject || window.RAB_INIT?.id || '';
+            const separator  = baseUrl.includes('?') ? '&' : '?';
+            const projectPart = idProject ? `&id_project=${encodeURIComponent(idProject)}` : '';
+            window.location.href = `${baseUrl}${separator}id_rap_detail=${encodeURIComponent(idRapDetail)}${projectPart}`;
         });
     });
 

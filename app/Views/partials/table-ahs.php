@@ -59,14 +59,15 @@ $wrapperClass = $wrapperClass ?? 'w-full';
 
             <colgroup>
                 <col style="width: 4rem">  <!-- No -->
-                <col style="min-width: 25rem"> <!-- Uraian -->
+                <col style="min-width: 22rem"> <!-- Uraian -->
                 <col style="width: 8rem">  <!-- Koefisien -->
                 <col style="width: 6rem">  <!-- Satuan -->
                 <col style="width: 10rem"> <!-- Harga Dasar -->
                 <col style="width: 10rem"> <!-- Harga Satuan (Total) -->
                 <col style="width: 8rem">  <!-- Aksi -->
-                <col style="width: 10rem"> <!-- Merk -->
-                <col style="width: 10rem"> <!-- Spesifikasi -->
+                <col style="width: 9rem"> <!-- Merk -->
+                <col style="width: 9rem"> <!-- Spesifikasi -->
+                <col style="min-width: 14rem"> <!-- Sumber / Regulasi -->
             </colgroup>
 
             <thead>
@@ -80,6 +81,10 @@ $wrapperClass = $wrapperClass ?? 'w-full';
                     <th class="px-3 md:px-4 py-3.5 text-center text-[10px] md:text-xs font-bold uppercase tracking-wider whitespace-nowrap">Aksi</th>
                     <th class="px-3 md:px-4 py-3.5 text-[10px] md:text-xs font-bold uppercase tracking-wider whitespace-nowrap">Merk</th>
                     <th class="px-3 md:px-4 py-3.5 text-[10px] md:text-xs font-bold uppercase tracking-wider whitespace-nowrap">Spesifikasi</th>
+                    <th class="px-3 md:px-4 py-3.5 text-[10px] md:text-xs font-bold uppercase tracking-wider whitespace-nowrap">
+                        Sumber / Regulasi
+                        <span class="ml-1 text-amber-300 text-[9px] font-normal normal-case">(→ SHBJ)</span>
+                    </th>
                 </tr>
             </thead>
 
@@ -109,28 +114,41 @@ $wrapperClass = $wrapperClass ?? 'w-full';
      MODAL — Pilih dari Daftar AHS
 ════════════════════════════════════════════════════════════════ -->
 <div id="ahs-modal-overlay"
-    class="fixed inset-0 z-50 hidden opacity-0 transition-opacity duration-300 flex flex-col" style="background:#fff">
+    class="fixed inset-0 z-50 hidden opacity-0 transition-opacity duration-300 flex flex-col items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 md:p-8">
 
-    <div id="ahs-modal-content" class="w-full h-full flex flex-col transform -translate-y-full transition-transform duration-500 ease-out overflow-hidden">
+    <div id="ahs-modal-content" class="w-full max-w-[1400px] h-full flex flex-col transform scale-95 opacity-0 transition-all duration-300 ease-out overflow-hidden bg-white rounded-2xl shadow-2xl ring-1 ring-black/5">
+
+        <!-- ── Modal Header ───────────────────────────────────── -->
+        <div class="shrink-0 bg-white px-6 py-4 flex items-center justify-between border-b border-slate-200 z-20">
+            <div class="flex items-center gap-3">
+                <div class="p-2 bg-blue-50 border border-blue-100 rounded-xl text-blue-600 shadow-sm">
+                    <i class="fas fa-database text-lg"></i>
+                </div>
+                <div>
+                    <h2 class="text-lg font-black text-slate-800 tracking-tight">Database AHS</h2>
+                    <p class="text-[11px] text-slate-500 font-medium mt-0.5">Pilih bahan, upah, dan alat dari referensi harga terpadu.</p>
+                </div>
+            </div>
+            <button onclick="document.getElementById('ahs-modal-close').click()" class="text-slate-400 hover:text-red-500 hover:bg-red-50 p-2.5 rounded-full transition-colors focus:outline-none">
+                <i class="fas fa-times text-lg"></i>
+            </button>
+        </div>
 
         <!-- Body: Left Filter + Right Table -->
-        <div class="flex flex-1 overflow-hidden">
+        <div class="flex flex-1 overflow-hidden bg-slate-50">
 
             <!-- ── Left Panel: Filter ───────────────────────── -->
-            <div class="w-56 shrink-0 flex flex-col bg-white border-r border-gray-200 overflow-y-auto">
-
-                <!-- Filter Header -->
-                <div class="bg-brand-dark text-white px-4 py-3 flex items-center gap-2 shrink-0">
-                    <i class="fas fa-filter text-xs"></i>
-                    <span class="text-xs font-bold uppercase tracking-wider">Filter Material</span>
-                </div>
-
-                <div class="p-3 flex flex-col gap-4">
+            <div class="w-64 shrink-0 flex flex-col bg-white border-r border-slate-200 overflow-y-auto z-10 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
+                
+                <div class="p-5 flex flex-col gap-6">
                     <!-- Search Nama -->
                     <div>
-                        <label class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block mb-1" id="ahs-filter-label-nama">Nama Bahan</label>
-                        <input id="ahs-modal-search" type="text" placeholder="Ketik Nama Bahan"
-                            class="w-full px-2.5 py-1.5 border border-gray-200 text-xs focus:outline-none focus:border-brand-dark bg-white"/>
+                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2" id="ahs-filter-label-nama">Pencarian Material</label>
+                        <div class="relative">
+                            <input id="ahs-modal-search" type="text" placeholder="Ketik kata kunci..."
+                                class="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-inner"/>
+                            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                        </div>
                     </div>
 
                     <!-- Filter Tipe (hidden buttons kept for JS compatibility) -->
@@ -144,55 +162,54 @@ $wrapperClass = $wrapperClass ?? 'w-full';
             </div>
 
             <!-- ── Right Panel: Tabs + Table ────────────────── -->
-            <div class="flex-1 flex flex-col overflow-hidden">
+            <div class="flex-1 flex flex-col overflow-hidden bg-white">
 
                 <!-- Tab Bar -->
-                <div class="flex border-b border-gray-200 bg-white shrink-0">
-                    <button class="ahs-source-tab px-5 py-3 text-xs font-semibold border-b-2 border-transparent text-slate-500 hover:text-brand-dark transition-colors whitespace-nowrap focus:outline-none" data-source="proyek">Proyek Terkini</button>
-                    <button class="ahs-source-tab px-5 py-3 text-xs font-semibold border-b-2 border-transparent text-slate-500 hover:text-brand-dark transition-colors whitespace-nowrap focus:outline-none" data-source="suplier">Suplier</button>
-                    <button class="ahs-source-tab px-5 py-3 text-xs font-semibold border-b-2 border-transparent text-slate-500 hover:text-brand-dark transition-colors whitespace-nowrap focus:outline-none" data-source="shbj">SHBJ</button>
-                    <button class="ahs-source-tab px-5 py-3 text-xs font-semibold border-b-2 border-transparent text-slate-500 hover:text-brand-dark transition-colors whitespace-nowrap focus:outline-none" data-source="ikkbps">IKK BPS</button>
-                    <button class="ahs-source-tab px-5 py-3 text-xs font-semibold border-b-2 border-transparent text-slate-500 hover:text-brand-dark transition-colors whitespace-nowrap focus:outline-none" data-source="estimatorid">Estimator.id</button>
-                    <button class="ahs-source-tab px-5 py-3 text-xs font-semibold border-b-2 border-transparent text-slate-500 hover:text-brand-dark transition-colors whitespace-nowrap focus:outline-none" data-source="survey">Survey</button>
+                <div class="flex overflow-x-auto border-b border-slate-200 bg-white shrink-0 scrollbar-hide">
+                    <button class="ahs-source-tab px-5 py-3.5 text-[11px] font-bold border-b-[3px] border-transparent text-slate-500 hover:text-blue-600 hover:bg-blue-50/50 transition-all whitespace-nowrap focus:outline-none uppercase tracking-wider" data-source="proyek">Proyek Terkini</button>
+                    <button class="ahs-source-tab px-5 py-3.5 text-[11px] font-bold border-b-[3px] border-transparent text-slate-500 hover:text-blue-600 hover:bg-blue-50/50 transition-all whitespace-nowrap focus:outline-none uppercase tracking-wider" data-source="suplier">Suplier</button>
+                    <button class="ahs-source-tab px-5 py-3.5 text-[11px] font-bold border-b-[3px] border-transparent text-slate-500 hover:text-blue-600 hover:bg-blue-50/50 transition-all whitespace-nowrap focus:outline-none uppercase tracking-wider" data-source="shbj">SHBJ</button>
+                    <button class="ahs-source-tab px-5 py-3.5 text-[11px] font-bold border-b-[3px] border-transparent text-slate-500 hover:text-blue-600 hover:bg-blue-50/50 transition-all whitespace-nowrap focus:outline-none uppercase tracking-wider" data-source="ikkbps">IKK BPS</button>
+                    <button class="ahs-source-tab px-5 py-3.5 text-[11px] font-bold border-b-[3px] border-transparent text-slate-500 hover:text-blue-600 hover:bg-blue-50/50 transition-all whitespace-nowrap focus:outline-none uppercase tracking-wider" data-source="estimatorid">Estimator.id</button>
+                    <button class="ahs-source-tab px-5 py-3.5 text-[11px] font-bold border-b-[3px] border-transparent text-slate-500 hover:text-blue-600 hover:bg-blue-50/50 transition-all whitespace-nowrap focus:outline-none uppercase tracking-wider" data-source="survey">Survey</button>
                 </div>
 
                 <!-- Table -->
-                <div class="flex-1 overflow-auto">
+                <div class="flex-1 overflow-auto bg-slate-50/30">
                     <table class="w-full text-left border-collapse" id="ahs-modal-table">
                         <colgroup>
-                            <col style="width: 3rem">   <!-- No -->
+                            <col style="width: 3.5rem"> <!-- No -->
                             <col>                       <!-- Nama Bahan -->
                             <col style="width: 6rem">   <!-- Satuan -->
                             <col style="width: 9rem">   <!-- Harga Dasar -->
                             <col style="width: 8rem">   <!-- Merk -->
                             <col style="width: 10rem">  <!-- Spesifikasi -->
-                            <col style="width: 10rem">  <!-- Sumber -->
-                            <col style="width: 3rem">   <!-- Checkbox -->
+                            <col style="width: 11rem">  <!-- Sumber -->
+                            <col style="width: 3.5rem"> <!-- Checkbox -->
                         </colgroup>
-                        <thead class="sticky top-0 z-10">
-                            <tr class="bg-brand-dark text-white">
-                                <th class="px-3 py-2.5 text-center text-[10px] font-bold uppercase tracking-wider">No.</th>
-                                <th class="px-3 py-2.5 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
+                        <thead class="sticky top-0 z-10 shadow-sm">
+                            <tr class="bg-slate-800 text-white">
+                                <th class="px-4 py-3 text-center text-[10px] font-bold uppercase tracking-widest border-b border-slate-700">No.</th>
+                                <th class="px-4 py-3 text-[10px] font-bold uppercase tracking-widest border-b border-slate-700">
                                     Nama Bahan
-                                    <i class="fas fa-sort text-[8px] opacity-60 ml-1"></i>
                                 </th>
-                                <th class="px-3 py-2.5 text-center text-[10px] font-bold uppercase tracking-wider">
-                                    Satuan <i class="fas fa-sort text-[8px] opacity-60 ml-0.5"></i>
+                                <th class="px-4 py-3 text-center text-[10px] font-bold uppercase tracking-widest border-b border-slate-700">
+                                    Satuan
                                 </th>
-                                <th class="px-3 py-2.5 text-right text-[10px] font-bold uppercase tracking-wider">
-                                    Harga Dasar <i class="fas fa-sort text-[8px] opacity-60 ml-0.5"></i>
+                                <th class="px-4 py-3 text-right text-[10px] font-bold uppercase tracking-widest border-b border-slate-700">
+                                    Harga Dasar
                                 </th>
-                                <th class="px-3 py-2.5 text-[10px] font-bold uppercase tracking-wider">
-                                    Merk <i class="fas fa-sort text-[8px] opacity-60 ml-0.5"></i>
+                                <th class="px-4 py-3 text-[10px] font-bold uppercase tracking-widest border-b border-slate-700">
+                                    Merk
                                 </th>
-                                <th class="px-3 py-2.5 text-[10px] font-bold uppercase tracking-wider">
-                                    Spesifikasi <i class="fas fa-sort text-[8px] opacity-60 ml-0.5"></i>
+                                <th class="px-4 py-3 text-[10px] font-bold uppercase tracking-widest border-b border-slate-700">
+                                    Spesifikasi
                                 </th>
-                                <th class="px-3 py-2.5 text-[10px] font-bold uppercase tracking-wider">
-                                    Sumber <i class="fas fa-sort text-[8px] opacity-60 ml-0.5"></i>
+                                <th class="px-4 py-3 text-[10px] font-bold uppercase tracking-widest border-b border-slate-700">
+                                    Sumber
                                 </th>
-                                <th class="px-3 py-2.5 text-center text-[10px] font-bold uppercase tracking-wider">
-                                    <input id="ahs-modal-check-all" type="checkbox" class="w-3.5 h-3.5 accent-brand-dark cursor-pointer"/>
+                                <th class="px-4 py-3 text-center text-[10px] font-bold uppercase tracking-widest border-b border-slate-700">
+                                    <input id="ahs-modal-check-all" type="checkbox" class="w-4 h-4 rounded border-slate-500 bg-slate-700/50 text-blue-500 focus:ring-blue-500 cursor-pointer transition-colors"/>
                                 </th>
                             </tr>
                         </thead>
@@ -205,18 +222,24 @@ $wrapperClass = $wrapperClass ?? 'w-full';
         </div>
 
         <!-- ── Footer ───────────────────────────────────────── -->
-        <div class="shrink-0 flex items-center justify-center gap-3 py-3 border-t border-gray-200 bg-slate-50">
-            <p id="ahs-modal-selected-count" class="text-xs text-table-subtle font-medium absolute left-6"></p>
-            <button id="ahs-modal-confirm" type="button" disabled
-                class="px-6 py-2 rounded-full bg-brand-dark hover:bg-brand-dark/90 text-white text-xs font-bold tracking-wide shadow-sm transition-all duration-150 focus:outline-none active:scale-95 disabled:opacity-40 disabled:pointer-events-none">
-                <i class="fas fa-check mr-1.5"></i> Pilih
-            </button>
-            <button id="ahs-modal-cancel" type="button"
-                class="px-6 py-2 rounded-full border border-brand-dark text-brand-dark text-xs font-bold tracking-wide transition-all focus:outline-none active:scale-95 hover:bg-brand-dark/5">
-                <i class="fas fa-times mr-1.5"></i> BATAL
-            </button>
-            <!-- Hidden close button for JS compat -->
-            <button id="ahs-modal-close" class="hidden"></button>
+        <div class="shrink-0 flex items-center justify-between px-6 py-4 border-t border-slate-200 bg-white rounded-b-2xl">
+            <div class="flex items-center gap-2">
+                <div class="w-2 h-2 rounded-full bg-blue-500 animate-pulse hidden" id="ahs-modal-loading-indicator"></div>
+                <p id="ahs-modal-selected-count" class="text-xs text-slate-500 font-bold tracking-wide uppercase bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200"></p>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <button id="ahs-modal-cancel" type="button"
+                    class="px-5 py-2.5 rounded-xl border-2 border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50 text-xs font-bold tracking-widest uppercase transition-all focus:outline-none active:scale-95 shadow-sm">
+                    Batal
+                </button>
+                <button id="ahs-modal-confirm" type="button" disabled
+                    class="px-8 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-black tracking-widest uppercase shadow-[0_4px_14px_rgba(37,99,235,0.39)] hover:shadow-[0_6px_20px_rgba(37,99,235,0.23)] transition-all duration-200 focus:outline-none active:scale-95 disabled:opacity-50 disabled:shadow-none disabled:cursor-not-allowed flex items-center gap-2">
+                    <i class="fas fa-check-circle text-sm"></i> Pilih Item
+                </button>
+                <!-- Hidden close button for JS compat -->
+                <button id="ahs-modal-close" class="hidden"></button>
+            </div>
         </div>
 
     </div>

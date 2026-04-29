@@ -699,13 +699,15 @@ class RapController extends BaseController
                         a.satuan_kategori,
                         a.merk,
                         a.spesifikasi,
-                        COALESCE(b.harga_dasar, u.harga_dasar, al.harga_dasar, 0) AS master_harga_dasar,
+                        COALESCE(MAX(b.keterangan), MAX(u.keterangan), MAX(al.keterangan)) AS master_keterangan,
+                        COALESCE(MAX(b.harga_dasar), MAX(u.harga_dasar), MAX(al.harga_dasar), 0) AS master_harga_dasar,
                         a.satuan_kategori AS satuan_final
                     FROM ahs a
                     LEFT JOIN bahan_utama b ON a.id_kategori = b.id_bahan AND a.kategori = 'A'
                     LEFT JOIN upah_utama u ON a.id_kategori = u.id_upah AND a.kategori = 'B'
                     LEFT JOIN alat_utama al ON a.id_kategori = al.id_alat AND a.kategori = 'C'
                     WHERE a.id_proyek = 1 AND a.id_pekerjaan IN ($inPlaceholders)
+                    GROUP BY a.id_ahs
                     ORDER BY a.kategori, a.id_ahs
                 ";
 
@@ -793,7 +795,7 @@ class RapController extends BaseController
                             'merk'          => $row['merk'] ?? null,
                             'spesifikasi'   => $row['spesifikasi'] ?? null,
                             'urutan'        => $ahsUrutan,
-                            'keterangan'    => null,
+                            'keterangan'    => $row['master_keterangan'] ?? null,
                         ];
                     }
                 }
@@ -943,12 +945,13 @@ class RapController extends BaseController
     {
         $dbEstimator = \Config\Database::connect('estimator');
         $ahsRows = $dbEstimator->table('ahs a')
-            ->select('a.*, COALESCE(b.harga_dasar, u.harga_dasar, al.harga_dasar, 0) as master_harga_dasar')
+            ->select('a.id_ahs, a.kategori, a.id_kategori, a.nama_kategori, a.koefisien, a.satuan_kategori, a.merk, a.spesifikasi, COALESCE(MAX(b.harga_dasar), MAX(u.harga_dasar), MAX(al.harga_dasar), 0) as master_harga_dasar, COALESCE(MAX(b.keterangan), MAX(u.keterangan), MAX(al.keterangan)) as master_keterangan')
             ->join('bahan_utama b', "a.id_kategori = b.id_bahan AND a.kategori = 'A'", 'left')
             ->join('upah_utama u', "a.id_kategori = u.id_upah AND a.kategori = 'B'", 'left')
             ->join('alat_utama al', "a.id_kategori = al.id_alat AND a.kategori = 'C'", 'left')
             ->where('a.id_proyek', 1)
             ->where('a.id_pekerjaan', $idPekerjaan)
+            ->groupBy('a.id_ahs')
             ->get()->getResultArray();
 
         if (empty($ahsRows)) {
@@ -986,7 +989,7 @@ class RapController extends BaseController
                 'merk'          => $row['merk'] ?? null,
                 'spesifikasi'   => $row['spesifikasi'] ?? null,
                 'urutan'        => $urutan,
-                'keterangan'    => $row['keterangan'] ?? null,
+                'keterangan'    => $row['master_keterangan'] ?? null,
             ];
         }
 
