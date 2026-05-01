@@ -3,8 +3,10 @@
  * Renders loading state, table rows, pagination buttons, and binds checkbox events.
  */
 
-import { state, tbody, countEl, paginationEl, paginationInfo,
-         submitBtn, selectedCount, PAGE_SIZE } from '../core/state.js';
+import {
+    state, tbody, countEl, paginationEl, paginationInfo,
+    submitBtn, selectedCount, PAGE_SIZE
+} from '../core/state.js';
 import { toast } from '../../shared/ui/toast.js';
 import { confirmAction } from '../../shared/ui/confirm.js';
 
@@ -13,10 +15,10 @@ import { confirmAction } from '../../shared/ui/confirm.js';
  * Matches partial text from 'sumber' (raw keterangan from DB).
  */
 const BADGE_MAP = [
-    { keyword: 'SNI',       cls: 'bg-emerald-100 text-emerald-700' },
-    { keyword: 'PUPR',      cls: 'bg-violet-100 text-violet-700'   },
-    { keyword: 'Empiris',   cls: 'bg-amber-100 text-amber-700'     },
-    { keyword: 'Estimator', cls: 'bg-rose-100 text-rose-700'       },
+    { keyword: 'SNI', cls: 'bg-emerald-100 text-emerald-700' },
+    { keyword: 'PUPR', cls: 'bg-violet-100 text-violet-700' },
+    { keyword: 'Empiris', cls: 'bg-amber-100 text-amber-700' },
+    { keyword: 'Estimator', cls: 'bg-rose-100 text-rose-700' },
 ];
 
 function getSumberBadge(sumber) {
@@ -41,7 +43,7 @@ export function renderLoading() {
 export function renderRows(result) {
     const { total, page, data } = result;
     const start = (page - 1) * PAGE_SIZE + 1;
-    const end   = Math.min(page * PAGE_SIZE, total);
+    const end = Math.min(page * PAGE_SIZE, total);
 
     if (countEl) {
         if (result.isError) {
@@ -74,10 +76,10 @@ export function renderRows(result) {
     }
 
     tbody.innerHTML = data.map(function (item, idx) {
-        const rowNum     = start + idx;
-        const isChecked  = !!state.selected[item.id];
-        const rowBg      = rowNum % 2 === 0 ? 'bg-table-row' : 'bg-white';
-        const badgeCls   = getSumberBadge(item.sumber);
+        const rowNum = start + idx;
+        const isChecked = !!state.selected[item.id];
+        const rowBg = rowNum % 2 === 0 ? 'bg-table-row' : 'bg-white';
+        const badgeCls = getSumberBadge(item.sumber);
 
         const actionButtons = item.sumber === 'Proyek Terkini' ? `
             <div class="absolute left-[calc(50%+12px)] top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 action-buttons-container bg-white/50 px-1 rounded-lg backdrop-blur-sm" onclick="event.preventDefault(); event.stopPropagation();">
@@ -139,9 +141,9 @@ export function renderPagination(total, current) {
     const totalPages = Math.ceil(total / PAGE_SIZE);
     if (totalPages <= 1) { paginationEl.innerHTML = ''; return; }
 
-    const btnBase     = 'inline-flex items-center justify-center w-7 h-7 text-xs rounded-md border transition-all duration-150 focus:outline-none';
-    const btnActive   = `${btnBase} bg-primary text-white border-primary font-bold`;
-    const btnIdle     = `${btnBase} bg-white border-table-border text-table-body hover:bg-primary/10 hover:border-primary/30`;
+    const btnBase = 'inline-flex items-center justify-center w-7 h-7 text-xs rounded-md border transition-all duration-150 focus:outline-none';
+    const btnActive = `${btnBase} bg-primary text-white border-primary font-bold`;
+    const btnIdle = `${btnBase} bg-white border-table-border text-table-body hover:bg-primary/10 hover:border-primary/30`;
     const btnDisabled = `${btnBase} bg-white border-table-border text-table-muted opacity-50 cursor-not-allowed pointer-events-none`;
 
     const svgPrev = `<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>`;
@@ -149,7 +151,7 @@ export function renderPagination(total, current) {
 
     let html = `<button class="${current === 1 ? btnDisabled : btnIdle}" data-page="${current - 1}" ${current === 1 ? 'disabled' : ''}>${svgPrev}</button>`;
 
-    const delta   = 2;
+    const delta = 2;
     const pagNums = [];
     for (let p = Math.max(1, current - delta); p <= Math.min(totalPages, current + delta); p++) pagNums.push(p);
     if (pagNums[0] > 1) {
@@ -184,7 +186,7 @@ export function bindCheckboxes() {
 
     tbody.querySelectorAll('.tambah-ahs-checkbox').forEach(cb => {
         cb.addEventListener('change', function () {
-            const id  = cb.dataset.id;
+            const id = cb.dataset.id;
             const row = cb.closest('tr');
             if (cb.checked) {
                 state.selected[id] = { id, nama: cb.dataset.nama, satuan: cb.dataset.satuan, harga: parseFloat(cb.dataset.harga), sumber: cb.dataset.sumber };
@@ -203,7 +205,7 @@ export function bindCheckboxes() {
 
 export function updateSubmitBar() {
     const count = Object.keys(state.selected).length;
-    if (submitBtn)     submitBtn.disabled    = count === 0;
+    if (submitBtn) submitBtn.disabled = count === 0;
     if (selectedCount) selectedCount.textContent = count > 0 ? `${count} item dipilih` : 'Belum ada item dipilih';
 }
 
@@ -329,10 +331,10 @@ export function bindPekerjaanActions() {
             const tr = this.closest('tr');
             const id = this.dataset.id;
             const editBtn = tr.querySelector('.btn-edit-pekerjaan');
-            
+
             const oldNama = editBtn.dataset.nama;
             const oldSatuan = editBtn.dataset.satuan;
-            
+
             const newNama = tr.querySelector('.nama-input').value.trim();
             const newSatuan = tr.querySelector('.satuan-input').value.trim() || 'm2';
 
@@ -342,7 +344,7 @@ export function bindPekerjaanActions() {
             }
 
             if (newNama === oldNama && newSatuan === oldSatuan) {
-                if(this._resetEditState) this._resetEditState();
+                if (this._resetEditState) this._resetEditState();
                 return;
             }
 
@@ -362,12 +364,12 @@ export function bindPekerjaanActions() {
 
                 toast.show(`Pekerjaan "${oldNama}" berhasil diubah`, 'success');
                 window.dispatchEvent(new CustomEvent('tambahAhsPageChange', { detail: { page: state.page } }));
-                
+
             } catch (err) {
                 console.error(err);
                 this.disabled = false;
                 alert(err.message || 'Terjadi kesalahan saat mengubah pekerjaan');
-                if(this._resetEditState) this._resetEditState();
+                if (this._resetEditState) this._resetEditState();
             }
         });
     });

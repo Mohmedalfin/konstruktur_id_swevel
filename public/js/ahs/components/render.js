@@ -3,7 +3,7 @@
  * Renders editable AHS table rows with autocomplete, recalc, and delete.
  */
 
-import { state, tbody, totalKeselEl } from '../core/state.js';
+import { state, tbody, totalKeselEl, sourceLabel } from '../core/state.js';
 import { fmt, escHtml } from '../../shared/utils.js';
 import { toast } from '../../shared/ui/toast.js';
 import { confirmAction } from '../../shared/ui/confirm.js';
@@ -20,6 +20,33 @@ function _parseSumber(raw) {
     if (idx === -1) return { nama: raw, url: '' };
     return { nama: raw.substring(0, idx), url: raw.substring(idx + 1) };
 }
+
+export function checkAndMarkEmpiris() {
+    if (!sourceLabel) return;
+    const current = sourceLabel.textContent.trim().toUpperCase();
+    // Ubah label visual ke EMPIRIS kalau belum EMPIRIS
+    // (berlaku baik dari PUPR maupun dari kosong)
+    // CATATAN: sessionStorage TIDAK diupdate di sini —
+    // hanya diupdate setelah save berhasil (lihat save.js),
+    // agar refresh sebelum simpan tidak "mengunci" label EMPIRIS
+    // padahal data belum tersimpan.
+    if (current !== 'EMPIRIS') {
+        sourceLabel.textContent = 'EMPIRIS';
+        // Pastikan container "Sumber:" terlihat
+        const sourceContainer = sourceLabel.closest('div');
+        if (sourceContainer) {
+            sourceContainer.classList.remove('hidden');
+            sourceContainer.classList.add('sm:block');
+        }
+    }
+}
+
+// Delegate input events on tbody to mark as empiris
+tbody.addEventListener('input', (e) => {
+    if (e.target.tagName === 'INPUT') {
+        checkAndMarkEmpiris();
+    }
+});
 
 export function renderRow(rowData, isNew = false) {
     const cfg = tipeConfig[rowData.tipe] || tipeConfig.bahan;
@@ -71,7 +98,7 @@ export function renderRow(rowData, isNew = false) {
         </td>
         <td class="px-3 md:px-4 py-2 md:py-2.5 relative">
             <input type="text" value="${escHtml(rowData.uraian)}"
-                placeholder="Nama bahan / alat / pekerja"
+                placeholder="Nama ${rowData.tipe}"
                 class="ahs-uraian w-full bg-transparent border-b border-transparent hover:border-slate-200 focus:border-primary text-[11px] md:text-[13px] text-table-medium placeholder-table-subtle focus:outline-none transition-colors py-0.5"
                 data-id="${rowData.id}" autocomplete="off" ${isNew ? '' : 'readonly'}/>
             <ul class="ahs-autocomplete hidden absolute left-0 right-0 top-full mt-1 bg-white border border-table-border rounded-lg shadow-xl z-30 max-h-48 overflow-y-auto text-[12px]"></ul>
@@ -197,9 +224,8 @@ function _ensureHeader(tipe) {
             }
         }
         if (!inserted) tbody.appendChild(header);
-
-        // Ensure footer exists too
-        _ensureFooter(tipe);
+        // NOTE: _ensureFooter is NOT called here to avoid circular dependency.
+        // Footer is always created explicitly by renderRow() and initEmptyFramework().
     }
     return header;
 }
@@ -213,7 +239,6 @@ function _ensureFooter(tipe) {
         footer.className = 'ahs-category-footer hidden'; // dummy for identification
         footer.dataset.tipe = tipe;
 
-        const header = _ensureHeader(tipe);
         const types = ['bahan', 'upah', 'alat'];
         const myIdx = types.indexOf(tipe);
         let inserted = false;
@@ -351,6 +376,7 @@ function _bindRowInputs(tr) {
 
         renumberRows();
         recalcTotals();
+        checkAndMarkEmpiris();
         toast.show('Item berhasil dihapus', 'success', 2000);
     });
 
@@ -452,11 +478,16 @@ export function addRow(tipe) {
     document.getElementById('ahs-empty-row')?.remove();
     renderRow({ id: Date.now(), tipe, uraian: '', merk: '', spesifikasi: '', koefisien: 1, satuan: '', hargaSatuan: 0, sumber: '' }, true);
     recalcTotals();
+    checkAndMarkEmpiris();
     const tipeLabel = tipeConfig[tipe]?.label || tipe;
     toast.show(`Baris ${tipeLabel} baru ditambahkan`, 'success', 2000);
 }
 export function initEmptyFramework() {
-    _ensureFooter('bahan');
-    _ensureFooter('upah');
-    _ensureFooter('alat');
+    // Harus buat header dulu baru footer untuk tiap tipe,
+    // agar urutan DOM benar: header → rows → footer → summary.
+    // Kedua fungsi tidak lagi saling memanggil, jadi urutan di sini penting.
+    ['bahan', 'upah', 'alat'].forEach(tipe => {
+        _ensureHeader(tipe);
+        _ensureFooter(tipe);
+    });
 }

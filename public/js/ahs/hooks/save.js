@@ -3,7 +3,7 @@
  * Save handler — collects row data and sends to CI4 endpoint.
  */
 
-import { state, tbody, simpanBtn } from '../core/state.js';
+import { state, tbody, simpanBtn, sourceLabel } from '../core/state.js';
 import { saveRincianAHS } from '../core/data.js';
 import { toast } from '../../shared/ui/toast.js';
 
@@ -62,6 +62,12 @@ export function bindSave() {
             const res = await saveRincianAHS({ id_rap_detail: idDetail, items });
             if (res.status === 'success') {
                 toast.show('Rincian AHS berhasil disimpan ke database', 'success', 4000);
+                // ── Commit label sumber ke sessionStorage HANYA setelah save berhasil ──
+                // Ini mencegah label berubah permanen kalau user refresh sebelum simpan.
+                try {
+                    const currentLabel = sourceLabel?.textContent?.trim() || '';
+                    sessionStorage.setItem('ahs_item_source', currentLabel);
+                } catch (_) {}
             } else {
                 throw new Error(res.message || 'Gagal menyimpan');
             }

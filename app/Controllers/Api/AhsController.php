@@ -137,7 +137,8 @@ class AhsController extends BaseController
                 $subtotalUpah     = $volume * $hargaUpah;
                 $totalKeseluruhan = $subtotalBahan + $subtotalAlat + $subtotalUpah;
 
-                $rapDetailModel->update($idDetail, [
+                $source = $json['source'] ?? null;
+                $updateData = [
                     'harga_bahan'       => $hargaBahan,
                     'harga_alat'        => $hargaAlat,
                     'harga_upah'        => $hargaUpah,
@@ -145,7 +146,13 @@ class AhsController extends BaseController
                     'subtotal_alat'     => $subtotalAlat,
                     'subtotal_upah'     => $subtotalUpah,
                     'total_keseluruhan' => $totalKeseluruhan,
-                ]);
+                ];
+
+                if ($source === 'EMPIRIS') {
+                    $updateData['keterangan'] = 'EMPIRIS';
+                }
+
+                $rapDetailModel->update($idDetail, $updateData);
 
                 // ── 4. Recalculate RAP-level grand total ──────────────────────
                 $rapModel  = new RapModel();

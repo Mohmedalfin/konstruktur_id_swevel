@@ -9,7 +9,7 @@ import { state, modalOverlay, modalClose, modalCancel, modalConfirm,
 import { fetchAhsDatabase, fetchProyekItems, fetchShbjItems, fetchSurveyItems, fetchEstimatorIdItems } from '../core/data.js';
 import { fmt, escHtml } from '../../shared/utils.js';
 import { toast } from '../../shared/ui/toast.js';
-import { tipeConfig, renderRow, recalcTotals } from './render.js';
+import { tipeConfig, renderRow, recalcTotals, checkAndMarkEmpiris } from './render.js';
 
 // ── Helper: fetch the right data based on the active source tab ────────────
 async function fetchBySource(page = 1, q = '', appendData = false) {
@@ -285,6 +285,7 @@ export function confirmModalSelection() {
         });
     });
     recalcTotals();
+    checkAndMarkEmpiris();
     closeModal();
     if (count > 0) {
         toast.show(`Berhasil menambahkan ${count} item dari database`, 'success', 3000);

@@ -32,8 +32,21 @@ if (!tbody) {
             const namaItem = sessionStorage.getItem('ahs_item_label') || '—';
             if (itemLabel) itemLabel.textContent = namaItem.toUpperCase();
             
-            const sumber = sessionStorage.getItem('ahs_item_source') || 'PUPR';
-            if (sourceLabel) sourceLabel.textContent = sumber.toUpperCase();
+            const rawSumber = sessionStorage.getItem('ahs_item_source') || '';
+            if (sourceLabel) {
+                sourceLabel.textContent = rawSumber.toUpperCase();
+                // Tampilkan/sembunyikan container "Sumber:" berdasarkan nilai
+                const sourceContainer = sourceLabel.closest('div');
+                if (sourceContainer) {
+                    if (rawSumber) {
+                        sourceContainer.classList.remove('hidden');
+                        sourceContainer.classList.add('sm:block');
+                    } else {
+                        sourceContainer.classList.add('hidden');
+                        sourceContainer.classList.remove('sm:block');
+                    }
+                }
+            }
         } catch (_) {}
 
         // ── Ambil id_project dan id_rap_detail dari URL atau sessionStorage ───
@@ -50,6 +63,60 @@ if (!tbody) {
         } catch (_) {}
 
         // ── Render initial rows ───────────────────────────────────────────
+        // Tampilkan skeleton loading sebelum fetch
+        const skeletonRow = (opacity) => `
+            <tr class="ahs-skeleton-row border-b border-slate-100">
+                <td class="px-4 py-3 text-center"><div class="h-3 w-5 mx-auto bg-slate-200 rounded animate-pulse ${opacity}"></div></td>
+                <td class="px-4 py-3"><div class="h-3 w-48 bg-slate-200 rounded animate-pulse ${opacity}"></div></td>
+                <td class="px-4 py-3 text-center"><div class="h-3 w-12 mx-auto bg-slate-200 rounded animate-pulse ${opacity}"></div></td>
+                <td class="px-4 py-3 text-center"><div class="h-3 w-10 mx-auto bg-slate-200 rounded animate-pulse ${opacity}"></div></td>
+                <td class="px-4 py-3 text-right"><div class="h-3 w-20 ml-auto bg-slate-200 rounded animate-pulse ${opacity}"></div></td>
+                <td class="px-4 py-3 text-right"><div class="h-3 w-20 ml-auto bg-slate-200 rounded animate-pulse ${opacity}"></div></td>
+                <td class="px-4 py-3"></td>
+                <td class="px-4 py-3"><div class="h-3 w-16 bg-slate-200 rounded animate-pulse ${opacity}"></div></td>
+                <td class="px-4 py-3"><div class="h-3 w-16 bg-slate-200 rounded animate-pulse ${opacity}"></div></td>
+                <td class="px-4 py-3"><div class="h-3 w-24 bg-slate-200 rounded animate-pulse ${opacity}"></div></td>
+            </tr>`;
+
+        tbody.innerHTML = `
+            <!-- Skeleton header BAHAN -->
+            <tr class="ahs-skeleton-row bg-slate-700/80">
+                <td class="px-4 py-2.5 text-center"><div class="h-3 w-4 mx-auto bg-slate-600 rounded animate-pulse"></div></td>
+                <td colspan="5" class="px-4 py-2.5"><div class="h-3 w-20 bg-slate-600 rounded animate-pulse"></div></td>
+                <td colspan="4" class="px-4 py-2.5"></td>
+            </tr>
+            ${skeletonRow('')}
+            ${skeletonRow('opacity-70')}
+            ${skeletonRow('opacity-40')}
+            <!-- Skeleton header UPAH -->
+            <tr class="ahs-skeleton-row bg-slate-700/80">
+                <td class="px-4 py-2.5 text-center"><div class="h-3 w-4 mx-auto bg-slate-600 rounded animate-pulse"></div></td>
+                <td colspan="5" class="px-4 py-2.5"><div class="h-3 w-16 bg-slate-600 rounded animate-pulse"></div></td>
+                <td colspan="4" class="px-4 py-2.5"></td>
+            </tr>
+            ${skeletonRow('')}
+            ${skeletonRow('opacity-60')}
+            <!-- Skeleton header ALAT -->
+            <tr class="ahs-skeleton-row bg-slate-700/80">
+                <td class="px-4 py-2.5 text-center"><div class="h-3 w-4 mx-auto bg-slate-600 rounded animate-pulse"></div></td>
+                <td colspan="5" class="px-4 py-2.5"><div class="h-3 w-12 bg-slate-600 rounded animate-pulse"></div></td>
+                <td colspan="4" class="px-4 py-2.5"></td>
+            </tr>
+            ${skeletonRow('')}
+            <!-- Loading caption -->
+            <tr class="ahs-skeleton-row">
+                <td colspan="10" class="py-4 text-center">
+                    <span class="inline-flex items-center gap-2 text-[11px] text-slate-400 font-medium animate-pulse">
+                        <svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                        </svg>
+                        Memuat data rincian AHS...
+                    </span>
+                </td>
+            </tr>
+        `;
+
         if (idDetail) {
             const existing = await fetchRincianAHS(idDetail);
             if (existing && existing.length > 0) {

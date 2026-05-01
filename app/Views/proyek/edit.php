@@ -15,7 +15,8 @@
             <h2 class="text-lg font-extrabold tracking-wide text-text-primary">LENGKAPI PROFIL PROYEK</h2>
         </div>
 
-        <form action="<?= base_url('proyek/update/' . $proyek['id_project']) ?>" method="post" enctype="multipart/form-data">
+        <form action="<?= base_url('proyek/update/' . $proyek['id_project']) ?>" method="post"
+            enctype="multipart/form-data">
             <?= csrf_field() ?>
 
             <div class="grid grid-cols-1 gap-8 lg:grid-cols-[260px_1fr]">
@@ -26,11 +27,7 @@
                     <!-- Upload Foto -->
                     <div class="overflow-hidden border border-gray-200">
                         <label class="block cursor-pointer">
-                            <input
-                                id="foto_proyek"
-                                type="file"
-                                name="foto_proyek"
-                                accept="image/png,image/jpeg"
+                            <input id="foto_proyek" type="file" name="foto_proyek" accept="image/png,image/jpeg"
                                 class="hidden" />
 
                             <!-- Frame biru -->
@@ -41,15 +38,14 @@
                                 $fotoPreview = !empty($proyek['foto_proyek']) ? base_url($proyek['foto_proyek']) : base_url('assets/images/BackgroundLogin.png');
                                 $imgOpacity = !empty($proyek['foto_proyek']) ? 'opacity-60' : 'opacity-25';
                                 ?>
-                                <img
-                                    id="fotoPreview"
-                                    src="<?= $fotoPreview ?>"
-                                    alt="Preview"
+                                <img id="fotoPreview" src="<?= $fotoPreview ?>" alt="Preview"
                                     class="absolute inset-0 h-full w-full object-cover <?= $imgOpacity ?>" />
 
                                 <!-- Konten tengah -->
-                                <div class="relative z-10 flex h-full flex-col items-center justify-center text-center px-4">
-                                    <div class="flex h-14 w-14 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/20">
+                                <div
+                                    class="relative z-10 flex h-full flex-col items-center justify-center text-center px-4">
+                                    <div
+                                        class="flex h-14 w-14 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/20">
                                         <i class="fa-solid fa-cloud-arrow-up text-3xl"></i>
                                     </div>
 
@@ -70,17 +66,10 @@
                     </div>
 
                     <!-- Tambah Dokumen -->
-                    <input
-                        id="dokumenInput"
-                        type="file"
-                        name="dokumen[]"
-                        class="hidden"
-                        multiple
+                    <input id="dokumenInput" type="file" name="dokumen[]" class="hidden" multiple
                         accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png" />
 
-                    <button
-                        type="button"
-                        id="btnTambahDokumen"
+                    <button type="button" id="btnTambahDokumen"
                         class="inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-4 py-2 text-white shadow-md transition hover:bg-primary/90">
                         <i class="fa-solid fa-file-circle-plus"></i>
                         <span class="text-sm font-semibold">Tambah Dokumen</span>
@@ -112,14 +101,16 @@
 
                         <div>
                             <label class="mb-1 block text-md font-semibold text-text-primary">Nama Proyek</label>
-                            <input name="nama_proyek" type="text" placeholder="Masukkan Nama Proyek" value="<?= esc($proyek['nama_proyek']) ?>"
+                            <input name="nama_proyek" type="text" placeholder="Masukkan Nama Proyek"
+                                value="<?= esc($proyek['nama_proyek']) ?>"
                                 class="w-full  border border-gray-300 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500" />
                         </div>
 
                         <div>
                             <label class="mb-1 block text-md font-semibold text-text-primary">
                                 Lokasi & Referensi Harga
-                                <span class="ml-1 text-xs font-normal text-slate-500">(Provinsi -> Kab/Kota -> Tahun)</span>
+                                <span class="ml-1 text-xs font-normal text-slate-500">(Provinsi -> Kab/Kota ->
+                                    Tahun)</span>
                             </label>
 
                             <div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
@@ -143,32 +134,37 @@
                             </div>
 
                             <!-- Hidden fields yang dikirim ke server -->
-                            <input type="hidden" name="id_wilayah" id="id_wilayah" value="<?= esc($proyek['id_wilayah'] ?? '') ?>" />
-                            <input type="hidden" name="id_template" id="id_template" value="<?= esc($proyek['id_template'] ?? '') ?>" />
-                            <input type="hidden" name="lokasi_proyek" id="lokasi_proyek" value="<?= esc($proyek['lokasi_proyek'] ?? '') ?>" />
+                            <input type="hidden" name="id_wilayah" id="id_wilayah"
+                                value="<?= esc($proyek['id_wilayah'] ?? '') ?>" />
+                            <input type="hidden" name="id_template" id="id_template"
+                                value="<?= esc($proyek['id_template'] ?? '') ?>" />
+                            <input type="hidden" name="lokasi_proyek" id="lokasi_proyek"
+                                value="<?= esc($proyek['lokasi_proyek'] ?? '') ?>" />
 
                             <?php if (!empty($proyek['id_wilayah'])): ?>
-                            <p id="lokasi-info" class="mt-1 text-xs text-green-600 font-medium">
-                                <i class="fa-solid fa-circle-check mr-1"></i>
-                                Tersimpan: <?= esc($proyek['lokasi_proyek'] ?? 'Wilayah #' . $proyek['id_wilayah']) ?>
-                            </p>
+                                <p id="lokasi-info" class="mt-1 text-xs text-green-600 font-medium">
+                                    <i class="fa-solid fa-circle-check mr-1"></i>
+                                    Tersimpan: <?= esc($proyek['lokasi_proyek'] ?? 'Wilayah #' . $proyek['id_wilayah']) ?>
+                                </p>
                             <?php else: ?>
-                            <p id="lokasi-info" class="mt-1 text-xs text-slate-500">
-                                Pilih lokasi untuk menggunakan harga satuan resmi (BPS/PUPR) sesuai wilayah.
-                            </p>
+                                <p id="lokasi-info" class="mt-1 text-xs text-slate-500">
+                                    Pilih lokasi untuk menggunakan harga satuan resmi (BPS/PUPR) sesuai wilayah.
+                                </p>
                             <?php endif; ?>
                         </div>
 
                         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                             <div>
                                 <label class="mb-1 block text-md font-semibold text-text-primary">Jenis Proyek</label>
-                                <input name="jenis_proyek" type="text" placeholder="Masukkan Jenis Proyek" value="<?= esc($proyek['jenis_proyek']) ?>"
+                                <input name="jenis_proyek" type="text" placeholder="Masukkan Jenis Proyek"
+                                    value="<?= esc($proyek['jenis_proyek']) ?>"
                                     class="w-full  border border-gray-300 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500" />
                             </div>
 
                             <div>
                                 <label class="mb-1 block text-md font-semibold text-text-primary">Harga Deal</label>
-                                <input name="harga_deal" id="harga_deal" type="text" placeholder="Masukkan Harga Deal" value="<?= esc($proyek['harga_deal'] ? 'Rp ' . number_format($proyek['harga_deal'], 0, ',', '.') : '') ?>"
+                                <input name="harga_deal" id="harga_deal" type="text" placeholder="Masukkan Harga Deal"
+                                    value="<?= esc($proyek['harga_deal'] ? 'Rp ' . number_format($proyek['harga_deal'], 0, ',', '.') : '') ?>"
                                     class="w-full  border border-gray-300 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500" />
                             </div>
                         </div>
@@ -179,23 +175,20 @@
                             <!-- Tanggal Mulai -->
                             <div>
                                 <label class="mb-1 block text-md font-semibold text-text-primary">Tanggal Mulai</label>
-                                <input
-                                    name="tanggal_mulai"
+                                <input name="tanggal_mulai"
                                     value="<?= !empty($proyek['tanggal_mulai']) ? str_replace('.', '-', $proyek['tanggal_mulai']) : '' ?>"
                                     class="py-3 px-4 block w-full bg-white border border-gray-300 sm:text-sm text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                                    type="date"
-                                    required>
+                                    type="date" required>
                             </div>
 
                             <!-- Estimasi Selesai -->
                             <div>
-                                <label class="mb-1 block text-md font-semibold text-text-primary">Estimasi Selesai</label>
-                                <input
-                                    name="estimasi_selesai"
+                                <label class="mb-1 block text-md font-semibold text-text-primary">Estimasi
+                                    Selesai</label>
+                                <input name="estimasi_selesai"
                                     value="<?= !empty($proyek['estimasi_selesai']) ? str_replace('.', '-', $proyek['estimasi_selesai']) : '' ?>"
                                     class="py-3 px-4 block w-full bg-white border border-gray-300 sm:text-sm text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                                    type="date"
-                                    required>
+                                    type="date" required>
                             </div>
 
                         </div>
@@ -209,26 +202,32 @@
 
                         <div class="space-y-4">
                             <div>
-                                <label class="mb-1 block text-md font-semibold text-text-primary">Nama Owner / Klien</label>
-                                <input name="nama_owner" type="text" placeholder="Masukkan Nama Owner / Klien" value="<?= esc($proyek['nama_owner']) ?>"
+                                <label class="mb-1 block text-md font-semibold text-text-primary">Nama Owner /
+                                    Klien</label>
+                                <input name="nama_owner" type="text" placeholder="Masukkan Nama Owner / Klien"
+                                    value="<?= esc($proyek['nama_owner']) ?>"
                                     class="w-full  border border-gray-300 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500" />
                             </div>
 
                             <div>
                                 <label class="mb-1 block text-md font-semibold text-text-primary">Perusahaan</label>
-                                <input name="perusahaan" type="text" placeholder="Masukkan Nama Perusahaan" value="<?= esc($proyek['nama_perusahaan']) ?>"
+                                <input name="perusahaan" type="text" placeholder="Masukkan Nama Perusahaan"
+                                    value="<?= esc($proyek['nama_perusahaan']) ?>"
                                     class="w-full  border border-gray-300 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500" />
                             </div>
 
                             <div>
                                 <label class="mb-1 block text-md font-semibold text-text-primary">Nomor Kontrak</label>
-                                <input name="nomor_kontrak" type="text" placeholder="Masukkan Nomor Kontrak" value="<?= esc($proyek['nomor_kontrak']) ?>"
+                                <input name="nomor_kontrak" type="text" placeholder="Masukkan Nomor Kontrak"
+                                    value="<?= esc($proyek['nomor_kontrak']) ?>"
                                     class="w-full  border border-gray-300 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500" />
                             </div>
 
                             <div>
-                                <label class="mb-1 block text-md font-semibold text-text-primary">Keterangan Lain</label>
-                                <input name="keterangan_lain" type="text" placeholder="Masukkan Keterangan Lain" value="<?= esc($proyek['keterangan']) ?>"
+                                <label class="mb-1 block text-md font-semibold text-text-primary">Keterangan
+                                    Lain</label>
+                                <input name="keterangan_lain" type="text" placeholder="Masukkan Keterangan Lain"
+                                    value="<?= esc($proyek['keterangan']) ?>"
                                     class="w-full  border border-gray-300 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500" />
                             </div>
                         </div>
@@ -273,7 +272,7 @@
         // =========================
         const hargaDealInput = document.getElementById('harga_deal');
         if (hargaDealInput) {
-            hargaDealInput.addEventListener('input', function(e) {
+            hargaDealInput.addEventListener('input', function (e) {
                 let value = this.value.replace(/[^0-9]/g, '');
                 if (value) {
                     this.value = 'Rp ' + parseInt(value, 10).toLocaleString('id-ID');
