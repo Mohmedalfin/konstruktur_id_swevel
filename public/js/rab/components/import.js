@@ -118,7 +118,11 @@ function _autoMapColumns() {
                 break;
             }
         }
-        currentMapping[sf.key] = foundIdx;
+        if (sf.key === 'uraian') {
+            currentMapping[sf.key] = foundIdx !== 0 ? [foundIdx] : [];
+        } else {
+            currentMapping[sf.key] = foundIdx;
+        }
     });
 }
 
@@ -131,7 +135,11 @@ function _renderTableHeaders(thead) {
         colgroupHtml += `<col style="width: 14rem">`;
         let mappedSysKey = '';
         Object.keys(currentMapping).forEach(sysKey => {
-            if (currentMapping[sysKey] === i) mappedSysKey = sysKey;
+            if (Array.isArray(currentMapping[sysKey])) {
+                if (currentMapping[sysKey].includes(i)) mappedSysKey = sysKey;
+            } else if (currentMapping[sysKey] === i) {
+                mappedSysKey = sysKey;
+            }
         });
 
         const isMapped = mappedSysKey !== '';
@@ -168,16 +176,29 @@ function _renderTableHeaders(thead) {
         sel.addEventListener('change', (e) => {
             const colIdx = parseInt(e.currentTarget.dataset.colIdx);
             const selectedSysKey = e.currentTarget.value;
+            
+            // Remove colIdx from any existing mappings
+            Object.keys(currentMapping).forEach(k => {
+                if (Array.isArray(currentMapping[k])) {
+                    currentMapping[k] = currentMapping[k].filter(idx => idx !== colIdx);
+                } else if (currentMapping[k] === colIdx) {
+                    currentMapping[k] = 0;
+                }
+            });
+
             if (selectedSysKey !== '') {
-                Object.keys(currentMapping).forEach(k => {
-                    if (currentMapping[k] === colIdx) currentMapping[k] = 0;
-                    if (k === selectedSysKey) currentMapping[k] = 0;
-                });
-                currentMapping[selectedSysKey] = colIdx;
-            } else {
-                Object.keys(currentMapping).forEach(k => {
-                    if (currentMapping[k] === colIdx) currentMapping[k] = 0;
-                });
+                // If mapping to a non-uraian key, remove previous column mapped to this key
+                if (selectedSysKey !== 'uraian') {
+                    currentMapping[selectedSysKey] = colIdx;
+                } else {
+                    if (!Array.isArray(currentMapping.uraian)) {
+                        currentMapping.uraian = currentMapping.uraian ? [currentMapping.uraian] : [];
+                    }
+                    if (!currentMapping.uraian.includes(colIdx)) {
+                        currentMapping.uraian.push(colIdx);
+                        currentMapping.uraian.sort((a, b) => a - b);
+                    }
+                }
             }
             const createdTbody = _renderTableHeaders(newThead);
             _renderTableBody(createdTbody);
@@ -194,14 +215,14 @@ function _renderTableBody(tbody) {
         return;
     }
 
-    const mapUraian = currentMapping.uraian || 0;
+    const uraianCols = Array.isArray(currentMapping.uraian) ? currentMapping.uraian : (currentMapping.uraian ? [currentMapping.uraian] : []);
     const mapVolume = currentMapping.volume || 0;
 
     let html = '';
     rawDataStore.forEach((rowVals, index) => {
         const rawVolCell = mapVolume !== 0 ? rowVals[excelColumns[mapVolume].idxExcel] : null;
         let isVolEmpty = (mapVolume !== 0 && (rawVolCell === null || rawVolCell === undefined || rawVolCell.toString().trim() === ''));
-        const hasUraian = mapUraian !== 0 && !!rowVals[excelColumns[mapUraian].idxExcel];
+        const hasUraian = uraianCols.some(colIdx => !!rowVals[excelColumns[colIdx].idxExcel]);
         const isHeaderStyle = isVolEmpty && hasUraian;
         const bgClass   = isHeaderStyle ? 'bg-amber-50/50' : 'bg-white';
         const textClass = isHeaderStyle ? 'font-bold text-amber-900' : 'font-medium text-table-strong';
@@ -214,7 +235,11 @@ function _renderTableBody(tbody) {
             const rawVal = rowVals[excelIdx];
             let mappedSysKey = '';
             Object.keys(currentMapping).forEach(sysKey => {
-                if (currentMapping[sysKey] === i) mappedSysKey = sysKey;
+                if (Array.isArray(currentMapping[sysKey])) {
+                    if (currentMapping[sysKey].includes(i)) mappedSysKey = sysKey;
+                } else if (currentMapping[sysKey] === i) {
+                    mappedSysKey = sysKey;
+                }
             });
 
             let cellVal = '';
@@ -240,7 +265,8 @@ function _renderTableBody(tbody) {
 function _validateImportState() {
     const btnNext = document.getElementById('import-rab-modal-next');
     if (!btnNext) return;
-    if (!currentMapping.uraian || !currentMapping.volume || !currentMapping.satuan) {
+    const hasUraian = Array.isArray(currentMapping.uraian) ? currentMapping.uraian.length > 0 : !!currentMapping.uraian;
+    if (!hasUraian || !currentMapping.volume || !currentMapping.satuan) {
         btnNext.disabled = true;
     } else {
         btnNext.disabled = false;
@@ -249,33 +275,78 @@ function _validateImportState() {
 
 function _prepareOrganizedData() {
     if (!globalWorksheet) return;
-    const mapUraian = currentMapping.uraian ? excelColumns[currentMapping.uraian].idxExcel : -1;
+    const uraianCols = Array.isArray(currentMapping.uraian) ? currentMapping.uraian : (currentMapping.uraian ? [currentMapping.uraian] : []);
     const mapVolume = currentMapping.volume ? excelColumns[currentMapping.volume].idxExcel : -1;
     const mapSatuan = currentMapping.satuan ? excelColumns[currentMapping.satuan].idxExcel : -1;
 
     organizedItems = [];
+    const isMultiColumn = uraianCols.length > 1;
     let currentLevelForItems = 0;
+
     globalWorksheet.eachRow((row, rowNumber) => {
         if (rowNumber === 1) return;
-        const vals = row.values;
-        const nama = mapUraian !== -1 && vals[mapUraian] ? vals[mapUraian].toString().trim() : '';
-        if (!nama) return;
+        
+        let isHeaderArtifact = false;
+        if (rowNumber <= 15) {
+            let exactHeaderMatches = 0;
+            const rowVals = row.values;
+            for (let i = 1; i < excelColumns.length; i++) {
+                const rawVal = rowVals[excelColumns[i].idxExcel];
+                const strVal = typeof rawVal === 'object' && rawVal !== null ? (rawVal.result ? rawVal.result.toString().trim() : '') : (rawVal ? rawVal.toString().trim() : '');
+                if (strVal) {
+                    const s = strVal.toLowerCase().replace(/\s+/g, ' ').trim();
+                    if (['uraian', 'uraian pekerjaan', 'pekerjaan', 'item pekerjaan', 'deskripsi', 'nama pekerjaan'].includes(s)) exactHeaderMatches++;
+                    if (['volume', 'vol', 'qty', 'kuantitas', 'jumlah'].includes(s)) exactHeaderMatches++;
+                    if (['satuan', 'sat', 'unit'].includes(s)) exactHeaderMatches++;
+                    if (['harga', 'harga satuan', 'rate', 'rate per unit', 'amount', 'total amount', 'jumlah harga', 'total harga', 'total'].includes(s)) exactHeaderMatches++;
+                }
+            }
+            if (exactHeaderMatches >= 2) isHeaderArtifact = true;
+        }
 
+        if (isHeaderArtifact) return;
+
+        let itemsOnRow = [];
+        for (let i = 0; i < uraianCols.length; i++) {
+            const colIdx = uraianCols[i];
+            const excelColIdx = excelColumns[colIdx].idxExcel;
+            const cell = row.getCell(excelColIdx);
+            const val = cell.value;
+            const strVal = typeof val === 'object' && val !== null ? (val.result ? val.result.toString().trim() : '') : (val ? val.toString().trim() : '');
+            
+            if (strVal) {
+                itemsOnRow.push({
+                    uraian: strVal,
+                    level: isMultiColumn ? i : 0
+                });
+            }
+        }
+        
+        if (itemsOnRow.length === 0) return;
+
+        const vals = row.values;
         const volRaw = mapVolume !== -1 ? vals[mapVolume] : null;
         const isVolEmpty = (volRaw === null || volRaw === undefined || volRaw.toString().trim() === '');
         
-        if (isVolEmpty) {
-            currentLevelForItems = 1;
+        if (!isMultiColumn) {
+            if (isVolEmpty) currentLevelForItems = 1;
+            itemsOnRow[0].level = isVolEmpty ? 0 : currentLevelForItems;
         }
 
-        organizedItems.push({
-            id: 'temp-' + Date.now() + '-' + rowNumber,
-            nama: nama,
-            volume: isVolEmpty ? 0 : parseNumber(volRaw),
-            satuan: mapSatuan !== -1 && vals[mapSatuan] ? vals[mapSatuan].toString().trim() : '-',
-            type: isVolEmpty ? 'kategori' : 'item',
-            level: isVolEmpty ? 0 : currentLevelForItems
-        });
+        for (let j = 0; j < itemsOnRow.length; j++) {
+            const isLast = (j === itemsOnRow.length - 1);
+            const item = itemsOnRow[j];
+            const hasVol = isLast && !isVolEmpty;
+
+            organizedItems.push({
+                id: 'temp-' + Date.now() + '-' + rowNumber + '-' + j,
+                nama: item.uraian,
+                volume: hasVol ? parseNumber(volRaw) : 0,
+                satuan: hasVol && mapSatuan !== -1 && vals[mapSatuan] ? vals[mapSatuan].toString().trim() : '-',
+                type: hasVol ? 'item' : 'kategori',
+                level: item.level
+            });
+        }
     });
     selectedIndices.clear();
 }
@@ -885,7 +956,32 @@ export async function initImport() {
                                 rowVals[colNum] = cell.value;
                             }
                         });
-                        rawDataStore.push(rowVals);
+                        
+                        // Cek apakah baris ini adalah "Header Artifact" (misal: baris tabel header yang ikut terbaca).
+                        // Menggunakan pencocokan kata kunci eksak agar sangat aman dan tidak menghapus data valid.
+                        let isHeaderArtifact = false;
+                        if (rowNum <= 15) {
+                            let exactHeaderMatches = 0;
+                            for (let i = 1; i < excelColumns.length; i++) {
+                                const rawVal = rowVals[excelColumns[i].idxExcel];
+                                const strVal = typeof rawVal === 'object' && rawVal !== null ? (rawVal.result ? rawVal.result.toString().trim() : '') : (rawVal ? rawVal.toString().trim() : '');
+                                if (strVal) {
+                                    const s = strVal.toLowerCase().replace(/\s+/g, ' ').trim();
+                                    if (['uraian', 'uraian pekerjaan', 'pekerjaan', 'item pekerjaan', 'deskripsi', 'nama pekerjaan'].includes(s)) exactHeaderMatches++;
+                                    if (['volume', 'vol', 'qty', 'kuantitas', 'jumlah'].includes(s)) exactHeaderMatches++;
+                                    if (['satuan', 'sat', 'unit'].includes(s)) exactHeaderMatches++;
+                                    if (['harga', 'harga satuan', 'rate', 'rate per unit', 'amount', 'total amount', 'jumlah harga', 'total harga', 'total'].includes(s)) exactHeaderMatches++;
+                                }
+                            }
+                            // Jika ada minimal 2 sel yang merupakan judul kolom umum, dipastikan ini adalah header
+                            if (exactHeaderMatches >= 2) {
+                                isHeaderArtifact = true;
+                            }
+                        }
+
+                        if (!isHeaderArtifact) {
+                            rawDataStore.push(rowVals);
+                        }
                     }
                 });
                 _autoMapColumns();

@@ -898,6 +898,126 @@ class RapController extends BaseController
         }
     }
 
+    public function copyPekerjaan()
+    {
+        $db = db_connect();
+
+        try {
+            $payload = $this->request->getJSON(true);
+            $idRapDetail = (int) ($payload['id_rap_detail'] ?? 0);
+
+            if ($idRapDetail <= 0) {
+                return $this->response->setStatusCode(400)->setJSON([
+                    'status'  => 'error',
+                    'message' => 'id_rap_detail wajib diisi',
+                ]);
+            }
+
+            $detail = $this->rapDetailModel->find($idRapDetail);
+
+            if (!$detail) {
+                return $this->response->setStatusCode(404)->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Data pekerjaan tidak ditemukan',
+                ]);
+            }
+
+            $rap = $this->rapModel->find($detail['id_rap']);
+            if (!$rap) {
+                return $this->response->setStatusCode(404)->setJSON([
+                    'status'  => 'error',
+                    'message' => 'RAP tidak ditemukan',
+                ]);
+            }
+
+            $project = $this->proyekModel->where('id_project', $rap['id_project'])->first();
+            if (!$project) {
+                return $this->response->setStatusCode(404)->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Project tidak ditemukan',
+                ]);
+            }
+
+            if (($project['sumber_data'] ?? 'manual') !== 'manual') {
+                return $this->response->setStatusCode(403)->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Pekerjaan pada proyek import tidak dapat dicopy',
+                ]);
+            }
+
+            $db->transStart();
+
+            $this->_duplicateRapDetail($detail, $detail['id_parent'], true);
+
+            $this->recalculateRapTotal((int) $detail['id_rap']);
+
+            $db->transComplete();
+
+            if ($db->transStatus() === false) {
+                throw new DatabaseException('Gagal melakukan copy pekerjaan');
+            }
+
+            return $this->response->setJSON([
+                'status'  => 'success',
+                'message' => 'Pekerjaan berhasil disalin',
+            ]);
+        } catch (\Throwable $e) {
+            if ($db->transStatus()) {
+                $db->transRollback();
+            }
+
+            return $this->response->setStatusCode(500)->setJSON([
+                'status'  => 'error',
+                'message' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    protected function _duplicateRapDetail(array $detail, $newParentId, $isRoot = true)
+    {
+        $data = $detail;
+        unset($data['id_rap_detail']); // Let it auto-increment
+        $data['id_parent'] = $newParentId;
+        
+        if ($isRoot) {
+            $data['pekerjaan'] = $data['pekerjaan'] . ' (Copy)';
+        }
+        
+        // Letakkan di urutan paling bawah pada parent yang sama
+        $lastUrutan = $this->rapDetailModel
+            ->selectMax('urutan')
+            ->where('id_rap', $detail['id_rap'])
+            ->where('id_kategori', $detail['id_kategori'])
+            ->where('id_parent', $newParentId)
+            ->first();
+            
+        $data['urutan'] = ((int) ($lastUrutan['urutan'] ?? 0)) + 1;
+
+        $this->rapDetailModel->insert($data);
+        $newId = $this->rapDetailModel->getInsertID();
+
+        // Copy AHS Items
+        $ahsItems = $this->rapDetailItemModel->where('id_rap_detail', $detail['id_rap_detail'])->findAll();
+        if (!empty($ahsItems)) {
+            $newAhsItems = [];
+            foreach ($ahsItems as $ahs) {
+                $newAhs = $ahs;
+                unset($newAhs['id']);
+                $newAhs['id_rap_detail'] = $newId;
+                $newAhsItems[] = $newAhs;
+            }
+            $this->rapDetailItemModel->insertBatch($newAhsItems);
+        }
+
+        // Copy children recursively
+        $children = $this->rapDetailModel->where('id_parent', $detail['id_rap_detail'])->findAll();
+        foreach ($children as $child) {
+            $this->_duplicateRapDetail($child, $newId, false);
+        }
+        
+        return $newId;
+    }
+
     public function copyAhsEstimator()
     {
         $db = db_connect();

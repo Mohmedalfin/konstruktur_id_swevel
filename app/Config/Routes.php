@@ -80,6 +80,7 @@ $routes->group('api', ['namespace' => 'App\Controllers\Api'], function ($routes)
 
     $routes->post('rap/pekerjaan', 'RapController::tambahPekerjaan');
     $routes->delete('rap/pekerjaan/(:num)', 'RapController::deletePekerjaan/$1');
+    $routes->post('rap/pekerjaan/copy', 'RapController::copyPekerjaan');
     $routes->put('rap/reorder', 'RapController::reorderPekerjaan');
     $routes->post('rap/import', 'RapController::importBoq');
     $routes->put('rap/move', 'RapController::moveItem');

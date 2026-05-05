@@ -159,20 +159,20 @@ export function renderReadonly(data) {
                 Swal.fire('Info', 'Tidak ada perubahan urutan yang perlu disimpan.', 'info');
                 return;
             }
-            
+
             const allReordered = [];
             for (const catId in window.reorderedDataCache) {
                 allReordered.push(...window.reorderedDataCache[catId]);
             }
-            
+
             saveBtn.disabled = true;
             saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
-            
+
             await saveOrderToBackend(allReordered);
-            
+
             saveBtn.disabled = false;
             saveBtn.innerHTML = '<i class="fas fa-save"></i> Simpan Urutan';
-            
+
             // Clear cache after save
             window.reorderedDataCache = {};
         });
@@ -196,7 +196,7 @@ export function renderReadonly(data) {
             onStart: function (evt) {
                 const item = evt.item;
                 const startDepth = parseInt(item.dataset.depth || '0', 10);
-                
+
                 const children = [];
                 let next = item.nextElementSibling;
                 while (next && next.classList.contains('sortable-item')) {
@@ -218,19 +218,19 @@ export function renderReadonly(data) {
                 item._currentDepth = startDepth;
                 item._dragStartX = null;
                 item._lastPrevSibling = null; // Track where the ghost is to reset anchor
-                
+
                 const handleDragMove = (e) => {
                     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
 
                     const ghostEl = document.querySelector('.sortable-ghost');
                     if (!ghostEl) return;
-                    
+
                     // Find actual previous sibling of ghost
                     let prev = ghostEl.previousElementSibling;
                     while (prev && (prev.classList.contains('sortable-drag') || prev.style.display === 'none')) {
                         prev = prev.previousElementSibling;
                     }
-                    
+
                     // If the ghost moved vertically to a new slot, RESET the horizontal anchor!
                     // This completely ignores "arc" dragging where users sweep the cursor diagonally.
                     if (item._lastPrevSibling !== prev) {
@@ -238,19 +238,19 @@ export function renderReadonly(data) {
                         item._dragStartX = clientX; // Reset base X to current mouse position
                         item._currentDepth = startDepth; // Reset to original depth assumption for the new slot
                     }
-                    
+
                     if (item._dragStartX === null) {
                         item._dragStartX = clientX;
                     }
-                    
+
                     const deltaX = clientX - item._dragStartX;
-                    const deltaDepth = Math.round(deltaX / 30); 
-                    
+                    const deltaDepth = Math.round(deltaX / 30);
+
                     let prevDepth = 0;
                     if (prev && prev.classList.contains('sortable-item')) {
                         prevDepth = parseInt(prev.dataset.depth || '0', 10);
                     }
-                    
+
                     // Calculate "Family Height" (deepest child's relative depth from parent)
                     let familyHeight = 0;
                     if (item._dragChildren && item._dragChildren.length > 0) {
@@ -265,14 +265,14 @@ export function renderReadonly(data) {
                     // AND at most previous sibling's depth + 1
                     const maxAllowedForFamily = 2 - familyHeight;
                     const maxDepth = Math.min(maxAllowedForFamily, prevDepth + 1);
-                    
+
                     let targetDepth = startDepth + deltaDepth;
                     let clampedDepth = Math.max(0, Math.min(targetDepth, maxDepth));
-                    
+
                     // Visual feedback colors
                     let indicatorClass = '';
                     let bgColor = '';
-                    
+
                     if (targetDepth > clampedDepth) { // Wants to indent but can't
                         bgColor = 'rgba(239, 68, 68, 0.15)'; // red-500 light
                         indicatorClass = 'border-l-4 border-red-500';
@@ -286,26 +286,26 @@ export function renderReadonly(data) {
                         bgColor = '';
                         indicatorClass = 'border-l-4 border-primary';
                     }
-                    
+
                     Array.from(ghostEl.children).forEach(td => {
                         td.style.backgroundColor = bgColor;
                     });
-                    
+
                     const pContainer = ghostEl.querySelector('td:nth-child(1) > div');
                     if (pContainer) pContainer.style.paddingLeft = (clampedDepth * 1.5) + 'rem';
-                    
+
                     const textContainer = ghostEl.querySelector('td:nth-child(2) > div');
                     if (textContainer) textContainer.style.paddingLeft = (clampedDepth * 1.5) + 'rem';
-                    
+
                     ghostEl.className = ghostEl.className.replace(/border-l-4 border-[a-z]+-500/g, '');
-                    ghostEl.classList.add('border-l-4'); 
+                    ghostEl.classList.add('border-l-4');
                     if (indicatorClass) {
                         ghostEl.className += ' ' + indicatorClass.replace('border-l-4', '').trim();
                     }
-                    
-                    item._currentDepth = clampedDepth; 
+
+                    item._currentDepth = clampedDepth;
                 };
-                
+
                 document.addEventListener('mousemove', handleDragMove);
                 document.addEventListener('touchmove', handleDragMove);
                 item._cleanupDragMove = () => {
@@ -315,7 +315,7 @@ export function renderReadonly(data) {
             },
             onMove: function (evt) {
                 const related = evt.related;
-                
+
                 // Allow moving to any sortable item regardless of category
                 if (related && related.classList.contains('sortable-item')) {
                     return true;
@@ -327,11 +327,11 @@ export function renderReadonly(data) {
                 const children = item._dragChildren || [];
                 const originalDepth = item._originalDepth;
                 const newDepth = item._currentDepth;
-                
+
                 if (item._cleanupDragMove) item._cleanupDragMove();
-                
+
                 const depthDelta = newDepth - originalDepth;
-                
+
                 // PREVENT FAMILY SPLITTING
                 // If we dropped into the middle of another parent's descendants while asking for a shallower depth,
                 // auto-shift the parent down to the end of that interrupted family cluster.
@@ -345,34 +345,34 @@ export function renderReadonly(data) {
                         break;
                     }
                 }
-                
+
                 // Apply new depth to the dragged item
                 item.dataset.depth = newDepth;
                 const pContainer = item.querySelector('td:nth-child(1) > div');
-                if(pContainer) pContainer.style.paddingLeft = (newDepth * 1.5) + 'rem';
-                
+                if (pContainer) pContainer.style.paddingLeft = (newDepth * 1.5) + 'rem';
+
                 const uraianContainer = item.querySelector('td:nth-child(2) > div');
-                if(uraianContainer) uraianContainer.style.paddingLeft = (newDepth * 1.5) + 'rem';
-                
+                if (uraianContainer) uraianContainer.style.paddingLeft = (newDepth * 1.5) + 'rem';
+
                 // Move children back after the parent in its new position and adjust their depths
                 let current = item;
                 children.forEach(c => {
                     c.style.display = ''; // Restore visibility
-                    
+
                     const chStartDepth = parseInt(c.dataset.depth || '0', 10);
                     const chNewDepth = chStartDepth + depthDelta;
                     c.dataset.depth = chNewDepth;
-                    
+
                     const cContainer = c.querySelector('td:nth-child(1) > div');
                     if (cContainer) cContainer.style.paddingLeft = (chNewDepth * 1.5) + 'rem';
-                    
+
                     const cUraian = c.querySelector('td:nth-child(2) > div');
                     if (cUraian) cUraian.style.paddingLeft = (chNewDepth * 1.5) + 'rem';
-                    
+
                     current.after(c);
                     current = c;
                 });
-                
+
                 delete item._dragChildren;
                 delete item._cleanupDragMove;
 
@@ -434,8 +434,8 @@ function updateHierarchicalNumbers() {
     categories.forEach(catRow => {
         const catId = catRow.dataset.cat;
         const itemRows = Array.from(tbody.querySelectorAll(`.subrow-${catId}.sortable-item`));
-        
-        let counters = [0]; 
+
+        let counters = [0];
         let prevDepth = 0;
 
         itemRows.forEach(row => {
@@ -450,7 +450,7 @@ function updateHierarchicalNumbers() {
                 counters[depth]++;
             }
             prevDepth = depth;
-            
+
             // Failsafe initialization
             for (let i = 0; i <= depth; i++) {
                 if (!counters[i]) counters[i] = 1;
@@ -472,11 +472,14 @@ function renderItemRows(items, catId, subClass, isEditable, prefix = '', depth =
         const hargaAlat = Number(item.hargaAlat || 0);
         const hargaUpah = Number(item.hargaUpah || 0);
         const hargaKeseluruhan = Number(item.hargaKeseluruhan || 0);
-        
+
         const currentNo = prefix ? `${prefix}.${index + 1}` : `${index + 1}`;
         const indent = depth * 1.5; // rem
         const hasChildren = item.children && item.children.length > 0;
-        
+        const uraianColspan = hasChildren && !isReorderMode ? 10 : 1;
+        const fontClass = hasChildren ? 'font-bold text-slate-700' : 'font-medium text-table-medium';
+        const bgClass = hasChildren ? 'bg-slate-50/50' : '';
+
         // CSS for indenting based on mode
         const containerPadding = isReorderMode ? `padding-left: ${indent}rem` : ``;
         const noIconPadding = isReorderMode ? `min-width:30px;` : `padding-left: ${(depth * 0.5) + 1.5}rem`;
@@ -488,7 +491,7 @@ function renderItemRows(items, catId, subClass, isEditable, prefix = '', depth =
                 data-parent-id="${item.id_parent || ''}"
                 data-id-rap-detail="${item.id_rap_detail || ''}"
                 data-depth="${depth}">
-                <td class="px-1 md:px-2 py-2 md:py-2.5 text-center text-table-subtle no-cell w-[100px]" style="border-right: ${isReorderMode ? '1px solid #e5e7eb' : 'none'}">
+                <td class="px-1 md:px-2 py-2 md:py-2.5 text-center text-table-subtle no-cell w-[100px] ${bgClass}" style="border-right: ${isReorderMode ? '1px solid #e5e7eb' : 'none'}">
                     <div class="flex items-center justify-start h-full transition-all duration-150" style="${containerPadding}">
                         ${isReorderMode ? `
                         <!-- Icon stays on the far left, fixed width -->
@@ -508,13 +511,14 @@ function renderItemRows(items, catId, subClass, isEditable, prefix = '', depth =
                         </div>
                     </div>
                 </td>
-                <td class="px-3 md:px-5 py-2 md:py-2.5 font-medium text-table-medium min-w-[250px] lg:min-w-[350px] whitespace-normal leading-relaxed border-l border-table-border">
+                <td colspan="${uraianColspan}" class="px-3 md:px-5 py-2 md:py-2.5 ${fontClass} min-w-[250px] lg:min-w-[350px] whitespace-normal leading-relaxed border-l border-table-border ${bgClass}">
                     <div style="${textPadding}" class="flex items-start gap-2">
-                        ${depth > 0 ? `<span class="text-slate-300">└─</span>` : ''}
+                        ${depth > 0 ? `<span class="text-slate-300 font-normal">└─</span>` : ''}
                         <span>${escHtml(item.uraian || '-')}</span>
                     </div>
                 </td>
                 ${!isReorderMode ? `
+                ${!hasChildren ? `
                 <td class="px-3 md:px-5 py-2 md:py-2.5 text-center tabular-nums border-l border-table-border">${volume}</td>
                 <td class="px-3 md:px-5 py-2 md:py-2.5 text-center text-table-subtle border-l border-table-border">${escHtml(item.satuan || '')}</td>
                 <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums whitespace-nowrap border-l border-table-border">${fmt(hargaBahan)}</td>
@@ -523,10 +527,11 @@ function renderItemRows(items, catId, subClass, isEditable, prefix = '', depth =
                 <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums whitespace-nowrap font-medium text-table-medium border-l border-table-border">${fmt(hargaBahan * (volume || 1))}</td>
                 <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums whitespace-nowrap font-medium text-table-medium border-l border-table-border">${fmt(hargaUpah * (volume || 1))}</td>
                 <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums whitespace-nowrap font-medium text-table-medium border-l border-table-border">${fmt(hargaAlat * (volume || 1))}</td>
-                <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums font-semibold text-table-strong whitespace-nowrap border-l border-table-border">
+                <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums font-semibold text-table-strong whitespace-nowrap border-l border-table-border ${bgClass}">
                     ${fmt(hargaKeseluruhan)}
                 </td>
-                <td class="px-3 md:px-5 py-2 md:py-2.5 text-center border-l border-table-border">
+                ` : ''}
+                <td class="px-3 md:px-5 py-2 md:py-2.5 text-center border-l border-table-border ${bgClass}">
                     <div class="inline-flex items-center gap-1.5">
                         ${isEditable && isAddDeleteAllowed && depth < 2 ? `
                             <button
@@ -541,6 +546,19 @@ function renderItemRows(items, catId, subClass, isEditable, prefix = '', depth =
                             </button>
                         ` : ''}
 
+                        ${isEditable && isAddDeleteAllowed && hasChildren ? `
+                            <button
+                                type="button"
+                                class="copy-pekerjaan-btn inline-flex items-center justify-center w-7 h-7 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200 transition-colors focus:outline-none"
+                                data-id-rap-detail="${item.id_rap_detail || ''}"
+                                title="Copy Pekerjaan">
+                                <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                                </svg>
+                            </button>
+                        ` : ''}
+
+                        ${!hasChildren ? `
                         <button
                             type="button"
                             class="readonly-item-detail inline-flex items-center justify-center w-7 h-7 rounded-lg bg-white hover:bg-slate-50 border border-table-border text-table-subtle hover:text-table-body transition-colors focus:outline-none"
@@ -553,6 +571,7 @@ function renderItemRows(items, catId, subClass, isEditable, prefix = '', depth =
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                             </svg>
                         </button>
+                        ` : ''}
 
                         ${isEditable && isAddDeleteAllowed ? `
                             <button
@@ -580,7 +599,7 @@ function renderItemRows(items, catId, subClass, isEditable, prefix = '', depth =
 
 function bindSubItemButtons() {
     tbody.querySelectorAll('.add-nested-item-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', function () {
             const idParent = this.dataset.idRapDetail;
             const idKategori = this.dataset.cat;
             const idProject = window.RAB_INIT?.idProject || window.RAB_INIT?.id;
@@ -588,6 +607,55 @@ function bindSubItemButtons() {
             const url = (window.RAB_INIT && window.RAB_INIT.tambahPekerjaanUrl) || `/menu-rap/tambah-pekerjaan`;
 
             window.location.href = `${url}?id_project=${idProject}&id_kategori=${idKategori}&id_parent=${idParent}&slug=${slug}`;
+        });
+    });
+
+    tbody.querySelectorAll('.copy-pekerjaan-btn').forEach(btn => {
+        btn.addEventListener('click', async function () {
+            const idRapDetail = this.dataset.idRapDetail;
+            if (!idRapDetail) return;
+
+            try {
+                if (window.renderLoading) window.renderLoading();
+                const res = await fetch(`/api/rap/pekerjaan/copy`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify({ id_rap_detail: idRapDetail })
+                });
+
+                const json = await res.json();
+                if (!res.ok || json.status !== 'success') {
+                    throw new Error(json.message || 'Gagal mengcopy pekerjaan');
+                }
+
+                if (window.Toast) window.Toast.show('Pekerjaan berhasil diduplikat', 'success');
+
+                // Refresh data
+                const idProject = window.RAB_INIT?.idProject || window.RAB_INIT?.id;
+                if (idProject && window.fetchRabData) {
+                    const data = await window.fetchRabData(idProject);
+                    if (window.state) {
+                        window.state.activeCategories = (data.categories || []).map(cat => ({
+                            id: String(cat.id),
+                            nama: cat.name
+                        }));
+                    }
+                    if (window.renderReadonly) {
+                        window.renderReadonly(data);
+                    } else {
+                        window.location.reload();
+                    }
+                } else {
+                    window.location.reload();
+                }
+            } catch (err) {
+                console.error(err);
+                if (window.Toast) window.Toast.show(err.message, 'error');
+                else alert(err.message);
+
+                // fallback reload on error if stuck loading
+                if (!window.fetchRabData) window.location.reload();
+            }
         });
     });
 }
@@ -604,7 +672,7 @@ async function saveOrderToBackend(reorderedItems) {
             body: JSON.stringify({ items: reorderedItems })
         });
         const json = await res.json();
-        
+
         if (!res.ok || json.status !== 'success') {
             throw new Error(json.message || 'Gagal menyimpan urutan');
         }
@@ -701,14 +769,14 @@ export function bindDeleteCategoryButtons() {
 
                 renderLoading();
                 const data = await fetchRabData(idProject);
-                
+
                 state.activeCategories = (data.categories || []).map(cat => ({
                     id: String(cat.id),
                     nama: cat.name
                 }));
 
                 renderReadonly(data);
-                
+
                 // Show toast specifically for UI completeness
                 if (window.Toast) {
                     window.Toast.show(`Kategori "${catName}" berhasi dihapus dari project`, 'success');
@@ -791,9 +859,9 @@ export function bindCategoryToggle() {
 export function bindReadonlyDropdowns() {
     tbody.querySelectorAll('.readonly-item-detail').forEach(btn => {
         btn.addEventListener('click', function () {
-            const baseUrl    = btn.dataset.url || '/menu-rap/rincian-ahs';
+            const baseUrl = btn.dataset.url || '/menu-rap/rincian-ahs';
             const idRapDetail = btn.dataset.idRapDetail || '';
-            const uraian     = btn.dataset.uraian || '';
+            const uraian = btn.dataset.uraian || '';
             const keterangan = btn.dataset.keterangan || '';
 
             let sourceVal = '';
@@ -808,15 +876,15 @@ export function bindReadonlyDropdowns() {
             try {
                 sessionStorage.setItem('ahs_item_label', uraian);
                 sessionStorage.setItem('ahs_item_source', sourceVal);
-            } catch (_) {}
+            } catch (_) { }
 
             if (!idRapDetail) {
                 window.location.href = baseUrl;
                 return;
             }
 
-            const idProject  = window.RAB_INIT?.idProject || window.RAB_INIT?.id || '';
-            const separator  = baseUrl.includes('?') ? '&' : '?';
+            const idProject = window.RAB_INIT?.idProject || window.RAB_INIT?.id || '';
+            const separator = baseUrl.includes('?') ? '&' : '?';
             const projectPart = idProject ? `&id_project=${encodeURIComponent(idProject)}` : '';
             window.location.href = `${baseUrl}${separator}id_rap_detail=${encodeURIComponent(idRapDetail)}${projectPart}`;
         });
