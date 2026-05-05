@@ -66,12 +66,12 @@ $isReorderMode = isset($isReorderMode) && $isReorderMode;
                     <col style="width: 6rem"> <!-- Volume -->
                     <col style="width: 6rem"> <!-- Satuan -->
                     <col style="width: 10rem"> <!-- Harga Bahan -->
-                    <col style="width: 10rem"> <!-- Harga Alat -->
                     <col style="width: 10rem"> <!-- Harga Upah -->
+                    <col style="width: 10rem"> <!-- Harga Alat -->
                     <col style="width: 10rem"> <!-- Sub. Bahan -->
-                    <col style="width: 10rem"> <!-- Sub. Alat -->
                     <col style="width: 10rem"> <!-- Sub. Upah -->
-                    <col style="width: 10rem"> <!-- Harga Keseluruhan -->
+                    <col style="width: 10rem"> <!-- Sub. Alat -->
+                    <col style="width: 10rem"> <!-- Total -->
                     <col style="width: 7rem"> <!-- Aksi -->
                 <?php endif; ?>
             </colgroup>
@@ -79,45 +79,43 @@ $isReorderMode = isset($isReorderMode) && $isReorderMode;
             <!-- Table Head (static — never changes) -->
             <thead>
                 <tr class="bg-primary text-white">
-                    <th scope="col"
-                        class="px-3 md:px-5 py-3 md:py-3.5 text-center text-[10px] md:text-xs font-semibold uppercase tracking-wider whitespace-nowrap">
+                    <th scope="col" rowspan="2"
+                        class="px-3 md:px-5 py-3 md:py-3.5 text-center text-[10px] md:text-xs font-semibold uppercase tracking-wider whitespace-nowrap align-middle border-b border-l border-white/20 first:border-l-0">
                         No</th>
-                    <th scope="col"
-                        class="px-3 md:px-5 py-3 md:py-3.5 text-[10px] md:text-xs font-semibold uppercase tracking-wider whitespace-nowrap">
+                    <th scope="col" rowspan="2"
+                        class="px-3 md:px-5 py-3 md:py-3.5 text-[10px] md:text-xs font-semibold uppercase tracking-wider whitespace-nowrap align-middle border-b border-l border-white/20">
                         Uraian Pekerjaan</th>
                     <?php if (!$isReorderMode): ?>
-                        <th scope="col"
-                            class="px-3 md:px-5 py-3 md:py-3.5 text-center text-[10px] md:text-xs font-semibold uppercase tracking-wider whitespace-nowrap">
+                        <th scope="col" rowspan="2"
+                            class="px-3 md:px-5 py-3 md:py-3.5 text-center text-[10px] md:text-xs font-semibold uppercase tracking-wider whitespace-nowrap align-middle border-b border-l border-white/20">
                             Volume</th>
-                        <th scope="col"
-                            class="px-3 md:px-5 py-3 md:py-3.5 text-center text-[10px] md:text-xs font-semibold uppercase tracking-wider whitespace-nowrap">
+                        <th scope="col" rowspan="2"
+                            class="px-3 md:px-5 py-3 md:py-3.5 text-center text-[10px] md:text-xs font-semibold uppercase tracking-wider whitespace-nowrap align-middle border-b border-l border-white/20">
                             Satuan</th>
-                        <th scope="col"
-                            class="px-3 md:px-5 py-3 md:py-3.5 text-right text-[10px] md:text-xs font-semibold uppercase tracking-wider whitespace-nowrap">
-                            Harga Bahan</th>
-                        <th scope="col"
-                            class="px-3 md:px-5 py-3 md:py-3.5 text-right text-[10px] md:text-xs font-semibold uppercase tracking-wider whitespace-nowrap">
-                            Harga Alat</th>
-                        <th scope="col"
-                            class="px-3 md:px-5 py-3 md:py-3.5 text-right text-[10px] md:text-xs font-semibold uppercase tracking-wider whitespace-nowrap">
-                            Harga Upah</th>
-                        <th scope="col"
-                            class="px-3 md:px-5 py-3 md:py-3.5 text-right text-[10px] md:text-xs font-semibold uppercase tracking-wider whitespace-nowrap">
-                            Sub. Bahan</th>
-                        <th scope="col"
-                            class="px-3 md:px-5 py-3 md:py-3.5 text-right text-[10px] md:text-xs font-semibold uppercase tracking-wider whitespace-nowrap">
-                            Sub. Alat</th>
-                        <th scope="col"
-                            class="px-3 md:px-5 py-3 md:py-3.5 text-right text-[10px] md:text-xs font-semibold uppercase tracking-wider whitespace-nowrap">
-                            Sub. Upah</th>
-                        <th scope="col"
-                            class="px-3 md:px-5 py-3 md:py-3.5 text-right text-[10px] md:text-xs font-semibold uppercase tracking-wider whitespace-nowrap">
-                            Harga Keseluruhan</th>
-                        <th scope="col"
-                            class="px-3 md:px-5 py-3 md:py-3.5 text-center text-[10px] md:text-xs font-semibold uppercase tracking-wider whitespace-nowrap">
+                        <th scope="colgroup" colspan="3"
+                            class="px-3 md:px-5 py-2 md:py-2.5 text-center text-[10px] md:text-xs font-semibold uppercase tracking-wider whitespace-nowrap border-b border-l border-white/20">
+                            Harga</th>
+                        <th scope="colgroup" colspan="3"
+                            class="px-3 md:px-5 py-2 md:py-2.5 text-center text-[10px] md:text-xs font-semibold uppercase tracking-wider whitespace-nowrap border-b border-l border-white/20">
+                            Sub Total</th>
+                        <th scope="col" rowspan="2"
+                            class="px-3 md:px-5 py-3 md:py-3.5 text-center text-[10px] md:text-xs font-semibold uppercase tracking-wider whitespace-nowrap align-middle border-b border-l border-white/20">
+                            Total</th>
+                        <th scope="col" rowspan="2"
+                            class="px-3 md:px-5 py-3 md:py-3.5 text-center text-[10px] md:text-xs font-semibold uppercase tracking-wider whitespace-nowrap align-middle border-b border-l border-white/20">
                             Aksi</th>
                     <?php endif; ?>
                 </tr>
+                <?php if (!$isReorderMode): ?>
+                <tr class="bg-primary text-white">
+                    <th scope="col" class="px-3 md:px-5 py-2 md:py-2.5 text-center text-[10px] md:text-xs font-semibold uppercase tracking-wider whitespace-nowrap border-b border-l border-white/20">Bahan</th>
+                    <th scope="col" class="px-3 md:px-5 py-2 md:py-2.5 text-center text-[10px] md:text-xs font-semibold uppercase tracking-wider whitespace-nowrap border-b border-l border-white/20">Upah</th>
+                    <th scope="col" class="px-3 md:px-5 py-2 md:py-2.5 text-center text-[10px] md:text-xs font-semibold uppercase tracking-wider whitespace-nowrap border-b border-l border-white/20">Alat</th>
+                    <th scope="col" class="px-3 md:px-5 py-2 md:py-2.5 text-center text-[10px] md:text-xs font-semibold uppercase tracking-wider whitespace-nowrap border-b border-l border-white/20">Bahan</th>
+                    <th scope="col" class="px-3 md:px-5 py-2 md:py-2.5 text-center text-[10px] md:text-xs font-semibold uppercase tracking-wider whitespace-nowrap border-b border-l border-white/20">Upah</th>
+                    <th scope="col" class="px-3 md:px-5 py-2 md:py-2.5 text-center text-[10px] md:text-xs font-semibold uppercase tracking-wider whitespace-nowrap border-b border-l border-white/20">Alat</th>
+                </tr>
+                <?php endif; ?>
             </thead>
 
             <!-- Table Body — populated by ajax_rab.js -->

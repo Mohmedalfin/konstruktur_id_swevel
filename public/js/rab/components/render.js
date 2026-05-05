@@ -508,25 +508,25 @@ function renderItemRows(items, catId, subClass, isEditable, prefix = '', depth =
                         </div>
                     </div>
                 </td>
-                <td class="px-3 md:px-5 py-2 md:py-2.5 font-medium text-table-medium min-w-[250px] lg:min-w-[350px] whitespace-normal leading-relaxed">
+                <td class="px-3 md:px-5 py-2 md:py-2.5 font-medium text-table-medium min-w-[250px] lg:min-w-[350px] whitespace-normal leading-relaxed border-l border-table-border">
                     <div style="${textPadding}" class="flex items-start gap-2">
                         ${depth > 0 ? `<span class="text-slate-300">└─</span>` : ''}
                         <span>${escHtml(item.uraian || '-')}</span>
                     </div>
                 </td>
                 ${!isReorderMode ? `
-                <td class="px-3 md:px-5 py-2 md:py-2.5 text-center tabular-nums">${volume}</td>
-                <td class="px-3 md:px-5 py-2 md:py-2.5 text-center text-table-subtle">${escHtml(item.satuan || '')}</td>
-                <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums whitespace-nowrap">${fmt(hargaBahan)}</td>
-                <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums whitespace-nowrap">${fmt(hargaAlat)}</td>
-                <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums whitespace-nowrap">${fmt(hargaUpah)}</td>
-                <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums whitespace-nowrap font-medium text-table-medium">${fmt(hargaBahan * (volume || 1))}</td>
-                <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums whitespace-nowrap font-medium text-table-medium">${fmt(hargaAlat * (volume || 1))}</td>
-                <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums whitespace-nowrap font-medium text-table-medium">${fmt(hargaUpah * (volume || 1))}</td>
-                <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums font-semibold text-table-strong whitespace-nowrap">
+                <td class="px-3 md:px-5 py-2 md:py-2.5 text-center tabular-nums border-l border-table-border">${volume}</td>
+                <td class="px-3 md:px-5 py-2 md:py-2.5 text-center text-table-subtle border-l border-table-border">${escHtml(item.satuan || '')}</td>
+                <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums whitespace-nowrap border-l border-table-border">${fmt(hargaBahan)}</td>
+                <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums whitespace-nowrap border-l border-table-border">${fmt(hargaUpah)}</td>
+                <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums whitespace-nowrap border-l border-table-border">${fmt(hargaAlat)}</td>
+                <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums whitespace-nowrap font-medium text-table-medium border-l border-table-border">${fmt(hargaBahan * (volume || 1))}</td>
+                <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums whitespace-nowrap font-medium text-table-medium border-l border-table-border">${fmt(hargaUpah * (volume || 1))}</td>
+                <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums whitespace-nowrap font-medium text-table-medium border-l border-table-border">${fmt(hargaAlat * (volume || 1))}</td>
+                <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums font-semibold text-table-strong whitespace-nowrap border-l border-table-border">
                     ${fmt(hargaKeseluruhan)}
                 </td>
-                <td class="px-3 md:px-5 py-2 md:py-2.5 text-center">
+                <td class="px-3 md:px-5 py-2 md:py-2.5 text-center border-l border-table-border">
                     <div class="inline-flex items-center gap-1.5">
                         ${isEditable && isAddDeleteAllowed && depth < 2 ? `
                             <button
