@@ -979,9 +979,7 @@ class RapController extends BaseController
         unset($data['id_rap_detail']); // Let it auto-increment
         $data['id_parent'] = $newParentId;
         
-        if ($isRoot) {
-            $data['pekerjaan'] = $data['pekerjaan'] . ' (Copy)';
-        }
+        // No suffix added on copy
         
         // Letakkan di urutan paling bawah pada parent yang sama
         $lastUrutan = $this->rapDetailModel
@@ -1124,12 +1122,24 @@ class RapController extends BaseController
             ->where('id_rap', $rapId)
             ->findAll();
 
+        // Build a set of all id_parent values so we can identify parent rows
+        $parentIds = [];
+        foreach ($details as $row) {
+            if (!is_null($row['id_parent'])) {
+                $parentIds[$row['id_parent']] = true;
+            }
+        }
+
         $subtotalBahan = 0;
         $subtotalUpah  = 0;
         $subtotalAlat  = 0;
         $total         = 0;
 
         foreach ($details as $row) {
+            // Only sum leaf rows (rows that are NOT a parent of any other row)
+            if (isset($parentIds[$row['id_rap_detail']])) {
+                continue;
+            }
             $subtotalBahan += (float) ($row['subtotal_bahan'] ?? 0);
             $subtotalUpah  += (float) ($row['subtotal_upah'] ?? 0);
             $subtotalAlat  += (float) ($row['subtotal_alat'] ?? 0);

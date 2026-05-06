@@ -55,7 +55,7 @@ $isReorderMode = isset($isReorderMode) && $isReorderMode;
 
     </div>
 
-    <div class="overflow-x-auto rounded-xl shadow-md border border-table-border bg-white pb-4 w-full">
+    <div class="overflow-x-auto rounded-xl shadow-md border border-table-border bg-white w-full">
         <table class="w-full text-left min-w-[1400px] border-collapse" id="rab-table">
 
             <!-- Column widths — locked permanently, never shift on open/close -->
@@ -124,36 +124,102 @@ $isReorderMode = isset($isReorderMode) && $isReorderMode;
             </tbody>
 
             <!-- Table Footer — updated by ajax_rab.js -->
-            <!-- Table Footer — updated by ajax_rab.js -->
             <?php if (!$isReorderMode): ?>
                 <tfoot id="rab-tfoot">
+
+                    <!-- Subtotal Bahan -->
                     <tr class="bg-table-category text-white">
                         <td colspan="10"
-                            class="px-3 md:px-5 py-1.5 md:py-2 text-center text-[10px] md:text-xs font-bold uppercase tracking-wide whitespace-nowrap">
-                            Jumlah Harga</td>
-                        <td id="rab-total-jumlah"
-                            class="px-3 md:px-5 py-1.5 md:py-2 text-right text-[10px] md:text-xs font-bold tabular-nums whitespace-nowrap">
-                            Rp 0</td>
-                        <td class="px-3 md:px-5 py-1.5 md:py-2"></td>
+                            class="px-5 md:px-8 py-3 md:py-3.5 text-right text-[11px] md:text-xs font-bold tracking-wide whitespace-nowrap text-white">
+                            Subtotal Bahan
+                        </td>
+                        <td id="rab-subtotal-bahan"
+                            class="px-5 md:px-8 py-3 md:py-3.5 text-right text-[11px] md:text-xs font-bold tabular-nums whitespace-nowrap">
+                            Rp 0
+                        </td>
+                        <td class="px-3 md:px-5 py-3 md:py-3.5"></td>
                     </tr>
+
+                    <!-- Subtotal Upah -->
                     <tr class="bg-table-category-hover text-white">
                         <td colspan="10"
-                            class="px-3 md:px-5 py-1.5 md:py-2 text-center text-[10px] md:text-xs font-bold uppercase tracking-wide whitespace-nowrap">
-                            PPN 11%</td>
-                        <td id="rab-total-ppn"
-                            class="px-3 md:px-5 py-1.5 md:py-2 text-right text-[10px] md:text-xs font-bold tabular-nums whitespace-nowrap">
-                            Rp 0</td>
-                        <td class="px-3 md:px-5 py-1.5 md:py-2"></td>
+                            class="px-5 md:px-8 py-3 md:py-3.5 text-right text-[11px] md:text-xs font-bold tracking-wide whitespace-nowrap text-white">
+                            Subtotal Upah
+                        </td>
+                        <td id="rab-subtotal-upah"
+                            class="px-5 md:px-8 py-3 md:py-3.5 text-right text-[11px] md:text-xs font-bold tabular-nums whitespace-nowrap">
+                            Rp 0
+                        </td>
+                        <td class="px-3 md:px-5 py-3 md:py-3.5"></td>
                     </tr>
+
+                    <!-- Subtotal Alat -->
                     <tr class="bg-table-category text-white">
                         <td colspan="10"
-                            class="px-3 md:px-5 py-1.5 md:py-2 text-center text-[10px] md:text-xs font-bold uppercase tracking-wide whitespace-nowrap">
-                            Total Harga</td>
-                        <td id="rab-total-final"
-                            class="px-3 md:px-5 py-1.5 md:py-2 text-right text-[10px] md:text-xs font-bold tabular-nums whitespace-nowrap">
-                            Rp 0</td>
-                        <td class="px-3 md:px-5 py-1.5 md:py-2"></td>
+                            class="px-5 md:px-8 py-3 md:py-3.5 text-right text-[11px] md:text-xs font-bold tracking-wide whitespace-nowrap text-white">
+                            Subtotal Alat
+                        </td>
+                        <td id="rab-subtotal-alat"
+                            class="px-5 md:px-8 py-3 md:py-3.5 text-right text-[11px] md:text-xs font-bold tabular-nums whitespace-nowrap">
+                            Rp 0
+                        </td>
+                        <td class="px-3 md:px-5 py-3 md:py-3.5"></td>
                     </tr>
+
+                    <!-- Separator row -->
+                    <tr class="bg-table-category">
+                        <td colspan="12" class="py-0">
+                            <div class="border-t border-dashed border-white/20 mx-6"></div>
+                        </td>
+                    </tr>
+
+                    <!-- Jumlah Harga -->
+                    <tr class="bg-table-category-hover text-white">
+                        <td colspan="10"
+                            class="px-5 md:px-8 py-3 md:py-3.5 text-right text-[11px] md:text-xs font-bold tracking-wide whitespace-nowrap text-white">
+                            Jumlah Harga
+                        </td>
+                        <td id="rab-total-jumlah"
+                            class="px-5 md:px-8 py-3 md:py-3.5 text-right text-[11px] md:text-xs font-bold tabular-nums whitespace-nowrap">
+                            Rp 0
+                        </td>
+                        <td class="px-3 md:px-5 py-3 md:py-3.5"></td>
+                    </tr>
+
+                    <!-- PPN 11% -->
+                    <tr class="bg-table-category text-white">
+                        <td colspan="10"
+                            class="px-5 md:px-8 py-3 md:py-3.5 text-right text-[11px] md:text-xs font-bold tracking-wide whitespace-nowrap text-white">
+                            PPN 11%
+                        </td>
+                        <td id="rab-total-ppn"
+                            class="px-5 md:px-8 py-3 md:py-3.5 text-right text-[11px] md:text-xs font-bold tabular-nums whitespace-nowrap">
+                            Rp 0
+                        </td>
+                        <td class="px-3 md:px-5 py-3 md:py-3.5"></td>
+                    </tr>
+
+                    <!-- Double separator row -->
+                    <tr class="bg-table-category">
+                        <td colspan="12" class="py-0 px-6">
+                            <div class="border-t-2 border-white/30"></div>
+                            <div class="border-t border-white/15 mt-0.5"></div>
+                        </td>
+                    </tr>
+
+                    <!-- Total Harga -->
+                    <tr class="bg-table-category text-white">
+                        <td colspan="10"
+                            class="px-5 md:px-8 py-4 md:py-5 text-right text-xs md:text-sm font-bold tracking-widest uppercase whitespace-nowrap">
+                            Total Harga
+                        </td>
+                        <td id="rab-total-final"
+                            class="px-5 md:px-8 py-4 md:py-5 text-right text-sm md:text-base font-extrabold tabular-nums whitespace-nowrap text-secondary">
+                            Rp 0
+                        </td>
+                        <td class="px-3 md:px-5 py-4 md:py-5"></td>
+                    </tr>
+
                 </tfoot>
             <?php endif; ?>
         </table>

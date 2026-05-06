@@ -42,10 +42,38 @@ export function renderReadonly(data) {
     // Specifically lock down structure for BOQ/Estimator source
     const isAddDeleteAllowed = isProjectManual;
 
-    const grandTotal = categories.reduce((sum, cat) => {
-        const items = cat.items || [];
-        return sum + items.reduce((s, i) => s + Number(i.hargaKeseluruhan || 0), 0);
-    }, 0);
+    // Helper: sum only leaf nodes recursively (items without children)
+    function sumLeaves(items) {
+        return items.reduce((s, i) => {
+            if (i.children && i.children.length > 0) {
+                return s + sumLeaves(i.children);
+            }
+            return s + Number(i.hargaKeseluruhan || 0);
+        }, 0);
+    }
+    function sumLeavesBahan(items) {
+        return items.reduce((s, i) => {
+            if (i.children && i.children.length > 0) return s + sumLeavesBahan(i.children);
+            return s + (Number(i.hargaBahan || 0) * Number(i.volume || 0));
+        }, 0);
+    }
+    function sumLeavesUpah(items) {
+        return items.reduce((s, i) => {
+            if (i.children && i.children.length > 0) return s + sumLeavesUpah(i.children);
+            return s + (Number(i.hargaUpah || 0) * Number(i.volume || 0));
+        }, 0);
+    }
+    function sumLeavesAlat(items) {
+        return items.reduce((s, i) => {
+            if (i.children && i.children.length > 0) return s + sumLeavesAlat(i.children);
+            return s + (Number(i.hargaAlat || 0) * Number(i.volume || 0));
+        }, 0);
+    }
+
+    const grandTotal = categories.reduce((sum, cat) => sum + sumLeaves(cat.items || []), 0);
+    const grandBahan = categories.reduce((sum, cat) => sum + sumLeavesBahan(cat.items || []), 0);
+    const grandUpah  = categories.reduce((sum, cat) => sum + sumLeavesUpah(cat.items || []), 0);
+    const grandAlat  = categories.reduce((sum, cat) => sum + sumLeavesAlat(cat.items || []), 0);
 
     if (categories.length === 0) {
         tbody.innerHTML = `
@@ -63,7 +91,7 @@ export function renderReadonly(data) {
 
     categories.forEach(cat => {
         const items = cat.items || [];
-        const catTotal = items.reduce((s, i) => s + Number(i.hargaKeseluruhan || 0), 0);
+        const catTotal = sumLeaves(items);
         const isOpen = !state.collapsed[cat.id];
         const subClass = isOpen ? '' : 'hidden';
         const isReorderMode = window.RAB_INIT && window.RAB_INIT.isReorderMode;
@@ -143,7 +171,7 @@ export function renderReadonly(data) {
     });
 
     tbody.innerHTML = html;
-    updateTotals(grandTotal);
+    updateTotals(grandTotal, grandBahan, grandUpah, grandAlat);
     updateHierarchicalNumbers(); // initial numbering
     bindCategoryToggle();
     bindReadonlyDropdowns();
@@ -795,14 +823,25 @@ export function bindDeleteCategoryButtons() {
     });
 }
 
-export function updateTotals(total) {
+export function updateTotals(total, bahan = 0, upah = 0, alat = 0) {
     const safeTotal = Number(total || 0);
-    const ppn = safeTotal * 0.11;
+    const safeBahan = Number(bahan || 0);
+    const safeUpah  = Number(upah || 0);
+    const safeAlat  = Number(alat || 0);
+    const ppn  = safeTotal * 0.11;
     const grand = safeTotal + ppn;
 
     if (totalJumlah) totalJumlah.textContent = fmt(safeTotal);
-    if (totalPpn) totalPpn.textContent = fmt(ppn);
-    if (totalFinal) totalFinal.textContent = fmt(grand);
+    if (totalPpn)    totalPpn.textContent     = fmt(ppn);
+    if (totalFinal)  totalFinal.textContent   = fmt(grand);
+
+    // Update subtotal rows
+    const elBahan = document.getElementById('rab-subtotal-bahan');
+    const elUpah  = document.getElementById('rab-subtotal-upah');
+    const elAlat  = document.getElementById('rab-subtotal-alat');
+    if (elBahan) elBahan.textContent = fmt(safeBahan);
+    if (elUpah)  elUpah.textContent  = fmt(safeUpah);
+    if (elAlat)  elAlat.textContent  = fmt(safeAlat);
 }
 
 export function showTable() {
