@@ -542,7 +542,7 @@ function renderItemRows(items, catId, subClass, isEditable, prefix = '', depth =
                 <td colspan="${uraianColspan}" class="px-3 md:px-5 py-2 md:py-2.5 ${fontClass} min-w-[250px] lg:min-w-[350px] whitespace-normal leading-relaxed border-l border-table-border ${bgClass}">
                     <div style="${textPadding}" class="flex items-start gap-2">
                         ${depth > 0 ? `<span class="text-slate-300 font-normal">└─</span>` : ''}
-                        <span>${escHtml(item.uraian || '-')}</span>
+                        <span>${escHtml(item.uraian || '')}</span>
                     </div>
                 </td>
                 ${!isReorderMode ? `

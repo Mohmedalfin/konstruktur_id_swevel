@@ -255,7 +255,7 @@ function _renderTableBody(tbody) {
                     cellVal = txt; extraClasses = 'text-slate-400 max-w-[170px] truncate';
                 }
             }
-            html += `<td class="px-3 py-2 align-middle ${align} ${extraClasses}" title="${cellVal}">${cellVal || '-'}</td>`;
+            html += `<td class="px-3 py-2 align-middle ${align} ${extraClasses}" title="${cellVal}">${cellVal || ''}</td>`;
         }
         html += `</tr>`;
     });
@@ -342,7 +342,7 @@ function _prepareOrganizedData() {
                 id: 'temp-' + Date.now() + '-' + rowNumber + '-' + j,
                 nama: item.uraian,
                 volume: hasVol ? parseNumber(volRaw) : 0,
-                satuan: hasVol && mapSatuan !== -1 && vals[mapSatuan] ? vals[mapSatuan].toString().trim() : '-',
+                satuan: hasVol && mapSatuan !== -1 && vals[mapSatuan] ? vals[mapSatuan].toString().trim() : '',
                 type: hasVol ? 'item' : 'kategori',
                 level: item.level
             });
@@ -893,7 +893,7 @@ export async function initImport() {
             nama: categoryName,
             id_kategori_master: categoryId,
             volume: 0,
-            satuan: '-',
+            satuan: '',
             type: 'kategori',
             level: 0
         });

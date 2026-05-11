@@ -285,5 +285,14 @@ if (!tbody) {
 window.goBackToRab = function() {
     let returnUrl = '';
     try { returnUrl = sessionStorage.getItem('rab_return_url'); } catch (_) {}
-    window.location.href = returnUrl ? returnUrl : '/menu-rap?mode=new';
+    
+    if (returnUrl) {
+        window.location.href = returnUrl;
+        return;
+    }
+    
+    // Fallback if no return URL in session
+    let slug = '';
+    try { slug = localStorage.getItem('lastProjectSlug'); } catch (_) {}
+    window.location.href = slug ? `/proyek/${slug}` : '/proyek';
 };
