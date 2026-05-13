@@ -96,7 +96,20 @@ export function renderReadonly(data) {
         const subClass = isOpen ? '' : 'hidden';
         const isReorderMode = window.RAB_INIT && window.RAB_INIT.isReorderMode;
         
-        const catNomor = formatNomor(-1, [catIndex + 1]);
+        const isImported = state.sumber_data === 'boq' || state.sumber_data === 'import';
+        let catNomor = formatNomor(-1, [catIndex + 1]);
+        let catNomorStr = '';
+        
+        if (isImported) {
+            if (cat.nomor_custom === null || cat.nomor_custom === undefined || cat.nomor_custom === '') {
+                catNomor = '';
+            } else {
+                catNomor = cat.nomor_custom;
+                catNomorStr = escHtml(catNomor); // Custom nomor dari Excel, tidak perlu tambah titik
+            }
+        } else {
+            catNomorStr = catNomor ? escHtml(catNomor) + '.' : ''; // Sistem punya, tambah titik
+        }
 
         html += `
             <tr class="rab-category bg-table-category text-white hover:bg-table-category-hover cursor-pointer select-none transition-colors duration-200"
@@ -119,7 +132,7 @@ export function renderReadonly(data) {
                 <td colspan="${isReorderMode ? 1 : 9}" class="px-3 md:px-5 py-2.5 md:py-3 font-semibold text-[10px] md:text-xs uppercase tracking-widest">
                     <span class="flex items-center gap-2">
                         <span class="w-1 h-3.5 md:h-4 bg-secondary rounded-full"></span>
-                        <span class="cat-nomor mr-1">${catNomor}.</span>
+                        <span class="cat-nomor mr-1">${catNomorStr}</span>
                         ${escHtml(cat.name || 'Tanpa Kategori')}
                     </span>
                 </td>
@@ -528,10 +541,22 @@ function updateHierarchicalNumbers() {
                 if (!counters[i]) counters[i] = 1;
             }
 
-            let noStr = formatNomor(depth, counters.slice(0, depth + 1));
-            // Add a dot if it's alphanumeric/roman and not dash
-            if (noStr !== '-' && !noStr.includes('.')) {
-                noStr += '.';
+            let noStr = '';
+            const isImported = state.sumber_data === 'boq' || state.sumber_data === 'import';
+            const rowSumber = row.dataset.sumber || 'manual';
+            const rowNomorCustom = row.dataset.nomorCustom;
+            
+            if (isImported && rowSumber === 'boq') {
+                if (rowNomorCustom === "null" || rowNomorCustom === "undefined" || !rowNomorCustom) {
+                    noStr = '';
+                } else {
+                    noStr = rowNomorCustom;
+                }
+            } else {
+                noStr = formatNomor(depth, counters.slice(0, depth + 1));
+                if (noStr !== '-' && !noStr.includes('.')) {
+                    noStr += '.';
+                }
             }
 
             const span = row.querySelector('.no-cell span');
@@ -567,6 +592,8 @@ function renderItemRows(items, catId, subClass, isEditable, prefix = '', depth =
                 data-cat="${catId}" 
                 data-parent-id="${item.id_parent || ''}"
                 data-id-rap-detail="${item.id_rap_detail || ''}"
+                data-sumber="${item.sumber || 'manual'}"
+                data-nomor-custom="${item.nomor_custom !== null && item.nomor_custom !== undefined ? escHtml(item.nomor_custom) : 'null'}"
                 data-depth="${depth}">
                 <td class="px-1 md:px-2 py-2 md:py-2.5 text-center text-table-subtle no-cell w-[100px] ${bgClass}" style="border-right: ${isReorderMode ? '1px solid #e5e7eb' : 'none'}">
                     <div class="flex items-center justify-start h-full transition-all duration-150" style="${containerPadding}">

@@ -281,6 +281,7 @@ if (!wrapper || !tbody) {
 
             const data = await fetchRabData(id);
             state.format_penomoran = data.format_penomoran || null;
+            state.sumber_data = data.sumber_data || 'manual';
             applySourcePermission(data);
             renderReadonly(data);
         });
@@ -292,6 +293,7 @@ if (!wrapper || !tbody) {
             state.currentId = null;
             state.collapsed = {};
             state.activeCategories = [];
+            state.sumber_data = 'manual';
 
             cards.forEach(c => c.classList.remove('ring-2', 'ring-primary'));
             setEditableMode(true);
@@ -367,6 +369,7 @@ if (!wrapper || !tbody) {
                 nama: cat.name
             }));
             state.format_penomoran = data.format_penomoran || null;
+            state.sumber_data = data.sumber_data || 'manual';
             applySourcePermission(data);
             renderReadonly(data);
 
@@ -402,6 +405,7 @@ if (!wrapper || !tbody) {
                 nama: cat.name
             }));
             state.format_penomoran = data.format_penomoran || null;
+            state.sumber_data = data.sumber_data || 'manual';
 
             // Silently sync AHS prices → RAP table on every page load
             fetch('/api/rap/recalculate', {
@@ -416,6 +420,7 @@ if (!wrapper || !tbody) {
                     nama: cat.name
                 }));
                 state.format_penomoran = freshData.format_penomoran || null;
+                state.sumber_data = freshData.sumber_data || 'manual';
                 applySourcePermission(freshData);
                 renderReadonly(freshData);
             }).catch(() => {/* non-blocking */});

@@ -45,6 +45,7 @@ const parseNumber = (val) => {
 
 const SYSTEM_FIELDS = [
     { key: 'uraian', label: 'Uraian Pekerjaan', required: true, keywords: ['uraian', 'pekerjaan', 'item', 'deskripsi', 'nama'], width: 'col' },
+    { key: 'nomor', label: 'No/Penomoran', required: false, keywords: ['no', 'nomor', 'number', 'penomoran'], width: 'col style="width: 5rem"' },
     { key: 'volume', label: 'Volume', required: true, keywords: ['vol', 'volume', 'qty', 'kuantitas', 'jumlah'], width: 'col style="width: 7rem"' },
     { key: 'satuan', label: 'Satuan', required: true, keywords: ['sat', 'satuan', 'unit'], width: 'col style="width: 6rem"' },
     { key: 'kategori', label: 'Kategori', required: false, keywords: [], width: 'col style="width: 10rem"' }
@@ -187,16 +188,16 @@ function _renderTableHeaders(thead) {
             });
 
             if (selectedSysKey !== '') {
-                // If mapping to a non-uraian key, remove previous column mapped to this key
-                if (selectedSysKey !== 'uraian') {
+                // If mapping to a non-uraian and non-nomor key, remove previous column mapped to this key
+                if (selectedSysKey !== 'uraian' && selectedSysKey !== 'nomor') {
                     currentMapping[selectedSysKey] = colIdx;
                 } else {
-                    if (!Array.isArray(currentMapping.uraian)) {
-                        currentMapping.uraian = currentMapping.uraian ? [currentMapping.uraian] : [];
+                    if (!Array.isArray(currentMapping[selectedSysKey])) {
+                        currentMapping[selectedSysKey] = currentMapping[selectedSysKey] ? [currentMapping[selectedSysKey]] : [];
                     }
-                    if (!currentMapping.uraian.includes(colIdx)) {
-                        currentMapping.uraian.push(colIdx);
-                        currentMapping.uraian.sort((a, b) => a - b);
+                    if (!currentMapping[selectedSysKey].includes(colIdx)) {
+                        currentMapping[selectedSysKey].push(colIdx);
+                        currentMapping[selectedSysKey].sort((a, b) => a - b);
                     }
                 }
             }
@@ -324,6 +325,18 @@ function _prepareOrganizedData() {
         
         if (itemsOnRow.length === 0) return;
 
+        const nomorCols = Array.isArray(currentMapping.nomor) ? currentMapping.nomor : (currentMapping.nomor ? [currentMapping.nomor] : []);
+        let firstNomorStr = null;
+        for (let i = 0; i < nomorCols.length; i++) {
+            const excelColIdx = excelColumns[nomorCols[i]].idxExcel;
+            const cellVal = row.values[excelColIdx];
+            const str = typeof cellVal === 'object' && cellVal !== null ? (cellVal.result ? cellVal.result.toString().trim() : '') : (cellVal ? cellVal.toString().trim() : '');
+            if (str) {
+                firstNomorStr = str;
+                break;
+            }
+        }
+
         const vals = row.values;
         const volRaw = mapVolume !== -1 ? vals[mapVolume] : null;
         const isVolEmpty = (volRaw === null || volRaw === undefined || volRaw.toString().trim() === '');
@@ -338,9 +351,12 @@ function _prepareOrganizedData() {
             const item = itemsOnRow[j];
             const hasVol = isLast && !isVolEmpty;
 
+            const strNomor = (j === 0) ? firstNomorStr : null;
+
             organizedItems.push({
                 id: 'temp-' + Date.now() + '-' + rowNumber + '-' + j,
                 nama: item.uraian,
+                nomor: strNomor,
                 volume: hasVol ? parseNumber(volRaw) : 0,
                 satuan: hasVol && mapSatuan !== -1 && vals[mapSatuan] ? vals[mapSatuan].toString().trim() : '',
                 type: hasVol ? 'item' : 'kategori',

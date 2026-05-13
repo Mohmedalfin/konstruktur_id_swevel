@@ -16,6 +16,7 @@ class RapKategoriModel extends Model
     protected $allowedFields = [
         'id_rap',
         'id_kategori',
+        'nomor_custom',
     ];
 
     protected $useTimestamps = false;

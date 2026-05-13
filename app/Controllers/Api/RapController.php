@@ -77,7 +77,7 @@ class RapController extends BaseController
             $rapId = (int) $rap['id_rap'];
 
             $kategoriRows = $this->rapKategoriModel
-                ->select('rap_kategori.id_kategori, kategori_pekerjaan.nama_kategori, kategori_pekerjaan.id_project')
+                ->select('rap_kategori.id_kategori, rap_kategori.nomor_custom, kategori_pekerjaan.nama_kategori, kategori_pekerjaan.id_project')
                 ->join(
                     'kategori_pekerjaan',
                     'kategori_pekerjaan.id_kategori_pekerjaan = rap_kategori.id_kategori',
@@ -88,7 +88,7 @@ class RapController extends BaseController
                     ->where('kategori_pekerjaan.id_project', $idProject)
                     ->orWhere('kategori_pekerjaan.id_project', null)
                 ->groupEnd()
-                ->orderBy('kategori_pekerjaan.nama_kategori', 'ASC')
+                ->orderBy('rap_kategori.id_rap_kategori', 'ASC')
                 ->findAll();
 
             $detailRows = $this->rapDetailModel
@@ -108,6 +108,7 @@ class RapController extends BaseController
                 $grouped[$catId] = [
                     'id'    => $catId,
                     'name'  => $cat['nama_kategori'] ?? 'Tanpa Kategori',
+                    'nomor_custom' => $cat['nomor_custom'] ?? null,
                     'items' => [],
                 ];
             }
@@ -1416,7 +1417,9 @@ class RapController extends BaseController
 
                 $existsInRap = $this->rapKategoriModel->where('id_rap', $rapId)->where('id_kategori', $catId)->first();
                 if (!$existsInRap) {
-                    $this->rapKategoriModel->insert(['id_rap' => $rapId, 'id_kategori' => $catId]);
+                    $this->rapKategoriModel->insert(['id_rap' => $rapId, 'id_kategori' => $catId, 'nomor_custom' => $item['nomor'] ?? null]);
+                } else if (isset($item['nomor'])) {
+                    $this->rapKategoriModel->update($existsInRap['id_rap_kategori'], ['nomor_custom' => $item['nomor']]);
                 }
                 $currentKategori = $catId;
                 $currentParent = null; 
@@ -1447,7 +1450,8 @@ class RapController extends BaseController
                     'subtotal_alat' => $vol * $al,
                     'total_keseluruhan' => $vol * ($bh + $al + $up),
                     'urutan' => $idx + 1,
-                    'sumber' => 'boq'
+                    'sumber' => 'boq',
+                    'nomor_custom' => $item['nomor'] ?? null
                 ];
                 $this->rapDetailModel->insert($data);
                 $currentParent = (int) $this->rapDetailModel->getInsertID();
@@ -1495,6 +1499,8 @@ class RapController extends BaseController
                     'hargaUpah'        => (float) ($element['harga_upah'] ?? 0),
                     'hargaKeseluruhan' => (float) ($element['total_keseluruhan'] ?? 0),
                     'keterangan'       => $element['keterangan'] ?? null,
+                    'nomor_custom'     => $element['nomor_custom'] ?? null,
+                    'sumber'           => $element['sumber'] ?? 'manual',
                     'children'         => $children
                 ];
                 $branch[] = $item;
