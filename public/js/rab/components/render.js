@@ -89,12 +89,14 @@ export function renderReadonly(data) {
 
     let html = '';
 
-    categories.forEach(cat => {
+    categories.forEach((cat, catIndex) => {
         const items = cat.items || [];
         const catTotal = sumLeaves(items);
         const isOpen = !state.collapsed[cat.id];
         const subClass = isOpen ? '' : 'hidden';
         const isReorderMode = window.RAB_INIT && window.RAB_INIT.isReorderMode;
+        
+        const catNomor = formatNomor(-1, [catIndex + 1]);
 
         html += `
             <tr class="rab-category bg-table-category text-white hover:bg-table-category-hover cursor-pointer select-none transition-colors duration-200"
@@ -117,6 +119,7 @@ export function renderReadonly(data) {
                 <td colspan="${isReorderMode ? 1 : 9}" class="px-3 md:px-5 py-2.5 md:py-3 font-semibold text-[10px] md:text-xs uppercase tracking-widest">
                     <span class="flex items-center gap-2">
                         <span class="w-1 h-3.5 md:h-4 bg-secondary rounded-full"></span>
+                        <span class="cat-nomor mr-1">${catNomor}.</span>
                         ${escHtml(cat.name || 'Tanpa Kategori')}
                     </span>
                 </td>
@@ -457,6 +460,47 @@ export function renderReadonly(data) {
  * Recalculate and update the display numbers (1, 1.1, etc.) in the No column
  * for all items in the table, respecting the current DOM order and depth.
  */
+export function formatNomor(depth, counters) {
+    let format = state.format_penomoran || {};
+    if (typeof format === 'string') {
+        try { format = JSON.parse(format); } catch(e) { format = {}; }
+    }
+    
+    const rule = format[String(depth)] || (depth === -1 ? 'A' : (depth === 0 ? '1' : '1.1'));
+    const currIndex = counters[counters.length - 1];
+    
+    if (rule === 'A') return numberToAlpha(currIndex, false);
+    if (rule === 'a') return numberToAlpha(currIndex, true);
+    if (rule === 'I') return numberToRoman(currIndex, false);
+    if (rule === 'i') return numberToRoman(currIndex, true);
+    if (rule === '-') return '-';
+    if (rule === '1.1') return counters.join('.');
+    
+    return currIndex.toString();
+}
+
+function numberToAlpha(num, lowercase = false) {
+    let result = '';
+    while (num > 0) {
+        num--;
+        result = String.fromCharCode((lowercase ? 97 : 65) + (num % 26)) + result;
+        num = Math.floor(num / 26);
+    }
+    return result;
+}
+
+function numberToRoman(num, lowercase = false) {
+    const lookup = {M:1000,CM:900,D:500,CD:400,C:100,XC:90,L:50,XL:40,X:10,IX:9,V:5,IV:4,I:1};
+    let roman = '';
+    for ( let i in lookup ) {
+        while ( num >= lookup[i] ) {
+            roman += i;
+            num -= lookup[i];
+        }
+    }
+    return lowercase ? roman.toLowerCase() : roman;
+}
+
 function updateHierarchicalNumbers() {
     const categories = Array.from(tbody.querySelectorAll('.rab-category'));
     categories.forEach(catRow => {
@@ -484,7 +528,12 @@ function updateHierarchicalNumbers() {
                 if (!counters[i]) counters[i] = 1;
             }
 
-            const noStr = counters.slice(0, depth + 1).join('.');
+            let noStr = formatNomor(depth, counters.slice(0, depth + 1));
+            // Add a dot if it's alphanumeric/roman and not dash
+            if (noStr !== '-' && !noStr.includes('.')) {
+                noStr += '.';
+            }
+
             const span = row.querySelector('.no-cell span');
             if (span) span.textContent = noStr;
         });

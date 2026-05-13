@@ -7,7 +7,8 @@ export const state = {
     mode:             null,
     currentId:        null,
     collapsed:        {},
-    activeCategories: []
+    activeCategories: [],
+    format_penomoran: null
 };
 
 export const wrapper              = document.getElementById('rab-table-wrapper');

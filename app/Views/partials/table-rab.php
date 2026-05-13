@@ -38,6 +38,12 @@ $isReorderMode = isset($isReorderMode) && $isReorderMode;
                     <i class="fas fa-plus"></i> Kategori Pekerjaan
                 </button>
 
+                <!-- Format Penomoran -->
+                <button id="format-penomoran-btn" type="button" title="Atur Format Penomoran"
+                    class="hidden inline-flex items-center gap-1 md:gap-1.5 px-2 py-1.5 md:px-3 md:py-2 rounded-lg bg-indigo-500 hover:bg-indigo-600 text-white text-[10px] md:text-xs font-semibold transition-all duration-150 shadow-sm">
+                    <i class="fas fa-list-ol"></i> Format Penomoran
+                </button>
+
                 <!-- Import BOQ -->
                 <button id="boq-import-btn" type="button" title="Import BOQ dari Excel"
                     class="inline-flex items-center gap-1 md:gap-1.5 px-2 py-1.5 md:px-3 md:py-2 rounded-lg bg-primary hover:bg-primary-hover text-white text-[10px] md:text-xs font-semibold transition-all duration-150 shadow-sm">
@@ -127,42 +133,39 @@ $isReorderMode = isset($isReorderMode) && $isReorderMode;
             <?php if (!$isReorderMode): ?>
                 <tfoot id="rab-tfoot">
 
-                    <!-- Subtotal Bahan -->
+                    <!-- Row: Subtotal per kolom (Bahan, Upah, Alat) + Grand Total di kolom Total -->
                     <tr class="bg-table-category text-white">
-                        <td colspan="10"
+                        <td colspan="2"
                             class="px-5 md:px-8 py-3 md:py-3.5 text-right text-[11px] md:text-xs font-bold tracking-wide whitespace-nowrap text-white">
-                            Subtotal Bahan
                         </td>
+                        <!-- Volume & Satuan kosong -->
+                        <td class="px-3 md:px-5 py-3 md:py-3.5"></td>
+                        <td class="px-3 md:px-5 py-3 md:py-3.5"></td>
+                        <!-- Harga Bahan, Upah, Alat kosong -->
+                        <td class="px-3 md:px-5 py-3 md:py-3.5"></td>
+                        <td class="px-3 md:px-5 py-3 md:py-3.5"></td>
+                        <td class="px-3 md:px-5 py-3 md:py-3.5"></td>
+                        <!-- Sub Total Bahan -->
                         <td id="rab-subtotal-bahan"
                             class="px-5 md:px-8 py-3 md:py-3.5 text-right text-[11px] md:text-xs font-bold tabular-nums whitespace-nowrap">
                             Rp 0
                         </td>
-                        <td class="px-3 md:px-5 py-3 md:py-3.5"></td>
-                    </tr>
-
-                    <!-- Subtotal Upah -->
-                    <tr class="bg-table-category-hover text-white">
-                        <td colspan="10"
-                            class="px-5 md:px-8 py-3 md:py-3.5 text-right text-[11px] md:text-xs font-bold tracking-wide whitespace-nowrap text-white">
-                            Subtotal Upah
-                        </td>
+                        <!-- Sub Total Upah -->
                         <td id="rab-subtotal-upah"
                             class="px-5 md:px-8 py-3 md:py-3.5 text-right text-[11px] md:text-xs font-bold tabular-nums whitespace-nowrap">
                             Rp 0
                         </td>
-                        <td class="px-3 md:px-5 py-3 md:py-3.5"></td>
-                    </tr>
-
-                    <!-- Subtotal Alat -->
-                    <tr class="bg-table-category text-white">
-                        <td colspan="10"
-                            class="px-5 md:px-8 py-3 md:py-3.5 text-right text-[11px] md:text-xs font-bold tracking-wide whitespace-nowrap text-white">
-                            Subtotal Alat
-                        </td>
+                        <!-- Sub Total Alat -->
                         <td id="rab-subtotal-alat"
                             class="px-5 md:px-8 py-3 md:py-3.5 text-right text-[11px] md:text-xs font-bold tabular-nums whitespace-nowrap">
                             Rp 0
                         </td>
+                        <!-- Total -->
+                        <td id="rab-total-jumlah"
+                            class="px-5 md:px-8 py-3 md:py-3.5 text-right text-[11px] md:text-xs font-bold tabular-nums whitespace-nowrap">
+                            Rp 0
+                        </td>
+                        <!-- Aksi kosong -->
                         <td class="px-3 md:px-5 py-3 md:py-3.5"></td>
                     </tr>
 
@@ -171,19 +174,6 @@ $isReorderMode = isset($isReorderMode) && $isReorderMode;
                         <td colspan="12" class="py-0">
                             <div class="border-t border-dashed border-white/20 mx-6"></div>
                         </td>
-                    </tr>
-
-                    <!-- Jumlah Harga -->
-                    <tr class="bg-table-category-hover text-white">
-                        <td colspan="10"
-                            class="px-5 md:px-8 py-3 md:py-3.5 text-right text-[11px] md:text-xs font-bold tracking-wide whitespace-nowrap text-white">
-                            Jumlah Harga
-                        </td>
-                        <td id="rab-total-jumlah"
-                            class="px-5 md:px-8 py-3 md:py-3.5 text-right text-[11px] md:text-xs font-bold tabular-nums whitespace-nowrap">
-                            Rp 0
-                        </td>
-                        <td class="px-3 md:px-5 py-3 md:py-3.5"></td>
                     </tr>
 
                     <!-- PPN 11% -->
@@ -520,6 +510,62 @@ $isReorderMode = isset($isReorderMode) && $isReorderMode;
                         Batal
                     </button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         MODAL — Format Penomoran
+    ════════════════════════════════════════════════════════════════ -->
+    <div id="format-penomoran-modal-overlay"
+        class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md flex flex-col overflow-hidden">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-table-border bg-indigo-600 text-white rounded-t-2xl shrink-0">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-list-ol text-lg"></i>
+                    <div>
+                        <h3 class="text-sm font-bold tracking-wide">Format Penomoran</h3>
+                        <p class="text-[11px] text-white/70 mt-0.5">Atur gaya penomoran untuk tabel RAP.</p>
+                    </div>
+                </div>
+                <button id="format-penomoran-modal-close" type="button" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 transition-colors focus:outline-none">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div class="p-5 flex flex-col gap-4 bg-slate-50">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Head Kategori</label>
+                    <select id="format-kategori" class="w-full text-xs px-3 py-2 rounded-lg border border-table-border focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none">
+                        <option value="A">A, B, C...</option>
+                        <option value="I">I, II, III...</option>
+                        <option value="1">1, 2, 3...</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Pekerjaan (Level 1)</label>
+                    <select id="format-pekerjaan" class="w-full text-xs px-3 py-2 rounded-lg border border-table-border focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none">
+                        <option value="1">1, 2, 3...</option>
+                        <option value="A">A, B, C...</option>
+                        <option value="a">a, b, c...</option>
+                        <option value="I">I, II, III...</option>
+                        <option value="i">i, ii, iii...</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Sub Pekerjaan (Level 2+)</label>
+                    <select id="format-subpekerjaan" class="w-full text-xs px-3 py-2 rounded-lg border border-table-border focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none">
+                        <option value="1.1">1.1, 1.2, 1.1.1...</option>
+                        <option value="-">- (Strip)</option>
+                        <option value="a">a, b, c...</option>
+                        <option value="1">1, 2, 3...</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex items-center justify-end gap-2 px-6 py-4 border-t border-table-border bg-white shrink-0 rounded-b-2xl">
+                <button id="format-penomoran-modal-cancel" type="button" class="px-4 py-2 rounded-lg border border-table-border bg-white hover:bg-slate-50 text-table-body text-xs font-medium transition-all focus:outline-none">Batal</button>
+                <button id="format-penomoran-modal-save" type="button" class="px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold tracking-wide shadow-sm transition-all focus:outline-none">Simpan Format</button>
             </div>
         </div>
     </div>

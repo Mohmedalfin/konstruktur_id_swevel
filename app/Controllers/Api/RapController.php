@@ -65,10 +65,11 @@ class RapController extends BaseController
                 return $this->response->setJSON([
                     'status' => 'success',
                     'data'   => [
-                        'id_project'  => $idProject,
-                        'id_rap'      => null,
-                        'sumber_data' => $sumberData,
-                        'categories'  => [],
+                        'id_project'       => $idProject,
+                        'id_rap'           => null,
+                        'sumber_data'      => $sumberData,
+                        'format_penomoran' => null,
+                        'categories'       => [],
                     ],
                 ]);
             }
@@ -126,16 +127,56 @@ class RapController extends BaseController
             return $this->response->setJSON([
                 'status' => 'success',
                 'data'   => [
-                    'id_project'  => $idProject,
-                    'id_rap'      => $rapId,
-                    'sumber_data' => $sumberData,
-                    'categories'  => array_values($grouped),
+                    'id_project'       => $idProject,
+                    'id_rap'           => $rapId,
+                    'sumber_data'      => $sumberData,
+                    'format_penomoran' => $rap['format_penomoran'] ?? null,
+                    'categories'       => array_values($grouped),
                 ],
             ]);
         } catch (Throwable $e) {
             return $this->response->setStatusCode(500)->setJSON([
                 'status'  => 'error',
                 'message' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    public function updateFormatPenomoran()
+    {
+        try {
+            $payload = $this->request->getJSON(true);
+            $idProject = (int) ($payload['id_project'] ?? 0);
+            $format = $payload['format_penomoran'] ?? null;
+
+            if ($idProject <= 0) {
+                return $this->response->setStatusCode(400)->setJSON([
+                    'status'  => 'error',
+                    'message' => 'id_project wajib diisi',
+                ]);
+            }
+
+            $rap = $this->rapModel->where('id_project', $idProject)->first();
+
+            if (!$rap) {
+                return $this->response->setStatusCode(404)->setJSON([
+                    'status'  => 'error',
+                    'message' => 'RAP tidak ditemukan',
+                ]);
+            }
+
+            $this->rapModel->update($rap['id_rap'], [
+                'format_penomoran' => is_array($format) || is_object($format) ? json_encode($format) : $format
+            ]);
+
+            return $this->response->setJSON([
+                'status'  => 'success',
+                'message' => 'Format penomoran berhasil disimpan',
+            ]);
+        } catch (\Throwable $e) {
+            return $this->response->setStatusCode(500)->setJSON([
+                'status'  => 'error',
+                'message' => $e->getMessage()
             ]);
         }
     }

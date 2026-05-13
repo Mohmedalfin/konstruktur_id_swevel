@@ -39,6 +39,7 @@ import {
 import { initImport, refreshImportCategories } from './components/import.js';
 import { initTemplate } from './components/template.js';
 import { bindSearch } from './hooks/search.js';
+import { bindFormatPenomoran } from './components/format.js';
 import { toast } from '../shared/ui/toast.js';
 import { confirmAction } from '../shared/ui/confirm.js';
 
@@ -54,6 +55,7 @@ if (!wrapper || !tbody) {
     bindSearch();
     initTemplate();
     initImport();
+    bindFormatPenomoran();
 
     if (resetDataBtn) {
         resetDataBtn.addEventListener('click', async function() {
@@ -93,6 +95,7 @@ if (!wrapper || !tbody) {
                     id: String(cat.id),
                     nama: cat.name
                 }));
+                state.format_penomoran = freshData.format_penomoran || null;
 
                 applySourcePermission(freshData);
                 renderReadonly(freshData);
@@ -191,6 +194,7 @@ if (!wrapper || !tbody) {
                     id: String(cat.id),
                     nama: cat.name
                 }));
+                state.format_penomoran = data.format_penomoran || null;
 
                 applySourcePermission(data);
                 renderReadonly(data);
@@ -276,6 +280,7 @@ if (!wrapper || !tbody) {
             renderLoading();
 
             const data = await fetchRabData(id);
+            state.format_penomoran = data.format_penomoran || null;
             applySourcePermission(data);
             renderReadonly(data);
         });
@@ -361,6 +366,7 @@ if (!wrapper || !tbody) {
                 id: String(cat.id),
                 nama: cat.name
             }));
+            state.format_penomoran = data.format_penomoran || null;
             applySourcePermission(data);
             renderReadonly(data);
 
@@ -395,6 +401,7 @@ if (!wrapper || !tbody) {
                 id: String(cat.id),
                 nama: cat.name
             }));
+            state.format_penomoran = data.format_penomoran || null;
 
             // Silently sync AHS prices → RAP table on every page load
             fetch('/api/rap/recalculate', {
@@ -408,6 +415,7 @@ if (!wrapper || !tbody) {
                     id: String(cat.id),
                     nama: cat.name
                 }));
+                state.format_penomoran = freshData.format_penomoran || null;
                 applySourcePermission(freshData);
                 renderReadonly(freshData);
             }).catch(() => {/* non-blocking */});

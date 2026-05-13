@@ -22,6 +22,7 @@ class RapModel extends Model
         'total_keseluruhan',
         'status_rap',
         'keterangan',
+        'format_penomoran',
     ];
 
     protected $useTimestamps = true;

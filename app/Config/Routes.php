@@ -71,6 +71,7 @@ $routes->group('api', ['namespace' => 'App\Controllers\Api'], function ($routes)
     $routes->delete('ahs/rincian/item/(:num)', 'AhsController::deleteItem/$1');
 
     $routes->get('rap', 'RapController::index');
+    $routes->put('rap/format_penomoran', 'RapController::updateFormatPenomoran');
 
     $routes->get('rap/kategori-master', 'RapController::kategoriMaster');
     $routes->put('rap/kategori-master/(:num)', 'RapController::updateKategoriMaster/$1');
