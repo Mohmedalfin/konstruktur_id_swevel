@@ -346,6 +346,68 @@ function _prepareOrganizedData() {
             itemsOnRow[0].level = isVolEmpty ? 0 : currentLevelForItems;
         }
 
+        function isNomor(str) {
+            str = str.trim();
+            if (!str) return false;
+            if (str.length > 15) return false;
+            if (str.includes(' ')) return false;
+            if (/^[0-9]/.test(str)) return true;
+            if (/^(I|II|III|IV|V|VI|VII|VIII|IX|X|XI|XII|XIII|XIV|XV)[\.\)]*$/i.test(str)) return true;
+            if (/^[A-Z]{1,2}[\.\)]+$/i.test(str)) return true;
+            if (/^[A-Z]{1,2}$/i.test(str)) return true;
+            return false;
+        }
+
+        function getCellStr(excelColIdx) {
+            const v = row.values[excelColIdx];
+            return typeof v === 'object' && v !== null ? (v.result ? v.result.toString().trim() : '') : (v ? v.toString().trim() : '');
+        }
+
+        // Build set of all mapped excel col indices so we know which are free
+        const allMappedExcelIdxs = new Set();
+        Object.values(currentMapping).forEach(v => {
+            const cols = Array.isArray(v) ? v : (v ? [v] : []);
+            cols.forEach(c => { if (excelColumns[c]) allMappedExcelIdxs.add(excelColumns[c].idxExcel); });
+        });
+
+        // Auto-extract nomor from uraian if multiple uraian columns mapped and first looks like a number
+        if (!firstNomorStr && itemsOnRow.length >= 2) {
+            if (isNomor(itemsOnRow[0].uraian)) {
+                firstNomorStr = itemsOnRow[0].uraian;
+                itemsOnRow.shift();
+            }
+        }
+
+        // If the ONLY mapped uraian value looks like a nomor, scan adjacent unmapped columns
+        // (to the right) for the actual text uraian — handles indented Excel layouts
+        if (!firstNomorStr && itemsOnRow.length === 1 && isNomor(itemsOnRow[0].uraian)) {
+            const nomorCandidate = itemsOnRow[0].uraian;
+            const uraianExcelIdx = excelColumns[uraianCols[0]].idxExcel;
+            let foundUraian = null;
+            for (let adj = uraianExcelIdx + 1; adj <= uraianExcelIdx + 5; adj++) {
+                if (allMappedExcelIdxs.has(adj)) continue; // skip cols already mapped to something else
+                const adjStr = getCellStr(adj);
+                if (adjStr && !isNomor(adjStr)) {
+                    foundUraian = adjStr;
+                    break;
+                }
+            }
+            if (foundUraian) {
+                firstNomorStr = nomorCandidate;
+                itemsOnRow[0].uraian = foundUraian;
+            }
+        }
+        
+        // Auto-extract inline nomor (e.g., "1. Pekerjaan A" -> Nomor: "1.", Uraian: "Pekerjaan A")
+        if (!firstNomorStr && itemsOnRow.length === 1) {
+            const text = itemsOnRow[0].uraian;
+            const match = text.match(/^((?:[0-9]+[\.\)]?)+|[A-Z]{1,2}[\.\)]+|(?:I|II|III|IV|V|VI|VII|VIII|IX|X)[\.\)]+)\s+(.+)$/i);
+            if (match) {
+                firstNomorStr = match[1];
+                itemsOnRow[0].uraian = match[2];
+            }
+        }
+
         for (let j = 0; j < itemsOnRow.length; j++) {
             const isLast = (j === itemsOnRow.length - 1);
             const item = itemsOnRow[j];
