@@ -3,8 +3,6 @@ $wrapperClass = $wrapperClass ?? 'w-full';
 ?>
 
 <div class="<?= $wrapperClass ?> px-3 sm:px-6 lg:px-8 py-4 md:py-8">
-
-    <!-- ── Context Banner ──────────────────────────────────────────── -->
     <div class="flex items-center gap-3 bg-primary text-white px-5 py-3 rounded-xl text-sm shadow-sm mb-6">
         <svg class="w-4 h-4 shrink-0 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -15,10 +13,7 @@ $wrapperClass = $wrapperClass ?? 'w-full';
         <span id="ahs-item-label" class="text-secondary font-bold tracking-wide truncate">—</span>
     </div>
 
-    <!-- ── Toolbar ─────────────────────────────────────────────────── -->
     <div class="flex flex-wrap items-center gap-2 mb-5">
-
-            <!-- Dari Daftar AHS (modal) -->
             <button id="ahs-from-db-btn" type="button"
                 class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-amber-400 hover:bg-amber-500 text-black text-xs font-semibold transition-all duration-150 focus:outline-none active:scale-95 shadow-sm">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -28,7 +23,6 @@ $wrapperClass = $wrapperClass ?? 'w-full';
                 Daftar AHS
             </button>
 
-            <!-- Tambah Bahan -->
             <button id="ahs-add-bahan-btn" type="button"
                 class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-semibold transition-all duration-150 focus:outline-none active:scale-95 shadow-sm">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -37,7 +31,6 @@ $wrapperClass = $wrapperClass ?? 'w-full';
                 Bahan
             </button>
 
-            <!-- Tambah Alat -->
             <button id="ahs-add-alat-btn" type="button"
                 class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold transition-all duration-150 focus:outline-none active:scale-95 shadow-sm">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -46,7 +39,6 @@ $wrapperClass = $wrapperClass ?? 'w-full';
                 Alat
             </button>
 
-            <!-- Tambah Upah -->
             <button id="ahs-add-upah-btn" type="button"
                 class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-violet-500 hover:bg-violet-600 text-white text-xs font-semibold transition-all duration-150 focus:outline-none active:scale-95 shadow-sm">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -57,10 +49,8 @@ $wrapperClass = $wrapperClass ?? 'w-full';
 
     </div>
 
-    <!-- ── Table Container ──────────────────────────────────────────── -->
     <div class="overflow-x-auto rounded-xl shadow-md border border-table-border bg-white">
         <table class="w-full text-left border-collapse min-w-[1300px]" id="ahs-table">
-
             <colgroup>
                 <col style="width: 3rem">
                 <col style="width: 6rem">
@@ -92,7 +82,6 @@ $wrapperClass = $wrapperClass ?? 'w-full';
             </thead>
 
             <tbody id="ahs-tbody" class="text-table-body text-[11px] md:text-[13px]">
-                <!-- rows injected by ajax_ahs.js -->
             </tbody>
 
             <tfoot id="ahs-tfoot">
@@ -121,7 +110,6 @@ $wrapperClass = $wrapperClass ?? 'w-full';
         </table>
     </div>
 
-    <!-- ── Simpan Bar ───────────────────────────────────────────────── -->
     <div class="mt-4 flex justify-end">
         <button id="ahs-simpan-btn" type="button"
             class="pointer inline-flex items-center gap-2 bg-primary hover:bg-primary-hover active:scale-95 text-white px-8 py-2.5 rounded-lg text-xs font-semibold tracking-wide shadow-md transition-all duration-150 focus:outline-none">
@@ -131,16 +119,10 @@ $wrapperClass = $wrapperClass ?? 'w-full';
 
 </div>
 
-
-<!-- ═══════════════════════════════════════════════════════════════
-     MODAL — Pilih dari Daftar AHS
-════════════════════════════════════════════════════════════════ -->
 <div id="ahs-modal-overlay"
     class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm p-4">
 
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl h-[600px] flex flex-col overflow-hidden">
-
-        <!-- Modal Header -->
         <div class="flex items-center justify-between px-6 py-4 border-b border-table-border bg-primary text-white rounded-t-2xl shrink-0">
             <div class="flex items-center gap-3">
                 <svg class="w-5 h-5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -160,11 +142,8 @@ $wrapperClass = $wrapperClass ?? 'w-full';
             </button>
         </div>
 
-        <!-- Search + Filter -->
         <div class="px-6 py-4 border-b border-table-border bg-slate-50 shrink-0">
             <div class="flex flex-col sm:flex-row gap-3">
-
-                <!-- Search -->
                 <div class="relative flex-1">
                     <input id="ahs-modal-search" type="text" placeholder="Cari nama bahan / alat / pekerja..."
                         class="w-full pl-9 pr-4 py-2 text-xs border border-table-border rounded-lg bg-white placeholder-table-subtle focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"/>
@@ -173,14 +152,12 @@ $wrapperClass = $wrapperClass ?? 'w-full';
                     </svg>
                 </div>
 
-                <!-- Filter Tipe -->
                 <div class="flex items-center gap-1.5 shrink-0">
                     <button data-filter="all"   class="ahs-modal-filter-btn active-filter px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-150 focus:outline-none">Semua</button>
                     <button data-filter="bahan" class="ahs-modal-filter-btn px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-150 focus:outline-none">Bahan</button>
                     <button data-filter="alat"  class="ahs-modal-filter-btn px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-150 focus:outline-none">Alat</button>
                     <button data-filter="upah"  class="ahs-modal-filter-btn px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-150 focus:outline-none">Upah</button>
                 </div>
-
             </div>
         </div>
 
@@ -188,14 +165,14 @@ $wrapperClass = $wrapperClass ?? 'w-full';
         <div class="flex-1 overflow-auto">
             <table class="w-full text-left border-collapse table-fixed min-w-[1200px]" id="ahs-modal-table">
                 <colgroup>
-                    <col style="width: 3.25rem">  <!-- Checkbox -->
-                    <col style="width: 6rem">     <!-- ID Item -->
-                    <col style="width: 18rem">    <!-- Uraian -->
-                    <col style="width: 8rem">     <!-- Merk -->
-                    <col style="width: 10rem">    <!-- Spesifikasi -->
-                    <col style="width: 5.5rem">   <!-- Satuan -->
-                    <col style="width: 8rem">     <!-- Harga Satuan -->
-                    <col style="width: 14rem">    <!-- Sumber -->
+                    <col style="width: 3.25rem">  
+                    <col style="width: 6rem">     
+                    <col style="width: 18rem">    
+                    <col style="width: 8rem">     
+                    <col style="width: 10rem">    
+                    <col style="width: 5.5rem">   
+                    <col style="width: 8rem">     
+                    <col style="width: 14rem">    
                 </colgroup>
                 <thead class="sticky top-0 bg-slate-100/90 backdrop-blur-sm z-10 shadow-sm">
                     <tr>
@@ -212,12 +189,10 @@ $wrapperClass = $wrapperClass ?? 'w-full';
                     </tr>
                 </thead>
                 <tbody id="ahs-modal-tbody" class="text-[11px] md:text-[13px] text-table-body">
-                    <!-- injected by JS -->
                 </tbody>
             </table>
         </div>
 
-        <!-- Modal Footer -->
         <div class="flex items-center justify-between px-6 py-4 border-t border-table-border bg-slate-50 shrink-0 rounded-b-2xl">
             <p id="ahs-modal-selected-count" class="text-xs text-table-subtle font-medium">
                 Belum ada item dipilih
@@ -233,6 +208,5 @@ $wrapperClass = $wrapperClass ?? 'w-full';
                 </button>
             </div>
         </div>
-
     </div>
 </div>

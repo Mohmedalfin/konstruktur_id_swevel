@@ -5,37 +5,30 @@ $isReorderMode = isset($isReorderMode) && $isReorderMode;
 ?>
 
 <div id="rab-table-wrapper" class="w-full px-3 sm:px-6 lg:px-8 py-4 md:py-8 <?= $wrapperClass ?>">
-    <!-- Table Toolbar -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
 
-        <!-- Search -->
-        <div class="relative w-full sm:w-64">
+        <div class="relative w-full sm:w-100">
             <input id="rab-search" type="text" placeholder="Cari pekerjaan..."
-                class="w-full pl-9 pr-4 py-2 text-xs sm:text-sm border border-table-border rounded-lg bg-white placeholder-table-subtle focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
+                class="w-full pl-9 pr-4 py-2 text-xs sm:text-sm border rounded-lg bg-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all" />
             <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-table-subtle" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
             </svg>
         </div>
 
-        <!-- BOQ Actions -->
         <div class="flex items-center gap-1.5 md:gap-2 shrink-0">
             <?php if ($isReorderMode): ?>
-                <!-- Actions moved to atur-urutan.php -->
 
             <?php else: ?>
-                <!-- Atur Urutan -->
                 <a href="<?= base_url('menu-rap/atur-urutan?id_project=' . ($idProject ?? '') . '&slug=' . ($slug ?? '')) ?>" title="Atur Urutan Uraian"
                     class="inline-flex items-center gap-1 md:gap-1.5 px-2 py-1.5 md:px-3 md:py-2 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-[10px] md:text-xs font-semibold transition-all duration-150 shadow-sm">
                     <i class="fas fa-list-ol"></i> Atur Urutan Uraian
                 </a>
 
-                <!-- Tambah Kategori -->
                 <button id="tambah-kategori-btn" type="button" title="Tambah Kategori Pekerjaan"
                     class="hidden inline-flex items-center gap-1 md:gap-1.5 px-2 py-1.5 md:px-3 md:py-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] md:text-xs font-semibold transition-all duration-150 shadow-sm">
                     <i class="fas fa-plus"></i> Kategori Pekerjaan
                 </button>
 
-                <!-- Import BOQ -->
                 <button id="boq-import-btn" type="button" title="Import BOQ dari Excel"
                     class="inline-flex items-center gap-1 md:gap-1.5 px-2 py-1.5 md:px-3 md:py-2 rounded-lg bg-primary hover:bg-primary-hover text-white text-[10px] md:text-xs font-semibold transition-all duration-150 focus:outline-none active:scale-95 shadow-sm">
                     <svg class="w-3 h-3 md:w-3.5 md:h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -46,7 +39,6 @@ $isReorderMode = isset($isReorderMode) && $isReorderMode;
                 </button>
                 <input id="boq-file-input" type="file" accept=".xlsx,.xls,.csv" class="hidden" />
 
-                <!-- Reset Data -->
                 <button id="reset-rap-btn" type="button" title="Kosongkan seluruh data pekerjaan"
                     class="inline-flex items-center gap-1 md:gap-1.5 px-2 py-1.5 md:px-3 md:py-2 rounded-lg border border-red-500 text-red-500 hover:bg-red-50 text-[10px] md:text-xs font-semibold transition-all duration-150 shadow-sm">
                     <i class="fas fa-trash-alt"></i> Kosongkan RAP
@@ -57,26 +49,23 @@ $isReorderMode = isset($isReorderMode) && $isReorderMode;
 
     <div class="overflow-x-auto rounded-xl shadow-md border border-table-border bg-white pb-4 w-full">
         <table class="w-full text-left min-w-[1400px] border-collapse" id="rab-table">
-
-            <!-- Column widths — locked permanently, never shift on open/close -->
             <colgroup>
-                <col style="width: 4.5rem">     <!-- No -->
-                <col class="min-w-[300px]">     <!-- Uraian Pekerjaan -->
+                <col style="width: 4.5rem">
+                <col class="min-w-[300px]">
                 <?php if (!$isReorderMode): ?>
-                <col style="width: 6rem">       <!-- Volume -->
-                <col style="width: 6rem">       <!-- Satuan -->
-                <col style="width: 10rem">      <!-- Harga Bahan -->
-                <col style="width: 10rem">      <!-- Harga Alat -->
-                <col style="width: 10rem">      <!-- Harga Upah -->
-                <col style="width: 10rem">      <!-- Sub. Bahan -->
-                <col style="width: 10rem">      <!-- Sub. Alat -->
-                <col style="width: 10rem">      <!-- Sub. Upah -->
-                <col style="width: 10rem">      <!-- Harga Keseluruhan -->
-                <col style="width: 7rem">       <!-- Aksi -->
+                <col style="width: 6rem">
+                <col style="width: 6rem">
+                <col style="width: 10rem">
+                <col style="width: 10rem">
+                <col style="width: 10rem">
+                <col style="width: 10rem">
+                <col style="width: 10rem">
+                <col style="width: 10rem">
+                <col style="width: 10rem">
+                <col style="width: 7rem">
                 <?php endif; ?>
             </colgroup>
 
-            <!-- Table Head (static — never changes) -->
             <thead>
                 <tr class="bg-primary text-white">
                     <th scope="col" class="px-3 md:px-5 py-3 md:py-3.5 text-center text-[10px] md:text-xs font-semibold uppercase tracking-wider whitespace-nowrap">No</th>
@@ -96,13 +85,9 @@ $isReorderMode = isset($isReorderMode) && $isReorderMode;
                 </tr>
             </thead>
 
-            <!-- Table Body — populated by ajax_rab.js -->
             <tbody id="rab-tbody" class="text-table-body text-[11px] md:text-[13px]">
-                <!-- rows injected here -->
             </tbody>
 
-            <!-- Table Footer — updated by ajax_rab.js -->
-            <!-- Table Footer — updated by ajax_rab.js -->
             <?php if (!$isReorderMode): ?>
             <tfoot id="rab-tfoot">
                 <tr class="bg-table-category text-white">
@@ -126,7 +111,6 @@ $isReorderMode = isset($isReorderMode) && $isReorderMode;
     </div>
 
     <?php if ($isReorderMode): ?>
-    <!-- ── Simpan Bar ───────────────────────────────────────────────── -->
     <div class="mt-4 flex justify-end">
         <button id="save-reorder-btn" type="button"
             class="pointer inline-flex items-center gap-2 bg-primary hover:bg-primary-hover active:scale-95 text-white px-8 py-2.5 rounded-lg text-xs font-semibold tracking-wide shadow-md transition-all duration-150 focus:outline-none">
@@ -141,7 +125,6 @@ $isReorderMode = isset($isReorderMode) && $isReorderMode;
     <div id="import-rab-modal-overlay" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-[95vw] h-[85vh] flex flex-col overflow-hidden">
             
-            <!-- Modal Header -->
             <div class="flex items-center justify-between px-6 py-4 border-b border-table-border bg-primary text-white rounded-t-2xl shrink-0">
                 <div class="flex items-center gap-3">
                     <svg class="w-5 h-5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -158,13 +141,11 @@ $isReorderMode = isset($isReorderMode) && $isReorderMode;
                 </button>
             </div>
             
-            <!-- Workspace Step 1: Mapping -->
             <div id="import-step-1" class="flex-1 overflow-auto bg-slate-50 p-4">
                 <div class="rounded-xl shadow-sm border border-table-border bg-white overflow-hidden h-full flex flex-col">
                     <div class="overflow-auto flex-1 pb-4">
                         <table class="table-auto min-w-max md:w-full text-left border-collapse" id="import-rab-modal-table">
                             <thead class="sticky top-0 bg-slate-100 z-10 shadow-sm border-b border-table-border" id="import-rab-modal-thead">
-                                <tr><th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-table-subtle">Memuat Struktur Tabel...</th></tr>
                             </thead>
                             <tbody id="import-rab-modal-tbody" class="text-[11px] md:text-[13px] text-table-body">
                                 <tr><td class="text-center py-20 text-table-subtle text-xs italic">Menunggu file Excel...</td></tr>
@@ -174,12 +155,9 @@ $isReorderMode = isset($isReorderMode) && $isReorderMode;
                 </div>
             </div>
 
-            <!-- Workspace Step 2: Studio Organisir -->
             <div id="import-step-2" class="hidden flex-1 overflow-hidden bg-slate-50 flex flex-col">
-                <!-- Toolbar -->
                 <div class="px-6 py-3 bg-white border-b border-table-border flex items-center justify-between shadow-sm shrink-0">
                     <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-3 w-full justify-between">
-                        <!-- Left: Selection Tools -->
                         <div class="flex items-center gap-2 shrink-0">
                             <button id="import-organize-indent-in" type="button" title="Jadikan Sub (Indentasi Masuk)" class="p-1.5 md:px-3 md:py-2 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-all text-xs font-bold flex items-center gap-1.5">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"/></svg>
@@ -191,9 +169,7 @@ $isReorderMode = isset($isReorderMode) && $isReorderMode;
                             </button>
                         </div>
                         
-                        <!-- Right: Inject Category -->
                         <div class="flex items-center gap-2 bg-slate-50 p-1 rounded-lg border border-slate-200">
-                            <!-- Custom Category Input (NEW) -->
                             <div class="flex items-center gap-1.5 px-2 border-r border-slate-200">
                                 <input id="import-custom-kategori-input" type="text" placeholder="Tambah Kategori..." class="bg-transparent border-none text-[11px] md:text-xs focus:ring-0 p-1 w-32 md:w-40 font-medium placeholder:text-slate-400">
                                 <button id="import-custom-kategori-add" type="button" class="text-emerald-500 hover:text-emerald-700 p-1 transition-colors" title="Tambah Kategori Baru">
@@ -215,13 +191,10 @@ $isReorderMode = isset($isReorderMode) && $isReorderMode;
                 <div class="flex-1 overflow-auto p-4 lg:p-6">
                     <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-sm border border-table-border overflow-hidden">
                         <div id="import-organize-list" class="divide-y divide-slate-100 select-none">
-                            <!-- Injected by import.js -->
                         </div>
                     </div>
                 </div>
             </div>
-
-            <!-- Modal Footer -->
             <div class="flex flex-col-reverse md:flex-row md:items-center md:justify-between gap-2 px-4 md:px-6 py-3 md:py-4 border-t border-table-border bg-white shrink-0 rounded-b-2xl shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-20">
                 <div class="flex items-center gap-4">
                     <p id="import-rab-modal-count" class="text-[10px] md:text-xs text-table-subtle font-medium text-center md:text-left">
@@ -254,7 +227,6 @@ $isReorderMode = isset($isReorderMode) && $isReorderMode;
     <div id="kategori-modal-overlay" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg flex flex-col overflow-hidden">
 
-            <!-- Modal Header -->
             <div class="flex items-center justify-between px-6 py-4 border-b border-table-border bg-primary text-white rounded-t-2xl shrink-0">
                 <div class="flex items-center gap-3">
                     <svg class="w-5 h-5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">

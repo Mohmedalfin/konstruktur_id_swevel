@@ -289,7 +289,7 @@ class ProyekController extends BaseController
             ]);
 
         } catch (\Throwable $e) {
-            if ($db->transStatus() === true) { // if trans was started but failed manually
+            if ($db->transStatus() === true) { 
                 $db->transRollback();
             }
             return $this->response->setStatusCode(500)->setJSON([

@@ -1,20 +1,6 @@
 <?php
 
-/**
- * nav_helper.php
- *
- * CodeIgniter 4 helper for navbar active-state detection.
- * Loaded automatically via app/Config/Autoload.php $helpers array.
- */
-
 if (! function_exists('get_nav_class')) {
-    /**
-     * Returns the full Tailwind CSS class string for a navigation link,
-     * applying active styling when the current URL matches the given path.
-     *
-     * @param  string $path  The URL segment(s) relative to base_url (e.g. 'dashboard', 'menu-rap')
-     * @return string
-     */
     function get_nav_class(string $path): string
     {
         $base     = 'p-2 md:w-28 md:justify-center flex items-center text-sm'
@@ -27,13 +13,6 @@ if (! function_exists('get_nav_class')) {
 }
 
 if (! function_exists('is_nav_active')) {
-    /**
-     * Returns true when the current request URL matches the given path.
-     * Performs an exact match for the root ('/') and a prefix match for all other paths.
-     *
-     * @param  string $path  The URL segment(s) relative to base_url (e.g. 'dashboard', 'menu-rap')
-     * @return bool
-     */
     function is_nav_active(string $path): bool
     {
         $linkUrl = rtrim(base_url($path), '/');
@@ -43,12 +22,17 @@ if (! function_exists('is_nav_active')) {
             return $linkUrl === $currUrl;
         }
 
-        // Special handling for menu-rap: active on /menu-rap*, /proyek/* (project detail views)
+        if ($path === 'dashboard') {
+            return str_contains($currUrl, '/dashboard');
+        }
+
         if ($path === 'menu-rap') {
             $baseProyek = rtrim(base_url('proyek'), '/');
-            return str_starts_with($currUrl . '/', $linkUrl . '/')
+            return (str_starts_with($currUrl . '/', $linkUrl . '/')
                 || str_starts_with($currUrl . '/', $baseProyek . '/')
-                || str_contains($currUrl, '/proyek/menu/');
+                || str_contains($currUrl, '/proyek/menu/'))
+                && !str_contains($currUrl, '/schedule')
+                && !str_contains($currUrl, '/realisasi');
         }
 
         return $linkUrl === $currUrl

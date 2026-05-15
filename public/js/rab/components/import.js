@@ -353,8 +353,8 @@ function _renderOrganizeList() {
             const currentType = organizedItems[idx].type;
             organizedItems[idx].type = currentType === 'kategori' ? 'item' : 'kategori';
             if (organizedItems[idx].type === 'kategori') {
-                organizedItems[idx].level = 0; // Kategori is always root
-                selectedIndices.delete(idx); // Remove from selection if turning into kat
+                organizedItems[idx].level = 0; 
+                selectedIndices.delete(idx); 
             }
             _renderOrganizeList();
         });

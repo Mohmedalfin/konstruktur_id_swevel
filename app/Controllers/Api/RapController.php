@@ -94,6 +94,7 @@ class RapController extends BaseController
                 ->findAll();
 
             $detailRows = $this->rapDetailModel
+                ->select('id_rap_detail, id_rap, id_kategori, id_parent, pekerjaan, urutan, start_date, finish_date')
                 ->where('id_rap', $rapId)
                 ->where('pekerjaan IS NOT NULL', null, false)
                 ->where('pekerjaan !=', '')
@@ -155,7 +156,7 @@ class RapController extends BaseController
                 ]);
             }
 
-            $idUser = session()->get('id_user'); // Assuming user ID is stored in session
+            $idUser = session()->get('id_user'); 
 
             $rows = $this->kategoriModel
                 ->groupStart()
@@ -221,7 +222,6 @@ class RapController extends BaseController
                 ]);
             }
 
-            // Allow adding categories if it's MASTER ONLY (to master list), even if project is BOQ
             if (!$isMasterOnly && ($project['sumber_data'] ?? 'manual') !== 'manual') {
                 return $this->response->setStatusCode(403)->setJSON([
                     'status'  => 'error',
@@ -1224,6 +1224,8 @@ class RapController extends BaseController
                     'hargaUpah'        => (float) ($element['harga_upah'] ?? 0),
                     'hargaKeseluruhan' => (float) ($element['total_keseluruhan'] ?? 0),
                     'keterangan'       => $element['keterangan'] ?? null,
+                    'start_date'       => $element['start_date'] ?? null,
+                    'finish_date'      => $element['finish_date'] ?? null,
                     'children'         => $children
                 ];
                 $branch[] = $item;
@@ -1253,22 +1255,17 @@ class RapController extends BaseController
             if ($rap) {
                 $rapId = (int)$rap['id_rap'];
 
-                // 1. Get all detail IDs to clean up AHS items
                 $details = $this->rapDetailModel->where('id_rap', $rapId)->findAll();
                 $detailIds = array_column($details, 'id_rap_detail');
 
                 if (!empty($detailIds)) {
-                    // 2. Clear AHS details
                     $this->rapDetailItemModel->whereIn('id_rap_detail', $detailIds)->delete();
                     
-                    // 3. Clear RAP details
                     $this->rapDetailModel->where('id_rap', $rapId)->delete();
                 }
 
-                // 4. Clear RAP categories relation
                 $this->rapKategoriModel->where('id_rap', $rapId)->delete();
 
-                // 5. Reset RAP totals
                 $this->rapModel->update($rapId, [
                     'subtotal_bahan'    => 0,
                     'subtotal_upah'     => 0,
@@ -1277,7 +1274,6 @@ class RapController extends BaseController
                 ]);
             }
 
-            // 6. Revert project source to manual
             $this->proyekModel->update($idProject, ['sumber_data' => 'manual']);
 
             $db->transComplete();

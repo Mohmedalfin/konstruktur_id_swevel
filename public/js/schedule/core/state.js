@@ -1,7 +1,3 @@
-/**
- * Global State for Schedule Module
- */
-
 let state = {
     schedules: [],
     collapsedCategories: {},
@@ -10,7 +6,14 @@ let state = {
     globalEndDate: null,
     totalTimelineDays: 0,
     totalWeeksCount: 0,
-    filteredIds: null 
+    filteredIds: null,
+    searchQuery: '',
+    viewMode: 'gantt',
+    filters: {
+        categories: [],
+        startDate: '',
+        endDate: ''
+    }
 };
 
 export function getState() {

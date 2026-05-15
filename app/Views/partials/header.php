@@ -3,7 +3,6 @@ $userName = session()->get('nama_pengguna') ?? session()->get('nama') ?? 'Penggu
 $userRole = session()->get('kategori_akun') ?? session()->get('role') ?? 'Kontraktor';
 ?>
 
-<!-- ========== HEADER ========== -->
 <header class="flex flex-wrap md:justify-start md:flex-nowrap z-50 bg-navbar border-b border-navbar-line sticky top-0 transition-all duration-200 ease-in-out">
     <nav class="relative max-w-[85rem] w-full mx-auto md:flex md:items-center md:justify-between md:gap-3 py-2 px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center gap-x-1">
@@ -15,30 +14,25 @@ $userRole = session()->get('kategori_akun') ?? session()->get('role') ?? 'Kontra
                 </div>
             </a>
 
-            <!-- Collapse Button -->
             <button type="button"
                 class="md:hidden relative size-9 flex justify-center items-center font-medium text-sm rounded-lg bg-transparent border border-transparent text-white focus:outline-hidden disabled:opacity-50 disabled:pointer-events-none"
                 id="hs-header-base-collapse"
                 aria-expanded="false"
                 aria-controls="hs-header-base"
                 aria-label="Toggle navigation">
-                <!-- Hamburger icon -->
                 <svg id="nav-icon-hamburger" class="size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="3" x2="21" y1="6" y2="6" />
                     <line x1="3" x2="21" y1="12" y2="12" />
                     <line x1="3" x2="21" y1="18" y2="18" />
                 </svg>
-                <!-- X icon -->
                 <svg id="nav-icon-close" class="size-4 hidden" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M18 6 6 18" />
                     <path d="m6 6 12 12" />
                 </svg>
                 <span class="sr-only">Toggle navigation</span>
             </button>
-            <!-- End Collapse Button -->
         </div>
 
-        <!-- Collapse -->
         <div id="hs-header-base" class="hidden overflow-hidden transition-all duration-300 basis-full grow md:block" aria-labelledby="hs-header-base-collapse">
             <div class="overflow-hidden overflow-y-auto max-h-[75vh] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-none [&::-webkit-scrollbar-track]:bg-scrollbar-track [&::-webkit-scrollbar-thumb]:bg-scrollbar-thumb">
                 <div class="py-2 md:py-0 flex flex-col md:flex-row md:items-stretch gap-0.5 md:gap-0">
@@ -52,7 +46,6 @@ $userRole = session()->get('kategori_akun') ?? session()->get('role') ?? 'Kontra
                                 Dashboard
                             </a>
 
-                            <!-- Dropdown (User Profile) -->
                             <div class="hs-dropdown [--strategy:static] md:[--strategy:fixed] [--adaptive:none] md:[--adaptive:adaptive] [--is-collapse:true] md:[--is-collapse:false]">
                                 <button id="hs-header-base-dropdown" type="button"
                                     class="hs-dropdown-toggle w-full h-14 px-4 md:px-3 md:justify-center flex items-center gap-3 text-sm text-navbar-nav-foreground hover:bg-navbar-nav-hover focus:outline-hidden focus:bg-navbar-nav-focus"
@@ -92,16 +85,12 @@ $userRole = session()->get('kategori_akun') ?? session()->get('role') ?? 'Kontra
                                     </div>
                                 </div>
                             </div>
-                            <!-- End Dropdown -->
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <!-- End Collapse -->
     </nav>
 </header>
-<!-- ========== END HEADER ========== -->
 
 <script src="<?= base_url('assets/js/partials/header.js') ?>"></script>
-

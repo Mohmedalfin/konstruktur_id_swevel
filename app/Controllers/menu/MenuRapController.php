@@ -3,9 +3,6 @@
 namespace App\Controllers\menu;
 
 use App\Controllers\BaseController;
-use CodeIgniter\HTTP\ResponseInterface;
-use App\Models\ProyekModel;
-use CodeIgniter\Exceptions\PageNotFoundException;
 
 class MenuRapController extends BaseController
 {
@@ -69,6 +66,7 @@ class MenuRapController extends BaseController
             'slug' => $slug
         ]);
     }
+
     // public function kategoriMaster()
     // {
     //     try {
