@@ -2,13 +2,6 @@
     
     <div class="absolute inset-0 bg-primary/75"></div>
 
-    <div class="absolute inset-0 pointer-events-none">
-        <i class="fa-solid fa-layer-group absolute top-4 left-[8%] text-lg opacity-40"></i>
-        <i class="fa-solid fa-list-check absolute bottom-6 left-[18%] text-xl opacity-30"></i>
-        <i class="fa-solid fa-clock-rotate-left absolute top-1/2 right-[12%] text-lg opacity-40"></i>
-        <i class="fa-solid fa-chart-pie absolute bottom-4 right-[8%] text-xl opacity-30"></i>
-    </div>
-
     <div class="relative max-w-[90rem] mx-auto px-4 group text-center">
         <h1 class="text-lg md:text-xl lg:text-2xl font-bold tracking-tight">
             <?= isset($title) ? $title : 'Project Management' ?>

@@ -32,6 +32,9 @@ $routes->group('', function ($routes) {
 
     // Dashboard
     $routes->get('dashboard', 'menu\DashboardController::index');
+    $routes->get('proyek/(:segment)/dashboard', 'menu\DashboardController::index/$1');
+    $routes->get('proyek/(:segment)/dashboard/getData', 'menu\DashboardController::getData');
+    $routes->get('proyek/(:segment)/dashboard/getCategoryDetail/(:num)', 'menu\DashboardController::getCategoryDetail/$2');
 
     // Menu RAP (RAB & RAP)
     $routes->get('menu-rap', 'menu\MenuRapController::index');
@@ -41,14 +44,18 @@ $routes->group('', function ($routes) {
 
     // Schedule
     $routes->get('schedule', 'menu\ScheduleController::index');
+    $routes->get('proyek/(:segment)/schedule', 'menu\ScheduleController::index/$1');
+    
+    // Realisasi
+    $routes->get('realisasi', 'menu\RealisasiController::index');
+    $routes->get('proyek/(:segment)/realisasi', 'menu\RealisasiController::index/$1');
+    $routes->post('realisasi/(:segment)/store', 'menu\RealisasiController::store/$1');
+    $routes->post('realisasi/(:segment)/store-sdm', 'menu\RealisasiController::storeSdm/$1');
+    $routes->delete('realisasi/pekerjaan/log/(:num)', 'menu\RealisasiController::deleteLog/$1');
+    $routes->delete('realisasi/sdm/item/(:num)', 'menu\RealisasiController::deleteSdmItem/$1');
     
     // Atur Urutan
     $routes->get('menu-rap/atur-urutan', 'menu\MenuRapController::aturUrutan');
-
-    // Monitoring
-    $routes->get('monitoring', 'MonitoringController::index');
-
-    // $routes->get('proyek/menu/main-pekerjaan', 'menu\MenuRapController::tambahPekerjaan');
 });
 
 
@@ -82,4 +89,14 @@ $routes->group('api', ['namespace' => 'App\Controllers\Api'], function ($routes)
     $routes->delete('rap/reset/(:num)', 'RapController::reset/$1');
 
     $routes->post('rap/copy-ahs-estimator', 'RapController::copyAhsEstimator');
+    $routes->put('rap/schedule-dates', '\App\Controllers\menu\ScheduleController::updateScheduleDates');
+
+
+    // Schedule Data
+    $routes->get('schedule/data', '\App\Controllers\menu\ScheduleController::getData');
+
+    // Realisasi Data
+    $routes->get('realisasi/data', '\App\Controllers\menu\RealisasiController::getData');
+    $routes->get('realisasi/sdm-resources', '\App\Controllers\menu\RealisasiController::getSdmResources');
+    $routes->get('realisasi/sdm-data', '\App\Controllers\menu\RealisasiController::getSdmData');
 });

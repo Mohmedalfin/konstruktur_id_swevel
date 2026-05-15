@@ -1,17 +1,4 @@
 <?php
-/**
- * Partial: card-proyek.php
- *
- * Expected variables (passed from the parent view via view()):
- *   $card = [
- *       'title'  => string,
- *       'lokasi' => string,
- *       'nilai'  => string|null,
- *       'pct'    => string|null,   e.g. '+0,8%' / '-2,1%' / null
- *       'tgl'    => string,        e.g. '2026-02-12'
- *       'href'   => string,        full URL
- *   ]
- */
 
 $id     = $card['id']     ?? 0;
 $title  = $card['title']  ?? '';
@@ -24,7 +11,6 @@ $status = $card['status'] ?? 'draft';
 
 $isSelesai = $status === 'done';
 
-// % color
 $pctCls = match (true) {
     $pctVal && str_starts_with($pctVal, '+') => 'text-emerald-600',
     $pctVal && str_starts_with($pctVal, '-') => 'text-red-500',
@@ -34,10 +20,8 @@ $pctCls = match (true) {
 
 <div id="proyek-card-<?= $id ?>" class="group relative flex flex-col overflow-hidden rounded-2xl bg-white border border-table-border shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
 
-    <!-- Full-card click target (sits behind dropdowns) -->
     <a href="<?= esc($href) ?>" class="absolute inset-0 z-10" aria-label="Buka proyek <?= esc($title) ?>"></a>
 
-    <!-- ── Cover ───────────────────────────────────────────────── -->
     <div class="relative h-24 sm:h-36 shrink-0 overflow-hidden">
 
         <?php
@@ -47,14 +31,11 @@ $pctCls = match (true) {
              class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
              alt="Cover <?= esc($title) ?>">
 
-        <!-- Gradient overlay -->
         <div class="absolute inset-0 bg-linear-to-t from-primary/70 via-primary/10 to-transparent"></div>
 
-        <!-- ⋯ Context menu (z-20 — above the card link) -->
         <div class="absolute top-2 right-2 z-20">
 
             <?php if ($isSelesai): ?>
-                <!-- Badge selesai (replaces 3-dot button for completed projects) -->
                 <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/90 backdrop-blur-sm text-white text-[10px] sm:text-xs font-semibold shadow">
                     <i class="fa-solid fa-circle-check"></i> Selesai
                 </span>
@@ -101,7 +82,6 @@ $pctCls = match (true) {
 
     </div>
 
-    <!-- ── Body ────────────────────────────────────────────────── -->
     <div class="flex flex-col flex-1 p-2.5 sm:p-4 gap-2 sm:gap-3">
 
         <h3 class="text-[11px] sm:text-sm font-bold leading-snug text-table-strong line-clamp-2">
@@ -133,7 +113,6 @@ $pctCls = match (true) {
 
     </div>
 
-    <!-- ── Footer ──────────────────────────────────────────────── -->
     <div class="flex items-center justify-between border-t border-table-border px-2.5 sm:px-4 py-2 sm:py-2.5 bg-gray-50/60">
         <span class="flex items-center gap-1 text-[10px] sm:text-[11px] text-table-subtle">
             <i class="fa-regular fa-calendar w-3 text-primary"></i>
@@ -154,5 +133,4 @@ $pctCls = match (true) {
             </span>
         <?php endif; ?>
     </div>
-
 </div>

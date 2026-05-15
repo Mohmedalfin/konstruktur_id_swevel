@@ -4,7 +4,6 @@ $wrapperClass = $wrapperClass ?? 'w-full';
 
 <div class="<?= $wrapperClass ?> px-3 sm:px-6 lg:px-8 py-4 md:py-8">
 
-    <!-- ── Context Banner ────────────────────────────────────────────── -->
     <div class="flex items-center gap-3 bg-primary text-white px-5 py-3 rounded-xl text-sm shadow-sm mb-6">
         <svg class="w-4 h-4 shrink-0 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -17,12 +16,9 @@ $wrapperClass = $wrapperClass ?? 'w-full';
         </span>
     </div>
 
-    <!-- ── Toolbar ────────────────────────────────────────────────────── -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
 
-        <!-- Left: Nama Pekerjaan Input + Tambah Sendiri -->
         <div class="flex flex-wrap items-center gap-2">
-            <!-- Add custom item button -->
             <button id="tambah-ahs-custom-btn"
                 class="inline-flex items-center gap-2 bg-table-category hover:bg-table-category/90 active:scale-95 text-white px-4 py-2 rounded-lg text-xs font-semibold tracking-wide shadow-sm transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary/40">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -33,18 +29,15 @@ $wrapperClass = $wrapperClass ?? 'w-full';
         </div>
     </div>
 
-    <!-- ── Filter: Nama Pekerjaan + Sumber ────────────────────────────── -->
     <div class="bg-white border border-table-border rounded-xl p-4 mb-5 shadow-sm">
         <div class="flex flex-col gap-3">
 
-            <!-- Nama Pekerjaan -->
             <div class="flex flex-col sm:flex-row sm:items-center gap-2">
                 <label for="tambah-ahs-nama" class="text-xs font-semibold text-table-body shrink-0 w-36">Nama Pekerjaan</label>
                 <input id="tambah-ahs-nama" type="text" placeholder="Ketik Nama Pekerjaan"
                     class="flex-1 bg-white border border-table-border rounded-lg px-3 py-2 text-xs text-table-medium placeholder-table-subtle focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm"/>
             </div>
 
-            <!-- Sumber checkboxes — label aligns with "Nama Pekerjaan" label above -->
             <div class="flex flex-col sm:flex-row sm:items-center gap-2">
                 <span class="text-xs font-semibold text-table-body shrink-0 w-36">Sumber</span>
                 <div class="flex flex-wrap gap-x-5 gap-y-2">
@@ -65,22 +58,19 @@ $wrapperClass = $wrapperClass ?? 'w-full';
         </div>
     </div>
 
-    <!-- ── Result Count ────────────────────────────────────────────────── -->
     <p id="tambah-ahs-count" class="text-[11px] text-table-subtle mb-3 font-medium tracking-wide"></p>
 
-    <!-- ── Table Container ───────────────────────────────────────────── -->
     <div class="overflow-x-auto rounded-xl shadow-md border border-table-border bg-white scrollbar-thin">
         <table class="w-full text-left border-collapse min-w-[700px]" id="tambah-ahs-table">
 
             <colgroup>
-                <col style="width: 3.25rem">    <!-- No -->
-                <col style="width: 45%">        <!-- Nama Pekerjaan — dibatasi supaya tidak ambil semua ruang -->
-                <col style="width: 6rem">       <!-- Satuan -->
-                <col style="width: 14rem">      <!-- Sumber -->
-                <col style="width: 9rem">     <!-- Pilih -->
+                <col style="width: 3.25rem">  
+                <col style="width: 45%">
+                <col style="width: 6rem">
+                <col style="width: 14rem">
+                <col style="width: 9rem"> 
             </colgroup>
 
-            <!-- ── Head ─────────────────────────────────────────────── -->
             <thead>
                 <tr class="bg-table-category text-white">
                     <th scope="col" class="px-3 md:px-5 py-3 md:py-3.5 text-center text-[10px] md:text-xs font-semibold uppercase tracking-wider">No</th>
@@ -91,21 +81,16 @@ $wrapperClass = $wrapperClass ?? 'w-full';
                 </tr>
             </thead>
 
-            <!-- ── Body — populated by ajax_tambah_ahs.js ─────────── -->
-            <tbody id="tambah-ahs-tbody" class="text-table-body text-[11px] md:text-[13px]">
-                <!-- rows injected here -->
-            </tbody>
+            <tbody id="tambah-ahs-tbody" class="text-table-body text-[11px] md:text-[13px]">            </tbody>
 
         </table>
     </div>
 
-    <!-- ── Pagination Info ───────────────────────────────────────────── -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mt-3">
         <p id="tambah-ahs-pagination-info" class="text-[11px] text-table-subtle font-medium tracking-wide"></p>
         <div class="flex items-center gap-1.5" id="tambah-ahs-pagination-btns"></div>
     </div>
 
-    <!-- ── Action Bar ────────────────────────────────────────────────── -->
     <div class="mt-5 flex items-center justify-between gap-3">
         <p id="tambah-ahs-selected-count" class="text-xs text-table-subtle font-medium">
             Belum ada item dipilih
@@ -116,7 +101,6 @@ $wrapperClass = $wrapperClass ?? 'w-full';
             Tambah ke RAB
         </button>
     </div>
-
 </div>
 
 <script type="module" src="<?= base_url('js/pekerjaan/index.js') ?>"></script>

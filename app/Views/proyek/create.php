@@ -20,10 +20,8 @@
 
             <div class="grid grid-cols-1 gap-8 lg:grid-cols-[260px_1fr]">
 
-                <!-- LEFT -->
                 <div class="space-y-5">
 
-                    <!-- Upload Foto -->
                     <div class="overflow-hidden border border-gray-200">
                         <label class="block cursor-pointer">
                             <input
@@ -33,17 +31,14 @@
                                 accept="image/png,image/jpeg"
                                 class="hidden" />
 
-                            <!-- Frame biru -->
                             <div class="relative h-64 bg-primary text-white">
 
-                                <!-- Default image / preview -->
                                 <img
                                     id="fotoPreview"
                                     src="<?= base_url('assets/images/BackgroundLogin.png') ?>"
                                     alt="Preview"
                                     class="absolute inset-0 h-full w-full object-cover opacity-25" />
 
-                                <!-- Konten tengah -->
                                 <div class="relative z-10 flex h-full flex-col items-center justify-center text-center px-4">
                                     <div class="flex h-14 w-14 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/20">
                                         <i class="fa-solid fa-cloud-arrow-up text-3xl"></i>
@@ -53,19 +48,15 @@
                                         Unggah Foto
                                     </div>
 
-                                    <!-- Teks format masuk ke frame biru -->
                                     <div class="mt-2 text-sm font-medium text-white/80">
                                         JPG/PNG, max 2MB
                                     </div>
                                 </div>
-
-                                <!-- Optional: overlay gelap biar mirip gambar 2 -->
                                 <div class="absolute inset-0 bg-black/20"></div>
                             </div>
                         </label>
                     </div>
 
-                    <!-- Tambah Dokumen -->
                     <input
                         id="dokumenInput"
                         type="file"
@@ -100,10 +91,7 @@
                     </div>
                 </div>
 
-                <!-- RIGHT -->
                 <div class="space-y-6">
-
-                    <!-- Profil Proyek -->
                     <div class="space-y-4">
 
                         <div>

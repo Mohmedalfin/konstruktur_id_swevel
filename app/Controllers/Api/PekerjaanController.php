@@ -8,16 +8,6 @@ use CodeIgniter\HTTP\ResponseInterface;
 
 class PekerjaanController extends BaseController
 {
-    /**
-     * GET /api/pekerjaan
-     * Returns a paginated list of pekerjaan utama filtered by search and sumber.
-     *
-     * Query Params:
-     *   q       string       – full-text search on nama_pekerjaan, keterangan
-     *   sumber  string|array – filter by source category (SNI, PUPR, Empiris, Estimator.id, Proyek Terkini)
-     *   page    int          – page number (default 1)
-     *   limit   int          – items per page (default 20)
-     */
     public function index(): ResponseInterface
     {
         try {
@@ -44,7 +34,6 @@ class PekerjaanController extends BaseController
             }
 
             if ($includeLocal) {
-                // Use single quotes for string literals and disable escaping for this custom select
                 $localModel->select('0 AS urut, nama_pekerjaan AS nama, satuan, \'Proyek Terkini\' AS sumber, id_pekerjaan AS id, 0 AS harga', false);
                 
                 $idProject = $this->request->getGet('id_project') ?: $this->request->getGet('id');
@@ -58,7 +47,6 @@ class PekerjaanController extends BaseController
                 $localItems = $localModel->findAll();
             }
 
-            // ── Fetch Master Items (with Pagination) ─────────────────────────
             $masterBuilder = $masterModel->select(
                 'urut, nama_pekerjaan AS nama, satuan, keterangan AS sumber, id_pekerjaan AS id, 0 AS harga'
             );
@@ -101,8 +89,6 @@ class PekerjaanController extends BaseController
             $masterTotal = $includeMaster ? $masterBuilder->countAllResults(false) : 0;
             $total       = $localTotal + $masterTotal;
 
-            // ── Pagination Calculation ───────────────────────────────────────
-            // If local items fill the first pages, we need to adjust master offset
             $masterData = [];
             if ($includeMaster) {
                 $masterOffset = ($page === 1) ? 0 : max(0, $offset - $localTotal);
@@ -113,13 +99,10 @@ class PekerjaanController extends BaseController
                 }
             }
 
-            // ── Final Merging ──────────────────────────────────────────────────
             $data = [];
             if ($page === 1) {
-                // Page 1: [Local Items] + [Head of Master Data]
                 $data = array_merge($localItems, $masterData);
             } else {
-                // Page > 1: Just the calculated Master Data slice
                 $data = $masterData;
             }
 
@@ -142,10 +125,6 @@ class PekerjaanController extends BaseController
         }
     }
 
-    /**
-     * POST /api/pekerjaan/custom
-     * Saves a new custom pekerjaan to the local DB.
-     */
     public function storeCustom(): ResponseInterface
     {
         try {
@@ -187,10 +166,6 @@ class PekerjaanController extends BaseController
         }
     }
 
-    /**
-     * PUT /api/pekerjaan/custom/(:num)
-     * Updates an existing custom pekerjaan.
-     */
     public function updateCustom($id = null)
     {
         try {

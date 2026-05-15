@@ -11,10 +11,6 @@ use App\Models\RapModel;
 
 class AhsController extends BaseController
 {
-    /**
-     * GET /api/ahs/rincian/(:num)
-     * Fetches saved rincian items (Bahan, Alat, Upah) for a given detail.
-     */
     public function getRincian($id_rap_detail): ResponseInterface
     {
         try {
@@ -51,10 +47,6 @@ class AhsController extends BaseController
         }
     }
 
-    /**
-     * POST /api/ahs/rincian
-     * Saves (overwrites) rincian items.
-     */
     public function saveRincian(): ResponseInterface
     {
         try {
@@ -107,12 +99,10 @@ class AhsController extends BaseController
 
             $db->transCommit();
 
-            // ── 3. Recalculate rap_detail totals from saved AHS items ─────────
             $rapDetailModel = new RapDetailModel();
             $rapDetail = $rapDetailModel->find($idDetail);
 
             if ($rapDetail) {
-                // Sum koefisien * harga_satuan per jenis_item
                 $totals = ['bahan' => 0.0, 'alat' => 0.0, 'upah' => 0.0];
 
                 $savedItems = $model
@@ -146,7 +136,6 @@ class AhsController extends BaseController
                     'total_keseluruhan' => $totalKeseluruhan,
                 ]);
 
-                // ── 4. Recalculate RAP-level grand total ──────────────────────
                 $rapModel  = new RapModel();
                 $idRap     = (int)($rapDetail['id_rap'] ?? 0);
                 if ($idRap > 0) {
@@ -171,10 +160,6 @@ class AhsController extends BaseController
         }
     }
 
-    /**
-     * DELETE /api/ahs/rincian/item/(:num)
-     * Deletes a specific rincian item row.
-     */
     public function deleteItem($id_rap_detail_item): ResponseInterface
     {
         try {
@@ -195,16 +180,6 @@ class AhsController extends BaseController
         }
     }
 
-    /**
-     * GET /api/ahs
-     * Returns a paginated list of AHS items (bahan, upah, alat) from master tables.
-     *
-     * Query Params:
-     *   q      string  – full-text search on uraian, merk, spesifikasi
-     *   tipe   string  – filter by type: 'bahan', 'alat', 'upah', or 'all'
-     *   page   int     – page number (default 1)
-     * 
-     */
     public function index(): ResponseInterface
     {
         try {
@@ -215,7 +190,6 @@ class AhsController extends BaseController
             $limit  = 20;
             $offset = ($page - 1) * $limit;
 
-            // ── Build UNION query across three master tables ──────────────────
             $sql = "
                 SELECT * FROM (
                     SELECT
@@ -260,7 +234,6 @@ class AhsController extends BaseController
 
             $params = [];
 
-            // ── Optional: full-text search ────────────────────────────────────
             if (!empty($search)) {
                 $sql .= ' AND (master_bua.uraian LIKE ? OR master_bua.merk LIKE ? OR master_bua.spesifikasi LIKE ?)';
                 $term      = "%{$search}%";
@@ -269,7 +242,6 @@ class AhsController extends BaseController
                 $params[]  = $term;
             }
 
-            // ── Optional: filter by tipe ──────────────────────────────────────
             if (!empty($tipe) && $tipe !== 'all') {
                 $sql     .= ' AND master_bua.tipe = ?';
                 $params[] = $tipe;
@@ -280,7 +252,6 @@ class AhsController extends BaseController
 
             $data = $db->query($sql, $params)->getResultArray();
 
-            // Cast numeric fields
             foreach ($data as &$row) {
                 $row['hargaSatuan'] = (float) $row['hargaSatuan'];
             }
