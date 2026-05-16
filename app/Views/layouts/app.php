@@ -14,7 +14,7 @@
 <body class="bg-gray-50">
 
     <?= $this->include('partials/header') ?>
-    <?php echo view('partials/topbar', ['title' => 'Daftar Project', 'subtitle' => '']); ?>
+    <?php echo view('partials/topbar', ['title' => $topbarTitle ?? 'Daftar Project', 'subtitle' => '']); ?>
 
 
     <main class="container mx-auto px-4 py-6">

@@ -65,7 +65,7 @@ export function renderRow(rowData, isNew = false) {
             <div class="ahs-sumber-edit-mode flex flex-col gap-1 ${isNew ? '' : 'hidden'}">
                 <input type="text"
                     class="ahs-sumber-nama w-full bg-transparent border-b border-transparent hover:border-amber-300 focus:border-amber-500 text-[11px] text-amber-800 placeholder-slate-300 focus:outline-none transition-colors py-0.5"
-                    placeholder="Nama regulasi (cth: Pergub 2019)"
+                    placeholder="Nama Sumber (cth: Pergub Sleman)"
                     value="${escHtml(s.nama)}" autocomplete="off" ${isNew ? '' : 'readonly'}/>
                 <div class="ahs-sumber-link-row flex items-center gap-1">
                     <svg class="w-2.5 h-2.5 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
