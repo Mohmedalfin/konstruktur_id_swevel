@@ -12,37 +12,33 @@ use App\Models\RapKategoriModel;
 
 class AhsController extends BaseController
 {
-    /**
-     * GET /api/ahs/rincian/(:num)
-     * Fetches saved rincian items (Bahan, Alat, Upah) for a given detail.
-     */
     public function getRincian($id_rap_detail): ResponseInterface
     {
         try {
             $model = new RapDetailItemModel();
-            $data  = $model->where('id_rap_detail', $id_rap_detail)
-                           ->orderBy('jenis_item', 'ASC')
-                           ->orderBy('id_rap_detail_item', 'ASC')
-                           ->findAll();
-            
+            $data = $model->where('id_rap_detail', $id_rap_detail)
+                ->orderBy('jenis_item', 'ASC')
+                ->orderBy('id_rap_detail_item', 'ASC')
+                ->findAll();
+
             // Format for frontend
-            $formatted = array_map(function($row) {
+            $formatted = array_map(function ($row) {
                 return [
-                    'id'          => $row['id_rap_detail_item'],
-                    'tipe'        => $row['jenis_item'], // mapped mapping
-                    'uraian'      => $row['nama_item'],
-                    'merk'        => $row['merk']        ?? '',
+                    'id' => $row['id_rap_detail_item'],
+                    'tipe' => $row['jenis_item'], // mapped mapping
+                    'uraian' => $row['nama_item'],
+                    'merk' => $row['merk'] ?? '',
                     'spesifikasi' => $row['spesifikasi'] ?? '',
-                    'koefisien'   => (float)$row['koefisien'],
-                    'satuan'      => $row['satuan'],
-                    'hargaSatuan' => (float)$row['harga_satuan'],
-                    'sumber'      => $row['keterangan']  ?? '',
+                    'koefisien' => (float) $row['koefisien'],
+                    'satuan' => $row['satuan'],
+                    'hargaSatuan' => (float) $row['harga_satuan'],
+                    'sumber' => $row['keterangan'] ?? '',
                 ];
             }, $data);
 
             return $this->response->setJSON([
                 'status' => 'success',
-                'data'   => $formatted
+                'data' => $formatted
             ]);
         } catch (Throwable $e) {
             return $this->response->setStatusCode(500)->setJSON([
@@ -52,16 +48,12 @@ class AhsController extends BaseController
         }
     }
 
-    /**
-     * POST /api/ahs/rincian
-     * Saves (overwrites) rincian items.
-     */
     public function saveRincian(): ResponseInterface
     {
         try {
-            $json   = $this->request->getJSON(true);
+            $json = $this->request->getJSON(true);
             $idDetail = $json['id_rap_detail'] ?? null;
-            $items    = $json['items']          ?? [];
+            $items = $json['items'] ?? [];
 
             if (!$idDetail) {
                 return $this->response->setStatusCode(400)->setJSON([
@@ -71,7 +63,7 @@ class AhsController extends BaseController
             }
 
             $model = new RapDetailItemModel();
-            
+
             // ── Transaction ──────────────────────────────────────────────────
             $db = \Config\Database::connect();
             $db->transBegin();
@@ -83,16 +75,16 @@ class AhsController extends BaseController
             foreach ($items as $index => $item) {
                 $inserted = $model->insert([
                     'id_rap_detail' => $idDetail,
-                    'jenis_item'    => $item['tipe']   ?? 'bahan',
-                    'nama_item'     => $item['uraian'] ?? '',
-                    'merk'          => $item['merk']   ?? '',
-                    'spesifikasi'   => $item['spesifikasi'] ?? '',
-                    'koefisien'     => $item['koefisien']   ?? 0,
-                    'satuan'        => $item['satuan']      ?? '',
-                    'harga_dasar'   => $item['hargaSatuan'] ?? 0,
-                    'harga_satuan'  => $item['hargaSatuan'] ?? 0,
-                    'keterangan'    => $item['sumber']      ?? '',
-                    'urutan'        => $index + 1,
+                    'jenis_item' => $item['tipe'] ?? 'bahan',
+                    'nama_item' => $item['uraian'] ?? '',
+                    'merk' => $item['merk'] ?? '',
+                    'spesifikasi' => $item['spesifikasi'] ?? '',
+                    'koefisien' => $item['koefisien'] ?? 0,
+                    'satuan' => $item['satuan'] ?? '',
+                    'harga_dasar' => $item['hargaSatuan'] ?? 0,
+                    'harga_satuan' => $item['hargaSatuan'] ?? 0,
+                    'keterangan' => $item['sumber'] ?? '',
+                    'urutan' => $index + 1,
                 ]);
                 if (!$inserted) {
                     $db->transRollback();
@@ -108,12 +100,10 @@ class AhsController extends BaseController
 
             $db->transCommit();
 
-            // ── 3. Recalculate rap_detail totals from saved AHS items ─────────
             $rapDetailModel = new RapDetailModel();
             $rapDetail = $rapDetailModel->find($idDetail);
 
             if ($rapDetail) {
-                // Sum koefisien * harga_satuan per jenis_item
                 $totals = ['bahan' => 0.0, 'alat' => 0.0, 'upah' => 0.0];
 
                 $savedItems = $model
@@ -121,30 +111,30 @@ class AhsController extends BaseController
                     ->findAll();
 
                 foreach ($savedItems as $si) {
-                    $jenis  = strtolower($si['jenis_item'] ?? 'bahan');
-                    $jumlah = (float)($si['koefisien'] ?? 0) * (float)($si['harga_satuan'] ?? 0);
+                    $jenis = strtolower($si['jenis_item'] ?? 'bahan');
+                    $jumlah = (float) ($si['koefisien'] ?? 0) * (float) ($si['harga_satuan'] ?? 0);
                     if (isset($totals[$jenis])) {
                         $totals[$jenis] += $jumlah;
                     }
                 }
 
-                $volume           = (float)($rapDetail['volume'] ?? 1);
-                $hargaBahan       = $totals['bahan'];
-                $hargaAlat        = $totals['alat'];
-                $hargaUpah        = $totals['upah'];
-                $subtotalBahan    = $volume * $hargaBahan;
-                $subtotalAlat     = $volume * $hargaAlat;
-                $subtotalUpah     = $volume * $hargaUpah;
+                $volume = (float) ($rapDetail['volume'] ?? 1);
+                $hargaBahan = $totals['bahan'];
+                $hargaAlat = $totals['alat'];
+                $hargaUpah = $totals['upah'];
+                $subtotalBahan = $volume * $hargaBahan;
+                $subtotalAlat = $volume * $hargaAlat;
+                $subtotalUpah = $volume * $hargaUpah;
                 $totalKeseluruhan = $subtotalBahan + $subtotalAlat + $subtotalUpah;
 
                 $source = $json['source'] ?? null;
                 $updateData = [
-                    'harga_bahan'       => $hargaBahan,
-                    'harga_alat'        => $hargaAlat,
-                    'harga_upah'        => $hargaUpah,
-                    'subtotal_bahan'    => $subtotalBahan,
-                    'subtotal_alat'     => $subtotalAlat,
-                    'subtotal_upah'     => $subtotalUpah,
+                    'harga_bahan' => $hargaBahan,
+                    'harga_alat' => $hargaAlat,
+                    'harga_upah' => $hargaUpah,
+                    'subtotal_bahan' => $subtotalBahan,
+                    'subtotal_alat' => $subtotalAlat,
+                    'subtotal_upah' => $subtotalUpah,
                     'total_keseluruhan' => $totalKeseluruhan,
                 ];
 
@@ -154,20 +144,19 @@ class AhsController extends BaseController
 
                 $rapDetailModel->update($idDetail, $updateData);
 
-                // ── 4. Recalculate RAP-level grand total ──────────────────────
-                $rapModel  = new RapModel();
-                $idRap     = (int)($rapDetail['id_rap'] ?? 0);
+                $rapModel = new RapModel();
+                $idRap = (int) ($rapDetail['id_rap'] ?? 0);
                 if ($idRap > 0) {
                     $allDetails = $rapDetailModel->where('id_rap', $idRap)->findAll();
                     $grandTotal = array_reduce($allDetails, function ($carry, $d) {
-                        return $carry + (float)($d['total_keseluruhan'] ?? 0);
+                        return $carry + (float) ($d['total_keseluruhan'] ?? 0);
                     }, 0.0);
                     $rapModel->update($idRap, ['total_keseluruhan' => $grandTotal]);
                 }
             }
 
             return $this->response->setJSON([
-                'status'  => 'success',
+                'status' => 'success',
                 'message' => 'Rincian AHS berhasil disimpan'
             ]);
 
@@ -179,17 +168,13 @@ class AhsController extends BaseController
         }
     }
 
-    /**
-     * DELETE /api/ahs/rincian/item/(:num)
-     * Deletes a specific rincian item row.
-     */
     public function deleteItem($id_rap_detail_item): ResponseInterface
     {
         try {
             $model = new RapDetailItemModel();
             if ($model->delete($id_rap_detail_item)) {
                 return $this->response->setJSON([
-                    'status'  => 'success',
+                    'status' => 'success',
                     'message' => 'Item berhasil dihapus'
                 ]);
             } else {
@@ -197,7 +182,7 @@ class AhsController extends BaseController
             }
         } catch (Throwable $e) {
             return $this->response->setStatusCode(500)->setJSON([
-                'status'  => 'error',
+                'status' => 'error',
                 'message' => $e->getMessage()
             ]);
         }
@@ -218,14 +203,14 @@ class AhsController extends BaseController
     public function getProyek(): ResponseInterface
     {
         try {
-            $db        = \Config\Database::connect();
+            $db = \Config\Database::connect();
             $idProject = (int) $this->request->getGet('id_project');
-            $idDetail  = (int) $this->request->getGet('id_rap_detail');
-            $search    = $this->request->getGet('q');
-            $tipe      = $this->request->getGet('tipe');
-            $page      = max(1, (int) $this->request->getGet('page'));
-            $limit     = 50;
-            $offset    = ($page - 1) * $limit;
+            $idDetail = (int) $this->request->getGet('id_rap_detail');
+            $search = $this->request->getGet('q');
+            $tipe = $this->request->getGet('tipe');
+            $page = max(1, (int) $this->request->getGet('page'));
+            $limit = 50;
+            $offset = ($page - 1) * $limit;
 
             // ── Auto-derive id_project from id_rap_detail if not supplied ────
             if ($idProject <= 0 && $idDetail > 0) {
@@ -243,7 +228,7 @@ class AhsController extends BaseController
 
             if ($idProject <= 0) {
                 return $this->response->setStatusCode(400)->setJSON([
-                    'status'  => 'error',
+                    'status' => 'error',
                     'message' => 'id_project atau id_rap_detail wajib diisi',
                 ]);
             }
@@ -270,13 +255,13 @@ class AhsController extends BaseController
             $params = [$idProject];
 
             if (!empty($search)) {
-                $sql      .= ' AND rdi.nama_item LIKE ?';
-                $params[]  = "%{$search}%";
+                $sql .= ' AND rdi.nama_item LIKE ?';
+                $params[] = "%{$search}%";
             }
 
             if (!empty($tipe) && $tipe !== 'all') {
-                $sql      .= ' AND rdi.jenis_item = ?';
-                $params[]  = $tipe;
+                $sql .= ' AND rdi.jenis_item = ?';
+                $params[] = $tipe;
             }
 
             $sql .= "
@@ -290,25 +275,25 @@ class AhsController extends BaseController
             // Assign UID and cast numerics
             foreach ($rows as $i => &$row) {
                 $row['hargaSatuan'] = (float) $row['hargaSatuan'];
-                $row['id']         = $i + 1 + $offset; // pseudo-id
-                $safeUraian        = preg_replace('/\W/', '', $row['uraian']);
-                $safeUraian        = substr($safeUraian, 0, 15);
-                $row['_uid']       = $row['tipe'] . '_prj_' . $safeUraian . '_' . $i;
+                $row['id'] = $i + 1 + $offset; // pseudo-id
+                $safeUraian = preg_replace('/\W/', '', $row['uraian']);
+                $safeUraian = substr($safeUraian, 0, 15);
+                $row['_uid'] = $row['tipe'] . '_prj_' . $safeUraian . '_' . $i;
             }
             unset($row);
 
             return $this->response->setStatusCode(200)->setJSON([
-                'status'     => 'success',
+                'status' => 'success',
                 'id_project' => $idProject,
-                'page'       => $page,
-                'limit'      => $limit,
-                'data'       => $rows,
+                'page' => $page,
+                'limit' => $limit,
+                'data' => $rows,
             ]);
 
         } catch (Throwable $e) {
             log_message('error', '[AhsController::getProyek] ' . $e->getMessage());
             return $this->response->setStatusCode(500)->setJSON([
-                'status'  => 'error',
+                'status' => 'error',
                 'message' => 'Gagal memuat data proyek terkini.',
             ]);
         }
@@ -328,13 +313,13 @@ class AhsController extends BaseController
     private function getMergedItemsByRegex(string $regexKeywords, string $sourceId): ResponseInterface
     {
         try {
-            $dbDefault   = \Config\Database::connect();
+            $dbDefault = \Config\Database::connect();
             $dbEstimator = \Config\Database::connect('estimator');
 
             $search = $this->request->getGet('q');
-            $tipe   = $this->request->getGet('tipe');
-            $page   = max(1, (int) $this->request->getGet('page'));
-            $limit  = 50;
+            $tipe = $this->request->getGet('tipe');
+            $page = max(1, (int) $this->request->getGet('page'));
+            $limit = 50;
             $offset = ($page - 1) * $limit;
 
             // 1. Fetch from Estimator DB (Master)
@@ -415,12 +400,12 @@ class AhsController extends BaseController
 
             if (!empty($search)) {
                 $sqlDefault .= ' AND rdi.nama_item LIKE ?';
-                $paramsDefault[]  = "%{$search}%";
+                $paramsDefault[] = "%{$search}%";
             }
 
             if (!empty($tipe) && $tipe !== 'all') {
                 $sqlDefault .= ' AND rdi.jenis_item = ?';
-                $paramsDefault[]  = $tipe;
+                $paramsDefault[] = $tipe;
             }
 
             $sqlDefault .= " GROUP BY rdi.jenis_item, rdi.nama_item, rdi.satuan";
@@ -451,9 +436,10 @@ class AhsController extends BaseController
             $combinedRows = array_values($merged);
 
             // Sort by tipe ASC, uraian ASC
-            usort($combinedRows, function($a, $b) {
+            usort($combinedRows, function ($a, $b) {
                 $cmpTipe = strcmp($a['tipe'], $b['tipe']);
-                if ($cmpTipe !== 0) return $cmpTipe;
+                if ($cmpTipe !== 0)
+                    return $cmpTipe;
                 return strcmp($a['uraian'], $b['uraian']);
             });
 
@@ -463,24 +449,24 @@ class AhsController extends BaseController
             // Assign UID and cast numerics
             foreach ($pagedRows as $i => &$row) {
                 $row['hargaSatuan'] = (float) $row['hargaSatuan'];
-                $row['id']         = $i + 1 + $offset;
-                $safeUraian        = preg_replace('/\W/', '', $row['uraian']);
-                $safeUraian        = substr($safeUraian, 0, 15);
-                $row['_uid']       = $row['tipe'] . '_' . $sourceId . '_' . $safeUraian . '_' . $i;
+                $row['id'] = $i + 1 + $offset;
+                $safeUraian = preg_replace('/\W/', '', $row['uraian']);
+                $safeUraian = substr($safeUraian, 0, 15);
+                $row['_uid'] = $row['tipe'] . '_' . $sourceId . '_' . $safeUraian . '_' . $i;
             }
             unset($row);
 
             return $this->response->setStatusCode(200)->setJSON([
                 'status' => 'success',
-                'page'   => $page,
-                'limit'  => $limit,
-                'data'   => $pagedRows,
+                'page' => $page,
+                'limit' => $limit,
+                'data' => $pagedRows,
             ]);
 
         } catch (Throwable $e) {
             log_message('error', '[AhsController::getMergedItemsByRegex] ' . $e->getMessage());
             return $this->response->setStatusCode(500)->setJSON([
-                'status'  => 'error',
+                'status' => 'error',
                 'message' => 'Gagal memuat data sumber ' . strtoupper($sourceId) . '.',
             ]);
         }
@@ -523,14 +509,13 @@ class AhsController extends BaseController
     public function index(): ResponseInterface
     {
         try {
-            $db     = \Config\Database::connect('estimator');
+            $db = \Config\Database::connect('estimator');
             $search = $this->request->getGet('q');
-            $tipe   = $this->request->getGet('tipe');
-            $page   = max(1, (int) $this->request->getGet('page'));
-            $limit  = 20;
+            $tipe = $this->request->getGet('tipe');
+            $page = max(1, (int) $this->request->getGet('page'));
+            $limit = 20;
             $offset = ($page - 1) * $limit;
 
-            // ── Build UNION query across three master tables ──────────────────
             $sql = "
                 SELECT * FROM (
                     SELECT
@@ -575,18 +560,16 @@ class AhsController extends BaseController
 
             $params = [];
 
-            // ── Optional: full-text search ────────────────────────────────────
             if (!empty($search)) {
                 $sql .= ' AND (master_bua.uraian LIKE ? OR master_bua.merk LIKE ? OR master_bua.spesifikasi LIKE ?)';
-                $term      = "%{$search}%";
-                $params[]  = $term;
-                $params[]  = $term;
-                $params[]  = $term;
+                $term = "%{$search}%";
+                $params[] = $term;
+                $params[] = $term;
+                $params[] = $term;
             }
 
-            // ── Optional: filter by tipe ──────────────────────────────────────
             if (!empty($tipe) && $tipe !== 'all') {
-                $sql     .= ' AND master_bua.tipe = ?';
+                $sql .= ' AND master_bua.tipe = ?';
                 $params[] = $tipe;
             }
 
@@ -595,7 +578,6 @@ class AhsController extends BaseController
 
             $data = $db->query($sql, $params)->getResultArray();
 
-            // Cast numeric fields
             foreach ($data as &$row) {
                 $row['hargaSatuan'] = (float) $row['hargaSatuan'];
             }
@@ -605,9 +587,9 @@ class AhsController extends BaseController
                 ->setStatusCode(ResponseInterface::HTTP_OK)
                 ->setJSON([
                     'status' => 'success',
-                    'page'   => $page,
-                    'limit'  => $limit,
-                    'data'   => $data,
+                    'page' => $page,
+                    'limit' => $limit,
+                    'data' => $data,
                 ]);
 
         } catch (\Throwable $e) {
@@ -616,7 +598,7 @@ class AhsController extends BaseController
             return $this->response
                 ->setStatusCode(500)
                 ->setJSON([
-                    'status'  => 'error',
+                    'status' => 'error',
                     'message' => 'Gagal memuat data AHS. Silakan coba lagi.',
                 ]);
         }

@@ -1,6 +1,10 @@
+<!-- ========== GLOBAL LOADER ========== -->
+<?= view('partials/global-loader') ?>
+<script type="module" src="<?= base_url('js/shared/ui/global-loader.js') ?>"></script>
+
 <!-- ========== HEADER ========== -->
 <header
-  class="flex flex-wrap md:justify-start md:flex-nowrap z-50 bg-navbar border-b border-navbar-line sticky top-0 transition-all duration-500 ease-in-out">
+  class="flex flex-wrap md:justify-start md:flex-nowrap z-50 bg-navbar border-b border-navbar-line sticky top-0 transition-all duration-200 ease-in-out">
   <nav
     class="relative max-w-[85rem] w-full mx-auto md:flex md:items-center md:justify-between md:gap-3 py-2 px-4 sm:px-6 lg:px-8">
     <div class="flex justify-between items-center gap-x-1">
@@ -13,12 +17,10 @@
         </div>
       </a>
 
-      <!-- Collapse Button -->
       <button type="button"
         class="hs-collapse-toggle md:hidden relative size-9 flex justify-center items-center font-medium text-sm rounded-lg bg-transparent border border-transparent text-white focus:outline-hidden disabled:opacity-50 disabled:pointer-events-none"
         id="hs-header-base-collapse" aria-expanded="false" aria-controls="hs-header-base" aria-label="Toggle navigation"
         data-hs-collapse="#hs-header-base">
-        <!-- Hamburger icon: visible by default, hidden when menu is open -->
         <svg id="nav-icon-hamburger" class="size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
           viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
           stroke-linejoin="round">
@@ -26,7 +28,6 @@
           <line x1="3" x2="21" y1="12" y2="12" />
           <line x1="3" x2="21" y1="18" y2="18" />
         </svg>
-        <!-- X icon: hidden by default, visible when menu is open -->
         <svg id="nav-icon-close" class="size-4 hidden" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
           viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
           stroke-linejoin="round">
@@ -35,10 +36,8 @@
         </svg>
         <span class="sr-only">Toggle navigation</span>
       </button>
-      <!-- End Collapse Button -->
     </div>
 
-    <!-- Collapse -->
     <div id="hs-header-base"
       class="hs-collapse hidden overflow-hidden transition-all duration-300 basis-full grow md:block "
       aria-labelledby="hs-header-base-collapse">
@@ -106,27 +105,13 @@
                 Realisasi
               </a>
 
-              <a class="<?= get_nav_class('monitoring') ?>" href="<?= base_url('monitoring') ?>"
-                data-nav-path="monitoring" <?= is_nav_active('monitoring') ? 'aria-current="page"' : '' ?>>
-                <svg class="shrink-0 size-4 me-3 md:me-2 block md:hidden" xmlns="http://www.w3.org/2000/svg" width="24"
-                  height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                  stroke-linecap="round" stroke-linejoin="round">
-                  <path
-                    d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2" />
-                  <path d="M18 14h-8" />
-                  <path d="M15 18h-5" />
-                  <path d="M10 6h8v4h-8V6Z" />
-                </svg>
-                Monitoring
-              </a>
+
             </div>
           </div>
         </div>
       </div>
     </div>
-    <!-- End Collapse -->
   </nav>
 </header>
-<!-- ========== END HEADER ========== -->
 
-<script src="<?= base_url('assets/js/navbar.js') ?>"></script>
+<script src="<?= base_url('assets/js/partials/navbar.js') ?>" defer></script>

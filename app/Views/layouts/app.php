@@ -13,6 +13,7 @@
 
 <body class="bg-gray-50">
 
+    <?= $this->include('partials/global-loader') ?>
     <?= $this->include('partials/header') ?>
     <?php echo view('partials/topbar', ['title' => $topbarTitle ?? 'Daftar Project', 'subtitle' => '']); ?>
 
@@ -21,23 +22,18 @@
         <?= $this->renderSection('content') ?>
     </main>
 
-    <?= $this->include('partials/footer') ?>
-
-    <!-- Vendor JS (WAJIB untuk Advanced Datepicker) -->
+    <script type="module" src="<?= base_url('js/shared/ui/global-loader.js') ?>"></script>
     <script src="<?= base_url('assets/vendor/lodash/lodash.min.js') ?>"></script>
     <script src="<?= base_url('assets/vendor/vanilla-calendar-pro/index.js') ?>"></script>
 
-    <!-- ✅ PRELINE CORE -->
     <script src="<?= base_url('node_modules/preline/dist/preline.js') ?>"></script>
     <script src="<?= base_url('assets/js/preline.js') ?>"></script>
     <script>
         window.addEventListener('load', () => {
             window.HSStaticMethods?.autoInit();
-            // biasanya cukup autoInit saja, tapi aman:
             window.HSDatepicker?.autoInit?.();
         });
     </script>
-    <!-- PRELINE JS (wajib) -->
 
     <?= $this->renderSection('scripts') ?>
 

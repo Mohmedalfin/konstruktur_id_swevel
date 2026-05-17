@@ -57,8 +57,6 @@ export function bindSubmit() {
                 rabUrl = sessionStorage.getItem('rab_return_url') || '';
             } catch (_) { }
 
-            // Prefer the stored return URL (e.g. /proyek/my-slug), then try
-            // localStorage slug, then fall back to the proyek list.
             if (!rabUrl) {
                 const slug = localStorage.getItem('lastProjectSlug');
                 rabUrl = slug ? `/proyek/${slug}` : '/proyek';

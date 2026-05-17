@@ -607,7 +607,7 @@ function _renderOrganizeList() {
                 }
             } else {
                 // Dimajukan ke kiri (kembali ke root) kalau berubah jadi item kembali
-                organizedItems[idx].level = 0; 
+                organizedItems[idx].level = 0;
                 // Auto outdent items below it
                 for (let i = idx + 1; i < organizedItems.length; i++) {
                     if (organizedItems[i].type === 'kategori') break;

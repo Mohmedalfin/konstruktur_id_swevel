@@ -60,7 +60,6 @@ $wrapperClass = $wrapperClass ?? 'w-full';
     <!-- ── Table Container ──────────────────────────────────────────── -->
     <div class="overflow-x-auto rounded-xl shadow-lg border border-table-border bg-white">
         <table class="w-full text-left border-collapse min-w-[1300px]" id="ahs-table">
-
             <colgroup>
                 <col style="width: 4rem"> <!-- No -->
                 <col style="min-width: 22rem"> <!-- Uraian -->
@@ -131,10 +130,6 @@ $wrapperClass = $wrapperClass ?? 'w-full';
 
 </div>
 
-
-<!-- ═══════════════════════════════════════════════════════════════
-     MODAL — Pilih dari Daftar AHS
-════════════════════════════════════════════════════════════════ -->
 <div id="ahs-modal-overlay"
     class="fixed inset-0 z-50 hidden opacity-0 transition-opacity duration-300 flex flex-col items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 md:p-8">
 
@@ -295,6 +290,5 @@ $wrapperClass = $wrapperClass ?? 'w-full';
                 <button id="ahs-modal-close" class="hidden"></button>
             </div>
         </div>
-
     </div>
 </div>

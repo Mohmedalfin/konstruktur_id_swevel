@@ -1,15 +1,10 @@
-/**
- * navbar.js
- * Highlights the active navigation link based on the current URL.
- * Works as a progressive enhancement alongside the PHP active-state logic.
- */
 (function () {
     const currentPath = window.location.pathname.replace(/\/$/, '');
 
     const navLinks = document.querySelectorAll('header nav a[data-nav-path]');
 
     const activeClasses   = ['bg-white', 'text-gray-900', 'font-semibold'];
-    const inactiveClasses = ['text-navbar-nav-foreground', 'hover:bg-navbar-nav-hover', 'focus:bg-navbar-nav-focus'];
+    const inactiveClasses = ['text-navbar-foreground', 'hover:bg-navbar-hover', 'focus:bg-navbar-focus'];
 
     navLinks.forEach(function (link) {
         const navPath = '/' + link.dataset.navPath.replace(/^\//, '');
@@ -18,12 +13,21 @@
         let isActive = false;
         if (isRoot) {
             isActive = currentPath === '' || currentPath === '/';
+        } else if (navPath === '/dashboard') {
+            isActive = currentPath.includes('/dashboard');
         } else if (navPath === '/menu-rap') {
-            // RAB & RAP is active on /menu-rap/*, /proyek/* (project detail) and /proyek/menu/*
             isActive = currentPath === navPath
                 || currentPath.startsWith(navPath + '/')
                 || currentPath.startsWith('/proyek/')
-                || currentPath.startsWith('/proyek/menu/');
+                && !currentPath.includes('/schedule')
+                && !currentPath.includes('/realisasi')
+                && !currentPath.includes('/dashboard');
+        } else if (navPath === '/schedule') {
+            isActive = currentPath === navPath
+                || currentPath.endsWith('/schedule');
+        } else if (navPath === '/realisasi') {
+            isActive = currentPath === navPath
+                || currentPath.endsWith('/realisasi');
         } else {
             isActive = currentPath === navPath || currentPath.startsWith(navPath + '/');
         }
@@ -39,21 +43,32 @@
         }
     });
 
-    // --- Restore last project slug into the RAB & RAP nav link ---
+    // --- Restore last project slug into the Dashboard, RAB, RAP, Schedule & Realisasi nav link ---
+    const dashboardLink = document.querySelector('header nav a[data-nav-path="dashboard"]');
     const rabLink = document.querySelector('header nav a[data-nav-path="menu-rap"]');
-    if (rabLink) {
-        const lastSlug = localStorage.getItem('lastProjectSlug');
-        if (lastSlug) {
-            // Point directly back to the last visited project
-            const baseOrigin = window.location.origin;
+    const scheduleLink = document.querySelector('header nav a[data-nav-path="schedule"]');
+    const realisasiLink = document.querySelector('header nav a[data-nav-path="realisasi"]');
+    const lastSlug = localStorage.getItem('lastProjectSlug');
+    
+    if (lastSlug) {
+        const baseOrigin = window.location.origin;
+        if (dashboardLink) {
+            dashboardLink.href = baseOrigin + '/proyek/' + lastSlug + '/dashboard';
+        }
+        if (rabLink) {
             rabLink.href = baseOrigin + '/proyek/' + lastSlug;
+        }
+        if (scheduleLink) {
+            scheduleLink.href = baseOrigin + '/proyek/' + lastSlug + '/schedule';
+        }
+        if (realisasiLink) {
+            realisasiLink.href = baseOrigin + '/proyek/' + lastSlug + '/realisasi';
         }
     }
 
     // Make dropdown button active if its internal links correspond to the current page
     const dropBtn = document.getElementById('hs-header-base-dropdown');
     if (dropBtn) {
-        // Here you can define which paths make the profile dropdown "active" (e.g. /profile)
         const profilePaths = ['/profile', '/account', '/settings']; 
         let isDropdownActive = profilePaths.some(path => currentPath.startsWith(path));
 
@@ -83,12 +98,12 @@
     const header = document.querySelector('header');
     if (header) {
         const floatAdd = [
-            'top-3',          // gap from viewport top (works with sticky)
-            'mx-3',           // horizontal gap
+            'top-3',          
+            'mx-3',           
             'sm:mx-6',
             'lg:mx-10',
-            'rounded-2xl',    // rounded pill corners
-            'shadow-xl',      // elevated shadow
+            'rounded-2xl',    
+            'shadow-xl',      
             'border',
             'border-white/10',
         ];
@@ -109,11 +124,11 @@
             floating = shouldFloat;
 
             if (shouldFloat) {
-                floatAdd.forEach(cls    => header.classList.add(cls));
-                floatRemove.forEach(cls => header.classList.remove(cls));
+                header.classList.add(...floatAdd);
+                header.classList.remove(...floatRemove);
             } else {
-                floatAdd.forEach(cls    => header.classList.remove(cls));
-                floatRemove.forEach(cls => header.classList.add(cls));
+                header.classList.remove(...floatAdd);
+                header.classList.add(...floatRemove);
             }
         }
 

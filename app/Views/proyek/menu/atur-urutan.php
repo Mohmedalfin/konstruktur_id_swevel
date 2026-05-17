@@ -1,5 +1,4 @@
 <?php
-// Read GET params passed from dashboard.php links
 $rabId   = $idProject ?? null;
 ?>
 

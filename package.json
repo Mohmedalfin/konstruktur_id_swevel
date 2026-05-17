@@ -12,6 +12,7 @@
     "tailwindcss": "^4.2.1"
   },
   "dependencies": {
+    "chart.js": "^4.5.1",
     "exceljs": "^4.4.0",
     "preline": "^2.0.0",
     "sweetalert2": "^11.26.22"

@@ -1,8 +1,3 @@
-/**
- * shared/ui/toast.js
- * A lightweight global Toast notification system using Tailwind CSS.
- */
-
 class ToastManager {
     constructor() {
         this.containerId = 'global-toast-container';
@@ -14,22 +9,14 @@ class ToastManager {
         
         const container = document.createElement('div');
         container.id = this.containerId;
-        // Positioned center top on mobile, and top-right on screens >= sm
         container.className = 'fixed top-4 left-1/2 -translate-x-1/2 sm:top-6 sm:left-auto sm:right-4 sm:translate-x-0 z-[9999] flex flex-col gap-2 p-3 sm:p-4 pointer-events-none w-[calc(100%-2rem)] sm:w-full max-w-sm';
         document.body.appendChild(container);
     }
 
-    /**
-     * Show a toast notification
-     * @param {string} message - The text to display
-     * @param {'success'|'error'|'info'|'warning'} type - Visual style
-     * @param {number} duration - Auto-hide timeout in ms (default 3000)
-     */
     show(message, type = 'success', duration = 3000) {
         this.initContainer();
         const container = document.getElementById(this.containerId);
 
-        // Styling based on type
         const styles = {
             success: 'bg-emerald-50 border-emerald-200 text-emerald-800',
             error:   'bg-red-50 border-red-200 text-red-800',
@@ -47,7 +34,6 @@ class ToastManager {
         const cls  = styles[type] || styles.info;
         const icon = icons[type]  || icons.info;
 
-        // Create the toast element
         const toast = document.createElement('div');
         toast.className = `flex flex-row items-center gap-3 p-4 rounded-xl shadow-lg border ${cls} pointer-events-auto transition-all duration-300 transform translate-x-full opacity-0`;
         
@@ -61,30 +47,25 @@ class ToastManager {
 
         container.appendChild(toast);
 
-        // Animate in (slide from right)
         requestAnimationFrame(() => {
             requestAnimationFrame(() => {
                 toast.classList.remove('translate-x-full', 'opacity-0');
             });
         });
 
-        // Close button event
         const closeBtn = toast.querySelector('.toast-close-btn');
         const dismiss = () => {
             toast.classList.add('translate-x-full', 'opacity-0');
-            setTimeout(() => toast.remove(), 300); // Wait for transition
+            setTimeout(() => toast.remove(), 300); 
         };
         closeBtn.addEventListener('click', dismiss);
 
-        // Auto hide
         if (duration > 0) {
             setTimeout(dismiss, duration);
         }
     }
 }
 
-// Export as a singleton
 export const toast = new ToastManager();
 
-// Also attach globally for non-module scripts if needed
 window.Toast = toast;

@@ -19,7 +19,6 @@ $userRole = session()->get('kategori_akun') ?? session()->get('role') ?? 'Kontra
                 </div>
             </a>
 
-            <!-- Collapse Button -->
             <button type="button"
                 class="md:hidden relative size-9 flex justify-center items-center font-medium text-sm rounded-lg bg-transparent border border-transparent text-white focus:outline-hidden disabled:opacity-50 disabled:pointer-events-none"
                 id="hs-header-base-collapse" aria-expanded="false" aria-controls="hs-header-base"
@@ -41,7 +40,6 @@ $userRole = session()->get('kategori_akun') ?? session()->get('role') ?? 'Kontra
                 </svg>
                 <span class="sr-only">Toggle navigation</span>
             </button>
-            <!-- End Collapse Button -->
         </div>
 
         <!-- Collapse -->
@@ -52,7 +50,7 @@ $userRole = session()->get('kategori_akun') ?? session()->get('role') ?? 'Kontra
                 <div class="py-2 md:py-0 flex flex-col md:flex-row md:items-stretch gap-0.5 md:gap-0">
                     <div class="grow">
                         <div class="flex flex-col md:flex-row md:justify-end md:items-stretch gap-0 md:gap-0">
-                            <a class="px-4 h-14 md:py-0 md:w-28 md:justify-center flex items-center gap-3 text-sm <?= is_nav_active('dashboard') ? 'bg-white text-primary font-semibold' : 'text-navbar-nav-foreground hover:bg-navbar-nav-hover focus:bg-navbar-nav-focus' ?> md:rounded-none focus:outline-hidden"
+                            <a class="px-4 h-14 md:py-0 md:w-28 md:justify-center flex items-center gap-3 text-sm <?= is_nav_active('dashboard') ? 'bg-white text-primary font-semibold' : 'text-navbar-foreground hover:bg-navbar-hover focus:bg-navbar-focus' ?> md:rounded-none focus:outline-hidden"
                                 href="<?= base_url('dashboard') ?>" <?= is_nav_active('dashboard') ? 'aria-current="page"' : '' ?>>
                                 <svg class="shrink-0 size-4 block md:hidden" xmlns="http://www.w3.org/2000/svg"
                                     width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -68,7 +66,7 @@ $userRole = session()->get('kategori_akun') ?? session()->get('role') ?? 'Kontra
                             <div
                                 class="hs-dropdown [--strategy:static] md:[--strategy:fixed] [--adaptive:none] md:[--adaptive:adaptive] [--is-collapse:true] md:[--is-collapse:false]">
                                 <button id="hs-header-base-dropdown" type="button"
-                                    class="hs-dropdown-toggle w-full h-14 px-4 md:px-3 md:justify-center flex items-center gap-3 text-sm text-navbar-nav-foreground hover:bg-navbar-nav-hover focus:outline-hidden focus:bg-navbar-nav-focus"
+                                    class="hs-dropdown-toggle w-full h-14 px-4 md:px-3 md:justify-center flex items-center gap-3 text-sm text-navbar-foreground hover:bg-navbar-hover focus:outline-hidden focus:bg-navbar-focus"
                                     aria-haspopup="menu" aria-expanded="false" aria-label="Dropdown">
 
                                     <div class="shrink-0">
@@ -110,13 +108,11 @@ $userRole = session()->get('kategori_akun') ?? session()->get('role') ?? 'Kontra
                                     </div>
                                 </div>
                             </div>
-                            <!-- End Dropdown -->
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <!-- End Collapse -->
     </nav>
 </header>
 <!-- ========== END HEADER ========== -->

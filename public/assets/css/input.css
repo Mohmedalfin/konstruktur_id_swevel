@@ -100,6 +100,37 @@
 }
 
 /* ================================
+   JS-Only Classes Safelist
+   Classes used only inside JS template strings —
+   Tailwind scanner can't detect them, so we define
+   them as plain CSS (outside @layer) to prevent purging.
+================================= */
+
+/* Table backgrounds */
+.bg-table-category         { background-color: var(--table-category-bg); }
+.bg-table-category-hover   { background-color: var(--table-category-hover); }
+.bg-table-row              { background-color: var(--table-row-bg); }
+
+/* Table text colors */
+.text-table-body           { color: var(--table-text-body); }
+.text-table-strong         { color: var(--table-text-strong); }
+.text-table-medium         { color: var(--table-text-medium); }
+.text-table-muted          { color: var(--table-text-muted); }
+.text-table-subtle         { color: var(--table-text-subtle); }
+
+/* Table border */
+.border-table-border       { border-color: var(--table-row-border); }
+
+/* Navbar */
+.text-navbar-foreground    { color: var(--navbar-foreground); }
+.bg-navbar-hover           { background-color: var(--navbar-hover); }
+.bg-navbar-focus           { background-color: var(--navbar-focus); }
+
+/* Hover variants for table */
+.hover\:bg-table-category-hover:hover { background-color: var(--table-category-hover); }
+
+
+/* ================================
    Custom Scrollbar (Thin Modern)
 ================================= */
 .scrollbar-thin::-webkit-scrollbar {

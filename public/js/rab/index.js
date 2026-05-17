@@ -249,7 +249,7 @@ if (!wrapper || !tbody) {
 
                 kategoriManualInput.value = '';
                 await openKategoriModal();
-                refreshImportCategories(); // Update BOQ import dropdown too
+                refreshImportCategories(); 
 
                 toast.show('Kategori custom berhasil ditambahkan ke daftar!', 'success');
 
@@ -302,7 +302,6 @@ if (!wrapper || !tbody) {
         });
     }
 
-    // ── Handle BOQ Import confirmed event ─────────────────────────────────────
     window.addEventListener('rabDataImported', async function (e) {
         const importedRows = e.detail || [];
         if (importedRows.length === 0) return;
@@ -313,7 +312,6 @@ if (!wrapper || !tbody) {
             return;
         }
 
-        // Group items by kategori ID
         const groups = {};
         importedRows.forEach(row => {
             if (!row.kategori || row.type === 'header') return;
@@ -334,8 +332,6 @@ if (!wrapper || !tbody) {
             for (const katId of kategoriIds) {
                 const items = groups[katId];
 
-                // Save pekerjaan for that category
-                // (the backend automatically links the category to the RAP if not already)
                 const pekerjaan = items.map(item => ({
                     nama:       item.uraian   || '',
                     volume:     item.volume   || 1,
@@ -384,10 +380,16 @@ if (!wrapper || !tbody) {
     });
 
     document.addEventListener('DOMContentLoaded', async function () {
+        window.manualLoader = true;
+        if (window.showLoader) window.showLoader();
+
         const init = window.RAB_INIT;
         const idProject = init?.idProject || init?.id;
 
-        if (!init || !idProject) return;
+        if (!init || !idProject) {
+            if (window.hideLoader) window.hideLoader();
+            return;
+        }
 
         try {
             state.mode = 'readonly';
@@ -396,7 +398,6 @@ if (!wrapper || !tbody) {
 
             setEditableMode(true);
             showTable();
-            renderLoading();
 
             const data = await fetchRabData(idProject);
 
@@ -407,13 +408,11 @@ if (!wrapper || !tbody) {
             state.format_penomoran = data.format_penomoran || null;
             state.sumber_data = data.sumber_data || 'manual';
 
-            // Silently sync AHS prices → RAP table on every page load
             fetch('/api/rap/recalculate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ id_project: Number(idProject) })
             }).then(async () => {
-                // Re-fetch and re-render after recalculate so prices appear
                 const freshData = await fetchRabData(idProject);
                 state.activeCategories = (freshData.categories || []).map(cat => ({
                     id: String(cat.id),
@@ -436,6 +435,8 @@ if (!wrapper || !tbody) {
                     </td>
                 </tr>
             `;
+        } finally {
+            if (window.hideLoader) window.hideLoader();
         }
     });
 }
