@@ -24,23 +24,18 @@
 
                     <div class="overflow-hidden border border-gray-200">
                         <label class="block cursor-pointer">
-                            <input
-                                id="foto_proyek"
-                                type="file"
-                                name="foto_proyek"
-                                accept="image/png,image/jpeg"
+                            <input id="foto_proyek" type="file" name="foto_proyek" accept="image/png,image/jpeg"
                                 class="hidden" />
 
                             <div class="relative h-64 bg-primary text-white">
 
-                                <img
-                                    id="fotoPreview"
-                                    src="<?= base_url('assets/images/BackgroundLogin.png') ?>"
-                                    alt="Preview"
-                                    class="absolute inset-0 h-full w-full object-cover opacity-25" />
+                                <img id="fotoPreview" src="<?= base_url('assets/images/BackgroundLogin.png') ?>"
+                                    alt="Preview" class="absolute inset-0 h-full w-full object-cover opacity-25" />
 
-                                <div class="relative z-10 flex h-full flex-col items-center justify-center text-center px-4">
-                                    <div class="flex h-14 w-14 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/20">
+                                <div
+                                    class="relative z-10 flex h-full flex-col items-center justify-center text-center px-4">
+                                    <div
+                                        class="flex h-14 w-14 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/20">
                                         <i class="fa-solid fa-cloud-arrow-up text-3xl"></i>
                                     </div>
 
@@ -57,17 +52,10 @@
                         </label>
                     </div>
 
-                    <input
-                        id="dokumenInput"
-                        type="file"
-                        name="dokumen[]"
-                        class="hidden"
-                        multiple
+                    <input id="dokumenInput" type="file" name="dokumen[]" class="hidden" multiple
                         accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png" />
 
-                    <button
-                        type="button"
-                        id="btnTambahDokumen"
+                    <button type="button" id="btnTambahDokumen"
                         class="inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-4 py-2 text-white shadow-md transition hover:bg-primary/90">
                         <i class="fa-solid fa-file-circle-plus"></i>
                         <span class="text-sm font-semibold">Tambah Dokumen</span>
@@ -101,130 +89,127 @@
                         </div>
 
                         <div>
-                            <label class="mb-1 block text-md font-semibold text-text-primary">
-                                Lokasi & Referensi Harga
-                                <span class="ml-1 text-xs font-normal text-slate-500">(Provinsi -> Kab/Kota -> Tahun)</span>
-                            </label>
+                            <div class="mb-3">
+                                <label class="mb-1 block text-md font-semibold text-text-primary">
+                                    Lokasi Proyek
+                                </label>
 
-                            <div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
-                                <!-- Dropdown Provinsi -->
-                                <select id="sel_provinsi"
-                                    class="w-full border border-gray-300 bg-white px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500">
-                                    <option value="">-- Pilih Provinsi --</option>
+                                <select name="id_wilayah" id="id_wilayah" required data-hs-select='{
+                                  "hasSearch": true,
+                                  "searchPlaceholder": "Cari Kabupaten/Kota...",
+                                  "searchClasses": "block w-full text-sm bg-white border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500",
+                                  "searchWrapperClasses": "bg-white p-2 -mx-1 sticky top-0",
+                                  "placeholder": "Pilih Kabupaten/Kota",
+                                  "toggleTag": "<button type=\"button\" aria-expanded=\"false\"></button>",
+                                  "toggleClasses": "relative py-2.5 ps-3 pe-9 flex w-full cursor-pointer bg-white border border-gray-300 text-start text-sm hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-blue-500",
+                                  "dropdownClasses": "mt-2 z-50 w-full max-h-72 p-1 space-y-0.5 bg-white border border-gray-200 shadow-xl overflow-hidden overflow-y-auto",
+                                  "optionClasses": "hs-selected:bg-gray-100 py-2 px-3 w-full text-sm text-gray-800 cursor-pointer hover:bg-gray-50",
+                                  "optionTemplate": "<div class=\"flex justify-between items-center w-full\"><span data-title></span><span class=\"hidden hs-selected:block\"><svg class=\"size-4 text-blue-600\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 16 16\" fill=\"currentColor\"><path d=\"M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022Z\"/></svg></span></div>",
+                                  "extraMarkup": "<div class=\"absolute top-1/2 end-3 -translate-y-1/2\"><svg class=\"size-4 text-gray-500\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 20 20\" fill=\"currentColor\"><path fill-rule=\"evenodd\" d=\"M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.168l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.24 4.5a.75.75 0 0 1-1.08 0l-4.24-4.5a.75.75 0 0 1 .02-1.06Z\" clip-rule=\"evenodd\"/></svg></div>"
+                                }' class="hidden">
+                                    <option value="">-- Pilih Kabupaten/Kota --</option>
+                                    <?php foreach ($cities as $city): ?>
+                                        <option value="<?= $city['id'] ?>"><?= esc($city['nama']) ?></option>
+                                    <?php endforeach; ?>
                                 </select>
 
-                                <!-- Dropdown Kab/Kota -->
-                                <select id="sel_kota" disabled
-                                    class="w-full border border-gray-300 bg-white px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500">
-                                    <option value="">Pilih Provinsi dahulu</option>
-                                </select>
-
-                                <!-- Dropdown Tahun -->
-                                <select id="sel_template" disabled
-                                    class="w-full border border-gray-300 bg-white px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500">
-                                    <option value="">Pilih Kab/Kota dahulu</option>
-                                </select>
+                                <!-- Hidden fields yang dikirim ke server -->
+                                <input type="hidden" name="id_template" id="id_template" value="" />
+                                <input type="hidden" name="lokasi_proyek" id="lokasi_proyek" value="" />
                             </div>
 
-                            <!-- Hidden fields yang dikirim ke server -->
-                            <input type="hidden" name="id_wilayah" id="id_wilayah" value="" />
-                            <input type="hidden" name="id_template" id="id_template" value="" />
-                            <input type="hidden" name="lokasi_proyek" id="lokasi_proyek" value="" />
+                            <div class="grid grid-cols-1 gap-4 md:grid-cols-2 mb-3">
+                                <div>
+                                    <label class="mb-1 block text-md font-semibold text-text-primary">Jenis
+                                        Proyek</label>
+                                    <input name="jenis_proyek" type="text" placeholder="Masukkan Jenis Proyek"
+                                        class="w-full  border border-gray-300 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                                </div>
 
-                            <p id="lokasi-info" class="mt-1 text-xs text-slate-500">
-                                Pilih lokasi untuk menggunakan harga satuan resmi (BPS/PUPR) sesuai wilayah.
-                            </p>
+                                <div>
+                                    <label class="mb-1 block text-md font-semibold text-text-primary">Harga Deal</label>
+                                    <input name="harga_deal" id="harga_deal" type="text"
+                                        placeholder="Masukkan Harga Deal"
+                                        class="w-full  border border-gray-300 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                                </div>
+                            </div>
+
+                            <!-- DATEPICKER ROW (SIMPLE - PRELINE) -->
+                            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+
+                                <!-- Tanggal Mulai -->
+                                <div>
+                                    <label class="mb-1 block text-md font-semibold text-text-primary">Tanggal
+                                        Mulai</label>
+                                    <input name="tanggal_mulai"
+                                        class="py-3 px-4 block w-full bg-white border border-gray-300 sm:text-sm text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                                        type="date" required>
+                                </div>
+
+                                <!-- Estimasi Selesai -->
+                                <div>
+                                    <label class="mb-1 block text-md font-semibold text-text-primary">Estimasi
+                                        Selesai</label>
+                                    <input name="estimasi_selesai"
+                                        class="py-3 px-4 block w-full bg-white border border-gray-300 sm:text-sm text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                                        type="date" required>
+                                </div>
+
+                            </div>
                         </div>
 
-                        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                            <div>
-                                <label class="mb-1 block text-md font-semibold text-text-primary">Jenis Proyek</label>
-                                <input name="jenis_proyek" type="text" placeholder="Masukkan Jenis Proyek"
-                                    class="w-full  border border-gray-300 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                        <div class="h-px bg-gray-200"></div>
+
+                        <!-- Informasi Owner -->
+                        <div>
+                            <h3 class="mb-3 text-sm font-bold text-text-primary">Informasi Owner</h3>
+
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="mb-1 block text-md font-semibold text-text-primary">Nama Owner /
+                                        Klien</label>
+                                    <input name="nama_owner" type="text" placeholder="Masukkan Nama Owner / Klien"
+                                        class="w-full  border border-gray-300 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                                </div>
+
+                                <div>
+                                    <label class="mb-1 block text-md font-semibold text-text-primary">Perusahaan</label>
+                                    <input name="perusahaan" type="text" placeholder="Masukkan Nama Perusahaan"
+                                        class="w-full  border border-gray-300 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                                </div>
+
+                                <div>
+                                    <label class="mb-1 block text-md font-semibold text-text-primary">Nomor
+                                        Kontrak</label>
+                                    <input name="nomor_kontrak" type="text" placeholder="Masukkan Nomor Kontrak"
+                                        class="w-full  border border-gray-300 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                                </div>
+
+                                <div>
+                                    <label class="mb-1 block text-md font-semibold text-text-primary">Keterangan
+                                        Lain</label>
+                                    <input name="keterangan_lain" type="text" placeholder="Masukkan Keterangan Lain"
+                                        class="w-full  border border-gray-300 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                                </div>
                             </div>
 
-                            <div>
-                                <label class="mb-1 block text-md font-semibold text-text-primary">Harga Deal</label>
-                                <input name="harga_deal" id="harga_deal" type="text" placeholder="Masukkan Harga Deal"
-                                    class="w-full  border border-gray-300 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                            <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-end">
+                                <a href="<?= base_url('proyek') ?>"
+                                    class="inline-flex items-center justify-center rounded-full border border-gray-300 bg-white px-6 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 gap-2">
+                                    <i class="fa-solid fa-arrow-rotate-left"></i>
+                                    Batal
+                                </a>
+
+                                <button type="submit"
+                                    class="inline-flex items-center justify-center rounded-full bg-primary px-6 py-2 text-sm font-semibold text-white shadow-md transition hover:bg-primary/90 gap-2">
+                                    <i class="fa-solid fa-floppy-disk"></i>
+                                    Simpan
+                                </button>
                             </div>
                         </div>
 
-                        <!-- DATEPICKER ROW (SIMPLE - PRELINE) -->
-                        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-
-                            <!-- Tanggal Mulai -->
-                            <div>
-                                <label class="mb-1 block text-md font-semibold text-text-primary">Tanggal Mulai</label>
-                                <input
-                                    name="tanggal_mulai"
-                                    class="py-3 px-4 block w-full bg-white border border-gray-300 sm:text-sm text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                                    type="date"
-                                    required>
-                            </div>
-
-                            <!-- Estimasi Selesai -->
-                            <div>
-                                <label class="mb-1 block text-md font-semibold text-text-primary">Estimasi Selesai</label>
-                                <input
-                                    name="estimasi_selesai"
-                                    class="py-3 px-4 block w-full bg-white border border-gray-300 sm:text-sm text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                                    type="date"
-                                    required>
-                            </div>
-
-                        </div>
                     </div>
-
-                    <div class="h-px bg-gray-200"></div>
-
-                    <!-- Informasi Owner -->
-                    <div>
-                        <h3 class="mb-3 text-sm font-bold text-text-primary">Informasi Owner</h3>
-
-                        <div class="space-y-4">
-                            <div>
-                                <label class="mb-1 block text-md font-semibold text-text-primary">Nama Owner / Klien</label>
-                                <input name="nama_owner" type="text" placeholder="Masukkan Nama Owner / Klien"
-                                    class="w-full  border border-gray-300 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500" />
-                            </div>
-
-                            <div>
-                                <label class="mb-1 block text-md font-semibold text-text-primary">Perusahaan</label>
-                                <input name="perusahaan" type="text" placeholder="Masukkan Nama Perusahaan"
-                                    class="w-full  border border-gray-300 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500" />
-                            </div>
-
-                            <div>
-                                <label class="mb-1 block text-md font-semibold text-text-primary">Nomor Kontrak</label>
-                                <input name="nomor_kontrak" type="text" placeholder="Masukkan Nomor Kontrak"
-                                    class="w-full  border border-gray-300 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500" />
-                            </div>
-
-                            <div>
-                                <label class="mb-1 block text-md font-semibold text-text-primary">Keterangan Lain</label>
-                                <input name="keterangan_lain" type="text" placeholder="Masukkan Keterangan Lain"
-                                    class="w-full  border border-gray-300 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500" />
-                            </div>
-                        </div>
-
-                        <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-end">
-                            <a href="<?= base_url('proyek') ?>"
-                                class="inline-flex items-center justify-center rounded-full border border-gray-300 bg-white px-6 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 gap-2">
-                                <i class="fa-solid fa-arrow-rotate-left"></i>
-                                Batal
-                            </a>
-
-                            <button type="submit"
-                                class="inline-flex items-center justify-center rounded-full bg-primary px-6 py-2 text-sm font-semibold text-white shadow-md transition hover:bg-primary/90 gap-2">
-                                <i class="fa-solid fa-floppy-disk"></i>
-                                Simpan
-                            </button>
-                        </div>
-                    </div>
-
                 </div>
-            </div>
         </form>
 
     </div>
@@ -233,18 +218,27 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
-<script src="<?= base_url('js/wilayah-selector.js') ?>"></script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        // Init wilayah selector (create mode — tidak ada id_template awal)
-        WilayahSelector.init();
+        // Sync lokasi_proyek name
+        const selWilayah = document.getElementById('id_wilayah');
+        const hiddenLokasi = document.getElementById('lokasi_proyek');
+        if (selWilayah) {
+            selWilayah.addEventListener('change', function () {
+                if (this.selectedIndex > 0) {
+                    hiddenLokasi.value = this.options[this.selectedIndex].text;
+                } else {
+                    hiddenLokasi.value = '';
+                }
+            });
+        }
 
         // =========================
         // 0) FORMAT HARGA DEAL
         // =========================
         const hargaDealInput = document.getElementById('harga_deal');
         if (hargaDealInput) {
-            hargaDealInput.addEventListener('input', function(e) {
+            hargaDealInput.addEventListener('input', function (e) {
                 let value = this.value.replace(/[^0-9]/g, '');
                 if (value) {
                     this.value = 'Rp ' + parseInt(value, 10).toLocaleString('id-ID');

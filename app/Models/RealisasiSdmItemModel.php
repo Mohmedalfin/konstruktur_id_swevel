@@ -27,7 +27,7 @@ class RealisasiSdmItemModel extends Model
 
     protected $validationRules = [
         'id_realisasi_sdm' => 'required|is_natural_no_zero',
-        'kategori'         => 'required|in_list[bahan,alat,upah,Tenaga Kerja]',
+        'kategori'         => 'required|in_list[Bahan,Alat,Tenaga Kerja]',
         'nama_item'        => 'required|min_length[2]',
         'qty'              => 'required|numeric|greater_than[0]',
         'satuan'           => 'required',
@@ -40,7 +40,7 @@ class RealisasiSdmItemModel extends Model
         ],
         'kategori' => [
             'required' => 'Kategori wajib diisi.',
-            'in_list'  => 'Kategori harus berupa bahan, alat, atau upah.'
+            'in_list'  => 'Kategori harus berupa Bahan, Alat, atau Tenaga Kerja.'
         ],
         'nama_item' => [
             'required'   => 'Nama item wajib diisi.',

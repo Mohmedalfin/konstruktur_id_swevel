@@ -33,31 +33,90 @@ class DashboardController extends BaseController
             // ── 2. Total Nilai Kontrak (harga_deal) ──────────────────────────
             $totalNilaiKontrak = array_sum(array_column($proyeks, 'harga_deal'));
 
-            // ── 3. Total RAP (serapan anggaran) ─────────────────────────────
-            $totalRap = (float) ($db->table('rap')
-                ->selectSum('total_keseluruhan')
-                ->get()
-                ->getRowArray()['total_keseluruhan'] ?? 0);
+            // ── 3. Total RAP & 4. Rata-rata progres & 5. Project Health & 7. Daftar Proyek ──
+            $healthCounts = ['critical' => 0, 'warning' => 0, 'healthy' => 0];
+            $scheduleCounts = ['ontime' => 0, 'delayed' => 0];
+            $costCounts = ['onbudget' => 0, 'overrun' => 0];
+            $daftarProyek = [];
+            
+            $totalEv = 0;
+            $totalBac = 0;
 
+            foreach ($proyeks as $idx => $p) {
+                $status = $p['status_proyek'] ?? 'draft';
+
+                // Ambil metrik aktual dari EVM
+                $metrics = $this->dashboardService->getProjectMetrics($p['id_project']);
+                
+                $totalEv += $metrics['ev_value'] ?? 0;
+                $totalBac += $metrics['bac_value'] ?? 0;
+
+                // Schedule status
+                $schedLabel = $metrics['schedule_status'] ?? 'On Time';
+                $schedClass = match ($schedLabel) {
+                    'Early' => 'badge-early',
+                    'Slightly Delay' => 'badge-slight',
+                    'Delayed' => 'badge-delayed',
+                    default => 'badge-ontime',
+                };
+                $jadwalStatus = ['label' => $schedLabel, 'class' => $schedClass];
+
+                // Cost status
+                $costLabel = $metrics['cost_status'] ?? 'On Budget';
+                $costClass = match ($costLabel) {
+                    'Under Budget' => 'badge-under',
+                    'Slightly Over' => 'badge-slightover',
+                    'Overrun' => 'badge-overrun',
+                    default => 'badge-onbudget',
+                };
+                $costStatus = ['label' => $costLabel, 'class' => $costClass];
+
+                // Schedule Counts
+                if (in_array($schedLabel, ['Delayed', 'Slightly Delay'])) {
+                    $scheduleCounts['delayed']++;
+                } else {
+                    $scheduleCounts['ontime']++;
+                }
+
+                // Cost Counts
+                if (in_array($costLabel, ['Overrun', 'Slightly Over'])) {
+                    $costCounts['overrun']++;
+                } else {
+                    $costCounts['onbudget']++;
+                }
+
+                // Overall status & Health Counts
+                if ($status === 'done') {
+                    $overall = ['label' => 'Healthy', 'class' => 'badge-healthy'];
+                    $healthCounts['healthy']++;
+                } elseif ($schedLabel === 'Delayed' || $costLabel === 'Overrun') {
+                    $overall = ['label' => 'Critical', 'class' => 'badge-critical'];
+                    $healthCounts['critical']++;
+                } elseif ($schedLabel === 'Slightly Delay' || $costLabel === 'Slightly Over') {
+                    $overall = ['label' => 'Warning', 'class' => 'badge-warning'];
+                    $healthCounts['warning']++;
+                } else {
+                    $overall = ['label' => 'Healthy', 'class' => 'badge-healthy'];
+                    $healthCounts['healthy']++;
+                }
+
+                $daftarProyek[] = [
+                    'no' => $idx + 1,
+                    'nama' => $p['nama_proyek'],
+                    'lokasi' => $p['lokasi_proyek'],
+                    'jadwalStatus' => $jadwalStatus,
+                    'costStatus' => $costStatus,
+                    'overall' => $overall,
+                    'slug' => $p['slug'],
+                ];
+            }
+
+            $rataProgres = $totalBac > 0 ? round(($totalEv / $totalBac) * 100, 1) : 0;
+            
+            $totalRap = $totalBac;
             $pctSerapan = $totalNilaiKontrak > 0
                 ? round(($totalRap / $totalNilaiKontrak) * 100, 1)
                 : 0;
-
-            // ── 4. Rata-rata progres (placeholder — pakai status proyek) ─────
-            $rataProgres = 0; // akan dikembangkan ketika modul realisasi tersedia
-
-            // ── 5. Project Health (berdasar status_proyek) ───────────────────
-            $healthCounts = ['critical' => 0, 'warning' => 0, 'healthy' => 0];
-            foreach ($proyeks as $p) {
-                $s = $p['status_proyek'] ?? 'draft';
-                if ($s === 'done') {
-                    $healthCounts['healthy']++;
-                } elseif ($s === 'draft') {
-                    $healthCounts['warning']++;
-                } else {
-                    $healthCounts['healthy']++;
-                }
-            }
 
             // ── 6. Cash Flow (RAP per bulan, 6 bulan terakhir) ───────────────
             $cashFlow = [];
@@ -76,51 +135,6 @@ class DashboardController extends BaseController
                 ];
             }
 
-            // ── 7. Daftar proyek untuk tabel ─────────────────────────────────
-            $daftarProyek = [];
-            foreach ($proyeks as $idx => $p) {
-                $status = $p['status_proyek'] ?? 'draft';
-
-                // Schedule status — placeholder logic
-                $jadwalStatus = match ($status) {
-                    'done' => ['label' => 'Early', 'class' => 'badge-early'],
-                    'aktif' => ['label' => 'On Time', 'class' => 'badge-ontime'],
-                    default => ['label' => 'Slightly Delay', 'class' => 'badge-slight'],
-                };
-
-                // Cost status — placeholder logic
-                $rapRow = $db->table('rap')->where('id_project', $p['id_project'])->get()->getRowArray();
-                $rapTotal = (float) ($rapRow['total_keseluruhan'] ?? 0);
-                $deal = (float) ($p['harga_deal'] ?? 0);
-
-                if ($deal <= 0 || $rapTotal <= 0) {
-                    $costStatus = ['label' => 'On Budget', 'class' => 'badge-onbudget'];
-                } elseif ($rapTotal > $deal) {
-                    $costStatus = ['label' => 'Overrun', 'class' => 'badge-overrun'];
-                } elseif ($rapTotal < $deal * 0.9) {
-                    $costStatus = ['label' => 'Under Budget', 'class' => 'badge-under'];
-                } else {
-                    $costStatus = ['label' => 'Slightly Over', 'class' => 'badge-slightover'];
-                }
-
-                // Overall status
-                $overall = match ($status) {
-                    'done' => ['label' => 'Healthy', 'class' => 'badge-healthy'],
-                    'aktif' => ['label' => 'Warning', 'class' => 'badge-warning'],
-                    default => ['label' => 'Warning', 'class' => 'badge-warning'],
-                };
-
-                $daftarProyek[] = [
-                    'no' => $idx + 1,
-                    'nama' => $p['nama_proyek'],
-                    'lokasi' => $p['lokasi_proyek'],
-                    'jadwalStatus' => $jadwalStatus,
-                    'costStatus' => $costStatus,
-                    'overall' => $overall,
-                    'slug' => $p['slug'],
-                ];
-            }
-
             return view('proyek/menu/dashboard', [
                 'topbarTitle' => 'Dashboard Proyek',
                 'totalProyek' => $totalProyek,
@@ -130,6 +144,8 @@ class DashboardController extends BaseController
                 'pctSerapan' => $pctSerapan,
                 'rataProgres' => $rataProgres,
                 'healthCounts' => $healthCounts,
+                'scheduleCounts' => $scheduleCounts,
+                'costCounts' => $costCounts,
                 'cashFlow' => $cashFlow,
                 'daftarProyek' => $daftarProyek,
             ]);

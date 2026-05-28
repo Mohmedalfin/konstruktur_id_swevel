@@ -18,7 +18,15 @@ $pctCls = match (true) {
 };
 ?>
 
-<div id="proyek-card-<?= $id ?>" class="group relative flex flex-col overflow-hidden rounded-2xl bg-white border border-table-border shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
+<?php
+$tahun = $tgl ? date('Y', strtotime($tgl)) : '';
+?>
+<div id="proyek-card-<?= $id ?>" 
+     class="proyek-card group relative flex flex-col overflow-hidden rounded-2xl bg-white border border-table-border shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
+     data-nama="<?= esc(strtolower($title)) ?>"
+     data-lokasi="<?= esc(strtolower($lokasi)) ?>"
+     data-tahun="<?= esc($tahun) ?>"
+>
 
     <a href="<?= esc($href) ?>" class="absolute inset-0 z-10" aria-label="Buka proyek <?= esc($title) ?>"></a>
 

@@ -7,7 +7,6 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
-
 <div class="mx-auto max-w-6xl">
     <div class="rounded-lg bg-white p-6 shadow-md ring-1 ring-black/5 md:p-8">
 
@@ -108,49 +107,33 @@
 
                         <div>
                             <label class="mb-1 block text-md font-semibold text-text-primary">
-                                Lokasi & Referensi Harga
-                                <span class="ml-1 text-xs font-normal text-slate-500">(Provinsi -> Kab/Kota ->
-                                    Tahun)</span>
+                                Lokasi Proyek
                             </label>
 
-                            <div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
-                                <!-- Dropdown Provinsi -->
-                                <select id="sel_provinsi"
-                                    class="w-full border border-gray-300 bg-white px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500">
-                                    <option value="">-- Pilih Provinsi --</option>
-                                </select>
-
-                                <!-- Dropdown Kab/Kota -->
-                                <select id="sel_kota" disabled
-                                    class="w-full border border-gray-300 bg-white px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500">
-                                    <option value="">Pilih Provinsi dahulu</option>
-                                </select>
-
-                                <!-- Dropdown Tahun -->
-                                <select id="sel_template" disabled
-                                    class="w-full border border-gray-300 bg-white px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500">
-                                    <option value="">Pilih Kab/Kota dahulu</option>
-                                </select>
-                            </div>
+                            <select name="id_wilayah" id="id_wilayah" required data-hs-select='{
+                                  "hasSearch": true,
+                                  "searchPlaceholder": "Cari Kabupaten/Kota...",
+                                  "searchClasses": "block w-full text-sm bg-white border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500",
+                                  "searchWrapperClasses": "bg-white p-2 -mx-1 sticky top-0",
+                                  "placeholder": "Pilih Kabupaten/Kota",
+                                  "toggleTag": "<button type=\"button\" aria-expanded=\"false\"></button>",
+                                  "toggleClasses": "relative py-2.5 ps-3 pe-9 flex w-full cursor-pointer bg-white border border-gray-300 text-start text-sm hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-blue-500",
+                                  "dropdownClasses": "mt-2 z-50 w-full max-h-72 p-1 space-y-0.5 bg-white border border-gray-200 shadow-xl overflow-hidden overflow-y-auto",
+                                  "optionClasses": "hs-selected:bg-gray-100 py-2 px-3 w-full text-sm text-gray-800 cursor-pointer hover:bg-gray-50",
+                                  "optionTemplate": "<div class=\"flex justify-between items-center w-full\"><span data-title></span><span class=\"hidden hs-selected:block\"><svg class=\"size-4 text-blue-600\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 16 16\" fill=\"currentColor\"><path d=\"M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022Z\"/></svg></span></div>",
+                                  "extraMarkup": "<div class=\"absolute top-1/2 end-3 -translate-y-1/2\"><svg class=\"size-4 text-gray-500\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 20 20\" fill=\"currentColor\"><path fill-rule=\"evenodd\" d=\"M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.168l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.24 4.5a.75.75 0 0 1-1.08 0l-4.24-4.5a.75.75 0 0 1 .02-1.06Z\" clip-rule=\"evenodd\"/></svg></div>"
+                                }' class="hidden">
+                                <option value="">-- Pilih Kabupaten/Kota --</option>
+                                <?php foreach ($cities as $city): ?>
+                                    <option value="<?= $city['id'] ?>" <?= ($proyek['id_wilayah'] == $city['id']) ? 'selected' : '' ?>><?= esc($city['nama']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
 
                             <!-- Hidden fields yang dikirim ke server -->
-                            <input type="hidden" name="id_wilayah" id="id_wilayah"
-                                value="<?= esc($proyek['id_wilayah'] ?? '') ?>" />
                             <input type="hidden" name="id_template" id="id_template"
                                 value="<?= esc($proyek['id_template'] ?? '') ?>" />
                             <input type="hidden" name="lokasi_proyek" id="lokasi_proyek"
                                 value="<?= esc($proyek['lokasi_proyek'] ?? '') ?>" />
-
-                            <?php if (!empty($proyek['id_wilayah'])): ?>
-                                <p id="lokasi-info" class="mt-1 text-xs text-green-600 font-medium">
-                                    <i class="fa-solid fa-circle-check mr-1"></i>
-                                    Tersimpan: <?= esc($proyek['lokasi_proyek'] ?? 'Wilayah #' . $proyek['id_wilayah']) ?>
-                                </p>
-                            <?php else: ?>
-                                <p id="lokasi-info" class="mt-1 text-xs text-slate-500">
-                                    Pilih lokasi untuk menggunakan harga satuan resmi (BPS/PUPR) sesuai wilayah.
-                                </p>
-                            <?php endif; ?>
                         </div>
 
                         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -257,15 +240,20 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
-<script src="<?= base_url('js/wilayah-selector.js') ?>"></script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        // Init wilayah selector — pre-fill jika sudah ada id_template/id_wilayah tersimpan
-        WilayahSelector.init({
-            idProv: '<?= $id_prov ?? '' ?>',
-            idWilayah: '<?= $proyek['id_wilayah'] ?? '' ?>',
-            idTemplate: '<?= $proyek['id_template'] ?? '' ?>'
-        });
+        // Sync lokasi_proyek name
+        const selWilayah = document.getElementById('id_wilayah');
+        const hiddenLokasi = document.getElementById('lokasi_proyek');
+        if (selWilayah) {
+            selWilayah.addEventListener('change', function () {
+                if (this.selectedIndex > 0) {
+                    hiddenLokasi.value = this.options[this.selectedIndex].text;
+                } else {
+                    hiddenLokasi.value = '';
+                }
+            });
+        }
 
         // =========================
         // 0) FORMAT HARGA DEAL

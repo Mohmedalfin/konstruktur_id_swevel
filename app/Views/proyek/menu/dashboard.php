@@ -239,6 +239,12 @@
     $hHealthy  = (int) ($healthCounts['healthy']  ?? 0);
     $hTotal    = $hCritical + $hWarning + $hHealthy;
 
+    $schOnTime  = (int) ($scheduleCounts['ontime'] ?? 0);
+    $schDelayed = (int) ($scheduleCounts['delayed'] ?? 0);
+    
+    $cstOnBudget = (int) ($costCounts['onbudget'] ?? 0);
+    $cstOverrun  = (int) ($costCounts['overrun'] ?? 0);
+
     $cashFlowData = $cashFlow ?? [];
     $daftar       = $daftarProyek ?? [];
 
@@ -280,7 +286,7 @@
             <span class="stat-value"><?= $rataProgres ?>%</span>
             <span class="stat-sub">
                 <i class="fa-solid fa-clock-rotate-left"></i>
-                Data realisasi belum tersedia
+                <?= $rataProgres > 0 ? "Berdasarkan realisasi lapangan" : "Data realisasi belum tersedia" ?>
             </span>
         </div>
 
@@ -345,18 +351,16 @@
                     <div class="status-section" style="margin-top: 0;">
                         <div class="status-lbl">Schedule Status</div>
                         <?php
-                        $onTime  = max(0, $hHealthy);
-                        $delayed = max(0, $hCritical + $hWarning);
-                        $barTotal = max(1, $onTime + $delayed);
-                        $pOn  = round($onTime / $barTotal * 100);
+                        $barTotal = max(1, $schOnTime + $schDelayed);
+                        $pOn  = round($schOnTime / $barTotal * 100);
                         $pDel = 100 - $pOn;
                         ?>
                         <div class="bar-track">
                             <div class="bar-seg" style="width:<?= $pOn ?>%;background:#10b981">
-                                <?= $onTime > 0 ? $onTime : '' ?>
+                                <?= $schOnTime > 0 ? $schOnTime : '' ?>
                             </div>
                             <div class="bar-seg" style="width:<?= $pDel ?>%;background:#ef4444">
-                                <?= $delayed > 0 ? $delayed : '' ?>
+                                <?= $schDelayed > 0 ? $schDelayed : '' ?>
                             </div>
                         </div>
                         <div style="display:flex;gap:12px;font-size:.65rem;color:var(--db-muted);margin-bottom:10px">
@@ -366,18 +370,16 @@
 
                         <div class="status-lbl">Cost Status</div>
                         <?php
-                        $onBudget = max(0, $hHealthy);
-                        $overrun  = max(0, $hCritical);
-                        $bTotal   = max(1, $onBudget + $overrun);
-                        $pBud  = round($onBudget / $bTotal * 100);
+                        $bTotal   = max(1, $cstOnBudget + $cstOverrun);
+                        $pBud  = round($cstOnBudget / $bTotal * 100);
                         $pOver = 100 - $pBud;
                         ?>
                         <div class="bar-track">
                             <div class="bar-seg" style="width:<?= $pBud ?>%;background:#3b82f6">
-                                <?= $onBudget > 0 ? $onBudget : '' ?>
+                                <?= $cstOnBudget > 0 ? $cstOnBudget : '' ?>
                             </div>
                             <div class="bar-seg" style="width:<?= $pOver ?>%;background:#f59e0b">
-                                <?= $overrun > 0 ? $overrun : '' ?>
+                                <?= $cstOverrun > 0 ? $cstOverrun : '' ?>
                             </div>
                         </div>
                         <div style="display:flex;gap:12px;font-size:.65rem;color:var(--db-muted)">

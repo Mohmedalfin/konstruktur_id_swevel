@@ -295,7 +295,7 @@ class RealisasiService
         $db = \Config\Database::connect();
 
         $budgetItems = $db->table('rap_detail_item rdi')
-            ->select('rdi.nama_item, rdi.satuan, rdi.spesifikasi, rdi.merk, rdi.jenis_item as kategori')
+            ->select('MIN(rdi.id_rap_detail_item) as id_rap_detail_item, rdi.nama_item, rdi.satuan, rdi.spesifikasi, rdi.merk, rdi.jenis_item as kategori')
             ->select('SUM(rd.volume * rdi.koefisien) as qty_budget', false)
             ->join('rap_detail rd', 'rd.id_rap_detail = rdi.id_rap_detail')
             ->join('rap r', 'r.id_rap = rd.id_rap')
@@ -405,9 +405,12 @@ class RealisasiService
             $qtyInput = (float) ($item['qty'] ?? 0);
             if ($qtyInput <= 0) continue;
 
-            $kategori = strtolower(trim($item['kategori'] ?? ''));
-            if ($kategori === 'tenaga kerja' || $kategori === 'tenaga') {
-                $kategori = 'upah';
+            $kategoriInput = strtolower(trim($item['kategori'] ?? ''));
+            $kategori = 'Bahan';
+            if ($kategoriInput === 'tenaga kerja' || $kategoriInput === 'tenaga' || $kategoriInput === 'upah') {
+                $kategori = 'Tenaga Kerja';
+            } elseif ($kategoriInput === 'alat') {
+                $kategori = 'Alat';
             }
 
             // Ambil harga_satuan dari RAP jika tersedia
@@ -417,6 +420,26 @@ class RealisasiService
                 $rapItem = $db->table('rap_detail_item')
                     ->select('harga_satuan')
                     ->where('id_rap_detail_item', $idRapDetailItem)
+                    ->get()->getRowArray();
+                if ($rapItem) {
+                    $hargaSatuan = (float) ($rapItem['harga_satuan'] ?? 0);
+                }
+            }
+
+            // Fallback: search by name, unit, spec, brand, and category if price is still 0
+            if ($hargaSatuan <= 0) {
+                $rapItem = $db->table('rap_detail_item rdi')
+                    ->select('rdi.harga_satuan')
+                    ->join('rap_detail rd', 'rd.id_rap_detail = rdi.id_rap_detail')
+                    ->join('rap r', 'r.id_rap = rd.id_rap')
+                    ->where('r.id_project', $idProject)
+                    ->where('rdi.nama_item', $item['nama_item'])
+                    ->where('rdi.satuan', $item['satuan'])
+                    ->groupStart()
+                        ->where('rdi.jenis_item', $kategori)
+                        ->orWhere('rdi.jenis_item', $item['kategori'])
+                    ->groupEnd()
+                    ->orderBy('rdi.harga_satuan', 'DESC')
                     ->get()->getRowArray();
                 if ($rapItem) {
                     $hargaSatuan = (float) ($rapItem['harga_satuan'] ?? 0);

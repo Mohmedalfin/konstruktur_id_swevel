@@ -11,8 +11,11 @@ use CodeIgniter\Router\RouteCollection;
 // --------------------------------------------------------------------
 $routes->group('', function ($routes) {
 
+    // Landing Page
+    $routes->get('/', 'Home::index');
+
     // Auth & Registrasi
-    $routes->get('/', 'Home::login');
+    $routes->get('login', 'Home::login');
     $routes->get('Register', 'Home::register');
     $routes->get('registrasi', 'Registrasi::index');
     $routes->post('registrasi/simpan', 'Registrasi::simpan');
@@ -32,6 +35,9 @@ $routes->group('', function ($routes) {
 
     // Dashboard
     $routes->get('dashboard', 'menu\DashboardController::index');
+    
+    // Notifikasi
+    $routes->get('notifikasi', 'NotifikasiController::index');
     $routes->get('proyek/(:segment)/dashboard', 'menu\DashboardController::index/$1');
     $routes->get('proyek/(:segment)/dashboard/getData', 'menu\DashboardController::getData');
     $routes->get('proyek/(:segment)/dashboard/getCategoryDetail/(:num)', 'menu\DashboardController::getCategoryDetail/$2');

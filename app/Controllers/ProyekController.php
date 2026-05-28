@@ -35,7 +35,10 @@ class ProyekController extends BaseController
             ];
         }
 
-        return view('proyek/index', ['cards' => $cards]);
+        return view('proyek/index', [
+            'cards' => $cards,
+            'cities' => $this->getAllCities()
+        ]);
     }
     public function show($slug)
     {
@@ -48,9 +51,19 @@ class ProyekController extends BaseController
 
         return view('proyek/show', ['proyek' => $proyek]);
     }
+    private function getAllCities()
+    {
+        try {
+            $db = \Config\Database::connect('estimator');
+            return $db->query("SELECT id_wilayah AS id, wilayah AS nama FROM wilayah WHERE kategori = '2' ORDER BY wilayah ASC")->getResultArray();
+        } catch (\Throwable $e) {
+            return [];
+        }
+    }
+
     public function create()
     {
-        return view('proyek/create');
+        return view('proyek/create', ['cities' => $this->getAllCities()]);
     }
     public function store()
     {
@@ -123,19 +136,9 @@ class ProyekController extends BaseController
             return redirect()->to(base_url('proyek'))->with('error', 'Proyek tidak ditemukan.');
         }
 
-        // Cari id_prov untuk pre-fill dropdown wilayah di frontend
-        $idProv = null;
-        if (!empty($proyek['id_wilayah'])) {
-            try {
-                $dbEst = \Config\Database::connect('estimator');
-                $w = $dbEst->query("SELECT id_prov FROM wilayah WHERE id_wilayah = ?", [$proyek['id_wilayah']])->getRowArray();
-                $idProv = $w['id_prov'] ?? null;
-            } catch (\Throwable $e) {}
-        }
-
         return view('proyek/edit', [
             'proyek' => $proyek,
-            'id_prov' => $idProv
+            'cities' => $this->getAllCities()
         ]);
     }
 

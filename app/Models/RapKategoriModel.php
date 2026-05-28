@@ -6,12 +6,12 @@ use CodeIgniter\Model;
 
 class RapKategoriModel extends Model
 {
-    protected $DBGroup          = 'default';
-    protected $table            = 'rap_kategori';
-    protected $primaryKey       = 'id_rap_kategori';
+    protected $DBGroup = 'default';
+    protected $table = 'rap_kategori';
+    protected $primaryKey = 'id_rap_kategori';
     protected $useAutoIncrement = true;
-    protected $returnType       = 'array';
-    protected $protectFields    = true;
+    protected $returnType = 'array';
+    protected $protectFields = true;
 
     protected $allowedFields = [
         'id_rap',
