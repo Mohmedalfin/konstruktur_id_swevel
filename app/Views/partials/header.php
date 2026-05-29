@@ -9,12 +9,12 @@ $isAccountSectionActive = $isProfilePage || $isTeamAccountsPage || $isProjectLis
 $isDashboardPage = in_array($firstSegment, ['', 'dashboard'], true) && !$isAccountSectionActive;
 
 $dashboardNavClass = $isDashboardPage
-    ? 'px-4 h-14 md:py-0 md:w-28 md:justify-center flex items-center gap-3 text-sm bg-white text-primary md:rounded-none focus:outline-hidden'
-    : 'px-4 h-14 md:py-0 md:w-28 md:justify-center flex items-center gap-3 text-sm text-white hover:bg-navbar-nav-hover focus:outline-hidden focus:bg-navbar-nav-focus';
+    ? 'px-4 h-14 md:py-0 md:w-28 md:justify-center flex items-center gap-3 text-sm bg-white text-primary font-semibold md:rounded-none focus:outline-hidden'
+    : 'px-4 h-14 md:py-0 md:w-28 md:justify-center flex items-center gap-3 text-sm text-navbar-foreground hover:bg-navbar-hover focus:bg-navbar-focus md:rounded-none focus:outline-hidden';
 
 $accountTriggerClass = $isAccountSectionActive
     ? 'hs-dropdown-toggle w-full h-14 px-4 md:px-3 md:justify-center flex items-center gap-3 text-sm bg-white text-slate-800 hover:bg-white/95 focus:outline-hidden focus:bg-white'
-    : 'hs-dropdown-toggle w-full h-14 px-4 md:px-3 md:justify-center flex items-center gap-3 text-sm text-navbar-nav-foreground hover:bg-navbar-nav-hover focus:outline-hidden focus:bg-navbar-nav-focus';
+    : 'hs-dropdown-toggle w-full h-14 px-4 md:px-3 md:justify-center flex items-center gap-3 text-sm text-navbar-foreground hover:bg-navbar-hover focus:outline-hidden focus:bg-navbar-focus';
 
 $accountIconClass = $isAccountSectionActive
     ? 'text-slate-800 fa-solid fa-user text-md'
