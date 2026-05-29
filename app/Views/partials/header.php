@@ -1,6 +1,44 @@
 <?php
-$userName = session()->get('nama_pengguna') ?? session()->get('nama') ?? 'Pengguna';
+$userName = session()->get('nama_pengguna') ?? session()->get('nama') ?? 'Moch. Alfin ';
 $userRole = session()->get('kategori_akun') ?? session()->get('role') ?? 'Kontraktor';
+$firstSegment = service('uri')->getSegment(1);
+$isProfilePage = $firstSegment === 'profile';
+$isTeamAccountsPage = $firstSegment === 'kelola-akun';
+$isProjectListPage = $firstSegment === 'proyek';
+$isAccountSectionActive = $isProfilePage || $isTeamAccountsPage || $isProjectListPage;
+$isDashboardPage = in_array($firstSegment, ['', 'dashboard'], true) && !$isAccountSectionActive;
+
+$dashboardNavClass = $isDashboardPage
+    ? 'px-4 h-14 md:py-0 md:w-28 md:justify-center flex items-center gap-3 text-sm bg-white text-primary md:rounded-none focus:outline-hidden'
+    : 'px-4 h-14 md:py-0 md:w-28 md:justify-center flex items-center gap-3 text-sm text-white hover:bg-navbar-nav-hover focus:outline-hidden focus:bg-navbar-nav-focus';
+
+$accountTriggerClass = $isAccountSectionActive
+    ? 'hs-dropdown-toggle w-full h-14 px-4 md:px-3 md:justify-center flex items-center gap-3 text-sm bg-white text-slate-800 hover:bg-white/95 focus:outline-hidden focus:bg-white'
+    : 'hs-dropdown-toggle w-full h-14 px-4 md:px-3 md:justify-center flex items-center gap-3 text-sm text-navbar-nav-foreground hover:bg-navbar-nav-hover focus:outline-hidden focus:bg-navbar-nav-focus';
+
+$accountIconClass = $isAccountSectionActive
+    ? 'text-slate-800 fa-solid fa-user text-md'
+    : 'text-white fa-solid fa-user text-md drop-shadow-[0_0_5px_rgba(255,255,255,0.5)]';
+
+$accountNameClass = $isAccountSectionActive
+    ? 'text-sm font-medium text-slate-900'
+    : 'text-sm font-medium text-white';
+
+$accountChevronClass = $isAccountSectionActive
+    ? 'text-slate-800 hs-dropdown-open:-rotate-180 duration-300 shrink-0 size-4 ms-auto md:ms-1 group-hover:translate-y-0.5'
+    : 'text-white hs-dropdown-open:-rotate-180 duration-300 shrink-0 size-4 ms-auto md:ms-1 group-hover:translate-y-0.5';
+
+$profileMenuClass = $isProfilePage
+    ? 'p-2 md:px-3 flex items-center text-sm text-slate-700 bg-gray-100 focus:outline-none focus:bg-gray-100 rounded-lg gap-3'
+    : 'p-2 md:px-3 flex items-center text-sm text-slate-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 rounded-lg gap-3';
+
+$teamAccountsMenuClass = $isTeamAccountsPage
+    ? 'p-2 md:px-3 flex items-center text-sm text-slate-700 bg-gray-100 focus:outline-none focus:bg-gray-100 rounded-lg gap-3'
+    : 'p-2 md:px-3 flex items-center text-sm text-slate-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 rounded-lg gap-3';
+
+$projectListMenuClass = $isProjectListPage
+    ? 'p-2 md:px-3 flex items-center text-sm text-slate-700 bg-gray-100 focus:outline-none focus:bg-gray-100 rounded-lg gap-3'
+    : 'p-2 md:px-3 flex items-center text-sm text-slate-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 rounded-lg gap-3';
 ?>
 
 <!-- ========== HEADER ========== -->
@@ -50,11 +88,8 @@ $userRole = session()->get('kategori_akun') ?? session()->get('role') ?? 'Kontra
                 <div class="py-2 md:py-0 flex flex-col md:flex-row md:items-stretch gap-0.5 md:gap-0">
                     <div class="grow">
                         <div class="flex flex-col md:flex-row md:justify-end md:items-stretch gap-0 md:gap-0">
-                            <a class="px-4 h-14 md:py-0 md:w-28 md:justify-center flex items-center gap-3 text-sm <?= is_nav_active('dashboard') ? 'bg-white text-primary font-semibold' : 'text-navbar-foreground hover:bg-navbar-hover focus:bg-navbar-focus' ?> md:rounded-none focus:outline-hidden"
-                                href="<?= base_url('dashboard') ?>" <?= is_nav_active('dashboard') ? 'aria-current="page"' : '' ?>>
-                                <svg class="shrink-0 size-4 block md:hidden" xmlns="http://www.w3.org/2000/svg"
-                                    width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <a class="<?= esc($dashboardNavClass) ?> header-nav-link" href="<?= base_url('dashboard') ?>"<?= $isDashboardPage ? ' aria-current="page"' : '' ?>>
+                                <svg class="shrink-0 size-4 block md:hidden" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
                                     <path
                                         d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
@@ -130,23 +165,21 @@ $userRole = session()->get('kategori_akun') ?? session()->get('role') ?? 'Kontra
                             <div
                                 class="hs-dropdown [--strategy:static] md:[--strategy:fixed] [--adaptive:none] md:[--adaptive:adaptive] [--is-collapse:true] md:[--is-collapse:false]">
                                 <button id="hs-header-base-dropdown" type="button"
-                                    class="hs-dropdown-toggle w-full h-14 px-4 md:px-3 md:justify-center flex items-center gap-3 text-sm text-navbar-foreground hover:bg-navbar-hover focus:outline-hidden focus:bg-navbar-focus"
+                                    class="<?= esc($accountTriggerClass) ?>"
                                     aria-haspopup="menu" aria-expanded="false" aria-label="Dropdown">
 
                                     <div class="shrink-0">
-                                        <i
-                                            class="text-white fa-solid fa-user text-md drop-shadow-[0_0_5px_rgba(255,255,255,0.5)]"></i>
+                                        <i class="<?= esc($accountIconClass) ?>"></i>
                                     </div>
 
                                     <div class="leading-tight text-left">
-                                        <div class="text-sm font-medium text-white"><?= esc($userName) ?></div>
+                                        <div class="<?= esc($accountNameClass) ?>"><?= esc($userName) ?></div>
                                         <div class="text-xs text-secondary opacity-80"><?= esc($userRole) ?></div>
                                     </div>
 
-                                    <svg class="text-white hs-dropdown-open:-rotate-180 duration-300 shrink-0 size-4 ms-auto md:ms-1 group-hover:translate-y-0.5"
-                                        xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                        stroke-linejoin="round">
+                                    <svg class="<?= esc($accountChevronClass) ?>" 
+                                        xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" 
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="m6 9 6 6 6-6" />
                                     </svg>
                                 </button>
@@ -154,13 +187,15 @@ $userRole = session()->get('kategori_akun') ?? session()->get('role') ?? 'Kontra
                                 <div class="hs-dropdown-menu transition-[opacity,margin] duration-[0.1ms] md:duration-[150ms] hs-dropdown-open:opacity-100 opacity-0 relative w-full md:w-52 hidden z-10 top-full ps-7 md:ps-0 md:bg-white md:border md:border-gray-200 md:shadow-md before:absolute before:-top-4 before:start-0 before:w-full before:h-5 md:after:hidden after:absolute after:top-1 after:start-4.5 after:h-[calc(100%-4px)] after:border-s after:border-white/20"
                                     role="menu" aria-orientation="vertical" aria-labelledby="hs-header-base-dropdown">
                                     <div class="py-1 md:px-1 space-y-0.5">
-                                        <a class="p-2 md:px-3 flex items-center text-sm text-slate-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 rounded-lg gap-3"
-                                            href="#">
+                                        <a class="<?= esc($profileMenuClass) ?> header-nav-link" href="<?= base_url('profile') ?>"<?= $isProfilePage ? ' aria-current="page"' : '' ?>>
                                             <i class="fa-regular fa-id-badge w-4"></i>
                                             Profile
                                         </a>
-                                        <a class="p-2 md:px-3 flex items-center text-sm text-slate-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 rounded-lg gap-3"
-                                            href="<?= base_url('proyek') ?>">
+                                        <a class="<?= esc($teamAccountsMenuClass) ?> header-nav-link" href="<?= base_url('kelola-akun') ?>"<?= $isTeamAccountsPage ? ' aria-current="page"' : '' ?>>
+                                            <i class="fa-solid fa-users-gear w-4"></i>
+                                            Kelola Akun
+                                        </a>
+                                        <a class="<?= esc($projectListMenuClass) ?> header-nav-link" href="<?= base_url('proyek') ?>"<?= $isProjectListPage ? ' aria-current="page"' : '' ?>>
                                             <i class="fa-solid fa-list-check w-4"></i>
                                             Daftar Proyek
                                         </a>

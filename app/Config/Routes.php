@@ -52,6 +52,17 @@ $routes->group('', function ($routes) {
     $routes->get('schedule', 'menu\ScheduleController::index');
     $routes->get('proyek/(:segment)/schedule', 'menu\ScheduleController::index/$1');
     
+    // Profile Perusahaan
+    $routes->get('profile', 'menu\ProfileController::index');
+    $routes->get('profile/data', 'menu\ProfileController::getData');
+    $routes->post('profile/update', 'menu\ProfileController::update');
+
+    // Kelola Akun Tim (Gudang & Purchasing)
+    $routes->get('kelola-akun', 'menu\TeamAccountsController::index');
+    $routes->get('kelola-akun/data', 'menu\TeamAccountsController::getSubAccounts');
+    $routes->post('kelola-akun/create', 'menu\TeamAccountsController::createSubAccount');
+    $routes->delete('kelola-akun/delete/(:num)', 'menu\TeamAccountsController::deleteSubAccount/$1');
+
     // Realisasi
     $routes->get('realisasi', 'menu\RealisasiController::index');
     $routes->get('proyek/(:segment)/realisasi', 'menu\RealisasiController::index/$1');
