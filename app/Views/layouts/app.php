@@ -9,6 +9,7 @@
 
     <link rel="stylesheet" href="<?= base_url('assets/css/output.css') ?>">
     <link rel="stylesheet" href="<?= base_url('assets/fontawesome/css/all.min.css') ?>">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.css" />
 </head>
 
 <body class="bg-gray-50">
@@ -34,6 +35,7 @@
             window.HSDatepicker?.autoInit?.();
         });
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.js.iife.js"></script>
 
     <?= $this->renderSection('scripts') ?>
 

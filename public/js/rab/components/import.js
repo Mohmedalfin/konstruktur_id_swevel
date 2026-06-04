@@ -1152,6 +1152,50 @@ export async function initImport() {
             overlay?.classList.add('opacity-100');
             content?.classList.remove('scale-95');
             content?.classList.add('scale-100');
+
+            // Edukasi / Tour menggunakan Driver.js
+            if (!localStorage.getItem('hasSeenImportTour_v3') && window.driver) {
+                const driver = window.driver.js.driver;
+                const driverObj = driver({
+                    showProgress: true,
+                    nextBtnText: 'Lanjut &rarr;',
+                    prevBtnText: '&larr; Kembali',
+                    doneBtnText: 'Selesai',
+                    progressText: '{{current}} dari {{total}}',
+                    allowClose: true,
+                    steps: [
+                        {
+                            popover: {
+                                title: 'Panduan Import BOQ',
+                                description: 'Selamat datang di fitur Import BOQ! Fitur ini memudahkan Anda memindahkan data RAB dari Excel ke dalam sistem.<br><br>Klik <b>Lanjut</b> untuk melihat tips aman menggunakannya.',
+                                align: 'center'
+                            }
+                        },
+                        {
+                            element: '#import-prompt-modal-template',
+                            popover: {
+                                title: 'Penting: Gunakan Template',
+                                description: 'Untuk mencegah error dan memastikan sistem membaca data dengan tepat, silakan unduh dan gunakan template Excel yang telah kami sediakan.<div class="mt-4 pt-3 border-t border-slate-100/60 flex items-center gap-2"><input type="checkbox" id="hide-import-tour" class="w-3.5 h-3.5 rounded text-primary border-slate-300 focus:ring-primary cursor-pointer"><label for="hide-import-tour" class="text-[11px] font-medium text-slate-500 cursor-pointer">Jangan tampilkan panduan ini lagi</label></div>',
+                                side: "bottom",
+                                align: 'center'
+                            }
+                        }
+                    ],
+                    onDestroyStarted: () => {
+                        const cb = document.getElementById('hide-import-tour');
+                        // HANYA simpan jika user benar-benar menceklis checkbox
+                        if (cb && cb.checked) {
+                            localStorage.setItem('hasSeenImportTour_v3', 'true');
+                        }
+                        driverObj.destroy();
+                    },
+                });
+
+                // Tunggu animasi modal selesai, baru jalankan driver
+                setTimeout(() => {
+                    driverObj.drive();
+                }, 350);
+            }
         }, 10);
     });
 

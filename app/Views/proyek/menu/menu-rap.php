@@ -18,6 +18,7 @@ if (!in_array($rabMode, ['readonly', 'new'], true)) {
     <title>Menu RAB &amp; RAP</title>
     <link href="<?= base_url('assets/css/output.css') ?>" rel="stylesheet">
     <link rel="stylesheet" href="<?= base_url('assets/fontawesome/css/all.min.css') ?>">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.css" />
 </head>
 
 <body class="bg-gray-50 min-h-screen">
@@ -66,6 +67,7 @@ if (!in_array($rabMode, ['readonly', 'new'], true)) {
     <script src="<?= base_url('assets/js/partials/navbar.js') ?>"></script>
     <script src="<?= base_url('assets/js/vendor/exceljs.min.js') ?>"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.js.iife.js"></script>
     <script type="module" src="<?= base_url('js/rab/index.js?v=' . time()) ?>"></script>
 </body>
 

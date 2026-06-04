@@ -326,3 +326,94 @@
         font-size: 0.7rem !important;
     }
 }
+
+/* ================================
+   Driver.js Custom Modern Theme
+================================= */
+
+.driver-popover {
+    font-family: var(--font-sans, 'Montserrat', sans-serif) !important;
+    border-radius: 1rem !important; /* rounded-2xl */
+    box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25), 0 0 0 1px rgb(0 0 0 / 0.05) !important;
+    padding: 1.5rem !important;
+    border: none !important;
+}
+
+/* Title styling */
+.driver-popover-title {
+    font-size: 1.125rem !important; /* text-lg */
+    font-weight: 700 !important; /* font-bold */
+    color: var(--table-text-strong, #111827) !important;
+    margin-bottom: 0.5rem !important;
+}
+
+/* Description styling */
+.driver-popover-description {
+    font-size: 0.8125rem !important; /* text-sm/13px */
+    line-height: 1.6 !important;
+    color: var(--table-text-subtle, #6b7280) !important;
+}
+
+/* Navigation Buttons Container */
+.driver-popover-footer {
+    margin-top: 1.25rem !important;
+}
+
+.driver-popover-footer button {
+    border-radius: 0.625rem !important; /* rounded-xl-ish */
+    font-weight: 600 !important;
+    font-size: 0.75rem !important; /* text-xs */
+    padding: 0.5rem 1.25rem !important;
+    transition: all 0.2s ease !important;
+    text-shadow: none !important;
+}
+
+/* Button next/done */
+.driver-popover-next-btn {
+    background-color: var(--primary, #0C111D) !important;
+    color: #ffffff !important;
+    border: none !important;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1) !important;
+}
+.driver-popover-next-btn:hover {
+    background-color: #1a2235 !important;
+    transform: translateY(-1px) !important;
+}
+.driver-popover-next-btn:active {
+    transform: translateY(0) scale(0.98) !important;
+}
+
+/* Button prev */
+.driver-popover-prev-btn {
+    background-color: #f3f4f6 !important;
+    color: #374151 !important;
+    border: 1px solid #d1d5db !important;
+}
+.driver-popover-prev-btn:hover {
+    background-color: #e5e7eb !important;
+}
+
+/* Progress text */
+.driver-popover-progress-text {
+    font-size: 0.75rem !important;
+    font-weight: 600 !important;
+    color: #9ca3af !important;
+    letter-spacing: 0.025em !important;
+}
+
+/* Close Button (the X at the top right) */
+.driver-popover-close-btn {
+    color: #9ca3af !important;
+    top: 1rem !important;
+    right: 1rem !important;
+    transition: color 0.2s ease, transform 0.2s ease !important;
+}
+.driver-popover-close-btn:hover {
+    color: #ef4444 !important;
+    transform: rotate(90deg) !important;
+}
+
+/* Active Highlighted Element (Gives it a subtle glow or rounded outline if possible, Driver.js handles outline but we can smooth it) */
+.driver-active-element {
+    border-radius: 0.75rem !important;
+}
