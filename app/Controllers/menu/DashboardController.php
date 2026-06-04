@@ -41,6 +41,7 @@ class DashboardController extends BaseController
             
             $totalEv = 0;
             $totalBac = 0;
+            $totalAc = 0;
 
             foreach ($proyeks as $idx => $p) {
                 $status = $p['status_proyek'] ?? 'draft';
@@ -50,6 +51,7 @@ class DashboardController extends BaseController
                 
                 $totalEv += $metrics['ev_value'] ?? 0;
                 $totalBac += $metrics['bac_value'] ?? 0;
+                $totalAc += $metrics['ac_value'] ?? 0;
 
                 // Schedule status
                 $schedLabel = $metrics['schedule_status'] ?? 'On Time';
@@ -113,7 +115,7 @@ class DashboardController extends BaseController
 
             $rataProgres = $totalBac > 0 ? round(($totalEv / $totalBac) * 100, 1) : 0;
             
-            $totalRap = $totalBac;
+            $totalRap = $totalAc;
             $pctSerapan = $totalNilaiKontrak > 0
                 ? round(($totalRap / $totalNilaiKontrak) * 100, 1)
                 : 0;

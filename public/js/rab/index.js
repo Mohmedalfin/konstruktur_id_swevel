@@ -28,20 +28,20 @@ import {
     renderEditable,
     showTable,
     setEditableMode
-} from './components/render.js';
+} from './components/render.js?v=2';
 
 import {
     openKategoriModal,
     closeKategoriModal,
     updateModalInfo
-} from './components/categories.js';
+} from './components/categories.js?v=2';
 
-import { initImport, refreshImportCategories } from './components/import.js';
-import { initTemplate } from './components/template.js';
-import { bindSearch } from './hooks/search.js';
-import { bindFormatPenomoran } from './components/format.js';
+import { initImport, refreshImportCategories } from './components/import.js?v=2';
+import { initTemplate } from './components/template.js?v=2';
+import { bindSearch } from './hooks/search.js?v=2';
+import { bindFormatPenomoran } from './components/format.js?v=2';
 import { toast } from '../shared/ui/toast.js';
-import { confirmAction } from '../shared/ui/confirm.js';
+import { confirmAction, AppSwal } from '../shared/ui/confirm.js?v=2';
 
 function applySourcePermission(data) {
     if (!tambahKategoriBtn) return;
@@ -70,43 +70,74 @@ if (!wrapper || !tbody) {
 
             if (!ok) return;
 
-            try {
-                resetDataBtn.disabled = true;
-                const originalHtml = resetDataBtn.innerHTML;
-                resetDataBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+            const executeReset = async (force = false) => {
+                try {
+                    resetDataBtn.disabled = true;
+                    const originalHtml = resetDataBtn.innerHTML;
+                    resetDataBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
 
-                const res = await fetch(`/api/rap/reset/${idProject}`, {
-                    method: 'DELETE',
-                    headers: { 'Accept': 'application/json' }
-                });
+                    const url = `/api/rap/reset/${idProject}${force ? '?force=1' : ''}`;
+                    const res = await fetch(url, {
+                        method: 'DELETE',
+                        headers: { 'Accept': 'application/json' }
+                    });
 
-                const json = await res.json();
-                if (!res.ok || json.status !== 'success') {
-                    throw new Error(json.message || 'Gagal reset data');
+                    const json = await res.json();
+                    
+                    if (res.status === 409 && json.status === 'has_realisasi') {
+                        resetDataBtn.disabled = false;
+                        resetDataBtn.innerHTML = originalHtml;
+                        
+                        const swalRes = await AppSwal.fire({
+                            title: 'Peringatan!',
+                            html: 'Proyek ini sudah memiliki data realisasi. Jika Anda mengosongkan RAP, <strong>semua data realisasinya juga akan ikut terhapus permanen</strong>.<br><br>Apakah Anda yakin ingin melanjutkan?',
+                            icon: 'warning',
+                            showDenyButton: true,
+                            showCancelButton: true,
+                            confirmButtonText: 'Kosongkan Semua',
+                            denyButtonText: 'Lihat Realisasi',
+                            cancelButtonText: 'Batal'
+                        });
+
+                        if (swalRes.isConfirmed) {
+                            return await executeReset(true);
+                        } else if (swalRes.isDenied) {
+                            window.location.href = `/proyek/${json.slug}/realisasi`;
+                            return false;
+                        }
+                        return false;
+                    }
+
+                    if (!res.ok || json.status !== 'success') {
+                        throw new Error(json.message || 'Gagal reset data');
+                    }
+
+                    toast.show('Data RAP berhasil dikosongkan!', 'success');
+                    
+                    // Refresh data
+                    renderLoading();
+                    const freshData = await fetchRabData(idProject);
+                    
+                    state.activeCategories = (freshData.categories || []).map(cat => ({
+                        id: String(cat.id),
+                        nama: cat.name
+                    }));
+                    state.format_penomoran = freshData.format_penomoran || null;
+
+                    applySourcePermission(freshData);
+                    renderReadonly(freshData);
+
+                    resetDataBtn.disabled = false;
+                    resetDataBtn.innerHTML = originalHtml;
+                } catch (err) {
+                    console.error('Reset error:', err);
+                    toast.show(err.message || 'Gagal mengosongkan data', 'error');
+                    resetDataBtn.disabled = false;
+                    resetDataBtn.innerHTML = 'Kosongkan Seluruh RAP';
                 }
-
-                toast.show('Data RAP berhasil dikosongkan!', 'success');
-                
-                // Refresh data
-                renderLoading();
-                const freshData = await fetchRabData(idProject);
-                
-                state.activeCategories = (freshData.categories || []).map(cat => ({
-                    id: String(cat.id),
-                    nama: cat.name
-                }));
-                state.format_penomoran = freshData.format_penomoran || null;
-
-                applySourcePermission(freshData);
-                renderReadonly(freshData);
-
-                resetDataBtn.disabled = false;
-                resetDataBtn.innerHTML = originalHtml;
-            } catch (err) {
-                console.error('Reset error:', err);
-                toast.show(err.message || 'Gagal mengosongkan data', 'error');
-                resetDataBtn.disabled = false;
-            }
+            };
+            
+            await executeReset();
         });
     }
 

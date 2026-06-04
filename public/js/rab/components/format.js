@@ -1,6 +1,7 @@
 import { state } from '../core/state.js';
 import { renderReadonly } from './render.js';
 import { fetchRabData } from '../core/data.js';
+import { AppSwal } from '../../shared/ui/confirm.js';
 
 export function bindFormatPenomoran() {
     const btn = document.getElementById('format-penomoran-btn');
@@ -14,6 +15,18 @@ export function bindFormatPenomoran() {
     btn.classList.remove('hidden');
 
     const openModal = () => {
+        if (state.sumber_data === 'boq' || state.sumber_data === 'import') {
+            AppSwal.fire({
+                title: 'Tidak Tersedia',
+                text: 'Format penomoran otomatis tidak dapat diubah karena RAP ini menggunakan data hasil Import BOQ (mengikuti penomoran asli file Excel).',
+                icon: 'info',
+                showCancelButton: false,
+                confirmButtonText: 'Mengerti',
+                scrollbarPadding: false
+            });
+            return;
+        }
+
         // Set values from state if they exist
         if (state.format_penomoran) {
             let parsed = state.format_penomoran;
@@ -28,10 +41,16 @@ export function bindFormatPenomoran() {
             document.getElementById('format-kategori').value = parsed['-1'] || 'A';
             document.getElementById('format-pekerjaan').value = parsed['0'] || '1';
             document.getElementById('format-subpekerjaan').value = parsed['1'] || '1.1';
+            const resetEl = document.getElementById('format-reset-pekerjaan');
+            if (resetEl) {
+                resetEl.value = typeof parsed['reset'] !== 'undefined' ? parsed['reset'] : '1';
+            }
         } else {
             document.getElementById('format-kategori').value = 'A';
             document.getElementById('format-pekerjaan').value = '1';
             document.getElementById('format-subpekerjaan').value = '1.1';
+            const resetEl = document.getElementById('format-reset-pekerjaan');
+            if (resetEl) resetEl.value = '1';
         }
         overlay.classList.remove('hidden');
         overlay.classList.add('flex');
@@ -50,7 +69,8 @@ export function bindFormatPenomoran() {
         const format = {
             '-1': document.getElementById('format-kategori').value,
             '0': document.getElementById('format-pekerjaan').value,
-            '1': document.getElementById('format-subpekerjaan').value
+            '1': document.getElementById('format-subpekerjaan').value,
+            'reset': document.getElementById('format-reset-pekerjaan') ? document.getElementById('format-reset-pekerjaan').value : '1'
         };
 
         const idProject = window.RAB_INIT?.idProject || window.RAB_INIT?.id;

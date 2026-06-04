@@ -520,30 +520,41 @@ function numberToRoman(num, lowercase = false) {
 }
 
 function updateHierarchicalNumbers() {
+    let format = state.format_penomoran || {};
+    if (typeof format === 'string') {
+        try { format = JSON.parse(format); } catch(e) { format = {}; }
+    }
+    const isReset = (format['reset'] === undefined || format['reset'] === '1' || format['reset'] == 1);
+
     const categories = Array.from(tbody.querySelectorAll('.rab-category'));
+    let globalCounters = [0];
+    let globalPrevDepth = 0;
+
     categories.forEach(catRow => {
         const catId = catRow.dataset.cat;
         const itemRows = Array.from(tbody.querySelectorAll(`.subrow-${catId}.sortable-item`));
 
-        let counters = [0];
-        let prevDepth = 0;
+        if (isReset) {
+            globalCounters = [0];
+            globalPrevDepth = 0;
+        }
 
         itemRows.forEach(row => {
             const depth = parseInt(row.dataset.depth || '0', 10);
 
-            if (depth > prevDepth) {
-                counters[depth] = 1;
-            } else if (depth < prevDepth) {
-                counters = counters.slice(0, depth + 1);
-                counters[depth]++;
+            if (depth > globalPrevDepth) {
+                globalCounters[depth] = 1;
+            } else if (depth < globalPrevDepth) {
+                globalCounters = globalCounters.slice(0, depth + 1);
+                globalCounters[depth]++;
             } else {
-                counters[depth]++;
+                globalCounters[depth]++;
             }
-            prevDepth = depth;
+            globalPrevDepth = depth;
 
             // Failsafe initialization
             for (let i = 0; i <= depth; i++) {
-                if (!counters[i]) counters[i] = 1;
+                if (!globalCounters[i]) globalCounters[i] = 1;
             }
 
             let noStr = '';
@@ -558,7 +569,7 @@ function updateHierarchicalNumbers() {
                     noStr = rowNomorCustom;
                 }
             } else {
-                noStr = formatNomor(depth, counters.slice(0, depth + 1));
+                noStr = formatNomor(depth, globalCounters.slice(0, depth + 1));
                 if (noStr !== '-' && !noStr.includes('.')) {
                     noStr += '.';
                 }
@@ -569,6 +580,8 @@ function updateHierarchicalNumbers() {
         });
     });
 }
+
+
 
 function renderItemRows(items, catId, subClass, isEditable, prefix = '', depth = 0, isAddDeleteAllowed = true) {
     let html = '';
@@ -857,49 +870,85 @@ export function bindDeleteCategoryButtons() {
             );
             if (!ok) return;
 
-            try {
-                const idProject = window.RAB_INIT?.idProject || window.RAB_INIT?.id;
-                if (!idProject) {
-                    throw new Error('ID project tidak ditemukan');
-                }
-
-                const res = await fetch(`/api/rap/kategori/${encodeURIComponent(catId)}?id_project=${encodeURIComponent(idProject)}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Accept': 'application/json'
+            const executeDelete = async (force = false) => {
+                try {
+                    const idProject = window.RAB_INIT?.idProject || window.RAB_INIT?.id;
+                    if (!idProject) {
+                        throw new Error('ID project tidak ditemukan');
                     }
-                });
 
-                const json = await res.json();
+                    const url = `/api/rap/kategori/${encodeURIComponent(catId)}?id_project=${encodeURIComponent(idProject)}${force ? '&force=1' : ''}`;
+                    const res = await fetch(url, {
+                        method: 'DELETE',
+                        headers: {
+                            'Accept': 'application/json'
+                        }
+                    });
 
-                if (!res.ok || json.status !== 'success') {
-                    throw new Error(json.message || 'Gagal menghapus kategori');
+                    const json = await res.json();
+
+                    if (res.status === 409 && json.status === 'has_realisasi') {
+                        const swalRes = await window.AppSwal.fire({
+                            title: 'Peringatan!',
+                            html: `Kategori ini memiliki pekerjaan yang sudah ada data realisasinya. Jika Anda menghapus kategori ini, <strong>semua realisasinya juga akan ikut terhapus permanen</strong>.<br><br>Apakah Anda yakin ingin melanjutkan?`,
+                            icon: 'warning',
+                            showDenyButton: true,
+                            showCancelButton: true,
+                            confirmButtonText: 'Hapus Semua',
+                            denyButtonText: 'Lihat Realisasi',
+                            cancelButtonText: 'Batal'
+                        });
+
+                        if (swalRes.isConfirmed) {
+                            return await executeDelete(true);
+                        } else if (swalRes.isDenied) {
+                            window.location.href = `/proyek/${json.slug}/realisasi`;
+                            return false;
+                        }
+                        return false; // Batal
+                    }
+
+                    if (!res.ok || json.status !== 'success') {
+                        throw new Error(json.message || 'Gagal menghapus kategori');
+                    }
+
+                    if (window.renderLoading) window.renderLoading();
+                    
+                    if (window.fetchRabData) {
+                        const data = await window.fetchRabData(idProject);
+
+                        if (window.state) {
+                            window.state.activeCategories = (data.categories || []).map(cat => ({
+                                id: String(cat.id),
+                                nama: cat.name
+                            }));
+                        }
+
+                        if (window.renderReadonly) {
+                            window.renderReadonly(data);
+                        }
+                    }
+
+                    // Show toast specifically for UI completeness
+                    if (window.Toast) {
+                        window.Toast.show(`Kategori "${catName}" berhasi dihapus dari project`, 'success');
+                    } else if (typeof toast !== 'undefined' && toast.show) {
+                        toast.show(`Kategori "${catName}" berhasi dihapus dari project`, 'success');
+                    }
+                    
+                    return true;
+                } catch (err) {
+                    console.error('Gagal hapus kategori:', err);
+                    if (window.Toast) {
+                        window.Toast.show(err.message || 'Terjadi kesalahan saat menghapus kategori', 'error');
+                    } else {
+                        alert(err.message || 'Terjadi kesalahan saat menghapus kategori');
+                    }
+                    return false;
                 }
-
-                renderLoading();
-                const data = await fetchRabData(idProject);
-
-                state.activeCategories = (data.categories || []).map(cat => ({
-                    id: String(cat.id),
-                    nama: cat.name
-                }));
-
-                renderReadonly(data);
-
-                // Show toast specifically for UI completeness
-                if (window.Toast) {
-                    window.Toast.show(`Kategori "${catName}" berhasi dihapus dari project`, 'success');
-                } else if (typeof toast !== 'undefined' && toast.show) {
-                    toast.show(`Kategori "${catName}" berhasi dihapus dari project`, 'success');
-                }
-            } catch (err) {
-                console.error('Gagal hapus kategori:', err);
-                if (window.Toast) {
-                    window.Toast.show(err.message || 'Terjadi kesalahan saat menghapus kategori', 'error');
-                } else {
-                    alert(err.message || 'Terjadi kesalahan saat menghapus kategori');
-                }
-            }
+            };
+            
+            await executeDelete();
         });
     });
 }
@@ -1022,46 +1071,80 @@ export function bindReadonlyDropdowns() {
             );
             if (!ok) return;
 
-            try {
-                const res = await fetch(`/api/rap/pekerjaan/${idRapDetail}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Accept': 'application/json'
+            const executeDelete = async (force = false) => {
+                try {
+                    const url = `/api/rap/pekerjaan/${idRapDetail}${force ? '?force=1' : ''}`;
+                    const res = await fetch(url, {
+                        method: 'DELETE',
+                        headers: {
+                            'Accept': 'application/json'
+                        }
+                    });
+
+                    const json = await res.json();
+
+                    if (res.status === 409 && json.status === 'has_realisasi') {
+                        const swalRes = await window.AppSwal.fire({
+                            title: 'Peringatan!',
+                            html: 'Pekerjaan ini sudah memiliki data realisasi. Jika Anda menghapus pekerjaan ini, <strong>realisasinya juga akan ikut terhapus permanen</strong>.<br><br>Apakah Anda yakin ingin melanjutkan?',
+                            icon: 'warning',
+                            showDenyButton: true,
+                            showCancelButton: true,
+                            confirmButtonText: 'Hapus Semua',
+                            denyButtonText: 'Lihat Realisasi',
+                            cancelButtonText: 'Batal'
+                        });
+
+                        if (swalRes.isConfirmed) {
+                            return await executeDelete(true);
+                        } else if (swalRes.isDenied) {
+                            window.location.href = `/proyek/${json.slug}/realisasi`;
+                            return false;
+                        }
+                        return false; // Batal
                     }
-                });
 
-                const json = await res.json();
+                    if (!res.ok || json.status !== 'success') {
+                        throw new Error(json.message || 'Gagal menghapus');
+                    }
 
-                if (!res.ok || json.status !== 'success') {
-                    throw new Error(json.message || 'Gagal menghapus');
+                    const idProject = window.RAB_INIT?.idProject || window.RAB_INIT?.id;
+                    if (!idProject) {
+                        throw new Error('ID project tidak ditemukan');
+                    }
+
+                    if (window.renderLoading) window.renderLoading();
+                    if (window.fetchRabData) {
+                        const data = await window.fetchRabData(idProject);
+
+                        if (window.state) {
+                            window.state.activeCategories = (data.categories || []).map(cat => ({
+                                id: String(cat.id),
+                                nama: cat.name
+                            }));
+                        }
+
+                        if (window.renderReadonly) {
+                            window.renderReadonly(data);
+                        }
+                    }
+
+                    if (window.Toast) {
+                        window.Toast.show('Pekerjaan berhasil dihapus dari RAB', 'success');
+                    }
+                    return true;
+                } catch (err) {
+                    console.error('Gagal hapus pekerjaan:', err);
+                    if (window.Toast) {
+                        window.Toast.show(err.message || 'Terjadi kesalahan saat menghapus', 'error');
+                    } else {
+                        alert(err.message || 'Terjadi kesalahan saat menghapus');
+                    }
+                    return false;
                 }
+            };
 
-                const idProject = window.RAB_INIT?.idProject || window.RAB_INIT?.id;
-                if (!idProject) {
-                    throw new Error('ID project tidak ditemukan');
-                }
-
-                renderLoading();
-                const data = await fetchRabData(idProject);
-
-                state.activeCategories = (data.categories || []).map(cat => ({
-                    id: String(cat.id),
-                    nama: cat.name
-                }));
-
-                renderReadonly(data);
-
-                if (window.Toast) {
-                    window.Toast.show('Pekerjaan berhasil dihapus dari RAB', 'success');
-                }
-            } catch (err) {
-                console.error('Gagal hapus pekerjaan:', err);
-                if (window.Toast) {
-                    window.Toast.show(err.message || 'Terjadi kesalahan saat menghapus', 'error');
-                } else {
-                    alert(err.message || 'Terjadi kesalahan saat menghapus');
-                }
-            }
+            await executeDelete();
         });
     });
 }

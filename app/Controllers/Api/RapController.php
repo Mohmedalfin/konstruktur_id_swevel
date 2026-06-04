@@ -9,6 +9,7 @@ use App\Models\KategoriPekerjaanModel;
 use App\Models\RapKategoriModel;
 use App\Models\RapDetailItemModel;
 use App\Models\ProyekModel;
+use App\Models\RealisasiPekerjaanModel;
 use CodeIgniter\Database\Exceptions\DatabaseException;
 use CodeIgniter\HTTP\ResponseInterface;
 use Throwable;
@@ -21,6 +22,7 @@ class RapController extends BaseController
     protected RapKategoriModel $rapKategoriModel;
     protected RapDetailItemModel $rapDetailItemModel;
     protected ProyekModel $proyekModel;
+    protected RealisasiPekerjaanModel $realisasiPekerjaanModel;
 
     public function __construct()
     {
@@ -30,6 +32,7 @@ class RapController extends BaseController
         $this->rapKategoriModel = new RapKategoriModel();
         $this->rapDetailItemModel = new RapDetailItemModel();
         $this->proyekModel = new ProyekModel();
+        $this->realisasiPekerjaanModel = new RealisasiPekerjaanModel();
     }
 
     public function index()
@@ -572,7 +575,27 @@ class RapController extends BaseController
                 ->where('id_kategori', $idKategori)
                 ->findAll();
 
+            $force = $this->request->getVar('force') == 1;
+
+            if (!$force && !empty($detailRows)) {
+                $detailIds = array_column($detailRows, 'id_rap_detail');
+                $hasRealisasi = $this->realisasiPekerjaanModel->whereIn('id_rap_detail', $detailIds)->first();
+                
+                if ($hasRealisasi) {
+                    $db->transRollback();
+                    return $this->response->setStatusCode(409)->setJSON([
+                        'status' => 'has_realisasi',
+                        'message' => 'Kategori ini memiliki pekerjaan yang sudah ada data realisasinya.',
+                        'slug' => $project['slug'] ?? $project['id_project']
+                    ]);
+                }
+            }
+
             foreach ($detailRows as $detail) {
+                if ($force) {
+                    $this->realisasiPekerjaanModel->where('id_rap_detail', $detail['id_rap_detail'])->delete();
+                }
+                
                 $this->rapDetailItemModel
                     ->where('id_rap_detail', $detail['id_rap_detail'])
                     ->delete();
@@ -922,6 +945,21 @@ class RapController extends BaseController
                     'status' => 'error',
                     'message' => 'Pekerjaan pada proyek import tidak dapat dihapus',
                 ]);
+            }
+
+            $force = $this->request->getVar('force') == 1;
+
+            if (!$force) {
+                $hasRealisasi = $this->realisasiPekerjaanModel->where('id_rap_detail', $idRapDetail)->first();
+                if ($hasRealisasi) {
+                    return $this->response->setStatusCode(409)->setJSON([
+                        'status' => 'has_realisasi',
+                        'message' => 'Pekerjaan ini sudah memiliki data realisasi.',
+                        'slug' => $project['slug'] ?? $project['id_project']
+                    ]);
+                }
+            } else {
+                $this->realisasiPekerjaanModel->where('id_rap_detail', $idRapDetail)->delete();
             }
 
             $this->rapDetailItemModel
@@ -1550,6 +1588,26 @@ class RapController extends BaseController
                 $detailIds = array_column($details, 'id_rap_detail');
 
                 if (!empty($detailIds)) {
+                    $realisasiModel = new \App\Models\RealisasiPekerjaanModel();
+                    
+                    // Check for existing realisasi
+                    $hasRealisasi = $realisasiModel->whereIn('id_rap_detail', $detailIds)->countAllResults() > 0;
+                    
+                    $force = $this->request->getGet('force');
+                    
+                    if ($hasRealisasi && $force !== '1') {
+                        $db->transRollback();
+                        return $this->response->setStatusCode(409)->setJSON([
+                            'status' => 'has_realisasi',
+                            'message' => 'Proyek ini sudah memiliki data realisasi.',
+                            'slug' => $project['slug'] ?? ''
+                        ]);
+                    }
+                    
+                    if ($hasRealisasi && $force === '1') {
+                        $realisasiModel->whereIn('id_rap_detail', $detailIds)->delete();
+                    }
+
                     $this->rapDetailItemModel->whereIn('id_rap_detail', $detailIds)->delete();
 
                     $this->rapDetailModel->where('id_rap', $rapId)->delete();

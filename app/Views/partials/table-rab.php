@@ -567,6 +567,14 @@ $isReorderMode = isset($isReorderMode) && $isReorderMode;
                         <option value="1">1, 2, 3...</option>
                     </select>
                 </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Reset Tiap Kategori</label>
+                    <select id="format-reset-pekerjaan"
+                        class="w-full text-xs px-3 py-2 rounded-lg border border-table-border focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none">
+                        <option value="1">Ya (reset 1,2,3 - 1,2,3)</option>
+                        <option value="0">Tidak (lanjut 1,2,3 - 4,5,6)</option>
+                    </select>
+                </div>
             </div>
             <div
                 class="flex items-center justify-end gap-2 px-6 py-4 border-t border-table-border bg-white shrink-0 rounded-b-2xl">

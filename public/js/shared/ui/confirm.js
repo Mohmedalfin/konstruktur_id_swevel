@@ -20,6 +20,7 @@ export const AppSwal = Swal.mixin({
         title:          'app-swal-title',
         htmlContainer:  'app-swal-html',
         confirmButton:  'app-swal-confirm',
+        denyButton:     'app-swal-deny',
         cancelButton:   'app-swal-cancel',
         icon:           'app-swal-icon',
     },

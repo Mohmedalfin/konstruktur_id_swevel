@@ -323,7 +323,35 @@ function _prepareOrganizedData() {
             }
         }
         
-        if (itemsOnRow.length === 0) return;
+        if (itemsOnRow.length === 0) {
+            // FALLBACK: Cek jika Uraian kosong tapi ada Nomor (sering terjadi untuk Head Kategori di Excel berjenjang)
+            let fallbackUraian = null;
+            const nomorColsArr = Array.isArray(currentMapping.nomor) ? currentMapping.nomor : (currentMapping.nomor ? [currentMapping.nomor] : []);
+            if (nomorColsArr && nomorColsArr.length > 0) {
+                let textFallback = null;
+                let numFallback = null;
+                for (let i = 0; i < nomorColsArr.length; i++) {
+                    const excelColIdx = excelColumns[nomorColsArr[i]].idxExcel;
+                    const cell = row.getCell(excelColIdx);
+                    const val = cell.value;
+                    const strVal = typeof val === 'object' && val !== null ? (val.result ? val.result.toString().trim() : '') : (val ? val.toString().trim() : '');
+                    if (strVal) {
+                        const isNum = /^[0-9]+[\.\)]*$|^[A-Z]{1,2}[\.\)]+$|^(I|II|III|IV|V|VI|VII|VIII|IX|X)[\.\)]*$/i.test(strVal.trim()) || /^[A-Z]{1,2}$/i.test(strVal.trim());
+                        if (isNum && !numFallback) numFallback = strVal;
+                        if (!isNum && !textFallback) textFallback = strVal;
+                    }
+                }
+                fallbackUraian = textFallback || numFallback;
+            }
+            if (fallbackUraian) {
+                itemsOnRow.push({
+                    uraian: fallbackUraian,
+                    level: 0
+                });
+            } else {
+                return;
+            }
+        }
 
         const nomorCols = Array.isArray(currentMapping.nomor) ? currentMapping.nomor : (currentMapping.nomor ? [currentMapping.nomor] : []);
         let firstNomorStr = null;
@@ -395,6 +423,13 @@ function _prepareOrganizedData() {
             if (foundUraian) {
                 firstNomorStr = nomorCandidate;
                 itemsOnRow[0].uraian = foundUraian;
+            }
+        }
+        
+        // Cleanup: Jika Nomor string persis sama dengan Uraian (efek fallback), hapus Nomor jika itu sekadar teks nama Kategori
+        if (firstNomorStr && itemsOnRow.length === 1 && firstNomorStr === itemsOnRow[0].uraian) {
+            if (!isNomor(firstNomorStr)) {
+                firstNomorStr = null;
             }
         }
         
