@@ -8,7 +8,6 @@
             </tr>
         </thead>
         <tbody id="realisasi-sdm-tbody" class="text-table-body text-[13px]">
-            <!-- Rendered via JS -->
         </tbody>
     </table>
 </div>

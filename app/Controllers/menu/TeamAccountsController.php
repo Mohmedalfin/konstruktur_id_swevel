@@ -71,14 +71,44 @@ class TeamAccountsController extends BaseController
         }
 
         $payload = [
-            'nama_pengguna' => trim((string) $this->request->getPost('nama_pengguna')),
-            'username'      => trim((string) $this->request->getPost('username')),
             'email'         => trim((string) $this->request->getPost('email')),
-            'password'      => (string) $this->request->getPost('password'),
             'kategori_akun' => trim((string) $this->request->getPost('kategori_akun')),
         ];
 
         $result = $this->profileService->createSubAccount((int) $id_pengguna, $payload);
+
+        if ($result['success']) {
+            return $this->response->setJSON($result);
+        }
+
+        return $this->response->setJSON($result)->setStatusCode(400);
+    }
+
+    public function getInvitations()
+    {
+        $id_pengguna = session()->get('id_pengguna') ?? session()->get('id_user');
+
+        if (!$id_pengguna) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Unauthorized'])->setStatusCode(401);
+        }
+
+        $items = $this->profileService->getPendingInvitations((int) $id_pengguna);
+
+        return $this->response->setJSON([
+            'success' => true,
+            'data' => $items,
+        ]);
+    }
+
+    public function deleteInvitation(int $invitationId)
+    {
+        $id_pengguna = session()->get('id_pengguna') ?? session()->get('id_user');
+
+        if (!$id_pengguna) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Unauthorized'])->setStatusCode(401);
+        }
+
+        $result = $this->profileService->deleteInvitation((int) $id_pengguna, $invitationId);
 
         if ($result['success']) {
             return $this->response->setJSON($result);

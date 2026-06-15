@@ -9,6 +9,14 @@
 
     <link rel="stylesheet" href="<?= base_url('assets/css/output.css') ?>">
     <link rel="stylesheet" href="<?= base_url('assets/fontawesome/css/all.min.css') ?>">
+    <style>
+        /* Styling backdrop modal agar semi-transparan dan memperlihatkan halaman belakang */
+        .hs-overlay-backdrop {
+            background-color: rgba(15, 23, 42, 0.5) !important;
+            backdrop-filter: blur(4px) !important;
+            -webkit-backdrop-filter: blur(4px) !important;
+        }
+    </style>
 </head>
 
 <body class="bg-gray-50">

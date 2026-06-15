@@ -193,7 +193,16 @@ class RealisasiService
         
         if ($remainingItems === 0) {
             $header = $this->realisasiSdmModel->find($idHeader);
-            if ($header && empty($header['dokumentasi']) && empty($header['keterangan'])) {
+            if ($header) {
+                if (!empty($header['dokumentasi'])) {
+                    $paths = json_decode($header['dokumentasi'], true) ?? [];
+                    foreach ($paths as $path) {
+                        $fullPath = FCPATH . $path;
+                        if (is_file($fullPath)) {
+                            unlink($fullPath);
+                        }
+                    }
+                }
                 $this->realisasiSdmModel->delete($idHeader);
             }
         }
@@ -325,7 +334,7 @@ class RealisasiService
             
             $item['qty_budget'] = (float) $item['qty_budget'];
             $item['qty_used']   = $used;
-            $item['qty_sisa']   = max(0, $item['qty_budget'] - $used);
+            $item['qty_sisa']   = $item['qty_budget'] - $used;
         }
 
         return $budgetItems;

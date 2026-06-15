@@ -109,7 +109,7 @@
         border-right: 1px solid var(--db-border);
         padding-right: 20px;
     }
-    .donut-wrap { position: relative; width: 140px; flex-shrink: 0; }
+    .donut-wrap { position: relative; width: 140px; height: 140px; flex-shrink: 0; }
     .donut-center {
         position: absolute;
         top: 50%; left: 50%;
@@ -402,8 +402,8 @@
                     <p>Belum ada data cash flow.</p>
                 </div>
             <?php else: ?>
-            <div style="position: relative; width: 100%;">
-                <canvas id="cashFlowChart" style="max-height:220px"></canvas>
+            <div style="position: relative; width: 100%; height: 220px;">
+                <canvas id="cashFlowChart"></canvas>
             </div>
             <?php endif; ?>
         </div>
@@ -485,6 +485,8 @@
             }]
         },
         options: {
+            responsive: true,
+            maintainAspectRatio: false,
             cutout: '68%',
             plugins: { legend: { display: false }, tooltip: { callbacks: {
                 label: ctx => ` ${ctx.label}: ${ctx.raw} proyek`
@@ -532,7 +534,7 @@
         },
         options: {
             responsive: true,
-            maintainAspectRatio: true,
+            maintainAspectRatio: false,
             plugins: {
                 legend: {
                     position: 'bottom',

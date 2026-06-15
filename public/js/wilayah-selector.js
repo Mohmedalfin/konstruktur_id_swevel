@@ -1,19 +1,4 @@
-/**
- * wilayah-selector.js
- * Dropdown Pemilihan Wilayah Bertingkat:
- *   Provinsi -> Kabupaten/Kota -> Tahun Deskripsi Harga (Template Harga)
- *
- * Digunakan pada form Create dan Edit Proyek.
- *
- * Usage:
- *   WilayahSelector.init({
- *      idProv: '3400',
- *      idWilayah: '3404',
- *      idTemplate: '2021'
- *   })
- */
 const WilayahSelector = (() => {
-    // Helper untuk deteksi base URL
     const _base = (() => {
         const m = document.querySelector('meta[name="base-url"]');
         if (m) {
@@ -29,15 +14,15 @@ const WilayahSelector = (() => {
     const API = {
         PROVINCES: `${_base}/api/wilayah/provinces`,
         CITIES: `${_base}/api/wilayah/cities`,
-        TEMPLATES: `${_base}/api/wilayah/templates` // In this case, templates are years
+        TEMPLATES: `${_base}/api/wilayah/templates`
     };
 
     const elements = {
         prov: () => document.getElementById('sel_provinsi'),
         city: () => document.getElementById('sel_kota'),
-        tmpl: () => document.getElementById('sel_template'), // This will store the year
+        tmpl: () => document.getElementById('sel_template'),
         hiddenWilayah: () => document.getElementById('id_wilayah'),
-        hiddenTemplate: () => document.getElementById('id_template'), // We'll keep this as years/ref
+        hiddenTemplate: () => document.getElementById('id_template'),
         hiddenLokasi: () => document.getElementById('lokasi_proyek'),
         info: () => document.getElementById('lokasi-info')
     };

@@ -37,7 +37,7 @@ $routes->group('', function ($routes) {
     $routes->get('dashboard', 'menu\DashboardController::index');
     
     // Notifikasi
-    $routes->get('notifikasi', 'NotifikasiController::index');
+    $routes->get('notifikasi', 'menu\NotifikasiController::index');
     $routes->get('proyek/(:segment)/dashboard', 'menu\DashboardController::index/$1');
     $routes->get('proyek/(:segment)/dashboard/getData', 'menu\DashboardController::getData');
     $routes->get('proyek/(:segment)/dashboard/getCategoryDetail/(:num)', 'menu\DashboardController::getCategoryDetail/$2');
@@ -62,6 +62,12 @@ $routes->group('', function ($routes) {
     $routes->get('kelola-akun/data', 'menu\TeamAccountsController::getSubAccounts');
     $routes->post('kelola-akun/create', 'menu\TeamAccountsController::createSubAccount');
     $routes->delete('kelola-akun/delete/(:num)', 'menu\TeamAccountsController::deleteSubAccount/$1');
+    $routes->get('kelola-akun/invitations', 'menu\TeamAccountsController::getInvitations');
+    $routes->delete('kelola-akun/delete-invitation/(:num)', 'menu\TeamAccountsController::deleteInvitation/$1');
+
+    // Accept Invite
+    $routes->get('accept-invite', 'menu\AcceptInviteController::index');
+    $routes->post('accept-invite/submit', 'menu\AcceptInviteController::submit');
 
     // Realisasi
     $routes->get('realisasi', 'menu\RealisasiController::index');
@@ -73,6 +79,10 @@ $routes->group('', function ($routes) {
     
     // Atur Urutan
     $routes->get('menu-rap/atur-urutan', 'menu\MenuRapController::aturUrutan');
+
+    // Permintaan Barang ke Gudang
+    $routes->get('permintaan', 'menu\PermintaanController::index');
+    $routes->get('permintaan/create', 'menu\PermintaanController::create');
 });
 
 
@@ -122,6 +132,10 @@ $routes->group('api', ['namespace' => 'App\Controllers\Api'], function ($routes)
     $routes->put('rap/schedule-dates', '\App\Controllers\menu\ScheduleController::updateScheduleDates');
 
 
+    $routes->get('stok/stats', '\App\Controllers\gudang\StokController::getStats');
+    $routes->get('stok/data', '\App\Controllers\gudang\StokController::getData');
+    $routes->put('stok/update-minimum', '\App\Controllers\gudang\StokController::updateMinimum');
+
     // Schedule Data
     $routes->get('schedule/data', '\App\Controllers\menu\ScheduleController::getData');
 
@@ -129,4 +143,25 @@ $routes->group('api', ['namespace' => 'App\Controllers\Api'], function ($routes)
     $routes->get('realisasi/data', '\App\Controllers\menu\RealisasiController::getData');
     $routes->get('realisasi/sdm-resources', '\App\Controllers\menu\RealisasiController::getSdmResources');
     $routes->get('realisasi/sdm-data', '\App\Controllers\menu\RealisasiController::getSdmData');
+
+    // Permintaan Gudang API
+    $routes->get('permintaan/stats', '\App\Controllers\menu\PermintaanController::getStats');
+    $routes->get('permintaan/data', '\App\Controllers\menu\PermintaanController::getData');
+    $routes->get('permintaan/detail/(:num)', '\App\Controllers\menu\PermintaanController::getDetail/$1');
+    $routes->post('permintaan/store', '\App\Controllers\menu\PermintaanController::store');
+    $routes->post('permintaan/status/(:num)', '\App\Controllers\menu\PermintaanController::updateStatus/$1');
+    $routes->post('permintaan/auto-procure/(:num)', '\App\Controllers\menu\PermintaanController::autoProcure/$1');
+    $routes->delete('permintaan/delete/(:num)', '\App\Controllers\menu\PermintaanController::destroy/$1');
+    $routes->get('permintaan/projects', '\App\Controllers\menu\PermintaanController::getProjects');
+    $routes->get('permintaan/rap-items/(:num)', '\App\Controllers\menu\PermintaanController::getRapItems/$1');
+});
+
+// Modul Gudang Web Routes
+$routes->group('gudang', function($routes) {
+    $routes->get('/', '\App\Controllers\gudang\GudangController::dashboard');
+    $routes->get('dashboard', '\App\Controllers\gudang\GudangController::dashboard');
+    $routes->get('permintaan', '\App\Controllers\gudang\GudangController::permintaan');
+    $routes->get('stok', '\App\Controllers\gudang\GudangController::stok');
+    $routes->get('pengadaan', '\App\Controllers\gudang\GudangController::pengadaan');
+    $routes->get('riwayat', '\App\Controllers\gudang\GudangController::riwayat');
 });

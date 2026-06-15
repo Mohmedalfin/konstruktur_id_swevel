@@ -47,6 +47,52 @@ function applySourcePermission(data) {
     if (!tambahKategoriBtn) return;
     const isEditable = (data?.sumber_data || 'manual') === 'manual';
     tambahKategoriBtn.classList.toggle('hidden', !isEditable);
+
+    const mobKategoriBtn = document.getElementById('mobile-tambah-kategori-btn');
+    if (mobKategoriBtn) {
+        mobKategoriBtn.classList.toggle('hidden', !isEditable);
+    }
+}
+
+function initMobileActionMenu() {
+    const mobileBtn = document.getElementById('mobileActionBtn');
+    const mobileMenu = document.getElementById('mobileActionMenu');
+
+    if (!mobileBtn || !mobileMenu) return;
+
+    mobileBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        mobileMenu.classList.toggle('hidden');
+    });
+
+    mobileMenu.addEventListener('click', (e) => {
+        e.stopPropagation();
+    });
+
+    document.addEventListener('click', () => {
+        mobileMenu.classList.add('hidden');
+    });
+
+    // Delegasikan klik ke button utama desktop agar logic tidak perlu diduplikasi
+    const bindings = {
+        'mobile-tambah-kategori-btn': 'tambah-kategori-btn',
+        'mobile-format-penomoran-btn': 'format-penomoran-btn',
+        'mobile-boq-import-btn': 'boq-import-btn',
+        'mobile-reset-rap-btn': 'reset-rap-btn'
+    };
+
+    Object.entries(bindings).forEach(([mobId, deskId]) => {
+        const mobEl = document.getElementById(mobId);
+        const deskEl = document.getElementById(deskId);
+        if (mobEl && deskEl) {
+            mobEl.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                mobileMenu.classList.add('hidden');
+                deskEl.click();
+            });
+        }
+    });
 }
 
 if (!wrapper || !tbody) {
@@ -56,6 +102,7 @@ if (!wrapper || !tbody) {
     initTemplate();
     initImport();
     bindFormatPenomoran();
+    initMobileActionMenu();
 
     if (resetDataBtn) {
         resetDataBtn.addEventListener('click', async function() {

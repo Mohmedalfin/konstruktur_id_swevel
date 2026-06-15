@@ -99,9 +99,9 @@
                                                 <input type="hidden" id="real-satuan">
                                             </div>
                                             <div class="space-y-1.5 flex justify-between sm:block border-b border-slate-50 sm:border-none pb-2 sm:pb-0">
-                                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">Vol Target</label>
+                                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sisa Target</label>
                                                 <div class="sm:py-2.5">
-                                                    <div id="real-vol-target-display" class="text-sm sm:text-[15px] font-semibold text-[#22c55e] leading-none">0</div>
+                                                    <div id="real-vol-sisa-display" class="text-sm sm:text-[15px] font-semibold text-[#22c55e] leading-none">0</div>
                                                 </div>
                                                 <input type="hidden" id="real-vol-target">
                                             </div>
@@ -144,8 +144,8 @@
                                                 <th class="px-4 py-3 text-center text-xs font-semibold w-12">No</th>
                                                 <th class="px-4 py-3 text-xs font-semibold">Uraian Pekerjaan</th>
                                                 <th class="px-4 py-3 text-center text-xs font-semibold w-24">Satuan</th>
-                                                <th class="px-4 py-3 text-center text-xs font-semibold w-28">Vol. Target</th>
-                                                <th class="px-4 py-3 text-center text-xs font-semibold w-32">Vol. Tercapai</th>
+                                                <th class="px-4 py-3 text-center text-xs font-semibold w-28">Sisa Target</th>
+                                                <th class="px-4 py-3 text-center text-xs font-semibold w-32">Vol. Input</th>
                                                 <th class="px-4 py-3 text-xs font-semibold min-w-[200px]">Keterangan</th>
                                                 <th class="px-4 py-3 text-center text-xs font-semibold w-20">Aksi</th>
                                             </tr>

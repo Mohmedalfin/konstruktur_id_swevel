@@ -1,69 +1,108 @@
-# CodeIgniter 4 Application Starter
+# Product Requirement Document (PRD)
+## Fitur Permintaan Barang Ke Gudang (Monitoring & Permintaan)
 
-## What is CodeIgniter?
+---
 
-CodeIgniter is a PHP full-stack web framework that is light, fast, flexible and secure.
-More information can be found at the [official site](https://codeigniter.com).
+## 1. Latar Belakang & Deskripsi Fitur
+Dalam manajemen proyek konstruksi, proses pengadaan barang dan material ke lapangan memerlukan pencatatan yang sistematis. Fitur **Permintaan Barang ke Gudang** dirancang sebagai tahap awal (fase pengajuan) di mana pelaksana proyek dapat mengajukan kebutuhan bahan dan alat untuk satu atau beberapa proyek sekaligus ke pihak gudang. 
 
-This repository holds a composer-installable app starter.
-It has been built from the
-[development repository](https://github.com/codeigniter4/CodeIgniter4).
+Pada fase ini, fokus sistem adalah pada pencatatan **dokumen pengajuan (Permintaan)** dan **rincian barang yang diajukan (Permintaan Detail)**, tanpa melibatkan modul pengiriman barang terlebih dahulu.
 
-More information about the plans for version 4 can be found in [CodeIgniter 4](https://forum.codeigniter.com/forumdisplay.php?fid=28) on the forums.
+---
 
-You can read the [user guide](https://codeigniter.com/user_guide/)
-corresponding to the latest version of the framework.
+## 2. Tujuan
+1. Menyediakan halaman pemantauan (monitoring) terpusat untuk semua pengajuan permintaan barang ke gudang.
+2. Memudahkan pengguna lapangan mengajukan material/alat dengan cepat melalui pencarian otomatis (autocomplete) berdasarkan Rencana Anggaran Pelaksanaan (RAP) proyek bersangkutan.
+3. Mendukung pembuatan satu dokumen pengajuan yang mencakup kebutuhan untuk beberapa proyek sekaligus.
+4. Menyediakan antarmuka manajemen status dokumen permintaan bagi pihak gudang/logistik.
 
-## Installation & updates
+---
 
-`composer create-project codeigniter4/appstarter` then `composer update` whenever
-there is a new release of the framework.
+## 3. Alur Kerja Pengguna (User Flow)
+```mermaid
+graph TD
+    A[Halaman Utama Monitoring] -->|Klik Buat Permintaan| B[Halaman Buat Permintaan]
+    B -->|Tambah Baris Proyek| C[Pilih Proyek & Cari Barang dari RAP]
+    C -->|Isi Kuantitas & Catatan| D[Klik Simpan Permintaan]
+    D -->|Simpan Data Header & Detail| E[Kembali ke Halaman Monitoring]
+    E -->|Klik Detail| F[Modal Rincian Permintaan]
+    F -->|Aksi Setujui/Tolak/Kirim| G[Status Diperbarui di Database]
+```
 
-When updating, check the release notes to see if there are any changes you might need to apply
-to your `app` folder. The affected files can be copied or merged from
-`vendor/codeigniter4/framework/app`.
+---
 
-## Setup
+## 4. Rancangan Database (Skema Tabel)
 
-Copy `env` to `.env` and tailor for your app, specifically the baseURL
-and any database settings.
+### A. Tabel `permintaan` (Header Dokumen)
+Menyimpan informasi utama dokumen pengajuan permintaan barang.
 
-## Important Change with index.php
+*   `id` (`INT`, Primary Key, Auto Increment, Unsigned): ID unik dokumen permintaan.
+*   `nomor_permintaan` (`VARCHAR(50)`, Unique, Not Null): Format penomoran otomatis (contoh: `REQ/YYYYMMDD/XXXX`).
+*   `tanggal_permintaan` (`DATE`, Not Null): Tanggal diajukannya permintaan.
+*   `pemohon_id` (`INT`, Not Null): ID pengguna yang mengajukan permintaan (relasi ke tabel `pengguna`).
+*   `status` (`ENUM('draft', 'pending', 'disetujui', 'ditolak', 'selesai')`, Default `'draft'`): Status dokumen permintaan.
+*   `keterangan` (`TEXT`, Nullable): Catatan umum/instruksi pengiriman untuk gudang.
+*   `created_at` (`DATETIME`): Tanggal dibuat.
+*   `updated_at` (`DATETIME`): Tanggal diperbarui.
 
-`index.php` is no longer in the root of the project! It has been moved inside the *public* folder,
-for better security and separation of components.
+### B. Tabel `permintaan_detail` (Item Rincian)
+Menyimpan daftar material atau alat yang diminta. Karena satu permintaan dapat mencakup beberapa proyek, kolom `id_project` diletakkan di tingkat detail item.
 
-This means that you should configure your web server to "point" to your project's *public* folder, and
-not to the project root. A better practice would be to configure a virtual host to point there. A poor practice would be to point your web server to the project root and expect to enter *public/...*, as the rest of your logic and the
-framework are exposed.
+*   `id` (`INT`, Primary Key, Auto Increment, Unsigned): ID unik item detail.
+*   `id_permintaan` (`INT`, Unsigned, Not Null): Relasi ke tabel `permintaan.id` (Foreign Key - Cascade on Delete).
+*   `id_project` (`INT`, Not Null): ID proyek yang membutuhkan barang tersebut (relasi ke tabel `projects`).
+*   `id_rap_detail_item` (`INT`, Nullable): Referensi opsional ke item RAP jika material merujuk langsung ke anggaran (`rap_detail_item`).
+*   `nama_barang` (`VARCHAR(255)`, Not Null): Nama barang yang diminta.
+*   `jumlah` (`DECIMAL(15,4)`, Not Null): Jumlah barang yang diminta.
+*   `satuan` (`VARCHAR(50)`, Not Null): Satuan barang (misal: `pcs`, `zak`, `m3`).
+*   `keterangan` (`TEXT`, Nullable): Catatan spesifik per item barang.
+*   `created_at` (`DATETIME`): Tanggal dibuat.
+*   `updated_at` (`DATETIME`): Tanggal diperbarui.
 
-**Please** read the user guide for a better explanation of how CI4 works!
+---
 
-## Repository Management
+## 5. Kebutuhan Fungsional Halaman (Tampilan)
 
-We use GitHub issues, in our main repository, to track **BUGS** and to track approved **DEVELOPMENT** work packages.
-We use our [forum](http://forum.codeigniter.com) to provide SUPPORT and to discuss
-FEATURE REQUESTS.
+### A. Halaman Monitoring (Halaman Utama)
+Halaman awal untuk memantau status seluruh permintaan barang yang telah diajukan.
 
-This repository is a "distribution" one, built by our release preparation script.
-Problems with it can be raised on our forum, or as issues in the main repository.
+1.  **Card Ringkasan Informasi (Stats Cards)**
+    *   **Total Permintaan**: Total akumulasi semua dokumen pengajuan.
+    *   **Menunggu (Pending)**: Jumlah permintaan yang membutuhkan persetujuan/belum diproses.
+    *   **Diproses (Disetujui)**: Jumlah permintaan yang sedang dipersiapkan oleh gudang.
+    *   **Terkirim (Selesai)**: Jumlah permintaan yang sudah selesai dikirim ke lapangan.
+2.  **Filter Status Cepat**
+    *   Tombol navigasi untuk memfilter list berdasarkan status: **Semua**, **Menunggu**, **Diproses**, **Terkirim**, dan **Ditolak**.
+3.  **Daftar Riwayat Permintaan (History List)**
+    *   Menampilkan data permintaan dalam bentuk kartu (card) informatif.
+    *   Setiap kartu menampilkan: Nomor Permintaan, Badge Status, Jumlah Proyek & Item, Tanggal Pengajuan, Badge Proyek terkait, Catatan Gudang, serta Tombol **Detail**.
+4.  **Modal Rincian Permintaan (Detail AJAX Modal)**
+    *   Saat tombol **Detail** diklik, modal popup akan memuat data detail via AJAX.
+    *   Data barang dikelompokkan secara visual berdasarkan nama proyek tujuan.
+    *   Menyediakan tombol aksi transisi status (misal: tombol **Setujui** & **Tolak** jika status masih *pending*, dan tombol **Kirim** jika status *disetujui*).
 
-## Server Requirements
+### B. Halaman Buat Permintaan Baru
+Formulir input untuk membuat dokumen pengisian baru.
 
-PHP version 8.2 or higher is required, with the following extensions installed:
+1.  **Struktur Blok Proyek Dinamis (Multi-Project Support)**
+    *   Pengguna dapat menambahkan baris pengajuan proyek lain dengan mengklik tombol **"Tambah Proyek Lain"**.
+    *   Masing-masing blok proyek dapat dihapus secara independen menggunakan tombol hapus (ikon trash).
+2.  **Pemilihan Proyek & Autocomplete Pencarian Barang**
+    *   Setiap blok proyek memiliki dropdown untuk memilih nama proyek aktif.
+    *   Setelah proyek dipilih, sistem memuat data material & alat dari RAP proyek tersebut ke memori lokal.
+    *   Pengguna dapat mengetik di kolom pencarian bahan/alat dan mendapatkan hasil autocomplete instan.
+    *   Jika bahan/alat tidak ada di daftar RAP, pengguna tetap dapat menginput item kustom secara manual dengan mengetik nama item baru.
+3.  **Manajemen Kuantitas & Catatan**
+    *   Setiap item yang dipilih akan ditambahkan ke daftar tabel di bawah kolom pencarian.
+    *   Pengguna dapat mengisi jumlah (kuantitas) barang dan catatan khusus per item.
+4.  **Catatan Umum & Pengiriman**
+    *   Di bagian bawah form, terdapat textarea opsional untuk menulis pesan/catatan global bagi petugas gudang.
 
-- [intl](http://php.net/manual/en/intl.requirements.php)
-- [mbstring](http://php.net/manual/en/mbstring.installation.php)
+---
 
-> [!WARNING]
-> - The end of life date for PHP 7.4 was November 28, 2022.
-> - The end of life date for PHP 8.0 was November 26, 2023.
-> - The end of life date for PHP 8.1 was December 31, 2025.
-> - If you are still using below PHP 8.2, you should upgrade immediately.
-> - The end of life date for PHP 8.2 will be December 31, 2026.
-
-Additionally, make sure that the following extensions are enabled in your PHP:
-
-- json (enabled by default - don't turn it off)
-- [mysqlnd](http://php.net/manual/en/mysqlnd.install.php) if you plan to use MySQL
-- [libcurl](http://php.net/manual/en/curl.requirements.php) if you plan to use the HTTP\CURLRequest library
+## 6. Kriteria Penerimaan (Acceptance Criteria)
+1.  Skema tabel database `permintaan` dan `permintaan_detail` terpasang dengan benar di database.
+2.  Pemilihan proyek pada form pembuatan permintaan berhasil memuat barang-barang yang sesuai dengan RAP proyek terpilih.
+3.  Satu transaksi pengiriman data form berhasil menyimpan satu record `permintaan` dan banyak record `permintaan_detail` dengan relasi `id_project` yang tepat.
+4.  Statistik jumlah pengajuan di halaman utama (card) harus diperbarui secara waktu nyata (real-time/sesuai data DB).
+5.  Detail barang pada modal detail terkelompok rapi berdasarkan proyek tujuan masing-masing.

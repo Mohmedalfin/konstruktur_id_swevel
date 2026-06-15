@@ -32,7 +32,8 @@ if (! function_exists('is_nav_active')) {
                 || str_starts_with($currUrl . '/', $baseProyek . '/')
                 || str_contains($currUrl, '/proyek/menu/'))
                 && !str_contains($currUrl, '/schedule')
-                && !str_contains($currUrl, '/realisasi');
+                && !str_contains($currUrl, '/realisasi')
+                && !str_contains($currUrl, '/permintaan');
         }
 
         return $linkUrl === $currUrl

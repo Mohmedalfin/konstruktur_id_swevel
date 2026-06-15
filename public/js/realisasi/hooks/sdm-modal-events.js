@@ -89,7 +89,7 @@ function _buildCustomDropdown(container, catId, items) {
             
             row.innerHTML = `
                 <div class="font-medium">${item.nama_item}</div>
-                <div class="text-[10px] text-slate-500 mt-0.5">Sisa: <span class="font-bold text-${catColor}-500">${item.qty_sisa}</span> ${item.satuan}</div>
+                <div class="text-[10px] text-slate-500 mt-0.5">Sisa: <span class="font-bold ${item.qty_sisa < 0 ? 'text-red-600' : 'text-' + catColor + '-500'}">${item.qty_sisa}</span> ${item.satuan}</div>
             `;
 
             if (selectedItem && selectedItem.id_rap_detail_item === item.id_rap_detail_item) {
@@ -217,8 +217,7 @@ function _bindAddButton() {
 
         const sisa = parseFloat(selectedOption.dataset.sisa) || 0;
         if (qtyActual > sisa) {
-            _showFieldError(qtyActualEl, `Qty melebihi sisa stok (${sisa} ${selectedOption.dataset.satuan}).`);
-            return;
+            toast.show(`Perhatian: Qty (${qtyActual}) melebihi sisa stok (${sisa} ${selectedOption.dataset.satuan}). Tercatat sebagai over-budget.`, 'warning');
         }
 
         const item = {

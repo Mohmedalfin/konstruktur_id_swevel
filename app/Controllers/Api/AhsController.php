@@ -9,6 +9,7 @@ use App\Models\RapDetailItemModel;
 use App\Models\RapDetailModel;
 use App\Models\RapModel;
 use App\Models\RapKategoriModel;
+use App\Helpers\InventoryHelper;
 
 class AhsController extends BaseController
 {
@@ -68,23 +69,43 @@ class AhsController extends BaseController
             $db = \Config\Database::connect();
             $db->transBegin();
 
+            // Get id_project for InventoryHelper
+            $rapDetailRow = $db->table('rap_detail rd')
+                ->select('r.id_project')
+                ->join('rap r', 'r.id_rap = rd.id_rap')
+                ->where('rd.id_rap_detail', $idDetail)
+                ->get()->getRowArray();
+            $idProject = (int) ($rapDetailRow['id_project'] ?? 0);
+
             // 1. Delete existing
             $model->where('id_rap_detail', $idDetail)->delete();
 
             // 2. Insert new
             foreach ($items as $index => $item) {
+                $jenisItem = $item['tipe'] ?? 'bahan';
+                $namaItem = $item['uraian'] ?? '';
+                $merk = $item['merk'] ?? '';
+                $spesifikasi = $item['spesifikasi'] ?? '';
+                $satuan = $item['satuan'] ?? '';
+
+                $idBarang = null;
+                if ($idProject > 0) {
+                    $idBarang = InventoryHelper::resolveMasterBarang($idProject, $jenisItem, $namaItem, $merk, $spesifikasi, $satuan);
+                }
+
                 $inserted = $model->insert([
                     'id_rap_detail' => $idDetail,
-                    'jenis_item' => $item['tipe'] ?? 'bahan',
-                    'nama_item' => $item['uraian'] ?? '',
-                    'merk' => $item['merk'] ?? '',
-                    'spesifikasi' => $item['spesifikasi'] ?? '',
-                    'koefisien' => $item['koefisien'] ?? 0,
-                    'satuan' => $item['satuan'] ?? '',
-                    'harga_dasar' => $item['hargaSatuan'] ?? 0,
-                    'harga_satuan' => $item['hargaSatuan'] ?? 0,
-                    'keterangan' => $item['sumber'] ?? '',
-                    'urutan' => $index + 1,
+                    'id_barang'     => $idBarang,
+                    'jenis_item'    => $jenisItem,
+                    'nama_item'     => $namaItem,
+                    'merk'          => $merk,
+                    'spesifikasi'   => $spesifikasi,
+                    'koefisien'     => $item['koefisien'] ?? 0,
+                    'satuan'        => $satuan,
+                    'harga_dasar'   => $item['hargaSatuan'] ?? 0,
+                    'harga_satuan'  => $item['hargaSatuan'] ?? 0,
+                    'keterangan'    => $item['sumber'] ?? '',
+                    'urutan'        => $index + 1,
                 ]);
                 if (!$inserted) {
                     $db->transRollback();
