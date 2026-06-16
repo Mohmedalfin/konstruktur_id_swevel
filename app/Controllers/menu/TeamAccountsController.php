@@ -23,7 +23,7 @@ class TeamAccountsController extends BaseController
         }
 
         $profile = $this->profileService->getDetailProfile((int) $id_pengguna);
-        $isSubAccount = is_object($profile) && !empty($profile->parent_id);
+        $isSubAccount = is_object($profile) && !empty($profile->parent_id) && $profile->parent_id !== '-';
 
         if ($isSubAccount) {
             return redirect()->to(base_url('profile'))->with('error', 'Akun tim tidak memiliki akses untuk menambah akun.');
@@ -41,7 +41,7 @@ class TeamAccountsController extends BaseController
         }
 
         $profile = $this->profileService->getDetailProfile((int) $id_pengguna);
-        $isSubAccount = is_object($profile) && !empty($profile->parent_id);
+        $isSubAccount = is_object($profile) && !empty($profile->parent_id) && $profile->parent_id !== '-';
 
         if ($isSubAccount) {
             return $this->response->setJSON(['success' => false, 'message' => 'Forbidden'])->setStatusCode(403);
@@ -64,7 +64,7 @@ class TeamAccountsController extends BaseController
         }
 
         $profile = $this->profileService->getDetailProfile((int) $id_pengguna);
-        $isSubAccount = is_object($profile) && !empty($profile->parent_id);
+        $isSubAccount = is_object($profile) && !empty($profile->parent_id) && $profile->parent_id !== '-';
 
         if ($isSubAccount) {
             return $this->response->setJSON(['success' => false, 'message' => 'Forbidden'])->setStatusCode(403);
@@ -126,7 +126,7 @@ class TeamAccountsController extends BaseController
         }
 
         $profile = $this->profileService->getDetailProfile((int) $id_pengguna);
-        $isSubAccount = is_object($profile) && !empty($profile->parent_id);
+        $isSubAccount = is_object($profile) && !empty($profile->parent_id) && $profile->parent_id !== '-';
 
         if ($isSubAccount) {
             return $this->response->setJSON(['success' => false, 'message' => 'Forbidden'])->setStatusCode(403);
