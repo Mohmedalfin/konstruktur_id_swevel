@@ -40,7 +40,7 @@ export function bindCustomRow() {
             <td class="px-3 md:px-5 py-3">
                 <div class="flex flex-col gap-0.5">
                     <label class="text-[9px] font-semibold text-table-subtle uppercase tracking-widest">Satuan</label>
-                    <input type="text" data-field="satuan" placeholder="m²"
+                    <input type="text" list="datalist-satuan" data-field="satuan" placeholder="m²"
                         class="w-full px-2.5 py-1.5 text-xs border border-table-border rounded-lg text-center focus:outline-none focus:ring-0.5 focus:ring-primary focus:border-primary bg-white text-table-medium"/>
                 </div>
             </td>

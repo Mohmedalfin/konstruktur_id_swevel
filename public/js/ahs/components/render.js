@@ -109,7 +109,7 @@ export function renderRow(rowData, isNew = false) {
                 data-id="${rowData.id}" ${isNew ? '' : 'readonly'}/>
         </td>
         <td class="px-3 md:px-4 py-2 md:py-2.5 text-center">
-            <input type="text" value="${escHtml(rowData.satuan)}" placeholder="m³"
+            <input type="text" value="${escHtml(rowData.satuan)}" placeholder="m³" list="datalist-satuan"
                 class="ahs-satuan w-16 px-2 py-1 text-[11px] md:text-[13px] border border-slate-200 rounded text-center focus:outline-none focus:ring-1 focus:ring-primary/40 focus:border-primary bg-white disabled:bg-slate-50"
                 data-id="${rowData.id}" ${isNew ? '' : 'readonly'}/>
         </td>
@@ -476,7 +476,7 @@ export function renumberRows() {
 
 export function addRow(tipe) {
     document.getElementById('ahs-empty-row')?.remove();
-    renderRow({ id: Date.now(), tipe, uraian: '', merk: '', spesifikasi: '', koefisien: 1, satuan: '', hargaSatuan: 0, sumber: '' }, true);
+    renderRow({ id: Date.now(), tipe, uraian: '', merk: '', spesifikasi: '', koefisien: 1, satuan: '', hargaSatuan: 0, sumber: 'Survey' }, true);
     recalcTotals();
     checkAndMarkEmpiris();
     const tipeLabel = tipeConfig[tipe]?.label || tipe;

@@ -1052,9 +1052,33 @@ export async function initImport() {
                 globalWorksheet = workbook.getWorksheet(1);
                 excelColumns = [{ idxExcel: -1, name: '-- Kosongkan --' }];
                 rawDataStore = [];
-                globalWorksheet.getRow(1).eachCell((c, colNum) => excelColumns.push({ idxExcel: colNum, name: c.text?.toString().trim() || `Kolom ${colNum}` }));
+                
+                // Cari baris header yang paling memungkinkan (baris dengan jumlah sel teks terbanyak di 15 baris pertama)
+                let bestHeaderRowIdx = 1;
+                let maxTextCells = 0;
+                let maxColNum = 0;
+                
+                for (let i = 1; i <= 15; i++) {
+                    const row = globalWorksheet.getRow(i);
+                    let count = 0;
+                    row.eachCell((c, colNum) => {
+                        if (colNum > maxColNum) maxColNum = colNum;
+                        if (c.text && c.text.toString().trim() !== '') count++;
+                    });
+                    if (count > maxTextCells) {
+                        maxTextCells = count;
+                        bestHeaderRowIdx = i;
+                    }
+                }
+                
+                const bestHeaderRow = globalWorksheet.getRow(bestHeaderRowIdx);
+                for (let i = 1; i <= maxColNum; i++) {
+                    const c = bestHeaderRow.getCell(i);
+                    excelColumns.push({ idxExcel: i, name: c.text?.toString().trim() || `Kolom ${i}` });
+                }
+
                 globalWorksheet.eachRow((row, rowNum) => { 
-                    if (rowNum > 1 && rowNum <= 101) {
+                    if (rowNum > bestHeaderRowIdx && rowNum <= 500) {
                         const rowVals = [];
                         row.eachCell({ includeEmpty: true }, (cell, colNum) => {
                             if (cell.isMerged && cell.master) {
@@ -1071,9 +1095,8 @@ export async function initImport() {
                         });
                         
                         // Cek apakah baris ini adalah "Header Artifact" (misal: baris tabel header yang ikut terbaca).
-                        // Menggunakan pencocokan kata kunci eksak agar sangat aman dan tidak menghapus data valid.
                         let isHeaderArtifact = false;
-                        if (rowNum <= 15) {
+                        if (rowNum <= bestHeaderRowIdx + 5) {
                             let exactHeaderMatches = 0;
                             for (let i = 1; i < excelColumns.length; i++) {
                                 const rawVal = rowVals[excelColumns[i].idxExcel];
@@ -1086,7 +1109,6 @@ export async function initImport() {
                                     if (['harga', 'harga satuan', 'rate', 'rate per unit', 'amount', 'total amount', 'jumlah harga', 'total harga', 'total'].includes(s)) exactHeaderMatches++;
                                 }
                             }
-                            // Jika ada minimal 2 sel yang merupakan judul kolom umum, dipastikan ini adalah header
                             if (exactHeaderMatches >= 2) {
                                 isHeaderArtifact = true;
                             }

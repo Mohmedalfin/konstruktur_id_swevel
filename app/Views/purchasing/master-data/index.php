@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?= esc($title) ?></title>
+    <link href="<?= base_url('assets/css/output.css') ?>" rel="stylesheet">
+    <link rel="stylesheet" href="<?= base_url('assets/fontawesome/css/all.min.css') ?>">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <style>
+        body { background-color: #f3f4f6; }
+        .tab-active {
+            background-color: white;
+            color: #0f172a;
+            border-top: 4px solid #f59e0b; /* yellow */
+            font-weight: bold;
+        }
+        .tab-inactive {
+            background-color: #d1d5db; /* gray-300 */
+            color: #1e293b;
+            border-top: 4px solid transparent;
+            font-weight: 600;
+        }
+        .table-row-odd { background-color: #ffffff; }
+        .table-row-even { background-color: #cbd5e1; /* slate-300/400 */ }
+        .btn-action-edit {
+            color: #334155;
+            background-color: white;
+            border: 2px solid #64748b;
+            border-radius: 4px;
+        }
+        .btn-action-delete {
+            color: white;
+            background-color: #ef4444; /* red-500 */
+            border: 2px solid #ef4444;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body class="font-sans antialiased text-sm">
+
+    <!-- Top Navigation & Header Container -->
+    <div class="bg-[#111827] w-full shadow-md">
+        <!-- Navbar -->
+        <?= view('purchasing/partials/navbar', ['activeNav' => 'master-data']) ?>
+
+        <!-- Title -->
+        <div class="py-12 flex justify-center items-center relative overflow-hidden bg-cover bg-center bg-no-repeat" style="background-image: url('<?= base_url('assets/images/BackgroundTopBar.png') ?>');">
+            <div class="absolute inset-0 bg-[#111827]/80"></div>
+            <h1 class="relative z-10 text-white text-4xl font-bold tracking-widest uppercase">MASTER DATA</h1>
+        </div>
+    </div>
+
+    <!-- Main Content Container -->
+    <div class="max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8 mt-6 pb-12">
+        
+        <!-- Tabs -->
+        <div class="flex">
+            <a href="<?= base_url('purchasing/master-data') ?>" class="tab-active px-8 py-3 rounded-tl-xl rounded-tr-xl text-[15px] flex items-center gap-2 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] z-10 relative">
+                <i class="fa-solid fa-store"></i> Supplier
+            </a>
+            <a href="<?= base_url('purchasing/master-data/material') ?>" class="tab-inactive px-8 py-3 rounded-tl-xl rounded-tr-xl text-[15px] flex items-center gap-2 -ml-3 z-0 relative">
+                <i class="fa-solid fa-cube"></i> Material
+            </a>
+            <a href="<?= base_url('purchasing/master-data/harga') ?>" class="tab-inactive px-8 py-3 rounded-tl-xl rounded-tr-xl text-[15px] flex items-center gap-2 -ml-3 z-0 relative">
+                <i class="fa-solid fa-tags"></i> Harga
+            </a>
+        </div>
+
+        <!-- Card Body -->
+        <div class="bg-white rounded-b-xl rounded-tr-xl shadow-md p-6 border border-gray-200">
+            
+            <!-- Toolbar -->
+            <div class="flex justify-between items-center mb-5">
+                <div class="relative w-80">
+                    <div class="absolute inset-y-0 start-0 flex items-center pointer-events-none ps-3">
+                        <i class="fa-solid fa-search text-gray-500"></i>
+                    </div>
+                    <input type="text" id="searchSupplier" class="py-2.5 px-4 ps-10 block w-full border-gray-400 rounded-lg text-[13px] font-medium focus:border-blue-500 focus:ring-blue-500 border placeholder-gray-500" placeholder="Cari nama supplier...">
+                </div>
+                
+                <button type="button" class="py-2.5 px-5 inline-flex items-center gap-x-2 text-sm font-bold rounded-lg bg-[#111827] text-white hover:bg-[#0f172a] transition-colors" onclick="openTambahModal()">
+                    <i class="fa-solid fa-plus"></i> Tambah Supplier
+                </button>
+            </div>
+
+            <!-- Table -->
+            <div class="border border-gray-300 rounded-lg overflow-hidden">
+                <table class="min-w-full divide-y divide-gray-300">
+                    <thead class="bg-[#111827] text-white">
+                        <tr>
+                            <th scope="col" class="px-4 py-3 text-center text-[13px] font-bold tracking-wide">No</th>
+                            <th scope="col" class="px-4 py-3 text-left text-[13px] font-bold tracking-wide">Nama Supplier</th>
+                            <th scope="col" class="px-4 py-3 text-center text-[13px] font-bold tracking-wide">Telepon</th>
+                            <th scope="col" class="px-4 py-3 text-center text-[13px] font-bold tracking-wide">Email</th>
+                            <th scope="col" class="px-4 py-3 text-center text-[13px] font-bold tracking-wide">NPWP</th>
+                            <th scope="col" class="px-4 py-3 text-center text-[13px] font-bold tracking-wide">Rekening Bank</th>
+                            <th scope="col" class="px-4 py-3 text-center text-[13px] font-bold tracking-wide w-24">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-300 bg-white text-[#1e293b]" id="supplierTableBody">
+                        <?php if (empty($suppliers)): ?>
+                            <tr>
+                                <td colspan="7" class="px-4 py-4 text-center text-[13px] font-semibold text-gray-500">Belum ada data supplier.</td>
+                            </tr>
+                        <?php else: ?>
+                            <?php $no = 1; foreach ($suppliers as $supplier): ?>
+                                <tr class="<?= $no % 2 == 0 ? 'bg-[#cbd5e1]' : 'bg-[#f1f5f9]' ?> hover:bg-gray-200 transition-colors">
+                                    <td class="px-4 py-2.5 whitespace-nowrap text-[13px] font-bold text-center text-[#1e293b]"><?= $no++ ?></td>
+                                    <td class="px-4 py-2.5 whitespace-nowrap text-[13px] font-bold text-[#1e293b]"><?= esc($supplier['nama_supplier']) ?></td>
+                                    <td class="px-4 py-2.5 whitespace-nowrap text-[13px] font-bold text-center text-[#1e293b]"><?= esc($supplier['telepon']) ?></td>
+                                    <td class="px-4 py-2.5 whitespace-nowrap text-[13px] font-bold text-center text-[#1e293b]"><?= esc($supplier['email']) ?></td>
+                                    <td class="px-4 py-2.5 whitespace-nowrap text-[13px] font-bold text-center text-[#1e293b]"><?= esc($supplier['npwp']) ?></td>
+                                    <td class="px-4 py-2.5 whitespace-nowrap text-[13px] font-bold text-center text-[#1e293b]"><?= esc($supplier['rekening_bank']) ?></td>
+                                    <td class="px-4 py-2.5 whitespace-nowrap text-center text-[13px]">
+                                        <div class="flex items-center justify-center gap-2">
+                                            <button type="button" class="btn-action-edit size-6 flex items-center justify-center hover:bg-gray-50 transition-colors" onclick='openEditModal(<?= json_encode($supplier) ?>)'>
+                                                <i class="fa-solid fa-pen-to-square text-[13px]"></i>
+                                            </button>
+                                            <button type="button" class="btn-action-delete size-6 flex items-center justify-center hover:bg-red-600 transition-colors" onclick="deleteSupplier(<?= $supplier['id'] ?>)">
+                                                <i class="fa-solid fa-trash-can text-[13px]"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <?php echo view('purchasing/master-data/partials/modal-supplier'); ?>
+
+    <!-- Scripts -->
+    <script src="<?= base_url('assets/js/preline.js') ?>"></script>
+    <script src="<?= base_url('node_modules/preline/dist/preline.js') ?>"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="<?= base_url('assets/js/purchasing/master-data.js?v=' . time()) ?>"></script>
+</body>
+
+</html>

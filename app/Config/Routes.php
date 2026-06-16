@@ -62,6 +62,37 @@ $routes->group('', function ($routes) {
     
     // Atur Urutan
     $routes->get('menu-rap/atur-urutan', 'menu\MenuRapController::aturUrutan');
+
+    // Purchasing - Dashboard
+    $routes->get('purchasing/dashboard', 'purchasing\DashboardController::index');
+
+    // Purchasing - Purchase Request
+    $routes->get('purchasing/purchase-request', 'purchasing\PurchaseRequestController::index');
+    $routes->get('purchasing/purchase-request/detail/(:num)', 'purchasing\PurchaseRequestController::getDetail/$1');
+    $routes->get('purchasing/purchase-request/pending/(:num)', 'purchasing\PurchaseRequestController::getPendingItems/$1');
+    $routes->post('purchasing/purchase-request/generate-po', 'purchasing\PurchaseRequestController::generatePO');
+
+    // Purchasing - PO Tracking
+    $routes->get('purchasing/po-tracking', 'purchasing\POTrackingController::index');
+    $routes->get('purchasing/po-tracking/detail/(:num)', 'purchasing\POTrackingController::getDetail/$1');
+    $routes->put('purchasing/po-tracking/status/(:num)', 'purchasing\POTrackingController::updateStatus/$1');
+
+    // Purchasing - Master Data
+    $routes->get('purchasing/notification', 'purchasing\NotificationController::index');
+    $routes->get('purchasing/master-data', 'purchasing\MasterDataController::index');
+    $routes->post('purchasing/master-data/store', 'purchasing\MasterDataController::storeSupplier');
+    $routes->put('purchasing/master-data/update/(:num)', 'purchasing\MasterDataController::updateSupplier/$1');
+    $routes->delete('purchasing/master-data/delete/(:num)', 'purchasing\MasterDataController::deleteSupplier/$1');
+
+    $routes->get('purchasing/master-data/material', 'purchasing\MasterDataController::material');
+    $routes->post('purchasing/master-data/material/store', 'purchasing\MasterDataController::storeMaterial');
+    $routes->put('purchasing/master-data/material/update/(:num)', 'purchasing\MasterDataController::updateMaterial/$1');
+    $routes->delete('purchasing/master-data/material/delete/(:num)', 'purchasing\MasterDataController::deleteMaterial/$1');
+
+    $routes->get('purchasing/master-data/harga', 'purchasing\MasterDataController::harga');
+    $routes->post('purchasing/master-data/harga/store', 'purchasing\MasterDataController::storeHarga');
+    $routes->put('purchasing/master-data/harga/update/(:num)', 'purchasing\MasterDataController::updateHarga/$1');
+    $routes->delete('purchasing/master-data/harga/delete/(:num)', 'purchasing\MasterDataController::deleteHarga/$1');
 });
 
 

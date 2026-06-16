@@ -110,7 +110,7 @@ export function renderRows(result) {
                 </td>
                 <td class="px-3 md:px-5 py-2.5 md:py-3 text-center text-table-subtle whitespace-nowrap">
                     <span class="satuan-text">${item.satuan}</span>
-                    <input type="text" class="satuan-input hidden w-16 text-center text-xs bg-white border border-slate-300 px-1 py-1 rounded focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" value="${item.satuan}">
+                    <input type="text" list="datalist-satuan" class="satuan-input hidden w-16 text-center text-xs bg-white border border-slate-300 px-1 py-1 rounded focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" value="${item.satuan}">
                 </td>
                 <td class="px-3 md:px-5 py-2.5 md:py-3 text-center">
                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] md:text-[10px] font-semibold whitespace-nowrap ${badgeCls}">${item.sumber}</span>

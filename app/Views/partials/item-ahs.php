@@ -104,3 +104,44 @@ $wrapperClass = $wrapperClass ?? 'w-full';
 </div>
 
 <script type="module" src="<?= base_url('js/pekerjaan/index.js') ?>"></script>
+
+<datalist id="datalist-satuan">
+    <!-- Volume / Dimensi -->
+    <option value="m">Meter (m)</option>
+    <option value="m2">Meter Persegi (m²)</option>
+    <option value="m3">Meter Kubik (m³)</option>
+    <option value="cm">Sentimeter (cm)</option>
+    <option value="mm">Milimeter (mm)</option>
+    <option value="km">Kilometer (km)</option>
+    <!-- Berat -->
+    <option value="kg">Kilogram (kg)</option>
+    <option value="ton">Ton</option>
+    <option value="gr">Gram (gr)</option>
+    <!-- Satuan Umum / Satuan Kerja -->
+    <option value="bh">Buah (bh)</option>
+    <option value="unit">Unit</option>
+    <option value="set">Set</option>
+    <option value="ls">Lump Sum (ls)</option>
+    <option value="ttk">Titik (ttk)</option>
+    <option value="btg">Batang (btg)</option>
+    <option value="lbr">Lembar (lbr)</option>
+    <option value="mtr">Meter Lari (m')</option>
+    <!-- Waktu & Tenaga -->
+    <option value="org/hr">Orang/Hari (OH)</option>
+    <option value="jam">Jam</option>
+    <option value="hari">Hari</option>
+    <option value="bln">Bulan</option>
+    <option value="mgg">Minggu</option>
+    <!-- Kemasan -->
+    <option value="zak">Zak</option>
+    <option value="gln">Galon (gln)</option>
+    <option value="klg">Kaleng (klg)</option>
+    <option value="btl">Botol (btl)</option>
+    <option value="ktk">Kotak (ktk)</option>
+    <option value="rol">Rol</option>
+    <option value="dus">Dus</option>
+    <!-- Lainnya -->
+    <option value="rit">Ritase (rit)</option>
+    <option value="pax">Pax</option>
+    <option value="liter">Liter (L)</option>
+</datalist>
