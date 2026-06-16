@@ -20,6 +20,7 @@ class RealisasiController extends BaseController
         try {
             $idProject = null;
             $progressData = [];
+            $categories = [];
 
             if ($slug) {
                 $proyekModel = new \App\Models\ProyekModel();
@@ -31,12 +32,25 @@ class RealisasiController extends BaseController
 
                 $idProject    = $project['id_project'];
                 $progressData = $this->realisasiService->getPekerjaanProgressData($idProject);
+
+                $kategoriModel = new \App\Models\KategoriPekerjaanModel();
+                $categories = $kategoriModel
+                    ->groupStart()
+                        ->where('jenis_kategori', 'sistem')
+                        ->orGroupStart()
+                            ->where('jenis_kategori', 'custom')
+                            ->where('id_project', $idProject)
+                        ->groupEnd()
+                    ->groupEnd()
+                    ->orderBy('nama_kategori', 'ASC')
+                    ->findAll();
             }
 
             return view('proyek/menu/menu-realisasi', [
                 'idProject'    => $idProject,
                 'slug'         => $slug,
-                'progressData' => $progressData
+                'progressData' => $progressData,
+                'categories'   => $categories
             ]);
         } catch (PageNotFoundException $e) {
             throw $e;

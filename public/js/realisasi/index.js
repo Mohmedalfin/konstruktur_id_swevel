@@ -6,6 +6,7 @@ import { initPekerjaanModalEvents } from './hooks/pekerjaan-modal-events.js';
 import { initLogEvents } from './hooks/log-events.js';
 import { initSDMEvents } from './hooks/sdm-events.js';
 import { initSDMModalEvents } from './hooks/sdm-modal-events.js';
+import { initListSDMEvents } from './hooks/list-sdm-events.js';
 import { initSDMFilter, getFilteredSDMData } from './hooks/sdm-filter.js';
 import { updateState } from './core/state.js';
 import { initPhotoLightbox } from './components/lightbox.js';
@@ -46,6 +47,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         initPekerjaanModalEvents();
         initSDMModalEvents();
+        initListSDMEvents();
         initLogEvents();
         initPhotoLightbox();
 

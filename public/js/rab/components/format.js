@@ -13,6 +13,10 @@ export function bindFormatPenomoran() {
     if (!btn || !overlay) return;
 
     btn.classList.remove('hidden');
+    const mobBtn = document.getElementById('mobile-format-penomoran-btn');
+    if (mobBtn) {
+        mobBtn.classList.remove('hidden');
+    }
 
     const openModal = () => {
         if (state.sumber_data === 'boq' || state.sumber_data === 'import') {

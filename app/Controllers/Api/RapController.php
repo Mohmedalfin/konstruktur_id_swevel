@@ -13,6 +13,7 @@ use App\Models\RealisasiPekerjaanModel;
 use CodeIgniter\Database\Exceptions\DatabaseException;
 use CodeIgniter\HTTP\ResponseInterface;
 use Throwable;
+use App\Helpers\InventoryHelper;
 
 class RapController extends BaseController
 {
@@ -852,19 +853,30 @@ class RapController extends BaseController
                         $koefisien = (float) ($row['koefisien'] ?? 0);
                         $hargaDasar = (float) ($row['master_harga_dasar'] ?? 0);
                         $hargaSatuan = $koefisien * $hargaDasar;
+                        
+                        $namaItem = $row['nama_kategori'] ?? '-';
+                        $satuan = $row['satuan_final'] ?? $row['satuan_kategori'] ?? '';
+                        $merk = $row['merk'] ?? null;
+                        $spesifikasi = $row['spesifikasi'] ?? null;
+
+                        $idBarang = null;
+                        if ($idProject > 0) {
+                            $idBarang = InventoryHelper::resolveMasterBarang($idProject, $jenis, $namaItem, $merk, $spesifikasi, $satuan);
+                        }
 
                         $bulkAhsItemsToInsert[] = [
                             'id_rap_detail' => $idRapDetail,
-                            'jenis_item' => $jenis,
-                            'nama_item' => $row['nama_kategori'] ?? '-',
-                            'koefisien' => $koefisien,
-                            'satuan' => $row['satuan_final'] ?? $row['satuan_kategori'] ?? '',
-                            'harga_dasar' => $hargaDasar,
-                            'harga_satuan' => $hargaSatuan,
-                            'merk' => $row['merk'] ?? null,
-                            'spesifikasi' => $row['spesifikasi'] ?? null,
-                            'urutan' => $ahsUrutan,
-                            'keterangan' => $row['master_keterangan'] ?? null,
+                            'id_barang'     => $idBarang,
+                            'jenis_item'    => $jenis,
+                            'nama_item'     => $namaItem,
+                            'koefisien'     => $koefisien,
+                            'satuan'        => $satuan,
+                            'harga_dasar'   => $hargaDasar,
+                            'harga_satuan'  => $hargaSatuan,
+                            'merk'          => $merk,
+                            'spesifikasi'   => $spesifikasi,
+                            'urutan'        => $ahsUrutan,
+                            'keterangan'    => $row['master_keterangan'] ?? null,
                         ];
                     }
                 }
@@ -1167,6 +1179,14 @@ class RapController extends BaseController
         $urutan = 0;
         $toInsert = [];
 
+        $db = \Config\Database::connect();
+        $rapDetailRow = $db->table('rap_detail rd')
+            ->select('r.id_project')
+            ->join('rap r', 'r.id_rap = rd.id_rap')
+            ->where('rd.id_rap_detail', $idRapDetail)
+            ->get()->getRowArray();
+        $idProject = (int) ($rapDetailRow['id_project'] ?? 0);
+
         foreach ($ahsRows as $row) {
             $urutan++;
 
@@ -1183,19 +1203,30 @@ class RapController extends BaseController
             $koefisien = (float) ($row['koefisien'] ?? 0);
             $hargaDasar = (float) ($row['master_harga_dasar'] ?? 0);
             $hargaSatuan = $koefisien * $hargaDasar;
+            
+            $namaItem = $row['nama_kategori'] ?? '-';
+            $satuan = $row['satuan_kategori'] ?? '';
+            $merk = $row['merk'] ?? null;
+            $spesifikasi = $row['spesifikasi'] ?? null;
+
+            $idBarang = null;
+            if ($idProject > 0) {
+                $idBarang = InventoryHelper::resolveMasterBarang($idProject, $jenis, $namaItem, $merk, $spesifikasi, $satuan);
+            }
 
             $toInsert[] = [
                 'id_rap_detail' => $idRapDetail,
-                'jenis_item' => $jenis,
-                'nama_item' => $row['nama_kategori'] ?? '-',
-                'koefisien' => $koefisien,
-                'satuan' => $row['satuan_kategori'] ?? '',
-                'harga_dasar' => $hargaDasar,
-                'harga_satuan' => $hargaSatuan,
-                'merk' => $row['merk'] ?? null,
-                'spesifikasi' => $row['spesifikasi'] ?? null,
-                'urutan' => $urutan,
-                'keterangan' => $row['master_keterangan'] ?? null,
+                'id_barang'     => $idBarang,
+                'jenis_item'    => $jenis,
+                'nama_item'     => $namaItem,
+                'koefisien'     => $koefisien,
+                'satuan'        => $satuan,
+                'harga_dasar'   => $hargaDasar,
+                'harga_satuan'  => $hargaSatuan,
+                'merk'          => $merk,
+                'spesifikasi'   => $spesifikasi,
+                'urutan'        => $urutan,
+                'keterangan'    => $row['master_keterangan'] ?? null,
             ];
         }
 

@@ -23,7 +23,12 @@ if (! function_exists('is_nav_active')) {
         }
 
         if ($path === 'dashboard') {
-            return str_contains($currUrl, '/dashboard');
+            return str_contains($currUrl, '/dashboard') && !str_contains($currUrl, '/gudang/dashboard');
+        }
+
+        if ($path === 'gudang/dashboard') {
+            $baseGudang = rtrim(base_url('gudang'), '/');
+            return str_contains($currUrl, '/gudang/dashboard') || $currUrl === $baseGudang;
         }
 
         if ($path === 'menu-rap') {
@@ -32,7 +37,8 @@ if (! function_exists('is_nav_active')) {
                 || str_starts_with($currUrl . '/', $baseProyek . '/')
                 || str_contains($currUrl, '/proyek/menu/'))
                 && !str_contains($currUrl, '/schedule')
-                && !str_contains($currUrl, '/realisasi');
+                && !str_contains($currUrl, '/realisasi')
+                && !str_contains($currUrl, '/permintaan');
         }
 
         return $linkUrl === $currUrl

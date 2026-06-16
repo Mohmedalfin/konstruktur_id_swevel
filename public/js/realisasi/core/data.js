@@ -87,7 +87,7 @@ export async function fetchSDMData() {
                     }),
                     dokumentasi: row.dokumentasi || []
                 };
-            });
+            }).filter(row => row.bahan.length > 0 || row.alat.length > 0 || row.tenaga.length > 0);
         }
         return [];
     } catch (error) {

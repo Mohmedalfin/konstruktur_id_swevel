@@ -15,6 +15,7 @@ class RapDetailItemModel extends Model
 
     protected $allowedFields = [
         'id_rap_detail',
+        'id_barang',
         'jenis_item',
         'nama_item',
         'koefisien',

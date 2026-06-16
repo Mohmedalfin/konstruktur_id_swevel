@@ -27,27 +27,53 @@ $idProject = $idProject ?? null;
             
             <div id="section-pekerjaan" class="block transition-all">
                 <div class="flex items-center justify-between md:justify-end gap-2 mb-4">
-                    <div class="relative md:hidden">
+                    <div class="relative md:hidden z-[80]">
                         <button id="mobileActionBtn" type="button" class="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-white border border-gray-200 text-slate-600 shadow-sm focus:outline-none">
                             <i class="fas fa-ellipsis-v text-sm"></i>
                         </button>
-                        <div id="mobileActionMenu" class="hidden absolute left-0 mt-2 w-52 bg-white rounded-xl shadow-xl border border-gray-100 p-2 z-[70] animate-in fade-in zoom-in duration-200">
-                            <button type="button" data-hs-overlay="#modal-log-dokumentasi" class="flex items-center gap-3 w-full px-3 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 rounded-lg transition-colors text-left">
-                                <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                        <div id="mobileActionMenu" class="hidden absolute left-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-100 p-2 z-[90] animate-in fade-in zoom-in duration-200">
+                            <button type="button" data-hs-overlay="#modal-log-dokumentasi" class="flex items-center gap-3 w-full px-3 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 rounded-lg transition-colors text-left focus:outline-none">
+                                <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
                                     <i class="fas fa-image text-xs"></i>
                                 </div>
                                 <span>Log Dokumentasi</span>
                             </button>
                             <div class="h-px bg-slate-100 my-1"></div>
-                            <div class="px-3 py-2">
-                                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-2">Filter Kategori</label>
-                                <div id="mobile-category-list" class="space-y-1 max-h-[150px] overflow-y-auto">
-                                    <div class="flex items-center gap-2 py-1">
-                                        <input type="checkbox" id="mobile-category-all" class="w-4 h-4 border-gray-300 rounded focus:ring-slate-800 accent-slate-800" value="all" checked>
-                                        <label for="mobile-category-all" class="text-xs font-semibold text-slate-600">Pilih Semua</label>
+                            
+                            <!-- Filter Kategori Dropdown -->
+                            <div class="relative">
+                                <button id="mobileCategoryBtn" type="button"
+                                    class="w-full inline-flex items-center gap-3 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 rounded-lg transition-colors text-left focus:outline-none">
+                                    <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                                        <i class="fas fa-filter text-xs"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-[9px] text-slate-400 font-bold uppercase tracking-wider leading-none mb-0.5">Filter Kategori</p>
+                                        <span id="mobileFilterLabel" class="truncate block text-slate-700 font-semibold leading-tight">Semua Kategori</span>
+                                    </div>
+                                    <span class="dropdown-icon ms-auto">
+                                        <svg class="w-3.5 h-3.5 opacity-70 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                        </svg>
+                                    </span>
+                                </button>
+                                <div id="mobileCategoryMenu"
+                                    class="hidden bg-slate-50 rounded-lg border border-slate-200 overflow-y-auto max-h-[180px] mt-1 z-50 p-2 space-y-1">
+                                    <div class="flex items-center gap-2 py-1 px-1 border-b border-slate-200 mb-1">
+                                        <input type="checkbox" id="mobile-category-all" class="w-4 h-4 border-gray-300 rounded focus:ring-slate-800 accent-slate-800 cursor-pointer" value="all" checked>
+                                        <label for="mobile-category-all" class="text-xs font-semibold text-slate-600 cursor-pointer">Pilih Semua</label>
                                     </div>
                                     <div id="mobile-category-checkbox-list" class="space-y-1">
-                                        <span class="text-[10px] text-slate-400 italic">Memuat...</span>
+                                    <?php if (isset($categories) && !empty($categories)): ?>
+                                        <?php foreach ($categories as $cat): ?>
+                                            <div class="flex items-center gap-2 py-1 px-1">
+                                                <input type="checkbox" class="mobile-category-checkbox w-4 h-4 border-gray-300 rounded focus:ring-slate-800 accent-slate-800 cursor-pointer" value="<?= esc($cat['nama_kategori']) ?>">
+                                                <label class="text-xs font-semibold text-slate-600 truncate cursor-pointer"><?= esc($cat['nama_kategori']) ?></label>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <span class="text-[10px] text-slate-400 italic">Tidak ada kategori</span>
+                                    <?php endif; ?>
                                     </div>
                                 </div>
                             </div>
@@ -78,7 +104,16 @@ $idProject = $idProject ?? null;
                                         </label>
                                     </div>
                                     <div id="category-checkbox-list" class="py-1">
-                                        <span class="block px-4 py-2 text-sm text-gray-400 italic">Memuat kategori...</span>
+                                    <?php if (isset($categories) && !empty($categories)): ?>
+                                        <?php foreach ($categories as $cat): ?>
+                                            <label class="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer">
+                                                <input type="checkbox" class="category-checkbox w-4 h-4 border-gray-300 rounded focus:ring-slate-800 accent-slate-800 cursor-pointer" value="<?= esc($cat['nama_kategori']) ?>">
+                                                <span class="truncate"><?= esc($cat['nama_kategori']) ?></span>
+                                            </label>
+                                        <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <span class="block px-4 py-2 text-sm text-gray-400 italic">Tidak ada kategori</span>
+                                    <?php endif; ?>
                                     </div>
                                 </div>
                             </div>
@@ -127,7 +162,12 @@ $idProject = $idProject ?? null;
                         </div>
                     </div>
 
-                    <button type="button" data-hs-overlay="#modal-real-sdm" class="inline-flex items-center gap-1.5 px-3 py-2 md:px-4 md:py-2 rounded-lg bg-[#0f172a] hover:bg-slate-800 text-white text-xs font-bold shadow-sm transition-all focus:outline-none ml-auto md:ml-0">
+                    <button type="button" data-hs-overlay="#modal-list-sdm" class="inline-flex items-center gap-1.5 px-3 py-2 md:px-4 md:py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-sm transition-all focus:outline-none ml-auto md:ml-0">
+                        <i class="fas fa-list"></i>
+                        <span class="hidden sm:inline">Daftar Kebutuhan</span>
+                        <span class="sm:hidden">Daftar</span>
+                    </button>
+                    <button type="button" data-hs-overlay="#modal-real-sdm" class="inline-flex items-center gap-1.5 px-3 py-2 md:px-4 md:py-2 rounded-lg bg-[#0f172a] hover:bg-slate-800 text-white text-xs font-bold shadow-sm transition-all focus:outline-none">
                         <i class="fas fa-plus"></i>
                         <span class="hidden sm:inline">Tambah Penggunaan</span>
                         <span class="sm:hidden">Tambah</span>
@@ -140,6 +180,7 @@ $idProject = $idProject ?? null;
 
         <?php echo view('partials/modal-real-pekerjaan'); ?>
         <?php echo view('partials/modal-real-sdm'); ?>
+        <?php echo view('partials/modal-list-sdm'); ?>
         <?php echo view('partials/modal-log-dokumentasi'); ?>
 
         <script>

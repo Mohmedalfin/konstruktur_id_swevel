@@ -66,22 +66,35 @@ export function initSDMEvents(tbodyElement) {
                         
                         toast.show('Item penggunaan berhasil dihapus.', 'success');
                         
-                        const { fetchSDMData } = await import('../core/data.js');
+                        const { fetchSDMData, fetchSDMResources } = await import('../core/data.js');
                         const { updateState } = await import('../core/state.js');
                         
                         const newData = await fetchSDMData();
+                        const newResources = await fetchSDMResources();
                         const { sdmData } = getState();
                         
-                        // Pertahankan state toggle (buka/tutup) dan tab yang sedang aktif
+                        // Pertahankan state toggle (buka/tutup) dan pindah tab jika tab saat ini kosong
                         newData.forEach(newItem => {
                             const oldItem = sdmData.find(old => old.id === newItem.id);
                             if (oldItem) {
                                 newItem.expanded = oldItem.expanded;
-                                newItem.activeTab = oldItem.activeTab;
+                                
+                                let currentTab = oldItem.activeTab || 'bahan';
+                                // Jika tab saat ini kosong, cari tab lain yang ada isinya
+                                if ((currentTab === 'bahan' && newItem.bahan.length === 0) ||
+                                    (currentTab === 'alat' && newItem.alat.length === 0) ||
+                                    (currentTab === 'tenaga' && newItem.tenaga.length === 0)) {
+                                    
+                                    if (newItem.bahan.length > 0) currentTab = 'bahan';
+                                    else if (newItem.alat.length > 0) currentTab = 'alat';
+                                    else if (newItem.tenaga.length > 0) currentTab = 'tenaga';
+                                    else if (newItem.dokumentasi.length > 0) currentTab = 'dokumentasi';
+                                }
+                                newItem.activeTab = currentTab;
                             }
                         });
                         
-                        updateState({ sdmData: newData });
+                        updateState({ sdmData: newData, sdmResources: newResources });
                         renderSDMTable(getFilteredSDMData(), tbodyElement);
                         
                     } catch (err) {

@@ -198,7 +198,9 @@ function _bindDropdownChange() {
             return;
         }
 
-        const volTarget = selected.dataset.volTarget || 0;
+        const volTarget = parseFloat(selected.dataset.volTarget) || 0;
+        const volCurrent = parseFloat(selected.dataset.volCurrent) || 0;
+        const volSisa = Math.max(0, volTarget - volCurrent);
         const satuan    = selected.dataset.satuan || '';
         
         volTargetInput.value = volTarget;
@@ -207,6 +209,9 @@ function _bindDropdownChange() {
 
         const volTargetDisplay = document.getElementById('real-vol-target-display');
         if (volTargetDisplay) volTargetDisplay.textContent = volTarget;
+
+        const volSisaDisplay = document.getElementById('real-vol-sisa-display');
+        if (volSisaDisplay) volSisaDisplay.textContent = volSisa.toFixed(2).replace(/\.00$/, '');
 
         const satuanDisplay = document.getElementById('real-satuan-display');
         if (satuanDisplay) satuanDisplay.textContent = satuan || '-';
@@ -238,8 +243,9 @@ function _bindAddButton() {
 
         const volCurrent = parseFloat(selectedOption.dataset.volCurrent) || 0;
         const volTarget  = parseFloat(selectedOption.dataset.volTarget)  || 0;
+        const volSisa    = Math.max(0, volTarget - volCurrent);
         if (volTarget > 0 && (volCurrent + volActual) > volTarget) {
-            _showFieldError(volActualEl, `Volume melebihi target (${volTarget} ${selectedOption.dataset.satuan}).`);
+            _showFieldError(volActualEl, `Volume melebihi sisa target yang tersedia (${volSisa.toFixed(2).replace(/\.00$/, '')} ${selectedOption.dataset.satuan}).`);
             return;
         }
 
@@ -248,6 +254,7 @@ function _bindAddButton() {
             id_rap_detail : parseInt(selectedOption.value),
             taskLabel     : selectedOption.textContent,
             volTarget     : volTarget,
+            volSisa       : volSisa,
             volActual     : volActual,
             satuan        : selectedOption.dataset.satuan || '',
             keterangan    : keteranganEl?.value.trim() || '',
@@ -277,7 +284,7 @@ function _renderBatchTable() {
             <td class="px-4 py-3 text-center text-slate-600 font-medium">${index + 1}</td>
             <td class="px-4 py-3 font-medium text-slate-700">${item.taskLabel}</td>
             <td class="px-4 py-3 text-center text-slate-600">${item.satuan}</td>
-            <td class="px-4 py-3 text-center text-slate-600 font-medium">${item.volTarget}</td>
+            <td class="px-4 py-3 text-center text-slate-600 font-medium">${item.volSisa !== undefined ? item.volSisa.toFixed(2).replace(/\.00$/, '') : item.volTarget}</td>
             <td class="px-4 py-3 text-center font-bold text-primary">${item.volActual}</td>
             <td class="px-4 py-3 text-slate-500 truncate max-w-[200px]" title="${item.keterangan}">${item.keterangan || '-'}</td>
             <td class="px-4 py-3 text-center">
@@ -536,6 +543,9 @@ function _resetInputRow(selectEl, volActualEl, keteranganEl) {
     if (volTargetEl) volTargetEl.value = '';
     const volTargetDisplay = document.getElementById('real-vol-target-display');
     if (volTargetDisplay) volTargetDisplay.textContent = '0';
+
+    const volSisaDisplay = document.getElementById('real-vol-sisa-display');
+    if (volSisaDisplay) volSisaDisplay.textContent = '0';
 
     const satuanEl = document.querySelector(SEL_SATUAN);
     if (satuanEl) satuanEl.value = '';

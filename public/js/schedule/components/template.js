@@ -189,7 +189,7 @@ function renderGanttCellTemplate(startStr, finishStr, barColor = 'bg-emerald-500
         const weeklyWeights = computeWeeklyWeights(startStr, finishStr, weight);
         weeklyWeights.forEach(({ centerPct, weight: wt }) => {
             weightLabelsHtml += `
-                <div class="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 z-20 pointer-events-none"
+                <div class="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 z-10 pointer-events-none"
                      style="left: ${centerPct.toFixed(3)}%;">
                     <span class="text-[8px] md:text-[9px] font-bold text-white drop-shadow whitespace-nowrap">${wt.toFixed(2)}%</span>
                 </div>`;
@@ -276,6 +276,8 @@ function renderItemRowTemplate(item, itemIdx, prefix, catId, subClass, depth = 0
     
     const textStyle = depth > 0 ? "text-[12px] text-slate-700" : "text-[12px] text-slate-800 font-medium";
 
+    const hasChildren = item.children && item.children.length > 0;
+
     let html = `
         <tr class="subrow-${catId} ${rowClass} bg-white hover:bg-slate-50 transition-colors duration-200 group border-b border-table-border" data-id="${item.id}" data-category="${categoryName}" data-cat-id="${catId}" data-type="item">
             <td class="px-1 md:px-2 py-3 text-left text-slate-600 bg-white group-hover:bg-slate-50 border-b border-slate-100 whitespace-nowrap z-10 relative">
@@ -290,19 +292,19 @@ function renderItemRowTemplate(item, itemIdx, prefix, catId, subClass, depth = 0
                 </div>
             </td>
             <td class="${hideClass} px-4 py-3 text-center md:sticky md:left-[320px] z-20 bg-white group-hover:bg-slate-50 border-b border-slate-100" data-action="prevent-collapse">
-                <input type="date" value="${item.start_date || ''}" data-field="start_date" class="schedule-input w-full max-w-[110px] bg-slate-50 border border-slate-200 rounded px-1.5 py-0.5 text-[12px] text-center focus:ring-primary focus:border-primary cursor-pointer text-slate-700 hover:border-slate-300 transition-colors focus:bg-white">
+                ${hasChildren ? '' : `<input type="date" value="${item.start_date || ''}" data-field="start_date" class="schedule-input w-full max-w-[110px] bg-slate-50 border border-slate-200 rounded px-1.5 py-0.5 text-[12px] text-center focus:ring-primary focus:border-primary cursor-pointer text-slate-700 hover:border-slate-300 transition-colors focus:bg-white">`}
             </td>
             <td class="${hideClass} px-4 py-3 text-center md:sticky md:left-[470px] z-20 bg-white group-hover:bg-slate-50 border-b border-slate-100" data-action="prevent-collapse">
-                <input type="date" value="${item.finish_date || ''}" data-field="finish_date" class="schedule-input w-full max-w-[110px] bg-slate-50 border border-slate-200 rounded px-1.5 py-0.5 text-[12px] text-center focus:ring-primary focus:border-primary cursor-pointer text-slate-700 hover:border-slate-300 transition-colors focus:bg-white">
+                ${hasChildren ? '' : `<input type="date" value="${item.finish_date || ''}" data-field="finish_date" class="schedule-input w-full max-w-[110px] bg-slate-50 border border-slate-200 rounded px-1.5 py-0.5 text-[12px] text-center focus:ring-primary focus:border-primary cursor-pointer text-slate-700 hover:border-slate-300 transition-colors focus:bg-white">`}
             </td>
             <td class="${hideClass} px-4 py-3 text-center md:sticky md:left-[620px] z-20 bg-white group-hover:bg-slate-50 text-slate-700 font-medium font-mono text-[12px] border-b border-slate-100">
-                ${item.duration || 0} Hari
+                ${hasChildren ? '' : `${item.duration || 0} Hari`}
             </td>
             <td class="px-4 py-3 text-center md:sticky ${bobotLeft} z-20 bg-white group-hover:bg-slate-50 border-b border-slate-100 shadow-[4px_0_10px_-4px_rgba(0,0,0,0.1)]">
-                ${(item.weight || 0).toFixed(2)}%
+                ${hasChildren ? '' : `${(item.weight || 0).toFixed(2)}%`}
             </td>
             
-            ${renderGanttCellTemplate(item.start_date, item.finish_date, depth > 0 ? 'bg-sky-400' : 'bg-emerald-500', false, item.weight)}
+            ${renderGanttCellTemplate(hasChildren ? null : item.start_date, hasChildren ? null : item.finish_date, depth > 0 ? 'bg-sky-400' : 'bg-emerald-500', false, hasChildren ? 0 : item.weight)}
         </tr>
     `;
 
@@ -335,6 +337,8 @@ export function renderSCurveItemRow(item, itemIdx, prefix, depth = 0) {
     const noPadding = `padding-left: ${(depth * 0.5) + 1.5}rem`;
     const textStyle = depth > 0 ? "text-[12px] text-slate-700" : "text-[12px] text-slate-800 font-medium";
     
+    const hasChildren = item.children && item.children.length > 0;
+
     let html = `
         <tr class="bg-white hover:bg-slate-50 border-b border-table-border transition-colors group">
             <td class="px-1 md:px-2 py-3 text-left text-slate-600 bg-white group-hover:bg-slate-50 border-b border-slate-100 whitespace-nowrap">
@@ -346,7 +350,7 @@ export function renderSCurveItemRow(item, itemIdx, prefix, depth = 0) {
                     <span>${item.nama}</span>
                 </div>
             </td>
-            <td class="px-4 py-3 text-center md:px-5 font-medium text-slate-700 bg-white group-hover:bg-slate-50 border-b border-slate-100 text-xs">${(item.weight || 0).toFixed(2)}%</td>
+            <td class="px-4 py-3 text-center md:px-5 font-medium text-slate-700 bg-white group-hover:bg-slate-50 border-b border-slate-100 text-xs">${hasChildren ? '' : `${(item.weight || 0).toFixed(2)}%`}</td>
         </tr>
     `;
 

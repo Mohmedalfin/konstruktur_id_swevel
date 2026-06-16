@@ -1,6 +1,59 @@
 <?php
-$userName = session()->get('nama_pengguna') ?? session()->get('nama') ?? 'Pengguna';
-$userRole = session()->get('kategori_akun') ?? session()->get('role') ?? 'Kontraktor';
+$fullName = trim(session()->get('nama_pengguna') ?? session()->get('nama') ?? 'Moch. Alfin ');
+$userRole = ucfirst((string) (session()->get('kategori_akun') ?? session()->get('role') ?? 'Kontraktor'));
+
+// Batasi nama pengguna maksimal 2 kata agar tidak merusak tata letak header
+$words = preg_split('/\s+/', $fullName);
+$wordLimit = 2;
+if (count($words) > $wordLimit) {
+    $userName = implode(' ', array_slice($words, 0, $wordLimit)) . '...';
+} else {
+    $userName = $fullName;
+}
+
+$firstSegment = service('uri')->getSegment(1);
+$isProfilePage = $firstSegment === 'profile';
+$isTeamAccountsPage = $firstSegment === 'kelola-akun';
+$isProjectListPage = $firstSegment === 'proyek';
+$isPermintaanPage = $firstSegment === 'permintaan';
+$isAccountSectionActive = $isProfilePage || $isTeamAccountsPage || $isProjectListPage;
+$isDashboardPage = in_array($firstSegment, ['', 'dashboard'], true) && !$isAccountSectionActive;
+
+$permintaanNavClass = $isPermintaanPage
+    ? 'px-4 h-14 md:py-0 md:w-28 md:justify-center flex items-center gap-3 text-sm bg-white text-primary font-semibold md:rounded-none focus:outline-hidden'
+    : 'px-4 h-14 md:py-0 md:w-28 md:justify-center flex items-center gap-3 text-sm text-navbar-foreground hover:bg-navbar-hover focus:bg-navbar-focus md:rounded-none focus:outline-hidden';
+
+$dashboardNavClass = $isDashboardPage
+    ? 'px-4 h-14 md:py-0 md:w-28 md:justify-center flex items-center gap-3 text-sm bg-white text-primary font-semibold md:rounded-none focus:outline-hidden'
+    : 'px-4 h-14 md:py-0 md:w-28 md:justify-center flex items-center gap-3 text-sm text-navbar-foreground hover:bg-navbar-hover focus:bg-navbar-focus md:rounded-none focus:outline-hidden';
+
+$accountTriggerClass = $isAccountSectionActive
+    ? 'hs-dropdown-toggle w-full h-14 px-4 md:px-3 md:justify-center flex items-center gap-3 text-sm bg-white text-slate-800 hover:bg-white/95 focus:outline-hidden focus:bg-white'
+    : 'hs-dropdown-toggle w-full h-14 px-4 md:px-3 md:justify-center flex items-center gap-3 text-sm text-navbar-foreground hover:bg-navbar-hover focus:outline-hidden focus:bg-navbar-focus';
+
+$accountIconClass = $isAccountSectionActive
+    ? 'text-slate-800 fa-solid fa-user text-md'
+    : 'text-white fa-solid fa-user text-md drop-shadow-[0_0_5px_rgba(255,255,255,0.5)]';
+
+$accountNameClass = $isAccountSectionActive
+    ? 'text-sm font-medium text-slate-900'
+    : 'text-sm font-medium text-white';
+
+$accountChevronClass = $isAccountSectionActive
+    ? 'text-slate-800 hs-dropdown-open:-rotate-180 duration-300 shrink-0 size-4 ms-auto md:ms-1 group-hover:translate-y-0.5'
+    : 'text-white hs-dropdown-open:-rotate-180 duration-300 shrink-0 size-4 ms-auto md:ms-1 group-hover:translate-y-0.5';
+
+$profileMenuClass = $isProfilePage
+    ? 'p-2 md:px-3 flex items-center text-sm text-slate-700 bg-gray-100 focus:outline-none focus:bg-gray-100 rounded-lg gap-3'
+    : 'p-2 md:px-3 flex items-center text-sm text-slate-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 rounded-lg gap-3';
+
+$teamAccountsMenuClass = $isTeamAccountsPage
+    ? 'p-2 md:px-3 flex items-center text-sm text-slate-700 bg-gray-100 focus:outline-none focus:bg-gray-100 rounded-lg gap-3'
+    : 'p-2 md:px-3 flex items-center text-sm text-slate-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 rounded-lg gap-3';
+
+$projectListMenuClass = $isProjectListPage
+    ? 'p-2 md:px-3 flex items-center text-sm text-slate-700 bg-gray-100 focus:outline-none focus:bg-gray-100 rounded-lg gap-3'
+    : 'p-2 md:px-3 flex items-center text-sm text-slate-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 rounded-lg gap-3';
 ?>
 
 <!-- ========== HEADER ========== -->
@@ -50,11 +103,8 @@ $userRole = session()->get('kategori_akun') ?? session()->get('role') ?? 'Kontra
                 <div class="py-2 md:py-0 flex flex-col md:flex-row md:items-stretch gap-0.5 md:gap-0">
                     <div class="grow">
                         <div class="flex flex-col md:flex-row md:justify-end md:items-stretch gap-0 md:gap-0">
-                            <a class="px-4 h-14 md:py-0 md:w-28 md:justify-center flex items-center gap-3 text-sm <?= is_nav_active('dashboard') ? 'bg-white text-primary font-semibold' : 'text-navbar-foreground hover:bg-navbar-hover focus:bg-navbar-focus' ?> md:rounded-none focus:outline-hidden"
-                                href="<?= base_url('dashboard') ?>" <?= is_nav_active('dashboard') ? 'aria-current="page"' : '' ?>>
-                                <svg class="shrink-0 size-4 block md:hidden" xmlns="http://www.w3.org/2000/svg"
-                                    width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <a class="<?= esc($dashboardNavClass) ?> header-nav-link" href="<?= base_url('dashboard') ?>"<?= $isDashboardPage ? ' aria-current="page"' : '' ?>>
+                                <svg class="shrink-0 size-4 block md:hidden" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
                                     <path
                                         d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
@@ -62,16 +112,27 @@ $userRole = session()->get('kategori_akun') ?? session()->get('role') ?? 'Kontra
                                 Dashboard
                             </a>
 
-                            <a class="px-4 h-14 md:py-0 md:w-28 md:justify-center flex items-center gap-3 text-sm <?= is_nav_active('proyek') ? 'bg-white text-primary font-semibold' : 'text-navbar-foreground hover:bg-navbar-hover focus:bg-navbar-focus' ?> md:rounded-none focus:outline-hidden"
-                                href="<?= base_url('proyek') ?>" <?= is_nav_active('proyek') ? 'aria-current="page"' : '' ?>>
-                                Proyek
+                            <a class="<?= esc($permintaanNavClass) ?> header-nav-link" href="<?= base_url('permintaan') ?>"<?= $isPermintaanPage ? ' aria-current="page"' : '' ?>>
+                                <svg class="shrink-0 size-4 block md:hidden" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                    <polyline points="14 2 14 8 20 8" />
+                                    <line x1="16" y1="13" x2="8" y2="13" />
+                                    <line x1="16" y1="17" x2="8" y2="17" />
+                                    <polyline points="10 9 9 9 8 9" />
+                                </svg>
+                                Monitoring
                             </a>
 
-                            <!-- Notification Dropdown -->
-                            <div class="hs-dropdown [--strategy:absolute] [--adaptive:none] flex items-center px-2 relative md:border-l md:border-white/10 md:ml-2 md:pl-4">
-                                <button id="hs-header-notification-dropdown" type="button" class="hs-dropdown-toggle relative flex justify-center items-center h-9 w-9 text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors focus:outline-none" aria-haspopup="menu" aria-expanded="false" aria-label="Notifikasi">
-                                    <i class="fa-regular fa-bell text-[1.1rem]"></i>
-                                    <span class="absolute top-1.5 right-1.5 inline-flex items-center justify-center w-2.5 h-2.5 font-bold text-white bg-red-500 border border-navbar rounded-full"></span>
+                            <!-- Dropdown Notifikasi -->
+                            <div class="hs-dropdown [--strategy:static] md:[--strategy:fixed] [--adaptive:none] md:[--adaptive:adaptive] [--is-collapse:true] md:[--is-collapse:false]">
+                                <button id="hs-header-notification-dropdown" type="button"
+                                    class="hs-dropdown-toggle relative w-full h-14 px-4 md:px-3 md:justify-center flex items-center gap-3 text-sm text-navbar-foreground hover:bg-navbar-hover focus:outline-none focus:bg-navbar-focus"
+                                    aria-haspopup="menu" aria-expanded="false" aria-label="Notifikasi">
+                                    <div class="shrink-0 relative">
+                                        <i class="fa-regular fa-bell text-white text-[1.1rem]"></i>
+                                        <span class="absolute top-0 right-0 inline-flex items-center justify-center w-3.5 h-3.5 text-[9px] font-bold text-white bg-red-500 border border-primary rounded-full -mt-1 -mr-1.5">3</span>
+                                    </div>
+                                    <span class="md:hidden">Notifikasi</span>
                                 </button>
 
                                 <div class="hs-dropdown-menu transition-[opacity,margin] duration-[150ms] hs-dropdown-open:opacity-100 opacity-0 absolute right-0 md:right-auto md:left-auto md:translate-x-[-70%] w-80 hidden z-50 top-full mt-2 bg-white border border-gray-200 shadow-md rounded-xl" role="menu" aria-orientation="vertical" aria-labelledby="hs-header-notification-dropdown">
@@ -100,27 +161,48 @@ $userRole = session()->get('kategori_akun') ?? session()->get('role') ?? 'Kontra
                                 </div>
                             </div>
 
-                            <!-- User Dropdown -->
-                            <div class="hs-dropdown [--strategy:absolute] [--adaptive:none] flex items-center relative">
-                                <button id="hs-header-base-dropdown" type="button" class="hs-dropdown-toggle flex items-center gap-3 px-3 h-10 hover:bg-white/10 rounded-lg transition-colors focus:outline-none" aria-haspopup="menu" aria-expanded="false">
-                                    <div class="w-8 h-8 rounded-full bg-gray-700 border border-gray-600 flex items-center justify-center overflow-hidden shrink-0">
-                                        <i class="text-gray-300 fa-solid fa-user text-sm"></i>
+                            <!-- Dropdown (User Profile) -->
+                            <div
+                                class="hs-dropdown [--strategy:static] md:[--strategy:fixed] [--adaptive:none] md:[--adaptive:adaptive] [--is-collapse:true] md:[--is-collapse:false]">
+                                <button id="hs-header-base-dropdown" type="button"
+                                    class="<?= esc($accountTriggerClass) ?>"
+                                    aria-haspopup="menu" aria-expanded="false" aria-label="Dropdown">
+
+                                    <div class="shrink-0">
+                                        <i class="<?= esc($accountIconClass) ?>"></i>
                                     </div>
-                                    <div class="leading-tight text-left hidden sm:block">
-                                        <div class="text-[13px] font-semibold text-white"><?= esc($userName) ?></div>
-                                        <div class="text-[11px] text-gray-400"><?= esc($userRole) ?></div>
+
+                                    <div class="leading-tight text-left">
+                                        <div class="<?= esc($accountNameClass) ?>" title="<?= esc($fullName) ?>"><?= esc($userName) ?></div>
+                                        <div class="text-xs text-secondary opacity-80"><?= esc($userRole) ?></div>
                                     </div>
-                                    <i class="fa-solid fa-chevron-down text-[10px] text-gray-400 hs-dropdown-open:rotate-180 transition-transform duration-300 ml-1"></i>
+
+                                    <svg class="<?= esc($accountChevronClass) ?>" 
+                                        xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" 
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="m6 9 6 6 6-6" />
+                                    </svg>
                                 </button>
 
-                                <div class="hs-dropdown-menu transition-[opacity,margin] duration-[150ms] hs-dropdown-open:opacity-100 opacity-0 absolute right-0 w-52 hidden z-50 top-full mt-2 bg-white border border-gray-200 shadow-md rounded-xl" role="menu" aria-orientation="vertical" aria-labelledby="hs-header-base-dropdown">
-                                    <div class="py-2 px-1">
-                                        <a class="px-3 py-2.5 flex items-center gap-3 text-[13px] font-medium text-gray-700 hover:bg-gray-100 rounded-lg mx-1 transition-colors" href="#">
-                                            <i class="fa-regular fa-id-badge w-4 text-center text-gray-400"></i> Profile
+                                <div class="hs-dropdown-menu transition-[opacity,margin] duration-[0.1ms] md:duration-[150ms] hs-dropdown-open:opacity-100 opacity-0 relative w-full md:w-52 hidden z-10 top-full ps-7 md:ps-0 md:bg-white md:border md:border-gray-200 md:shadow-md before:absolute before:-top-4 before:start-0 before:w-full before:h-5 md:after:hidden after:absolute after:top-1 after:start-4.5 after:h-[calc(100%-4px)] after:border-s after:border-white/20"
+                                    role="menu" aria-orientation="vertical" aria-labelledby="hs-header-base-dropdown">
+                                    <div class="py-1 md:px-1 space-y-0.5">
+                                        <a class="<?= esc($profileMenuClass) ?> header-nav-link" href="<?= base_url('profile') ?>"<?= $isProfilePage ? ' aria-current="page"' : '' ?>>
+                                            <i class="fa-regular fa-id-badge w-4"></i>
+                                            Profile
                                         </a>
-                                        <div class="my-1 border-t border-gray-100"></div>
-                                        <a class="px-3 py-2.5 flex items-center gap-3 text-[13px] font-medium text-red-600 hover:bg-red-50 rounded-lg mx-1 transition-colors" href="<?= base_url('auth/logout') ?>">
-                                            <i class="fa-solid fa-right-from-bracket w-4 text-center"></i> Logout
+                                        <a class="<?= esc($teamAccountsMenuClass) ?> header-nav-link" href="<?= base_url('kelola-akun') ?>"<?= $isTeamAccountsPage ? ' aria-current="page"' : '' ?>>
+                                            <i class="fa-solid fa-users-gear w-4"></i>
+                                            Kelola Akun
+                                        </a>
+                                        <a class="<?= esc($projectListMenuClass) ?> header-nav-link" href="<?= base_url('proyek') ?>"<?= $isProjectListPage ? ' aria-current="page"' : '' ?>>
+                                            <i class="fa-solid fa-list-check w-4"></i>
+                                            Daftar Proyek
+                                        </a>
+                                        <a class="p-2 md:px-3 flex items-center text-sm text-red-600 hover:bg-red-50 focus:outline-none focus:bg-red-50 rounded-lg gap-3"
+                                            href="<?= base_url('logout') ?>">
+                                            <i class="fa-solid fa-right-from-bracket w-4"></i>
+                                            Logout
                                         </a>
                                     </div>
                                 </div>

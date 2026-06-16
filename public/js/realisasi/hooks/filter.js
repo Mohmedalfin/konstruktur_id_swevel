@@ -42,7 +42,8 @@ function updateFilterUI() {
     
     if (!filterLabel || !filterBtn || !realisasiData) return;
 
-    const totalCategories = realisasiData.length;
+    const uniqueCategories = new Set(Array.from(document.querySelectorAll('.category-checkbox')).map(c => c.value));
+    const totalCategories = uniqueCategories.size;
     const isSelected = selectedCategories.length > 0;
     const isOpen = filterMenu && !filterMenu.classList.contains('hidden');
 
@@ -92,44 +93,22 @@ function clearAllCategories() {
 }
 
 export function initFilter() {
-    const { realisasiData } = getState();
-    const listContainer = document.getElementById('category-checkbox-list');
-    
-    if (!listContainer || !realisasiData || realisasiData.length === 0) {
-        if (listContainer) {
-            listContainer.innerHTML = '<span class="block px-4 py-2 text-sm text-gray-400 italic">Tidak ada kategori</span>';
-        }
-        return;
-    }
-
     updateState({ selectedCategories: [] });
 
-    const categories = realisasiData.map(item => item.uraian);
-    const checkboxesHtml = categories.map(cat => `
-        <label class="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer">
-            <input type="checkbox" class="category-checkbox w-4 h-4 border-gray-300 rounded focus:ring-slate-800 accent-slate-800 cursor-pointer" value="${cat}">
-            <span class="truncate">${cat}</span>
-        </label>
-    `).join('');
-
-    listContainer.innerHTML = checkboxesHtml;
-
-    const mobileListContainer = document.getElementById('mobile-category-checkbox-list');
-    if (mobileListContainer) {
-        const mobileHtml = categories.map(cat => `
-            <div class="flex items-center gap-2 py-1 px-1">
-                <input type="checkbox" class="mobile-category-checkbox w-4 h-4 border-gray-300 rounded focus:ring-slate-800 accent-slate-800" value="${cat}">
-                <label class="text-xs font-semibold text-slate-600 truncate">${cat}</label>
-            </div>
-        `).join('');
-        mobileListContainer.innerHTML = mobileHtml;
-    }
-    
     const selectAllCb = document.getElementById('category-checkbox-all');
     if (selectAllCb) {
         selectAllCb.checked = false;
         selectAllCb.indeterminate = false;
     }
+    const mobileSelectAllCb = document.getElementById('mobile-category-all');
+    if (mobileSelectAllCb) {
+        mobileSelectAllCb.checked = false;
+        mobileSelectAllCb.indeterminate = false;
+    }
+    
+    // Uncheck all category checkboxes initially since selectedCategories is empty
+    const checkboxes = document.querySelectorAll('.category-checkbox, .mobile-category-checkbox');
+    checkboxes.forEach(cb => cb.checked = false);
     
     updateFilterUI();
     
@@ -141,6 +120,8 @@ export function initFilter() {
 function _setupMobileActionMenu() {
     const mobileBtn = document.getElementById('mobileActionBtn');
     const mobileMenu = document.getElementById('mobileActionMenu');
+    const mobCategoryBtn = document.getElementById('mobileCategoryBtn');
+    const mobCategoryMenu = document.getElementById('mobileCategoryMenu');
 
     if (!mobileBtn || !mobileMenu) return;
 
@@ -148,6 +129,17 @@ function _setupMobileActionMenu() {
         e.stopPropagation();
         mobileMenu.classList.toggle('hidden');
     });
+
+    if (mobCategoryBtn && mobCategoryMenu) {
+        mobCategoryBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            mobCategoryMenu.classList.toggle('hidden');
+            const icon = mobCategoryBtn.querySelector('.dropdown-icon svg');
+            if (icon) {
+                icon.classList.toggle('rotate-180', !mobCategoryMenu.classList.contains('hidden'));
+            }
+        });
+    }
 
     mobileMenu.addEventListener('click', (e) => {
         const target = e.target.closest('button, a');
@@ -160,6 +152,13 @@ function _setupMobileActionMenu() {
     document.addEventListener('click', (e) => {
         if (!mobileBtn.contains(e.target) && !mobileMenu.contains(e.target)) {
             mobileMenu.classList.add('hidden');
+            if (mobCategoryMenu) {
+                mobCategoryMenu.classList.add('hidden');
+            }
+            if (mobCategoryBtn) {
+                const icon = mobCategoryBtn.querySelector('.dropdown-icon svg');
+                if (icon) icon.classList.remove('rotate-180');
+            }
         }
     });
 }
@@ -236,12 +235,20 @@ function _bindFilterEvents() {
     if (!checkboxes.length || !tbody) return;
 
     checkboxes.forEach(cb => {
-        cb.addEventListener('change', () => {
-            const selected = Array.from(checkboxes)
-                                 .filter(c => c.checked)
-                                 .map(c => c.value);
+        cb.addEventListener('change', (e) => {
+            const isChecked = e.target.checked;
+            const value = e.target.value;
+            let { selectedCategories } = getState();
             
-            updateState({ selectedCategories: selected });
+            if (isChecked) {
+                if (!selectedCategories.includes(value)) {
+                    selectedCategories = [...selectedCategories, value];
+                }
+            } else {
+                selectedCategories = selectedCategories.filter(v => v !== value);
+            }
+            
+            updateState({ selectedCategories });
             syncCheckboxes();
             updateFilterUI();
             
@@ -259,11 +266,11 @@ function _bindFilterEvents() {
     function handleSelectAll(e) {
         const isChecked = e.target.checked;
         
-        checkboxes.forEach(c => {
-            c.checked = isChecked;
-        });
-
-        const selected = isChecked ? Array.from(document.querySelectorAll('.category-checkbox')).map(c => c.value) : [];
+        let selected = [];
+        if (isChecked) {
+            const allValues = Array.from(document.querySelectorAll('.category-checkbox')).map(c => c.value);
+            selected = [...new Set(allValues)];
+        }
         
         updateState({ selectedCategories: selected });
         syncCheckboxes();

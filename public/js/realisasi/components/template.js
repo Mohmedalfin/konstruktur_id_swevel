@@ -41,11 +41,11 @@ export function renderItemRow(item, depth = 0) {
                     <span>${item.uraian}</span>
                 </div>
             </td>
-            <td class="px-3 md:px-5 py-3.5 text-center text-slate-700 font-medium text-sm">${item.satuan}</td>
-            <td class="px-3 md:px-5 py-3.5 text-center text-slate-700 font-medium text-sm">${item.volume}</td>
-            <td class="px-3 md:px-5 py-3.5 text-center text-slate-700 font-medium text-sm">${item.volumeTercapai}</td>
-            <td class="px-3 md:px-5 py-3.5 text-center text-slate-700 font-medium text-sm">${renderProgressBar(item.progress)}</td>
-            <td class="px-3 md:px-5 py-3.5 text-center">${actionCell}</td>
+            <td class="px-3 md:px-5 py-3.5 text-center text-slate-700 font-medium text-sm">${hasChildren ? '' : item.satuan}</td>
+            <td class="px-3 md:px-5 py-3.5 text-center text-slate-700 font-medium text-sm">${hasChildren ? '' : item.volume}</td>
+            <td class="px-3 md:px-5 py-3.5 text-center text-slate-700 font-medium text-sm">${hasChildren ? '' : item.volumeTercapai}</td>
+            <td class="px-3 md:px-5 py-3.5 text-center text-slate-700 font-medium text-sm">${hasChildren ? '' : renderProgressBar(item.progress)}</td>
+            <td class="px-3 md:px-5 py-3.5 text-center">${hasChildren ? '' : actionCell}</td>
         </tr>
     `;
 }

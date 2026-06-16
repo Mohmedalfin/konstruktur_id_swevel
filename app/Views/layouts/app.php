@@ -10,6 +10,14 @@
     <link rel="stylesheet" href="<?= base_url('assets/css/output.css') ?>">
     <link rel="stylesheet" href="<?= base_url('assets/fontawesome/css/all.min.css') ?>">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.css" />
+    <style>
+        /* Styling backdrop modal agar semi-transparan dan memperlihatkan halaman belakang */
+        .hs-overlay-backdrop {
+            background-color: rgba(15, 23, 42, 0.5) !important;
+            backdrop-filter: blur(4px) !important;
+            -webkit-backdrop-filter: blur(4px) !important;
+        }
+    </style>
 </head>
 
 <body class="bg-gray-50">
