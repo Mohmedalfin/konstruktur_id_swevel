@@ -23,7 +23,12 @@ if (! function_exists('is_nav_active')) {
         }
 
         if ($path === 'dashboard') {
-            return str_contains($currUrl, '/dashboard');
+            return str_contains($currUrl, '/dashboard') && !str_contains($currUrl, '/gudang/dashboard');
+        }
+
+        if ($path === 'gudang/dashboard') {
+            $baseGudang = rtrim(base_url('gudang'), '/');
+            return str_contains($currUrl, '/gudang/dashboard') || $currUrl === $baseGudang;
         }
 
         if ($path === 'menu-rap') {

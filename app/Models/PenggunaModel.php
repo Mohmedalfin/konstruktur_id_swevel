@@ -78,6 +78,32 @@ class PenggunaModel extends Model
                 // Set default avatar jika tidak ada foto
                 $profile->foto_url = base_url('assets/images/default-avatar.png');
             }
+            
+            // Format status akun (1 = aktif, 0 = nonaktif) dengan huruf besar di awal
+            if (isset($profile->status)) {
+                $profile->status = ((int)$profile->status === 1) ? 'Aktif' : 'Nonaktif';
+            }
+            
+            // Format kategori akun dengan huruf besar di awal
+            if (isset($profile->kategori_akun)) {
+                $profile->kategori_akun = ucfirst((string)$profile->kategori_akun);
+            }
+            
+            // Ambil nama dari parent_id jika ada
+            if (!empty($profile->parent_id)) {
+                $parent = $this->db->table('pengguna')
+                                   ->select('nama_pengguna')
+                                   ->where('id_pengguna', $profile->parent_id)
+                                   ->get()
+                                   ->getRow();
+                if ($parent) {
+                    $profile->parent_id = $parent->nama_pengguna;
+                } else {
+                    $profile->parent_id = '-';
+                }
+            } else {
+                $profile->parent_id = '-';
+            }
         }
         
         return $profile;

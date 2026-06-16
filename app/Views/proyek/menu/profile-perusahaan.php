@@ -10,7 +10,11 @@
 </head>
 <body class="bg-gray-50 min-h-screen">
     <?php echo view('partials/global-loader'); ?>
-    <?php echo view('partials/header'); ?>
+    <?php if (strtolower(session()->get('kategori_akun') ?? session()->get('role') ?? '') === 'gudang') : ?>
+        <?php echo view('gudang/partials/navbar'); ?>
+    <?php else : ?>
+        <?php echo view('partials/header'); ?>
+    <?php endif; ?>
     <?php echo view('partials/topbar', [
         'title' => 'EDIT PROFILE PERUSAHAAN',
         'subtitle' => 'Perbarui informasi dan identitas perusahaan Anda.'

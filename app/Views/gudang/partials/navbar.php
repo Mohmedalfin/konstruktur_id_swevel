@@ -9,6 +9,25 @@ if (count($words) > $wordLimit) {
 } else {
     $userName = $fullName;
 }
+
+$firstSegment = service('uri')->getSegment(1);
+$isProfilePage = $firstSegment === 'profile';
+
+$accountTriggerClass = $isProfilePage
+    ? 'hs-dropdown-toggle w-full p-2 md:w-auto md:px-4 md:justify-center flex items-center gap-3 text-sm bg-white text-slate-800 hover:bg-white/95 focus:outline-hidden focus:bg-white transition-colors duration-200'
+    : 'hs-dropdown-toggle w-full p-2 md:w-auto md:px-4 md:justify-center flex items-center gap-3 text-sm text-navbar-foreground hover:bg-navbar-hover focus:outline-hidden focus:bg-navbar-focus transition-colors duration-200';
+
+$accountIconClass = $isProfilePage
+    ? 'text-slate-800 fa-solid fa-user text-md'
+    : 'text-white fa-solid fa-user text-md drop-shadow-[0_0_5px_rgba(255,255,255,0.5)]';
+
+$accountNameClass = $isProfilePage
+    ? 'text-sm font-medium text-slate-900'
+    : 'text-sm font-medium text-white';
+
+$accountChevronClass = $isProfilePage
+    ? 'text-slate-800 hs-dropdown-open:-rotate-180 duration-300 shrink-0 size-4 ms-auto md:ms-1 group-hover:translate-y-0.5'
+    : 'text-white hs-dropdown-open:-rotate-180 duration-300 shrink-0 size-4 ms-auto md:ms-1 group-hover:translate-y-0.5';
 ?>
 <!-- ========== GUDANG HEADER ========== -->
 <header class="flex flex-wrap md:justify-start md:flex-nowrap z-50 bg-navbar border-b border-navbar-line sticky top-0 transition-all duration-200 ease-in-out">
@@ -75,19 +94,19 @@ if (count($words) > $wordLimit) {
               <!-- Dropdown (User Profile) -->
               <div class="hs-dropdown [--strategy:static] md:[--strategy:fixed] [--adaptive:none] md:[--adaptive:adaptive] [--is-collapse:true] md:[--is-collapse:false]">
                   <button id="hs-header-base-dropdown" type="button"
-                      class="hs-dropdown-toggle w-full p-2 md:w-auto md:px-4 md:justify-center flex items-center gap-3 text-sm text-navbar-foreground hover:bg-navbar-hover focus:outline-hidden focus:bg-navbar-focus transition-colors duration-200"
+                      class="<?= esc($accountTriggerClass) ?>"
                       aria-haspopup="menu" aria-expanded="false" aria-label="Dropdown">
 
                       <div class="shrink-0">
-                          <i class="text-white fa-solid fa-user text-md drop-shadow-[0_0_5px_rgba(255,255,255,0.5)]"></i>
+                          <i class="<?= esc($accountIconClass) ?>"></i>
                       </div>
 
                       <div class="leading-tight text-left">
-                          <div class="text-sm font-medium text-white" title="<?= esc($fullName) ?>"><?= esc($userName) ?></div>
+                          <div class="<?= esc($accountNameClass) ?>" title="<?= esc($fullName) ?>"><?= esc($userName) ?></div>
                           <div class="text-xs text-secondary opacity-80"><?= esc($userRole) ?></div>
                       </div>
 
-                      <svg class="text-white hs-dropdown-open:-rotate-180 duration-300 shrink-0 size-4 ms-auto md:ms-1 group-hover:translate-y-0.5" 
+                      <svg class="<?= esc($accountChevronClass) ?>" 
                           xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" 
                           fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                           <path d="m6 9 6 6 6-6" />

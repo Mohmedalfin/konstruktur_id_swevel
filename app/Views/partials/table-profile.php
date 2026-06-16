@@ -193,7 +193,7 @@
                         </div>
                     </div>
                     <div class="grid grid-cols-[120px_1fr] gap-3 items-start">
-                        <span class="text-[11px] font-semibold text-slate-500">Parent ID</span>
+                        <span class="text-[11px] font-semibold text-slate-500">Akun Induk</span>
                         <div class="text-[12px] text-slate-700">
                             <span data-profile-text="parent_id">-</span>
                         </div>

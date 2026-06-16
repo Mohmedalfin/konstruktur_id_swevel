@@ -52,7 +52,7 @@ abstract class BaseController extends Controller
             $targetRole = 'gudang';
         } elseif (in_array($firstSegment, [
             '', 'permintaan', 'proyek', 'dashboard', 'schedule', 
-            'realisasi', 'profile', 'kelola-akun', 'notifikasi'
+            'realisasi', 'kelola-akun', 'notifikasi'
         ], true)) {
             $targetRole = 'kontraktor';
         }
