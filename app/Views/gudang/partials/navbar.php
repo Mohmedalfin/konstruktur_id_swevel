@@ -17,9 +17,13 @@ $accountTriggerClass = $isProfilePage
     ? 'hs-dropdown-toggle w-full p-2 md:w-auto md:px-4 md:justify-center flex items-center gap-3 text-sm bg-white text-slate-800 hover:bg-white/95 focus:outline-hidden focus:bg-white transition-colors duration-200'
     : 'hs-dropdown-toggle w-full p-2 md:w-auto md:px-4 md:justify-center flex items-center gap-3 text-sm text-navbar-foreground hover:bg-navbar-hover focus:outline-hidden focus:bg-navbar-focus transition-colors duration-200';
 
+$accountIconWrapperClass = $isProfilePage
+    ? 'w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center'
+    : 'w-8 h-8 rounded-full bg-white/20 flex items-center justify-center ring-1 ring-white/30';
+
 $accountIconClass = $isProfilePage
-    ? 'text-slate-800 fa-solid fa-user text-md'
-    : 'text-white fa-solid fa-user text-md drop-shadow-[0_0_5px_rgba(255,255,255,0.5)]';
+    ? 'text-slate-700 fa-solid fa-user text-sm'
+    : 'text-white fa-solid fa-user text-sm';
 
 $accountNameClass = $isProfilePage
     ? 'text-sm font-medium text-slate-900'
@@ -97,7 +101,7 @@ $accountChevronClass = $isProfilePage
                       class="<?= esc($accountTriggerClass) ?>"
                       aria-haspopup="menu" aria-expanded="false" aria-label="Dropdown">
 
-                      <div class="shrink-0">
+                      <div class="<?= esc($accountIconWrapperClass) ?> shrink-0">
                           <i class="<?= esc($accountIconClass) ?>"></i>
                       </div>
 

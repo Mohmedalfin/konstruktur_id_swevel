@@ -31,9 +31,13 @@ $accountTriggerClass = $isAccountSectionActive
     ? 'hs-dropdown-toggle w-full h-14 px-4 md:px-3 md:justify-center flex items-center gap-3 text-sm bg-white text-slate-800 hover:bg-white/95 focus:outline-hidden focus:bg-white'
     : 'hs-dropdown-toggle w-full h-14 px-4 md:px-3 md:justify-center flex items-center gap-3 text-sm text-navbar-foreground hover:bg-navbar-hover focus:outline-hidden focus:bg-navbar-focus';
 
+$accountIconWrapperClass = $isAccountSectionActive
+    ? 'w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center'
+    : 'w-8 h-8 rounded-full bg-white/20 flex items-center justify-center ring-1 ring-white/30';
+
 $accountIconClass = $isAccountSectionActive
-    ? 'text-slate-800 fa-solid fa-user text-md'
-    : 'text-white fa-solid fa-user text-md drop-shadow-[0_0_5px_rgba(255,255,255,0.5)]';
+    ? 'text-slate-700 fa-solid fa-user text-sm'
+    : 'text-white fa-solid fa-user text-sm';
 
 $accountNameClass = $isAccountSectionActive
     ? 'text-sm font-medium text-slate-900'
@@ -194,7 +198,7 @@ $projectListMenuClass = $isProjectListPage
                                     class="<?= esc($accountTriggerClass) ?>"
                                     aria-haspopup="menu" aria-expanded="false" aria-label="Dropdown">
 
-                                    <div class="shrink-0">
+                                    <div class="<?= esc($accountIconWrapperClass) ?> shrink-0">
                                         <i class="<?= esc($accountIconClass) ?>"></i>
                                     </div>
 

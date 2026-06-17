@@ -136,6 +136,9 @@ $routes->group('api', ['namespace' => 'App\Controllers\Api'], function ($routes)
     $routes->get('stok/data', '\App\Controllers\gudang\StokController::getData');
     $routes->put('stok/update-minimum', '\App\Controllers\gudang\StokController::updateMinimum');
 
+    // Dashboard Gudang API
+    $routes->get('gudang/dashboard/data', '\App\Controllers\gudang\GudangController::getDashboardData');
+
     // Pengadaan Gudang API
     $routes->get('pengadaan/stats', '\App\Controllers\gudang\PengadaanController::getStats');
     $routes->get('pengadaan/data', '\App\Controllers\gudang\PengadaanController::getData');
