@@ -633,7 +633,7 @@ function renderItemRows(items, catId, subClass, isEditable, prefix = '', depth =
                     ${isEditable ? `
                         <div class="flex items-center justify-center gap-2 volume-display-container">
                             <span class="volume-text">${volume}</span>
-                            <button type="button" class="edit-volume-btn opacity-0 group-hover:opacity-100 text-slate-400 hover:text-primary transition-opacity p-1 focus:outline-none" title="Edit Volume">
+                            <button type="button" class="edit-volume-btn text-slate-400 hover:text-primary transition-colors p-1 focus:outline-none" title="Edit Volume">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
                             </button>
                         </div>

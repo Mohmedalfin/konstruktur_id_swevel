@@ -4,47 +4,50 @@ $wrapperClass = $wrapperClass ?? 'w-full';
 
 <div class="<?= $wrapperClass ?> px-3 sm:px-6 lg:px-8 py-4 md:py-8">
 
-    <!-- ── Header Info (Branding Blue) ──────────────────────────────── -->
-    <div
-        class="bg-navbar text-white px-5 py-3.5 rounded-t-xl text-sm shadow-sm flex items-center justify-between border-b border-navbar-line">
-        <div class="flex items-center gap-3">
-            <div class="p-1.5 bg-blue-500/10 rounded-lg text-blue-400">
-                <i class="fas fa-file-invoice text-sm"></i>
-            </div>
-            <div class="flex flex-col md:flex-row md:items-center md:gap-2">
-                <span class="text-white font-bold tracking-tight">Rincian AHS:</span>
-                <span id="ahs-item-label" class="text-white/80 font-medium truncate italic text-xs md:text-sm">—</span>
+    <!-- ── Header Info ─────────────────────────────────────────────── -->
+    <div class="bg-[#0f172a] text-white px-5 py-3.5 rounded-t-xl flex items-center justify-between gap-4 border-b border-slate-800">
+        <div class="flex items-center gap-3 min-w-0">
+            <!-- Dot indicator -->
+            <span class="w-2.5 h-2.5 rounded-full bg-blue-500 shrink-0 shadow-[0_0_8px_rgba(59,130,246,0.6)]"></span>
+            <div class="flex flex-col md:flex-row md:items-center md:gap-2 min-w-0">
+                <span class="text-white font-bold tracking-tight shrink-0 text-sm">Rincian AHS:</span>
+                <span id="ahs-item-label" class="text-slate-400 font-medium truncate italic text-xs md:text-sm">—</span>
             </div>
         </div>
-        <div class="text-[10px] md:text-xs font-semibold opacity-80 uppercase tracking-widest hidden sm:block">
-            Sumber: <span id="ahs-source-label" class="text-blue-400 font-bold">PUPR</span>
+        <div class="shrink-0 hidden sm:flex items-center gap-1.5 text-[11px] font-semibold tracking-widest uppercase">
+            <span class="text-slate-500">Sumber:</span>
+            <span id="ahs-source-label" class="text-blue-400 font-bold">—</span>
         </div>
     </div>
 
-    <!-- ── Summary Section (Centered Price & Right Search) ───────────── -->
-    <div
-        class="bg-white border-x border-table-border py-6 px-4 md:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
+    <!-- ── Summary Section ────────────────────────────────────────── -->
+    <div class="bg-white border-x border-b border-slate-200 px-6 py-5 flex flex-col md:flex-row items-center justify-between gap-5">
 
-        <!-- Left Spacer (to keep price centered) -->
+        <!-- Left Spacer -->
         <div class="hidden md:block w-64"></div>
 
-        <!-- Center: Price Highlight -->
-        <div class="flex flex-col items-center gap-2">
-            <p class="text-[10px] md:text-xs font-bold text-table-subtle uppercase tracking-[0.2em]">Harga Satuan</p>
-            <div
-                class="bg-[#eef2ff] border border-blue-200 px-10 py-2.5 rounded-xl shadow-[0_0_20px_rgba(59,130,246,0.1)] transition-transform hover:scale-105 duration-300">
-                <span id="ahs-total-keseluruhan"
-                    class="text-2xl md:text-3xl font-black text-blue-700 tabular-nums tracking-tighter">Rp 0</span>
+        <!-- Center: Price Card -->
+        <div class="flex items-center gap-4 bg-slate-50 border border-slate-200 rounded-xl px-6 py-3 shadow-sm">
+            <div class="w-10 h-10 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a2 2 0 012-2z"/>
+                </svg>
+            </div>
+            <div>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.18em] mb-0.5">Harga Satuan</p>
+                <span id="ahs-total-keseluruhan" class="text-2xl font-black text-blue-600 tabular-nums tracking-tight">Rp 0</span>
             </div>
         </div>
 
         <!-- Right: Search -->
-        <div class="w-full md:w-64 flex flex-col gap-1.5 self-end">
-            <label class="text-[10px] font-bold text-table-subtle uppercase tracking-wider ml-1">Cari Data:</label>
+        <div class="w-full md:w-64 flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-0.5">Cari Data:</label>
             <div class="relative">
+                <svg class="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0"/>
+                </svg>
                 <input type="text" id="ahs-table-search" placeholder="Masukkan kata kunci..."
-                    class="w-full pl-9 pr-4 py-2.5 border border-table-border rounded-xl text-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none bg-slate-50/50 shadow-inner" />
-                <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-table-subtle text-xs"></i>
+                    class="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-xs focus:ring-1 focus:ring-slate-400 focus:border-slate-400 transition-all outline-none bg-white shadow-sm text-slate-700" />
             </div>
         </div>
     </div>
@@ -58,19 +61,19 @@ $wrapperClass = $wrapperClass ?? 'w-full';
     </div>
 
     <!-- ── Table Container ──────────────────────────────────────────── -->
-    <div class="overflow-x-auto rounded-xl shadow-lg border border-table-border bg-white">
-        <table class="w-full text-left border-collapse min-w-[1300px]" id="ahs-table">
+    <div class="overflow-x-auto rounded-none shadow-sm border-y border-slate-200 bg-white">
+        <table class="w-full text-left border-collapse min-w-[1500px]" id="ahs-table">
             <colgroup>
-                <col style="width: 4rem"> <!-- No -->
-                <col style="min-width: 22rem"> <!-- Uraian -->
+                <col style="width: 3.5rem"> <!-- No -->
+                <col style="min-width: 20rem"> <!-- Uraian -->
                 <col style="width: 8rem"> <!-- Koefisien -->
                 <col style="width: 6rem"> <!-- Satuan -->
-                <col style="width: 10rem"> <!-- Harga Dasar -->
-                <col style="width: 10rem"> <!-- Harga Satuan (Total) -->
-                <col style="width: 8rem"> <!-- Aksi -->
-                <col style="width: 9rem"> <!-- Merk -->
-                <col style="width: 9rem"> <!-- Spesifikasi -->
-                <col style="min-width: 14rem"> <!-- Sumber / Regulasi -->
+                <col style="width: 12rem"> <!-- Harga Dasar -->
+                <col style="width: 14rem"> <!-- Harga Satuan (Total) -->
+                <col style="width: 7rem"> <!-- Aksi -->
+                <col style="min-width: 13rem"> <!-- Merk -->
+                <col style="min-width: 13rem"> <!-- Spesifikasi -->
+                <col style="min-width: 16rem"> <!-- Sumber / Regulasi -->
             </colgroup>
 
             <thead>
@@ -137,19 +140,20 @@ $wrapperClass = $wrapperClass ?? 'w-full';
         class="w-full max-w-[1400px] h-full flex flex-col transform scale-95 opacity-0 transition-all duration-300 ease-out overflow-hidden bg-white rounded-2xl shadow-2xl ring-1 ring-black/5">
 
         <!-- ── Modal Header ───────────────────────────────────── -->
-        <div class="shrink-0 bg-white px-6 py-4 flex items-center justify-between border-b border-slate-200 z-20">
-            <div class="flex items-center gap-3">
-                <div class="p-2 bg-blue-50 border border-blue-100 rounded-xl text-blue-600 shadow-sm">
-                    <i class="fas fa-database text-lg"></i>
+        <div class="bg-[#0f172a] px-5 py-4 flex items-center justify-between border-b border-slate-800 rounded-t-2xl z-20">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center border border-blue-500/30">
+                    <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2 1 3 3 3h10c2 0 3-1 3-3V7M4 7c0-2 1-3 3-3h10c2 0 3 1 3 3M4 7h16M8 11h8M8 15h5"/>
+                    </svg>
                 </div>
                 <div>
-                    <h2 class="text-lg font-black text-slate-800 tracking-tight">Database AHS</h2>
-                    <p class="text-[11px] text-slate-500 font-medium mt-0.5">Pilih bahan, upah, dan alat dari referensi
-                        harga terpadu.</p>
+                    <h2 class="font-bold text-white text-lg tracking-wide">Database AHS</h2>
+                    <p class="text-slate-400 text-xs mt-0.5">Pilih bahan, upah, dan alat dari referensi harga terpadu.</p>
                 </div>
             </div>
             <button onclick="document.getElementById('ahs-modal-close').click()"
-                class="text-slate-400 hover:text-red-500 hover:bg-red-50 p-2.5 rounded-full transition-colors focus:outline-none">
+                class="w-8 h-8 flex justify-center items-center rounded-lg text-slate-400 hover:bg-white/10 hover:text-white transition-colors focus:outline-none">
                 <i class="fas fa-times text-lg"></i>
             </button>
         </div>
@@ -168,9 +172,8 @@ $wrapperClass = $wrapperClass ?? 'w-full';
                             id="ahs-filter-label-nama">Pencarian Material</label>
                         <div class="relative">
                             <input id="ahs-modal-search" type="text" placeholder="Ketik kata kunci..."
-                                class="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-inner" />
-                            <i
-                                class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                                class="w-full pl-9 pr-3 py-2 bg-white border border-slate-300 rounded-lg text-sm font-medium text-slate-700 focus:outline-none focus:ring-1 focus:ring-slate-400 focus:border-slate-400 transition-all shadow-sm" />
+                            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
                         </div>
                     </div>
 
@@ -214,7 +217,8 @@ $wrapperClass = $wrapperClass ?? 'w-full';
                     <table class="w-full text-left border-collapse" id="ahs-modal-table">
                         <colgroup>
                             <col style="width: 3.5rem"> <!-- No -->
-                            <col> <!-- Nama Bahan -->
+                            <col style="width: 7rem"> <!-- Kategori -->
+                            <col style="min-width: 15rem"> <!-- Nama Bahan -->
                             <col style="width: 6rem"> <!-- Satuan -->
                             <col style="width: 9rem"> <!-- Harga Dasar -->
                             <col style="width: 8rem"> <!-- Merk -->
@@ -228,7 +232,11 @@ $wrapperClass = $wrapperClass ?? 'w-full';
                                     class="px-4 py-3 text-center text-[10px] font-bold uppercase tracking-widest border-b border-slate-700">
                                     No.</th>
                                 <th
-                                    class="px-4 py-3 text-[10px] font-bold uppercase tracking-widest border-b border-slate-700">
+                                    class="px-4 py-3 text-center text-[10px] font-bold uppercase tracking-widest border-b border-slate-700">
+                                    Kategori
+                                </th>
+                                <th
+                                    class="px-4 py-3 text-[10px] font-bold uppercase tracking-widest border-b border-slate-700 min-w-[200px]">
                                     Nama Bahan
                                 </th>
                                 <th
@@ -279,11 +287,11 @@ $wrapperClass = $wrapperClass ?? 'w-full';
 
             <div class="flex items-center gap-3">
                 <button id="ahs-modal-cancel" type="button"
-                    class="px-5 py-2.5 rounded-xl border-2 border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50 text-xs font-bold tracking-widest uppercase transition-all focus:outline-none active:scale-95 shadow-sm">
+                    class="px-6 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-bold rounded-xl transition-all">
                     Batal
                 </button>
                 <button id="ahs-modal-confirm" type="button" disabled
-                    class="px-8 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-black tracking-widest uppercase shadow-[0_4px_14px_rgba(37,99,235,0.39)] hover:shadow-[0_6px_20px_rgba(37,99,235,0.23)] transition-all duration-200 focus:outline-none active:scale-95 disabled:opacity-50 disabled:shadow-none disabled:cursor-not-allowed flex items-center gap-2">
+                    class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl flex items-center justify-center gap-2 shadow-md transition-all disabled:opacity-50 disabled:shadow-none disabled:cursor-not-allowed">
                     <i class="fas fa-check-circle text-sm"></i> Pilih Item
                 </button>
                 <!-- Hidden close button for JS compat -->

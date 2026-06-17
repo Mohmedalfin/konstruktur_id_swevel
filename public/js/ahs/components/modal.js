@@ -67,7 +67,7 @@ export function openModal(initialFilter = 'all') {
 
     _syncSourceTabs(state.activeSource);   // keep last-used tab
 
-    modalTbody.innerHTML = `<tr><td colspan="8" class="text-center py-8 text-slate-400 text-xs italic">${getLoadingLabel()}</td></tr>`;
+    modalTbody.innerHTML = `<tr><td colspan="9" class="text-center py-8 text-slate-400 text-xs italic">${getLoadingLabel()}</td></tr>`;
 
     // Slide down animation
     modalOverlay.classList.remove('hidden');
@@ -162,7 +162,7 @@ export function bindSourceTabs() {
                 filterLabel.textContent = labelMap[src] || 'Nama Material';
             }
 
-            modalTbody.innerHTML = `<tr><td colspan="8" class="text-center py-8 text-slate-400 text-xs italic">${getLoadingLabel()}</td></tr>`;
+            modalTbody.innerHTML = `<tr><td colspan="9" class="text-center py-8 text-slate-400 text-xs italic">${getLoadingLabel()}</td></tr>`;
             await fetchBySource(1, q, false);
             renderModalRows(state.ahsDatabase);
         });
@@ -179,7 +179,7 @@ export function renderModalRows(items) {
             estimatorid : 'Tidak ada data bersumber dari Estimator.id ditemukan.',
         };
         const msg = emptyMessages[state.activeSource] || 'Tidak ada item ditemukan.';
-        modalTbody.innerHTML = `<tr><td colspan="8" class="text-center py-12 text-slate-400 text-xs italic px-6">${msg}</td></tr>`;
+        modalTbody.innerHTML = `<tr><td colspan="9" class="text-center py-12 text-slate-400 text-xs italic px-6">${msg}</td></tr>`;
         return;
     }
 
@@ -220,8 +220,11 @@ export function renderModalRows(items) {
         <tr class="modal-item-row border-b border-gray-100 ${bgClass} hover:bg-slate-100 transition-colors cursor-pointer ${checked ? '!bg-brand-dark/10' : ''}"
             data-uid="${item._uid}">
             <td class="px-3 py-2 text-center text-[11px] font-medium text-slate-400 tabular-nums">${n}</td>
+            <td class="px-3 py-2 text-center whitespace-nowrap">
+                ${badge}
+            </td>
             <td class="px-3 py-2 text-[12px] text-slate-800 font-medium">
-                ${badge} ${escHtml(item.uraian)}
+                ${escHtml(item.uraian)}
             </td>
             <td class="px-3 py-2 text-center text-[12px] text-slate-600 whitespace-nowrap">${escHtml(item.satuan)}</td>
             <td class="px-3 py-2 text-right text-[12px] tabular-nums text-slate-800 whitespace-nowrap">${fmt(item.hargaSatuan)}</td>
@@ -301,7 +304,7 @@ export function bindModalInfiniteScroll() {
                 const q     = (modalSearch?.value || '').trim();
                 const trLoad = document.createElement('tr');
                 trLoad.id   = 'ahs-load-more';
-                trLoad.innerHTML = '<td colspan="8" class="text-center py-2 text-table-subtle text-xs italic">Memuat lebih banyak data...</td>';
+                trLoad.innerHTML = '<td colspan="9" class="text-center py-2 text-table-subtle text-xs italic">Memuat lebih banyak data...</td>';
                 modalTbody.appendChild(trLoad);
                 await fetchBySource(state.currentPage + 1, q, true);
                 document.getElementById('ahs-load-more')?.remove();

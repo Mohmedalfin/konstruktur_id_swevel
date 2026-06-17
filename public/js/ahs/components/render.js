@@ -114,11 +114,14 @@ export function renderRow(rowData, isNew = false) {
                 data-id="${rowData.id}" ${isNew ? '' : 'readonly'}/>
         </td>
         <td class="px-3 md:px-4 py-2 md:py-2.5 text-right">
-            <input type="number" min="0" step="any" value="${rowData.hargaSatuan}"
-                class="ahs-harga-dasar w-32 px-2 py-1 text-[11px] md:text-[13px] border border-slate-200 rounded text-right focus:outline-none focus:ring-1 focus:ring-primary/40 focus:border-primary tabular-nums bg-white disabled:bg-slate-50"
-                data-id="${rowData.id}" ${isNew ? '' : 'readonly'}/>
+            <div class="flex items-center justify-end gap-1">
+                <span class="text-[10px] text-slate-400 font-semibold shrink-0">Rp</span>
+                <input type="text" inputmode="numeric" value="${rowData.hargaSatuan > 0 ? rowData.hargaSatuan.toLocaleString('id-ID') : ''}" placeholder="0"
+                    class="ahs-harga-dasar w-full px-2 py-1 text-[11px] md:text-[13px] border border-slate-200 rounded text-right focus:outline-none focus:ring-1 focus:ring-primary/40 focus:border-primary tabular-nums bg-white disabled:bg-slate-50"
+                    data-id="${rowData.id}" data-raw="${rowData.hargaSatuan}" ${isNew ? '' : 'readonly'}/>
+            </div>
         </td>
-        <td class="px-3 md:px-4 py-2 md:py-2.5 text-right tabular-nums font-semibold text-table-strong text-[11px] md:text-[13px] bg-slate-50/50">
+        <td class="px-3 md:px-4 py-2 md:py-2.5 text-right tabular-nums font-semibold text-table-strong text-[11px] md:text-[13px] bg-slate-50/50 whitespace-nowrap">
             <span class="ahs-jumlah-cell">${fmt(hargaSatuan)}</span>
         </td>
         <td class="px-3 md:px-4 py-2 md:py-2.5 text-center">
@@ -134,12 +137,12 @@ export function renderRow(rowData, isNew = false) {
                 </button>
             </div>
         </td>
-        <td class="px-3 md:px-4 py-2 md:py-2.5">
+        <td class="px-4 md:px-5 py-2 md:py-2.5">
             <input type="text" value="${escHtml(rowData.merk || '')}" placeholder="Merk"
                 class="ahs-merk w-full bg-transparent border-b border-transparent hover:border-slate-200 focus:border-primary text-[11px] md:text-[13px] text-table-subtle focus:outline-none transition-colors py-0.5"
                 data-id="${rowData.id}" ${isNew ? '' : 'readonly'}/>
         </td>
-        <td class="px-3 md:px-4 py-2 md:py-2.5">
+        <td class="px-4 md:px-5 py-2 md:py-2.5">
             <input type="text" value="${escHtml(rowData.spesifikasi || '')}" placeholder="Spesifikasi"
                 class="ahs-spesifikasi w-full bg-transparent border-b border-transparent hover:border-slate-200 focus:border-primary text-[11px] md:text-[13px] text-table-subtle focus:outline-none transition-colors py-0.5"
                 data-id="${rowData.id}" ${isNew ? '' : 'readonly'}/>
@@ -282,14 +285,27 @@ function _bindRowInputs(tr) {
     const acList = tr.querySelector('.ahs-autocomplete');
     const tipe = tr.dataset.tipe;
 
+
+
+    function formatRpInput(input) {
+        // Get raw digits only
+        const raw = (input.value || '').replace(/[^0-9]/g, '');
+        if (!raw) { input.value = ''; return; }
+        // Format with dots as thousand separator
+        input.value = parseInt(raw, 10).toLocaleString('id-ID');
+    }
+
     function recalcRow() {
         const koef = parseFloat(koefInput?.value) || 0;
-        const harga = parseFloat(hargaInput?.value) || 0;
+        const harga = parseRpValue(hargaInput);
         if (jumlahCell) jumlahCell.textContent = fmt(koef * harga);
         recalcTotals();
     }
     koefInput?.addEventListener('input', recalcRow);
-    hargaInput?.addEventListener('input', recalcRow);
+    hargaInput?.addEventListener('input', function () {
+        formatRpInput(hargaInput);
+        recalcRow();
+    });
 
     tr.querySelector('.ahs-edit-btn')?.addEventListener('click', function () {
         const inputs = tr.querySelectorAll('input');
@@ -401,7 +417,10 @@ function _bindRowInputs(tr) {
                 uraianInput.value = li.dataset.uraian;
                 const satuanEl = tr.querySelector('.ahs-satuan');
                 if (satuanEl) satuanEl.value = li.dataset.satuan;
-                if (hargaInput) hargaInput.value = li.dataset.harga;
+                if (hargaInput) {
+                    const rawHarga = parseFloat(li.dataset.harga) || 0;
+                    hargaInput.value = rawHarga > 0 ? rawHarga.toLocaleString('id-ID') : '';
+                }
                 recalcRow();
                 _hideAc(acList);
             });
@@ -418,12 +437,21 @@ function _hideAc(list) {
     state.autocompleteActive = null;
 }
 
+/**
+ * Parse Indonesian-formatted number string (dots as thousand separators)
+ * e.g. "21.500.000" → 21500000
+ */
+function parseRpValue(input) {
+    const val = (typeof input === 'string') ? input : (input?.value || '');
+    return parseFloat(val.replace(/\./g, '').replace(/,/g, '.')) || 0;
+}
+
 export function recalcTotals() {
     const t = { bahan: 0, upah: 0, alat: 0 };
     tbody.querySelectorAll('.ahs-row').forEach(tr => {
         const tipe = tr.dataset.tipe;
         const koef = parseFloat(tr.querySelector('.ahs-koef')?.value) || 0;
-        const harga = parseFloat(tr.querySelector('.ahs-harga-dasar')?.value) || 0;
+        const harga = parseRpValue(tr.querySelector('.ahs-harga-dasar')?.value || '');
         if (t[tipe] !== undefined) t[tipe] += koef * harga;
     });
 
