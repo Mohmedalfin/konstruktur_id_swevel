@@ -629,9 +629,17 @@ function renderItemRows(items, catId, subClass, isEditable, prefix = '', depth =
                 </td>
                 ${!isReorderMode ? `
                 ${!hasChildren ? `
-                <td class="px-3 md:px-5 py-2 md:py-2.5 text-center tabular-nums border-l border-table-border">
+                <td class="px-3 md:px-5 py-2 md:py-2.5 text-center tabular-nums border-l border-table-border group relative w-[120px]">
                     ${isEditable ? `
-                        <input type="number" min="0" step="0.01" class="volume-input w-20 px-2 py-1 text-center text-[10px] md:text-xs border border-table-border rounded focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all" data-id-rap-detail="${item.id_rap_detail || ''}" value="${volume}">
+                        <div class="flex items-center justify-center gap-2 volume-display-container">
+                            <span class="volume-text">${volume}</span>
+                            <button type="button" class="edit-volume-btn opacity-0 group-hover:opacity-100 text-slate-400 hover:text-primary transition-opacity p-1 focus:outline-none" title="Edit Volume">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                            </button>
+                        </div>
+                        <div class="hidden volume-edit-container items-center justify-center gap-1">
+                            <input type="number" min="0" step="0.01" class="volume-input w-20 px-2 py-1 text-center text-[10px] md:text-xs border border-table-border rounded focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all" data-id-rap-detail="${item.id_rap_detail || ''}" value="${volume}">
+                        </div>
                     ` : volume}
                 </td>
                 <td class="px-3 md:px-5 py-2 md:py-2.5 text-center text-table-subtle border-l border-table-border">${escHtml(item.satuan || '')}</td>
@@ -775,18 +783,52 @@ function bindSubItemButtons() {
 }
 
 function bindVolumeInputs() {
+    // Bind Edit Buttons
+    tbody.querySelectorAll('.edit-volume-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const td = this.closest('td');
+            const displayContainer = td.querySelector('.volume-display-container');
+            const editContainer = td.querySelector('.volume-edit-container');
+            const input = editContainer.querySelector('.volume-input');
+
+            displayContainer.classList.add('hidden');
+            displayContainer.classList.remove('flex');
+            editContainer.classList.remove('hidden');
+            editContainer.classList.add('flex');
+            
+            input.focus();
+            input.select();
+        });
+    });
+
     tbody.querySelectorAll('.volume-input').forEach(input => {
         let lastValue = input.value;
         input.addEventListener('blur', async function() {
+            const td = this.closest('td');
+            const displayContainer = td.querySelector('.volume-display-container');
+            const editContainer = td.querySelector('.volume-edit-container');
+
+            const resetView = () => {
+                editContainer.classList.add('hidden');
+                editContainer.classList.remove('flex');
+                displayContainer.classList.remove('hidden');
+                displayContainer.classList.add('flex');
+            };
+
             const idRapDetail = this.dataset.idRapDetail;
             const newVolume = parseFloat(this.value);
 
             if (isNaN(newVolume) || newVolume < 0) {
                 this.value = lastValue;
+                resetView();
                 return;
             }
 
-            if (this.value === lastValue) return;
+            if (this.value === lastValue) {
+                resetView();
+                return;
+            }
 
             try {
                 if (window.renderLoading) window.renderLoading();
@@ -827,12 +869,16 @@ function bindVolumeInputs() {
                 else alert(err.message);
                 
                 this.value = lastValue;
+                resetView();
                 if (!window.fetchRabData) window.location.reload();
             }
         });
         
         input.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
+                this.blur();
+            } else if (e.key === 'Escape') {
+                this.value = lastValue; // Revert
                 this.blur();
             }
         });
