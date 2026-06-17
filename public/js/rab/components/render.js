@@ -194,6 +194,7 @@ export function renderReadonly(data) {
     bindCategoryActionButtons();
     bindDeleteCategoryButtons();
     bindSubItemButtons();
+    bindVolumeInputs();
 
     // Bind save button for reorder mode
     const saveBtn = document.getElementById('save-reorder-btn');
@@ -628,7 +629,11 @@ function renderItemRows(items, catId, subClass, isEditable, prefix = '', depth =
                 </td>
                 ${!isReorderMode ? `
                 ${!hasChildren ? `
-                <td class="px-3 md:px-5 py-2 md:py-2.5 text-center tabular-nums border-l border-table-border">${volume}</td>
+                <td class="px-3 md:px-5 py-2 md:py-2.5 text-center tabular-nums border-l border-table-border">
+                    ${isEditable ? `
+                        <input type="number" min="0" step="0.01" class="volume-input w-20 px-2 py-1 text-center text-[10px] md:text-xs border border-table-border rounded focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all" data-id-rap-detail="${item.id_rap_detail || ''}" value="${volume}">
+                    ` : volume}
+                </td>
                 <td class="px-3 md:px-5 py-2 md:py-2.5 text-center text-table-subtle border-l border-table-border">${escHtml(item.satuan || '')}</td>
                 <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums whitespace-nowrap border-l border-table-border">${fmt(hargaBahan)}</td>
                 <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums whitespace-nowrap border-l border-table-border">${fmt(hargaUpah)}</td>
@@ -764,6 +769,71 @@ function bindSubItemButtons() {
 
                 // fallback reload on error if stuck loading
                 if (!window.fetchRabData) window.location.reload();
+            }
+        });
+    });
+}
+
+function bindVolumeInputs() {
+    tbody.querySelectorAll('.volume-input').forEach(input => {
+        let lastValue = input.value;
+        input.addEventListener('blur', async function() {
+            const idRapDetail = this.dataset.idRapDetail;
+            const newVolume = parseFloat(this.value);
+
+            if (isNaN(newVolume) || newVolume < 0) {
+                this.value = lastValue;
+                return;
+            }
+
+            if (this.value === lastValue) return;
+
+            try {
+                if (window.renderLoading) window.renderLoading();
+                const res = await fetch(`/api/rap/pekerjaan/${idRapDetail}/volume`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify({ volume: newVolume })
+                });
+
+                const json = await res.json();
+                if (!res.ok || json.status !== 'success') {
+                    throw new Error(json.message || 'Gagal mengubah volume');
+                }
+
+                if (window.Toast) window.Toast.show('Volume berhasil diubah', 'success');
+
+                // Refresh data
+                const idProject = window.RAB_INIT?.idProject || window.RAB_INIT?.id;
+                if (idProject && window.fetchRabData) {
+                    const data = await window.fetchRabData(idProject);
+                    if (window.state) {
+                        window.state.activeCategories = (data.categories || []).map(cat => ({
+                            id: String(cat.id),
+                            nama: cat.name
+                        }));
+                    }
+                    if (window.renderReadonly) {
+                        window.renderReadonly(data);
+                    } else {
+                        window.location.reload();
+                    }
+                } else {
+                    window.location.reload();
+                }
+            } catch (err) {
+                console.error(err);
+                if (window.Toast) window.Toast.show(err.message, 'error');
+                else alert(err.message);
+                
+                this.value = lastValue;
+                if (!window.fetchRabData) window.location.reload();
+            }
+        });
+        
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                this.blur();
             }
         });
     });

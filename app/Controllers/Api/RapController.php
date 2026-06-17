@@ -956,6 +956,101 @@ class RapController extends BaseController
         }
     }
 
+    public function updateVolumePekerjaan($idRapDetail = null)
+    {
+        $db = db_connect();
+
+        try {
+            $idRapDetail = (int) $idRapDetail;
+            $payload = $this->request->getJSON(true);
+
+            $volume = isset($payload['volume']) ? (float) $payload['volume'] : null;
+
+            if ($idRapDetail <= 0 || $volume === null || $volume < 0) {
+                return $this->response->setStatusCode(400)->setJSON([
+                    'status' => 'error',
+                    'message' => 'id_rap_detail dan volume (>= 0) wajib diisi'
+                ]);
+            }
+
+            $detail = $this->rapDetailModel->find($idRapDetail);
+
+            if (!$detail) {
+                return $this->response->setStatusCode(404)->setJSON([
+                    'status' => 'error',
+                    'message' => 'Data pekerjaan tidak ditemukan'
+                ]);
+            }
+
+            $rapId = (int) $detail['id_rap'];
+            $rap = $this->rapModel->find($rapId);
+
+            if (!$rap) {
+                return $this->response->setStatusCode(404)->setJSON([
+                    'status' => 'error',
+                    'message' => 'RAP tidak ditemukan'
+                ]);
+            }
+
+            $project = $this->proyekModel->where('id_project', $rap['id_project'])->first();
+
+            if (!$project) {
+                return $this->response->setStatusCode(404)->setJSON([
+                    'status' => 'error',
+                    'message' => 'Project tidak ditemukan'
+                ]);
+            }
+
+            if (($project['sumber_data'] ?? 'manual') !== 'manual') {
+                return $this->response->setStatusCode(403)->setJSON([
+                    'status' => 'error',
+                    'message' => 'Volume pada proyek import tidak dapat diubah secara manual'
+                ]);
+            }
+
+            $db->transStart();
+
+            $hargaBahan = (float) $detail['harga_bahan'];
+            $hargaUpah = (float) $detail['harga_upah'];
+            $hargaAlat = (float) $detail['harga_alat'];
+
+            $subtotalBahan = $volume * $hargaBahan;
+            $subtotalUpah = $volume * $hargaUpah;
+            $subtotalAlat = $volume * $hargaAlat;
+            $total = $subtotalBahan + $subtotalUpah + $subtotalAlat;
+
+            $this->rapDetailModel->update($idRapDetail, [
+                'volume' => $volume,
+                'subtotal_bahan' => $subtotalBahan,
+                'subtotal_upah' => $subtotalUpah,
+                'subtotal_alat' => $subtotalAlat,
+                'total_keseluruhan' => $total,
+            ]);
+
+            $this->recalculateRapTotal($rapId);
+
+            $db->transComplete();
+
+            if ($db->transStatus() === false) {
+                throw new DatabaseException('Gagal mengubah volume pekerjaan');
+            }
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'message' => 'Volume pekerjaan berhasil diubah'
+            ]);
+        } catch (Throwable $e) {
+            if ($db->transStatus()) {
+                $db->transRollback();
+            }
+
+            return $this->response->setStatusCode(500)->setJSON([
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
+
     public function copyPekerjaan()
     {
         $db = db_connect();
