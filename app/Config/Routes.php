@@ -82,6 +82,7 @@ $routes->group('', function ($routes) {
 
     // Permintaan Barang ke Gudang
     $routes->get('permintaan', 'menu\PermintaanController::index');
+    $routes->get('permintaan/deviasi', 'menu\PermintaanController::deviasi');
     $routes->get('permintaan/create', 'menu\PermintaanController::create');
 });
 
@@ -131,10 +132,18 @@ $routes->group('api', ['namespace' => 'App\Controllers\Api'], function ($routes)
     $routes->post('rap/copy-ahs-estimator', 'RapController::copyAhsEstimator');
     $routes->put('rap/schedule-dates', '\App\Controllers\menu\ScheduleController::updateScheduleDates');
 
-
     $routes->get('stok/stats', '\App\Controllers\gudang\StokController::getStats');
     $routes->get('stok/data', '\App\Controllers\gudang\StokController::getData');
     $routes->put('stok/update-minimum', '\App\Controllers\gudang\StokController::updateMinimum');
+
+    // Pengadaan Gudang API
+    $routes->get('pengadaan/stats', '\App\Controllers\gudang\PengadaanController::getStats');
+    $routes->get('pengadaan/data', '\App\Controllers\gudang\PengadaanController::getData');
+    $routes->get('pengadaan/detail/(:num)', '\App\Controllers\gudang\PengadaanController::getDetail/$1');
+    $routes->get('pengadaan/items-kritis', '\App\Controllers\gudang\PengadaanController::getItemsKritis');
+    $routes->get('pengadaan/search-barang', '\App\Controllers\gudang\PengadaanController::searchBarang');
+    $routes->post('pengadaan/store', '\App\Controllers\gudang\PengadaanController::store');
+    $routes->delete('pengadaan/delete/(:num)', '\App\Controllers\gudang\PengadaanController::delete/$1');
 
     // Schedule Data
     $routes->get('schedule/data', '\App\Controllers\menu\ScheduleController::getData');
@@ -146,6 +155,7 @@ $routes->group('api', ['namespace' => 'App\Controllers\Api'], function ($routes)
 
     // Permintaan Gudang API
     $routes->get('permintaan/stats', '\App\Controllers\menu\PermintaanController::getStats');
+    $routes->get('permintaan/deviasi-data', '\App\Controllers\menu\PermintaanController::getDeviasiData');
     $routes->get('permintaan/data', '\App\Controllers\menu\PermintaanController::getData');
     $routes->get('permintaan/detail/(:num)', '\App\Controllers\menu\PermintaanController::getDetail/$1');
     $routes->post('permintaan/store', '\App\Controllers\menu\PermintaanController::store');

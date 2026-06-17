@@ -4,22 +4,20 @@ namespace App\Models;
 
 use CodeIgniter\Model;
 
-class PermintaanModel extends Model
+class PurchaseRequestModel extends Model
 {
-    protected $table            = 'permintaan';
+    protected $table            = 'purchase_requests';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $protectFields    = true;
     protected $allowedFields    = [
-        'nomor_permintaan',
-        'tanggal_permintaan',
-        'pemohon_id',
+        'id_perusahaan',
+        'pr_number',
+        'request_date',
         'status',
-        'is_over_limit',
-        'justifikasi_over_limit',
         'keterangan',
-        'stok_terpotong',
+        'created_by',
     ];
 
     protected $useTimestamps = true;

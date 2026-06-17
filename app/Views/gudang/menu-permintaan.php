@@ -83,6 +83,14 @@
             </button>
         </div>
         </div>
+        
+        <!-- Action Buttons -->
+        <div class="flex items-center gap-2 mt-3 sm:mt-0">
+            <a href="<?= base_url('permintaan/deviasi?source=gudang') ?>" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-bold shadow-sm transition-all focus:outline-none cursor-pointer">
+                <i class="fas fa-chart-line text-[10px]"></i>
+                <span>Laporan Deviasi</span>
+            </a>
+        </div>
     </div>
 
     <!-- HISTORY CARDS CONTAINER -->

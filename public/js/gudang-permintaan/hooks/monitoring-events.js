@@ -68,15 +68,59 @@ export async function initMonitoring() {
         });
     });
 
+    // Modal transition functions
+    function openDetailModal() {
+        const modal = document.getElementById('modal-detail-permintaan');
+        const overlay = document.getElementById('modal-detail-permintaan-overlay');
+        const panel = document.getElementById('modal-detail-permintaan-panel');
+        if (!modal) return;
+        
+        modal.classList.remove('hidden');
+        // trigger reflow
+        void modal.offsetWidth; 
+        
+        if (overlay) {
+            overlay.classList.remove('opacity-0');
+            overlay.classList.add('opacity-100');
+        }
+        if (panel) {
+            panel.classList.remove('opacity-0', 'scale-95');
+            panel.classList.add('opacity-100', 'scale-100');
+        }
+    }
+
+    function closeDetailModal() {
+        const modal = document.getElementById('modal-detail-permintaan');
+        const overlay = document.getElementById('modal-detail-permintaan-overlay');
+        const panel = document.getElementById('modal-detail-permintaan-panel');
+        if (!modal) return;
+        
+        if (overlay) {
+            overlay.classList.remove('opacity-100');
+            overlay.classList.add('opacity-0');
+        }
+        if (panel) {
+            panel.classList.remove('opacity-100', 'scale-100');
+            panel.classList.add('opacity-0', 'scale-95');
+        }
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 300);
+    }
+
+    // Bind Close Detail Modal
+    document.addEventListener('click', (e) => {
+        if (e.target.closest('#btn-close-detail-permintaan-header') || e.target.closest('#btn-close-detail-permintaan-footer')) {
+            closeDetailModal();
+        }
+    });
+
     // 3. Bind Detail Button click (uses event delegation for dynamic cards)
     document.addEventListener('click', async (e) => {
         const btn = e.target.closest('.btn-detail-ajax');
         if (!btn) return;
 
         const id = parseInt(btn.dataset.id);
-        const modalEl = document.getElementById('modal-detail-permintaan');
-        if (!modalEl) return;
-
         const modalBody = document.getElementById('detail-modal-body');
         if (modalBody) {
             modalBody.innerHTML = `
@@ -87,11 +131,7 @@ export async function initMonitoring() {
             `;
         }
 
-        if (window.HSOverlay) {
-            window.HSOverlay.open(modalEl);
-        } else {
-            modalEl.classList.remove('hidden');
-        }
+        openDetailModal();
 
         const request = await fetchRequestDetail(id);
         if (request) {
@@ -158,14 +198,7 @@ export async function initMonitoring() {
                 if (window.hideLoader) window.hideLoader();
 
                 // Close modal
-                const modalEl = document.getElementById('modal-detail-permintaan');
-                if (modalEl) {
-                    if (window.HSOverlay) {
-                        window.HSOverlay.close(modalEl);
-                    } else {
-                        modalEl.classList.add('hidden');
-                    }
-                }
+                closeDetailModal();
 
                 // Show toast
                 toast.show(successToast, 'success');

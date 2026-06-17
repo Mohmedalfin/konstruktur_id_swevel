@@ -18,9 +18,12 @@ export function renderStokList(items) {
     if (!Array.isArray(items) || items.length === 0) {
         container.innerHTML = `
             <tr>
-                <td colspan="7" class="px-6 py-12 text-center text-slate-400">
-                    <i class="fas fa-box-open text-4xl mb-3 text-slate-300"></i>
-                    <p class="text-sm font-semibold">Data stok tidak ditemukan.</p>
+                <td colspan="8" class="px-6 py-12 text-center bg-white">
+                    <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <i class="fas fa-box-open text-2xl text-slate-300"></i>
+                    </div>
+                    <p class="text-sm font-semibold text-slate-600">Belum ada data stok</p>
+                    <p class="text-xs mt-1 text-slate-400">Tidak ada data yang sesuai dengan filter saat ini.</p>
                 </td>
             </tr>
         `;

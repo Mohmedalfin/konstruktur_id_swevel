@@ -19,6 +19,8 @@ class PermintaanDetailModel extends Model
         'nama_barang',
         'jumlah',
         'satuan',
+        'is_over_limit',
+        'jumlah_over_limit',
         'keterangan',
     ];
 

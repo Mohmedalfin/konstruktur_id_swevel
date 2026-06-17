@@ -75,6 +75,9 @@ export async function initMonitoring() {
 
     // 3. Bind Detail Button click (uses event delegation for dynamic cards)
     document.addEventListener('click', async (e) => {
+        // Jangan buka modal detail jika yang diklik adalah tombol hapus
+        if (e.target.closest('.btn-delete-request')) return;
+
         const btn = e.target.closest('.btn-detail-ajax');
         if (!btn) return;
 
@@ -86,19 +89,15 @@ export async function initMonitoring() {
         const modalBody = document.getElementById('detail-modal-body');
         if (modalBody) {
             modalBody.innerHTML = `
-                <div class="text-center py-10 text-slate-400">
-                    <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
-                    <p class="text-sm font-semibold">Memuat rincian...</p>
+                <div class="text-center py-10 text-slate-400 flex flex-col items-center justify-center">
+                    <i class="fas fa-spinner fa-spin text-3xl mb-3 text-slate-300"></i>
+                    <p class="text-sm font-semibold">Memuat rincian permintaan...</p>
                 </div>
             `;
         }
 
-        // Open Preline modal
-        if (window.HSOverlay) {
-            window.HSOverlay.open(modalEl);
-        } else {
-            modalEl.classList.remove('hidden');
-        }
+        // Buka modal dengan animasi kustom
+        openDetailModal();
 
         const request = await fetchRequestDetail(id);
         if (request) {
@@ -107,6 +106,22 @@ export async function initMonitoring() {
         } else {
             // Error handling
             if (modalBody) modalBody.innerHTML = '<p class="text-center text-red-500 font-semibold py-4">Gagal memuat rincian permintaan.</p>';
+        }
+    });
+
+    // 3b. Bind Close Detail Modal Buttons
+    document.addEventListener('click', (e) => {
+        const btnClose = e.target.closest('#btn-close-detail-permintaan-header, #btn-close-detail-permintaan-footer');
+        if (btnClose) {
+            closeDetailModal();
+        }
+    });
+
+    // 3c. Close modal when clicking outside (on the overlay)
+    document.addEventListener('click', (e) => {
+        const overlayEl = document.getElementById('modal-detail-permintaan-overlay');
+        if (e.target === overlayEl) {
+            closeDetailModal();
         }
     });
 
@@ -162,14 +177,7 @@ export async function initMonitoring() {
                 if (window.hideLoader) window.hideLoader();
 
                 // Close modal
-                const modalEl = document.getElementById('modal-detail-permintaan');
-                if (modalEl) {
-                    if (window.HSOverlay) {
-                        window.HSOverlay.close(modalEl);
-                    } else {
-                        modalEl.classList.add('hidden');
-                    }
-                }
+                closeDetailModal();
 
                 // Show toast
                 toast.show(successToast, 'success');
@@ -217,6 +225,9 @@ export async function initMonitoring() {
             if (res.status === 'success') {
                 if (window.hideLoader) window.hideLoader();
 
+                // Tutup modal jika hapus dilakukan dari dalam modal
+                closeDetailModal();
+
                 toast.show('Permintaan berhasil dibatalkan', 'success');
 
                 await reloadDashboard();
@@ -247,4 +258,42 @@ async function reloadDashboard() {
 
     renderStats(stats);
     renderRequestsList(requests);
+}
+
+// Custom Modal Transition Helpers
+function openDetailModal() {
+    const modalEl = document.getElementById('modal-detail-permintaan');
+    const overlayEl = document.getElementById('modal-detail-permintaan-overlay');
+    const contentEl = document.getElementById('modal-detail-permintaan-panel');
+    
+    if (modalEl && overlayEl && contentEl) {
+        modalEl.classList.remove('hidden');
+        // Small delay to allow display:block to apply before animating opacity/transform
+        setTimeout(() => {
+            overlayEl.classList.remove('opacity-0');
+            overlayEl.classList.add('opacity-100');
+            
+            contentEl.classList.remove('opacity-0', 'scale-95');
+            contentEl.classList.add('opacity-100', 'scale-100');
+        }, 10);
+    }
+}
+
+function closeDetailModal() {
+    const modalEl = document.getElementById('modal-detail-permintaan');
+    const overlayEl = document.getElementById('modal-detail-permintaan-overlay');
+    const contentEl = document.getElementById('modal-detail-permintaan-panel');
+    
+    if (modalEl && overlayEl && contentEl) {
+        overlayEl.classList.remove('opacity-100');
+        overlayEl.classList.add('opacity-0');
+        
+        contentEl.classList.remove('opacity-100', 'scale-100');
+        contentEl.classList.add('opacity-0', 'scale-95');
+        
+        // Wait for transition before hiding
+        setTimeout(() => {
+            modalEl.classList.add('hidden');
+        }, 300);
+    }
 }

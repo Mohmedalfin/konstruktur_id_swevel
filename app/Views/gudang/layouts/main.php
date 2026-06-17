@@ -34,10 +34,10 @@
     </main>
 
     <script type="module" src="<?= base_url('js/shared/ui/global-loader.js') ?>"></script>
-    <script src="<?= base_url('assets/vendor/lodash/lodash.min.js') ?>"></script>
-    <script src="<?= base_url('assets/vendor/vanilla-calendar-pro/index.js') ?>"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@uvarov.frontend/vanilla-calendar/build/vanilla-calendar.min.js"></script>
 
-    <script src="<?= base_url('node_modules/preline/dist/preline.js') ?>"></script>
+    <script src="https://cdn.jsdelivr.net/npm/preline@2.3.0/dist/preline.min.js"></script>
     <script src="<?= base_url('assets/js/preline.js') ?>"></script>
     <script>
         window.addEventListener('load', () => {

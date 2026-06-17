@@ -73,76 +73,111 @@ export function initListSDMEvents() {
     function renderCategoryAccordion(group, categoryId) {
         const container = document.getElementById(`accordion-list-${categoryId}`);
         const emptyState = document.getElementById(`empty-list-${categoryId}`);
+        const badge = document.querySelector(`.badge-${categoryId}`);
         
         if (!container || !emptyState) return;
 
         container.innerHTML = '';
         
         const keys = Object.keys(group).sort();
+        let totalItemsInCat = 0;
+
         if (keys.length === 0) {
             container.classList.add('hidden');
             emptyState.classList.remove('hidden');
+            if (badge) badge.innerText = '0';
             return;
         }
 
         container.classList.remove('hidden');
         emptyState.classList.add('hidden');
 
+        let html = '';
+
         keys.forEach((keyword, index) => {
             const items = group[keyword];
+            totalItemsInCat += items.length;
             const accordionId = `accordion-${categoryId}-${index}`;
             
-            const renderItemRow = (item, isInside) => {
-                const paddingClass = isInside ? "py-2.5 pl-8 pr-4 sm:pl-10 sm:pr-5" : "py-3 px-4 sm:px-5";
-                
+            const renderItemRow = (item) => {
+                // Determine icon based on category
+                let iconHtml = '';
+                if (categoryId === 'bahan') {
+                    iconHtml = '<img src="/assets/images/icons/material.png" alt="Icon" class="w-6 h-6 opacity-70" onerror="this.onerror=null; this.outerHTML=\'<div class=\\\'w-6 h-6 rounded flex items-center justify-center text-slate-400 bg-slate-100\\\'><i class=\\\'fas fa-cube text-[10px]\\\'></i></div>\'">';
+                } else if (categoryId === 'alat') {
+                    iconHtml = '<div class="w-6 h-6 rounded bg-blue-50 flex items-center justify-center text-blue-500"><i class="fas fa-tools text-[10px]"></i></div>';
+                } else {
+                    iconHtml = '<div class="w-6 h-6 rounded bg-red-50 flex items-center justify-center text-red-500"><i class="fas fa-hard-hat text-[10px]"></i></div>';
+                }
+
+                // Category Text
+                const catText = categoryId.charAt(0).toUpperCase() + categoryId.slice(1);
+
                 return `
-                    <div class="grid grid-cols-1 md:grid-cols-12 items-center ${paddingClass} border-b border-slate-100 last:border-0 hover:bg-slate-50/80 transition-colors gap-y-2 group">
-                        <div class="md:col-span-6 font-bold text-slate-700 text-[13px] pr-2 truncate">
-                            ${item.nama_item}
+                    <div class="grid grid-cols-12 gap-4 px-5 py-2.5 border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors items-center bg-white group">
+                        <div class="col-span-8 flex items-center gap-3">
+                            ${iconHtml}
+                            <div>
+                                <h4 class="text-[12px] font-bold text-slate-800 leading-tight">${item.nama_item}</h4>
+                                <p class="text-[10px] text-slate-400 mt-0.5">${catText}</p>
+                            </div>
                         </div>
-                        
-                        <div class="md:col-span-6 flex items-center justify-end text-xs">
-                            <div class="px-3 text-right whitespace-nowrap">
-                                <span class="text-slate-400">Kebutuhan:</span> 
-                                <span class="font-bold text-indigo-600 ml-1 inline-block min-w-[50px] text-right">${formatNumber(item.qty_budget)} ${item.satuan}</span>
-                            </div>
-                            <div class="pl-3 border-l border-slate-200 text-right whitespace-nowrap">
-                                <span class="text-slate-400">Sisa:</span> 
-                                <span class="font-bold ${item.qty_sisa < 0 ? 'text-red-600' : 'text-emerald-600'} ml-1 inline-block min-w-[50px] text-right">${formatNumber(item.qty_sisa)} ${item.satuan}</span>
-                            </div>
+                        <div class="col-span-2 text-left">
+                            <span class="font-bold text-indigo-700 text-[13px]">${formatNumber(item.qty_budget)} ${item.satuan}</span>
+                        </div>
+                        <div class="col-span-2 flex items-center justify-between">
+                            <span class="font-bold text-emerald-500 text-[13px]">${formatNumber(item.qty_sisa)} ${item.satuan}</span>
+                            <button class="text-slate-400 hover:text-slate-600 w-6 h-6 flex items-center justify-center focus:outline-none">
+                                <i class="fas fa-ellipsis-v text-sm"></i>
+                            </button>
                         </div>
                     </div>
                 `;
             };
 
             if (items.length === 1) {
-                // Single item, no accordion wrapper
-                container.insertAdjacentHTML('beforeend', renderItemRow(items[0], false));
+                // Single item
+                html += renderItemRow(items[0]);
             } else {
-                // Accordion wrapper
-                const itemsHtml = items.map(item => renderItemRow(item, true)).join('');
+                // Group Wrapper
+                const itemsHtml = items.map(item => renderItemRow(item)).join('');
                 
-                const html = `
-                    <div class="hs-accordion border-b border-slate-200 last:border-0" id="${accordionId}">
-                        <button class="hs-accordion-toggle w-full py-3 px-4 sm:px-5 inline-flex items-center justify-between gap-x-3 text-sm font-bold text-slate-800 text-left hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:pointer-events-none" aria-controls="${accordionId}-collapse">
+                html += `
+                    <div class="hs-accordion border-b border-slate-100 last:border-0" id="${accordionId}">
+                        <button class="hs-accordion-toggle w-full px-5 py-2.5 inline-flex items-center justify-between bg-slate-50/50 hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:pointer-events-none" aria-controls="${accordionId}-collapse">
                             <div class="flex items-center gap-3">
-                                <div class="w-6 h-6 rounded bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0">
-                                    <span class="text-[11px]">${items.length}</span>
+                                <div class="w-6 h-6 rounded bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-[11px]">
+                                    ${items.length}
                                 </div>
-                                <span class="uppercase tracking-wide text-[13px]">${keyword}</span>
+                                <span class="font-bold text-[13px] text-slate-700 uppercase tracking-widest">${keyword}</span>
                             </div>
-                            <i class="fas fa-chevron-right text-slate-400 text-xs transition-transform duration-300 hs-accordion-active:rotate-90"></i>
+                            <i class="fas fa-chevron-down text-slate-400 text-xs transition-transform duration-300 hs-accordion-active:rotate-180"></i>
                         </button>
                         <div id="${accordionId}-collapse" class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="${accordionId}">
-                            <div class="pb-2 flex flex-col border-t border-slate-50 bg-[#fafafa]">
+                            <div class="flex flex-col border-t border-slate-100">
                                 ${itemsHtml}
                             </div>
                         </div>
                     </div>
                 `;
-                container.insertAdjacentHTML('beforeend', html);
             }
         });
+
+        container.innerHTML = html;
+        if (badge) badge.innerText = totalItemsInCat;
+
+        // Update overall total
+        updateTotalItems();
+    }
+
+    function updateTotalItems() {
+        const bahanCount = parseInt(document.querySelector('.badge-bahan')?.innerText || '0');
+        const alatCount = parseInt(document.querySelector('.badge-alat')?.innerText || '0');
+        const upahCount = parseInt(document.querySelector('.badge-upah')?.innerText || '0');
+        const total = bahanCount + alatCount + upahCount;
+        
+        const totalEl = document.getElementById('total-items-text');
+        if (totalEl) totalEl.innerText = `${total} item`;
     }
 
     function formatNumber(num) {

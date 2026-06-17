@@ -324,4 +324,45 @@ class PermintaanController extends BaseController
             ]);
         }
     }
+    /**
+     * GET /permintaan/deviasi
+     * Renders the Deviasi Report Page
+     */
+    public function deviasi()
+    {
+        $userRole = session()->get('kategori_akun') ?? session()->get('role') ?? 'Kontraktor';
+        
+        $proyekModel = new \App\Models\ProyekModel();
+        $projects = $proyekModel->orderBy('nama_proyek', 'ASC')->findAll();
+
+        return view('proyek/menu/deviasi', [
+            'userRole'    => $userRole,
+            'topbarTitle' => 'Laporan Deviasi & Margin',
+            'projects'    => $projects
+        ]);
+    }
+
+    /**
+     * GET /api/permintaan/deviasi
+     * Return deviasi data JSON
+     */
+    public function getDeviasiData(): ResponseInterface
+    {
+        try {
+            $idProject = $this->request->getGet('id_project');
+            $month = $this->request->getGet('month');
+            $data = $this->permintaanService->getDeviasiReport($idProject ? (int)$idProject : null, $month);
+
+            return $this->response->setJSON([
+                'status'  => 'success',
+                'data'    => $data,
+            ]);
+        } catch (\Throwable $e) {
+            log_message('error', '[PermintaanController::getDeviasiData] ' . $e->getMessage());
+            return $this->response->setStatusCode(500)->setJSON([
+                'status'  => 'error',
+                'message' => 'Gagal mengambil data laporan deviasi.',
+            ]);
+        }
+    }
 }
