@@ -643,9 +643,6 @@ function renderItemRows(items, catId, subClass, isEditable, prefix = '', depth =
                                 <button type="button" class="save-volume-btn flex items-center justify-center w-5 h-5 rounded bg-primary text-white hover:bg-primary-hover focus:outline-none transition-colors shadow-sm" title="Simpan">
                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                                 </button>
-                                <button type="button" class="cancel-volume-btn flex items-center justify-center w-5 h-5 rounded bg-slate-200 text-slate-600 hover:bg-slate-300 focus:outline-none transition-colors shadow-sm" title="Batal">
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
-                                </button>
                             </div>
                         </div>
                     ` : volume}
@@ -814,7 +811,6 @@ function bindVolumeInputs() {
     tbody.querySelectorAll('.volume-edit-container').forEach(container => {
         const input = container.querySelector('.volume-input');
         const saveBtn = container.querySelector('.save-volume-btn');
-        const cancelBtn = container.querySelector('.cancel-volume-btn');
         const displayContainer = container.closest('td').querySelector('.volume-display-container');
         
         let lastValue = input.value;
@@ -884,14 +880,21 @@ function bindVolumeInputs() {
             }
         };
 
+        saveBtn.addEventListener('mousedown', function(e) {
+            // Prevent blur from firing before click
+            e.preventDefault();
+        });
+
         saveBtn.addEventListener('click', function(e) {
             e.stopPropagation();
             saveVolume();
         });
 
-        cancelBtn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            resetView();
+        input.addEventListener('blur', function(e) {
+            // If they click the save button, mousedown prevented this from firing or e.relatedTarget is saveBtn
+            if (e.relatedTarget !== saveBtn) {
+                resetView();
+            }
         });
 
         input.addEventListener('keydown', function(e) {
