@@ -638,7 +638,15 @@ function renderItemRows(items, catId, subClass, isEditable, prefix = '', depth =
                             </button>
                         </div>
                         <div class="hidden volume-edit-container items-center justify-center gap-1">
-                            <input type="number" min="0" step="0.01" class="volume-input w-20 px-2 py-1 text-center text-[10px] md:text-xs border border-table-border rounded focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all" data-id-rap-detail="${item.id_rap_detail || ''}" value="${volume}">
+                            <input type="number" min="0" step="0.01" class="volume-input w-14 px-1.5 py-1 text-center text-[10px] md:text-xs border border-table-border rounded focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all" data-id-rap-detail="${item.id_rap_detail || ''}" value="${volume}">
+                            <div class="flex items-center flex-col gap-0.5">
+                                <button type="button" class="save-volume-btn flex items-center justify-center w-5 h-5 rounded bg-primary text-white hover:bg-primary-hover focus:outline-none transition-colors shadow-sm" title="Simpan">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                </button>
+                                <button type="button" class="cancel-volume-btn flex items-center justify-center w-5 h-5 rounded bg-slate-200 text-slate-600 hover:bg-slate-300 focus:outline-none transition-colors shadow-sm" title="Batal">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                                </button>
+                            </div>
                         </div>
                     ` : volume}
                 </td>
@@ -802,30 +810,33 @@ function bindVolumeInputs() {
         });
     });
 
-    tbody.querySelectorAll('.volume-input').forEach(input => {
+    // Replace blur saving with explicit buttons
+    tbody.querySelectorAll('.volume-edit-container').forEach(container => {
+        const input = container.querySelector('.volume-input');
+        const saveBtn = container.querySelector('.save-volume-btn');
+        const cancelBtn = container.querySelector('.cancel-volume-btn');
+        const displayContainer = container.closest('td').querySelector('.volume-display-container');
+        
         let lastValue = input.value;
-        input.addEventListener('blur', async function() {
-            const td = this.closest('td');
-            const displayContainer = td.querySelector('.volume-display-container');
-            const editContainer = td.querySelector('.volume-edit-container');
 
-            const resetView = () => {
-                editContainer.classList.add('hidden');
-                editContainer.classList.remove('flex');
-                displayContainer.classList.remove('hidden');
-                displayContainer.classList.add('flex');
-            };
+        const resetView = () => {
+            container.classList.add('hidden');
+            container.classList.remove('flex');
+            displayContainer.classList.remove('hidden');
+            displayContainer.classList.add('flex');
+            input.value = lastValue; // Revert input to original
+        };
 
-            const idRapDetail = this.dataset.idRapDetail;
-            const newVolume = parseFloat(this.value);
+        const saveVolume = async () => {
+            const idRapDetail = input.dataset.idRapDetail;
+            const newVolume = parseFloat(input.value);
 
             if (isNaN(newVolume) || newVolume < 0) {
-                this.value = lastValue;
                 resetView();
                 return;
             }
 
-            if (this.value === lastValue) {
+            if (input.value === lastValue) {
                 resetView();
                 return;
             }
@@ -868,18 +879,28 @@ function bindVolumeInputs() {
                 if (window.Toast) window.Toast.show(err.message, 'error');
                 else alert(err.message);
                 
-                this.value = lastValue;
                 resetView();
                 if (!window.fetchRabData) window.location.reload();
             }
+        };
+
+        saveBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            saveVolume();
         });
-        
+
+        cancelBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            resetView();
+        });
+
         input.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
-                this.blur();
+                e.preventDefault();
+                saveVolume();
             } else if (e.key === 'Escape') {
-                this.value = lastValue; // Revert
-                this.blur();
+                e.preventDefault();
+                resetView();
             }
         });
     });
