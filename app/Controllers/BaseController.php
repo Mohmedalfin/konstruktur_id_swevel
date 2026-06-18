@@ -47,6 +47,8 @@ abstract class BaseController extends Controller
         log_message('error', "[DEBUG] BaseController initialized. firstSegment: '{$firstSegment}'");
 
         // Determinisasi role berdasarkan path halaman web
+        // Fitur auto-switch role dinonaktifkan agar login aslinya (akun purchasing baru) tidak tertimpa oleh hardcode ID 13
+        /*
         $targetRole = null;
         if ($firstSegment === 'gudang') {
             $targetRole = 'gudang';
@@ -107,5 +109,6 @@ abstract class BaseController extends Controller
                 }
             }
         }
+        */
     }
 }
