@@ -57,9 +57,9 @@ $accountChevronClass = $isProfilePage
     </div>
 
     <div id="hs-header-base"
-      class="hs-collapse hidden overflow-hidden transition-all duration-300 basis-full grow md:block"
+      class="hs-collapse hidden overflow-hidden md:overflow-visible transition-all duration-300 basis-full grow md:block"
       aria-labelledby="hs-header-base-collapse">
-      <div class="overflow-hidden overflow-y-auto max-h-[75vh] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-none [&::-webkit-scrollbar-track]:bg-scrollbar-track [&::-webkit-scrollbar-thumb]:bg-scrollbar-thumb">
+      <div class="overflow-hidden overflow-y-auto md:overflow-visible max-h-[75vh] md:max-h-none [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-none [&::-webkit-scrollbar-track]:bg-scrollbar-track [&::-webkit-scrollbar-thumb]:bg-scrollbar-thumb">
         <div class="py-2 md:py-0 flex flex-col md:flex-row md:items-stretch gap-0.5 md:gap-0">
           <div class="grow">
             <div class="flex flex-col md:flex-row md:justify-end md:items-stretch gap-0.5 md:gap-0">
