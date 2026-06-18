@@ -12,6 +12,8 @@ class NotifikasiController extends BaseController
         
         if ($userRole === 'gudang') {
             $layout = 'gudang/layouts/main';
+        } elseif ($userRole === 'purchasing') {
+            $layout = 'purchasing/layouts/main';
         }
 
         $data = [

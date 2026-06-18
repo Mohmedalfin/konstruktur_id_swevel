@@ -114,7 +114,7 @@ $accountChevronClass = $isProfilePage
                           </div>
                       </div>
                       <div class="p-2 border-t border-gray-100 text-center bg-gray-50 md:rounded-b-xl">
-                          <a class="text-xs font-bold text-primary hover:text-primary/80 flex items-center justify-center gap-1 transition-colors" href="<?= base_url('notifikasi') ?>">
+                          <a class="text-xs font-bold text-primary hover:text-primary/80 flex items-center justify-center gap-1 transition-colors" href="<?= base_url('purchasing/notifikasi') ?>">
                               Lihat Semua Notifikasi <i class="fa-solid fa-chevron-right text-[10px]"></i>
                           </a>
                       </div>

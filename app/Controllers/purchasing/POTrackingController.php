@@ -84,6 +84,26 @@ class POTrackingController extends BaseController
         $updated = $this->poModel->update($id, ['status' => $newStatus]);
 
         if ($updated) {
+            try {
+                if ($newStatus === 'dalam pengiriman') {
+                    $notifService = new \App\Services\NotificationService();
+                    $po = $this->poModel->find($id);
+                    if ($po) {
+                        $notifService->sendToRole(
+                            'gudang',
+                            'Barang Dalam Pengiriman 🚚',
+                            "Pesanan PO {$po['po_number']} sedang dalam pengiriman oleh supplier.",
+                            '/gudang/pengadaan',
+                            'fa-solid fa-truck-fast',
+                            'blue',
+                            'purchasing'
+                        );
+                    }
+                }
+            } catch (\Throwable $e) {
+                log_message('warning', 'Gagal mengirim notifikasi update PO: ' . $e->getMessage());
+            }
+
             return $this->response->setJSON([
                 'status'  => 'success',
                 'message' => 'Status PO berhasil diperbarui'

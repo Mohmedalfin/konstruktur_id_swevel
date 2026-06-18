@@ -95,7 +95,7 @@ $routes->group('', function ($routes) {
     $routes->put('purchasing/po-tracking/status/(:num)', 'purchasing\POTrackingController::updateStatus/$1');
 
     // Purchasing - Master Data
-    $routes->get('purchasing/notification', 'purchasing\NotificationController::index');
+    $routes->get('purchasing/notifikasi', '\App\Controllers\menu\NotifikasiController::index');
     $routes->get('purchasing/master-data', 'purchasing\MasterDataController::index');
     $routes->post('purchasing/master-data/store', 'purchasing\MasterDataController::storeSupplier');
     $routes->put('purchasing/master-data/update/(:num)', 'purchasing\MasterDataController::updateSupplier/$1');

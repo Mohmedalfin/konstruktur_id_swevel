@@ -219,6 +219,23 @@ class PurchaseRequestController extends BaseController
                 throw new DatabaseException();
             }
 
+            try {
+                $notifService = new \App\Services\NotificationService();
+                foreach ($createdPOs as $poSum) {
+                    $notifService->sendToRole(
+                        'gudang',
+                        'PO Baru Diterbitkan 📋',
+                        "Purchasing telah menerbitkan {$poSum['po_number']} ke supplier {$poSum['supplier_name']}.",
+                        '/gudang/pengadaan',
+                        'fa-solid fa-file-invoice-dollar',
+                        'purple',
+                        'purchasing'
+                    );
+                }
+            } catch (\Throwable $e) {
+                log_message('warning', 'Gagal mengirim notifikasi PO: ' . $e->getMessage());
+            }
+
             return $this->response->setJSON([
                 'status' => 'success',
                 'message' => 'PO berhasil dibuat',
