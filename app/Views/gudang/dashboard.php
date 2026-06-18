@@ -56,58 +56,71 @@
 
     <!-- STATS CARDS -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <!-- Total -->
-        <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-4 transition-all duration-200 hover:shadow-md relative overflow-hidden group">
-            <div class="absolute -right-4 -top-4 w-16 h-16 rounded-full bg-blue-50 transition-transform duration-500 group-hover:scale-150"></div>
-            <div class="flex items-center gap-3 relative z-10">
-                <div class="w-10 h-10 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
-                    <i class="fas fa-boxes text-lg"></i>
+        <!-- Total Barang -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 h-full min-h-[140px] relative overflow-hidden group hover:shadow-md transition-all duration-200">
+            <div class="absolute -right-4 -top-4 w-20 h-20 rounded-full bg-blue-50/80 transition-transform duration-500 group-hover:scale-150 z-0"></div>
+            <div class="relative z-10 flex flex-col h-full">
+                <div class="flex justify-between items-start mb-2">
+                    <h3 class="text-sm font-bold text-slate-800">Total Barang</h3>
+                    <i class="fas fa-boxes text-slate-800 text-lg opacity-80"></i>
                 </div>
-                <div>
-                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Barang</p>
-                    <h3 id="stat-total" class="text-xl font-bold text-slate-800 mt-0.5">-</h3>
+                <div class="mt-auto">
+                    <h3 id="stat-total" class="text-4xl font-black text-blue-600">-</h3>
+                </div>
+                <div class="mt-2">
+                    <span class="text-xs font-semibold text-slate-500">Stok Tersedia</span>
                 </div>
             </div>
         </div>
 
         <!-- Stok Kritis -->
-        <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-4 transition-all duration-200 hover:shadow-md relative overflow-hidden group">
-            <div class="absolute -right-4 -top-4 w-16 h-16 rounded-full bg-red-50 transition-transform duration-500 group-hover:scale-150"></div>
-            <div class="flex items-center gap-3 relative z-10">
-                <div class="w-10 h-10 rounded-lg bg-red-100 text-red-600 flex items-center justify-center shrink-0">
-                    <i class="fas fa-exclamation-triangle text-lg"></i>
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 h-full min-h-[140px] relative overflow-hidden group hover:shadow-md transition-all duration-200">
+            <div class="absolute -right-4 -top-4 w-20 h-20 rounded-full bg-red-50/80 transition-transform duration-500 group-hover:scale-150 z-0"></div>
+            <div class="relative z-10 flex flex-col h-full">
+                <div class="flex justify-between items-start mb-2">
+                    <h3 class="text-sm font-bold text-slate-800">Stok Kritis / Habis</h3>
+                    <i class="fas fa-exclamation-triangle text-slate-800 text-lg opacity-80"></i>
                 </div>
-                <div>
-                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Stok Kritis / Habis</p>
-                    <h3 id="stat-kritis" class="text-xl font-bold text-red-600 mt-0.5">-</h3>
+                <div class="mt-auto">
+                    <h3 id="stat-kritis" class="text-4xl font-black text-blue-600">-</h3>
+                </div>
+                <div class="mt-2">
+                    <span class="px-2 py-0.5 bg-red-100 text-red-600 text-[10px] rounded font-bold">Perlu perhatian</span>
                 </div>
             </div>
         </div>
 
-        <!-- Permintaan Menunggu -->
-        <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-4 transition-all duration-200 hover:shadow-md relative overflow-hidden group">
-            <div class="absolute -right-4 -top-4 w-16 h-16 rounded-full bg-amber-50 transition-transform duration-500 group-hover:scale-150"></div>
-            <div class="flex items-center gap-3 relative z-10">
-                <div class="w-10 h-10 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
-                    <i class="fas fa-clipboard-list text-lg"></i>
+        <!-- Permintaan Pending -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 h-full min-h-[140px] relative overflow-hidden group hover:shadow-md transition-all duration-200">
+            <div class="absolute -right-4 -top-4 w-20 h-20 rounded-full bg-amber-50/80 transition-transform duration-500 group-hover:scale-150 z-0"></div>
+            <div class="relative z-10 flex flex-col h-full">
+                <div class="flex justify-between items-start mb-2">
+                    <h3 class="text-sm font-bold text-slate-800">Permintaan Pending</h3>
+                    <i class="fas fa-clipboard-list text-slate-800 text-lg opacity-80"></i>
                 </div>
-                <div>
-                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Permintaan Pending</p>
-                    <h3 id="stat-permintaan" class="text-xl font-bold text-slate-800 mt-0.5">-</h3>
+                <div class="mt-auto">
+                    <h3 id="stat-permintaan" class="text-4xl font-black text-blue-600">-</h3>
+                </div>
+                <div class="mt-2">
+                    <span class="text-xs font-semibold text-slate-500">Menunggu Proses</span>
                 </div>
             </div>
         </div>
 
         <!-- Pengadaan Aktif -->
-        <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-4 transition-all duration-200 hover:shadow-md relative overflow-hidden group">
-            <div class="absolute -right-4 -top-4 w-16 h-16 rounded-full bg-emerald-50 transition-transform duration-500 group-hover:scale-150"></div>
-            <div class="flex items-center gap-3 relative z-10">
-                <div class="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
-                    <i class="fas fa-shopping-cart text-lg"></i>
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 h-full min-h-[140px] relative overflow-hidden group hover:shadow-md transition-all duration-200">
+            <div class="absolute -right-4 -top-4 w-20 h-20 rounded-full bg-emerald-50/80 transition-transform duration-500 group-hover:scale-150 z-0"></div>
+            <div class="relative z-10 flex flex-col h-full">
+                <div class="flex justify-between items-start mb-2">
+                    <h3 class="text-sm font-bold text-slate-800">Pengadaan Aktif</h3>
+                    <i class="fas fa-shopping-cart text-slate-800 text-lg opacity-80"></i>
                 </div>
-                <div>
-                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Pengadaan Aktif</p>
-                    <h3 id="stat-pengadaan" class="text-xl font-bold text-slate-800 mt-0.5">-</h3>
+                <div class="mt-auto">
+                    <h3 id="stat-pengadaan" class="text-4xl font-black text-blue-600">-</h3>
+                </div>
+                <div class="mt-2 flex gap-2">
+                    <span class="px-2 py-0.5 bg-blue-100 text-blue-600 text-[10px] rounded font-bold">Diproses</span>
+                    <span class="px-2 py-0.5 bg-emerald-100 text-emerald-600 text-[10px] rounded font-bold">Menunggu Tiba</span>
                 </div>
             </div>
         </div>
