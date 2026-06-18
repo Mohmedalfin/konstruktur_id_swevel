@@ -152,8 +152,8 @@
 
     <script type="module" src="<?= base_url('js/shared/ui/global-loader.js') ?>"></script>
     <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/preline@2.3.0/dist/preline.min.js"></script>
     <script src="<?= base_url('assets/js/preline.js') ?>"></script>
+    <script src="<?= base_url('js/shared/notification-poll.js') ?>"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
