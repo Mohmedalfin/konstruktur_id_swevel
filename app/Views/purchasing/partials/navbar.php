@@ -142,19 +142,16 @@ $accountChevronClass = $isProfilePage
                       </svg>
                   </button>
 
-                  <div class="hs-dropdown-menu transition-[opacity,margin] duration-[0.1ms] md:duration-[150ms] hs-dropdown-open:opacity-100 opacity-0 relative w-full md:w-52 hidden z-10 top-full ps-7 md:ps-0 md:bg-white md:border md:border-gray-200 md:shadow-md md:rounded-xl before:absolute before:-top-4 before:start-0 before:w-full before:h-5 md:after:hidden after:absolute after:top-1 after:start-4.5 after:h-[calc(100%-4px)] after:border-s after:border-white/20"
+                  <div class="hs-dropdown-menu transition-[opacity,margin] duration-[0.1ms] md:duration-[150ms] hs-dropdown-open:opacity-100 opacity-0 relative w-full md:w-52 hidden z-10 top-full ps-7 md:ps-0 md:bg-white md:border md:border-gray-200 md:shadow-md before:absolute before:-top-4 before:start-0 before:w-full before:h-5 md:after:hidden after:absolute after:top-1 after:start-4.5 after:h-[calc(100%-4px)] after:border-s after:border-white/20"
                       role="menu" aria-orientation="vertical" aria-labelledby="hs-header-base-dropdown">
                       <div class="py-1 md:px-1 space-y-0.5">
-                          <a class="p-2 md:px-3 md:py-2.5 flex items-center gap-x-3 text-sm font-medium text-gray-800 hover:bg-gray-100 rounded-lg md:mx-1 focus:outline-hidden focus:bg-gray-100"
-                              href="<?= base_url('profile') ?>">
-                              <svg class="shrink-0 size-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                          <a class="p-2 md:px-3 flex items-center text-sm text-slate-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 rounded-lg gap-3" href="<?= base_url('profile') ?>">
+                              <i class="fa-regular fa-id-badge w-4"></i>
                               Profile
                           </a>
-                          <div class="my-1 border-t border-gray-100"></div>
-                          <a class="p-2 md:px-3 md:py-2.5 flex items-center gap-x-3 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg md:mx-1 focus:outline-hidden focus:bg-red-50"
-                              href="<?= base_url('logout') ?>">
-                              <svg class="shrink-0 size-4 text-red-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
-                              Log out
+                          <a class="p-2 md:px-3 flex items-center text-sm text-red-600 hover:bg-red-50 focus:outline-none focus:bg-red-50 rounded-lg gap-3" href="<?= base_url('logout') ?>">
+                              <i class="fa-solid fa-right-from-bracket w-4"></i>
+                              Logout
                           </a>
                       </div>
                   </div>
