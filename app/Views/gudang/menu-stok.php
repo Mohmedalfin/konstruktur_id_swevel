@@ -105,7 +105,7 @@
                 </thead>
                 <tbody id="stok-table-body" class="divide-y divide-slate-100 text-slate-700">
                     <tr>
-                        <td colspan="7" class="px-6 py-12 text-center text-slate-400">
+                        <td colspan="8" class="px-6 py-12 text-center text-slate-400">
                             <i class="fas fa-spinner fa-spin text-3xl mb-3"></i>
                             <p class="text-sm font-semibold">Memuat data stok...</p>
                         </td>

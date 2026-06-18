@@ -47,6 +47,7 @@ class PermintaanService
             'total'     => $getStat(),
             'pending'   => $getStat('pending'),
             'disetujui' => $getStat('disetujui'),
+            'diproses'  => $getStat('diproses'),
             'selesai'   => $getStat('selesai'),
             'ditolak'   => $getStat('ditolak'),
         ];
@@ -201,26 +202,85 @@ class PermintaanService
         }
         $nomorPermintaan = $prefix . $nextNum;
 
-        // 2. Insert Header
+        // 2. Validate items against RAP sisa_volume and calculate over-limits
+        if (empty($data['items']) || !is_array($data['items'])) {
+            throw new \InvalidArgumentException("Item permintaan tidak boleh kosong.");
+        }
+
+        $projectRapItemsCache = [];
+        $cumulativeRequestQty = [];
+        $isGlobalOverLimit = 0;
+        $processedItems = [];
+        
+        foreach ($data['items'] as $item) {
+            $idProject = (int) $item['id_project'];
+            $idRapDetailItem = !empty($item['id_rap_detail_item']) ? (int) $item['id_rap_detail_item'] : null;
+            $jumlah = (float) $item['jumlah'];
+            $namaBarang = trim($item['nama_barang']);
+            
+            $isOverLimit = 0;
+            $jumlahOverLimit = 0;
+
+            if ($idRapDetailItem) {
+                if (!isset($cumulativeRequestQty[$idRapDetailItem])) {
+                    $cumulativeRequestQty[$idRapDetailItem] = 0;
+                }
+                
+                $qtyBeforeThis = $cumulativeRequestQty[$idRapDetailItem];
+                $cumulativeRequestQty[$idRapDetailItem] += $jumlah;
+
+                if (!isset($projectRapItemsCache[$idProject])) {
+                    $projectRapItemsCache[$idProject] = $this->getProjectRapItems($idProject);
+                }
+
+                $rapItem = null;
+                foreach ($projectRapItemsCache[$idProject] as $ri) {
+                    if ((int)$ri['id_rap_detail_item'] === $idRapDetailItem) {
+                        $rapItem = $ri;
+                        break;
+                    }
+                }
+
+                if ($rapItem) {
+                    $sisaVolume = (float) $rapItem['sisa_volume'];
+                    $availableForThisItem = $sisaVolume - $qtyBeforeThis;
+                    
+                    if ($jumlah > max(0, $availableForThisItem)) {
+                        $isOverLimit = 1;
+                        $jumlahOverLimit = $jumlah - max(0, $availableForThisItem);
+                        $isGlobalOverLimit = 1;
+                    }
+                }
+            }
+            
+            $processedItems[] = array_merge($item, [
+                'is_over_limit' => $isOverLimit,
+                'jumlah_over_limit' => $jumlahOverLimit
+            ]);
+        }
+        
+        if ($isGlobalOverLimit && empty(trim((string)($data['justifikasi_over_limit'] ?? '')))) {
+            throw new \InvalidArgumentException("Justifikasi over-limit wajib diisi untuk permintaan melebihi RAP.");
+        }
+
+        // 3. Insert Header
         $headerData = [
-            'nomor_permintaan'   => $nomorPermintaan,
-            'tanggal_permintaan' => date('Y-m-d'),
-            'pemohon_id'         => $pemohonId,
-            'status'             => 'pending', // default pending on save
-            'keterangan'         => $data['keterangan'] ?? null,
-            'created_at'         => date('Y-m-d H:i:s'),
-            'updated_at'         => date('Y-m-d H:i:s'),
+            'nomor_permintaan'       => $nomorPermintaan,
+            'tanggal_permintaan'     => date('Y-m-d'),
+            'pemohon_id'             => $pemohonId,
+            'status'                 => 'pending',
+            'is_over_limit'          => $isGlobalOverLimit,
+            'justifikasi_over_limit' => $isGlobalOverLimit ? trim((string)($data['justifikasi_over_limit'] ?? '')) : null,
+            'keterangan'             => $data['keterangan'] ?? null,
+            'created_at'             => date('Y-m-d H:i:s'),
+            'updated_at'             => date('Y-m-d H:i:s'),
         ];
 
         $db->table('permintaan')->insert($headerData);
         $permintaanId = $db->insertID();
 
-        // 3. Insert Details
-        if (empty($data['items']) || !is_array($data['items'])) {
-            throw new \InvalidArgumentException("Item permintaan tidak boleh kosong.");
-        }
-
-        foreach ($data['items'] as $item) {
+        // 4. Insert Details
+        foreach ($processedItems as $item) {
             $idProject = (int) $item['id_project'];
             $namaBarang = trim($item['nama_barang']);
             $satuan = trim($item['satuan']);
@@ -242,6 +302,8 @@ class PermintaanService
                 'jumlah'             => (float) $item['jumlah'],
                 'satuan'             => $satuan,
                 'jenis_item'         => $jenisItem,
+                'is_over_limit'      => $item['is_over_limit'],
+                'jumlah_over_limit'  => $item['jumlah_over_limit'],
                 'keterangan'         => $keterangan,
                 'created_at'         => date('Y-m-d H:i:s'),
                 'updated_at'         => date('Y-m-d H:i:s'),
@@ -429,7 +491,44 @@ class PermintaanService
         $this->permintaanModel->delete($id);
 
         $db->transComplete();
+    }
 
-        return $db->transStatus();
+    /**
+     * Get Deviasi (Over-limit) Report
+     */
+    public function getDeviasiReport(?int $idProject = null, ?string $month = null): array
+    {
+        $db = Database::connect();
+        $builder = $db->table('permintaan_detail pd')
+            ->select('pd.*, p.nomor_permintaan, p.tanggal_permintaan, p.status, p.justifikasi_over_limit, pr.nama_proyek, rdi.harga_satuan')
+            ->join('permintaan p', 'p.id = pd.id_permintaan')
+            ->join('projects pr', 'pr.id_project = pd.id_project')
+            ->join('rap_detail_item rdi', 'rdi.id_rap_detail_item = pd.id_rap_detail_item', 'left')
+            ->where('pd.is_over_limit', 1)
+            ->whereIn('p.status', ['pending', 'disetujui', 'selesai']); // active status
+
+        if ($idProject) {
+            $builder->where('pd.id_project', $idProject);
+        }
+
+        if ($month) {
+            $builder->like('p.tanggal_permintaan', $month . '-', 'after');
+        }
+
+        $items = $builder->orderBy('p.tanggal_permintaan', 'DESC')->get()->getResultArray();
+
+        $totalKelebihan = 0;
+        foreach ($items as &$item) {
+            $hargaSatuan = (float)($item['harga_satuan'] ?? 0);
+            $jumlahOver = (float)$item['jumlah_over_limit'];
+            $kerugian = $hargaSatuan * $jumlahOver;
+            $item['kerugian_margin'] = $kerugian;
+            $totalKelebihan += $kerugian;
+        }
+
+        return [
+            'items' => $items,
+            'total_kerugian' => $totalKelebihan
+        ];
     }
 }

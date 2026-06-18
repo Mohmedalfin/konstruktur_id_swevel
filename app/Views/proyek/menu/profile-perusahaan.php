@@ -16,7 +16,7 @@
         <?php echo view('partials/header'); ?>
     <?php endif; ?>
     <?php echo view('partials/topbar', [
-        'title' => 'EDIT PROFILE PERUSAHAAN',
+        'title' => 'PROFILE PERUSAHAAN',
         'subtitle' => 'Perbarui informasi dan identitas perusahaan Anda.'
     ]); ?>
 

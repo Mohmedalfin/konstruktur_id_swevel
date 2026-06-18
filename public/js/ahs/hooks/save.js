@@ -27,8 +27,8 @@ export function bindSave() {
                 spesifikasi: (tr.querySelector('.ahs-spesifikasi')?.value || '').trim(),
                 koefisien:   parseFloat(tr.querySelector('.ahs-koef')?.value) || 0,
                 satuan:      (tr.querySelector('.ahs-satuan')?.value      || '').trim(),
-                hargaSatuan: parseFloat(tr.querySelector('.ahs-harga-dasar')?.value)  || 
-                             parseFloat(tr.querySelector('.ahs-harga-satuan')?.value) || 0,
+                hargaSatuan: parseFloat((tr.querySelector('.ahs-harga-dasar')?.value || '').replace(/\./g, '').replace(/,/g, '.'))  ||
+                             parseFloat((tr.querySelector('.ahs-harga-satuan')?.value || '').replace(/\./g, '').replace(/,/g, '.')) || 0,
                 // Custom items: combine nama + link → "Pergub 2019|https://..."
                 // System items: use the original sumber stored in data-sumber attribute
                 sumber: (() => {

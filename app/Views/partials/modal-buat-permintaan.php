@@ -33,6 +33,15 @@
                         <span>Tambah Proyek Lain</span>
                     </button>
 
+                    <!-- Over-Limit Justification Block (Hidden by default) -->
+                    <div id="over-limit-container" class="hidden bg-red-50 border border-red-200 rounded-xl p-4 space-y-2">
+                        <label for="justifikasi_over_limit" class="block text-xs font-bold text-red-700 uppercase tracking-wider">
+                            <i class="fas fa-exclamation-triangle mr-1"></i> Justifikasi Over-Limit RAP <span class="text-red-500">*</span>
+                        </label>
+                        <textarea id="justifikasi_over_limit" rows="3" placeholder="Wajib diisi: Jelaskan alasan mengapa permintaan melebihi kuota RAP..." class="w-full px-3 py-2 text-sm text-slate-700 bg-white border border-red-300 rounded-lg focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 placeholder-red-300 transition-colors"></textarea>
+                        <p class="text-[10px] sm:text-xs text-red-600 mt-1"><i class="fas fa-info-circle mr-1"></i>Terdapat item yang melebihi sisa volume RAP. Anda wajib menyertakan alasan justifikasi.</p>
+                    </div>
+
                     <!-- Global Notes Block -->
                     <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
                         <label for="catatan_umum" class="block text-xs font-bold text-slate-700 uppercase tracking-wider">

@@ -16,7 +16,10 @@ class PermintaanModel extends Model
         'tanggal_permintaan',
         'pemohon_id',
         'status',
+        'is_over_limit',
+        'justifikasi_over_limit',
         'keterangan',
+        'stok_terpotong',
     ];
 
     protected $useTimestamps = true;

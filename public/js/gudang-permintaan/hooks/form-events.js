@@ -163,6 +163,52 @@ export function initForm() {
         const block = state.projectRows.find(b => b.id === blockId);
         if (block && block.items[idx]) {
             block.items[idx].jumlah = val;
+            
+            // Validate locally and update the DOM immediately
+            const sisaVolume = parseFloat(block.items[idx].sisa_volume) || 0;
+            const container = input.closest('div');
+            if (container) {
+                const errorSpan = container.querySelector('.error-qty');
+                if (val > Math.max(0, sisaVolume)) {
+                    input.classList.add('border-red-500', 'focus:border-red-500', 'bg-red-50');
+                    input.classList.remove('border-slate-300', 'focus:border-blue-500', 'bg-slate-50');
+                    if (errorSpan) {
+                        const excess = val - Math.max(0, sisaVolume);
+                        errorSpan.textContent = `Over-limit: ${excess}`;
+                        errorSpan.classList.remove('hidden');
+                        errorSpan.classList.add('text-red-500');
+                    }
+                } else {
+                    input.classList.remove('border-red-500', 'focus:border-red-500', 'bg-red-50');
+                    input.classList.add('border-slate-300', 'focus:border-blue-500', 'bg-slate-50');
+                    if (errorSpan) {
+                        errorSpan.textContent = '';
+                        errorSpan.classList.add('hidden');
+                        errorSpan.classList.remove('text-red-500');
+                    }
+                }
+            }
+            
+            // Check global over-limit status
+            let isAnyOverLimit = false;
+            state.projectRows.forEach(r => {
+                r.items.forEach(i => {
+                    const sv = parseFloat(i.sisa_volume) || 0;
+                    if (parseFloat(i.jumlah) > Math.max(0, sv)) isAnyOverLimit = true;
+                });
+            });
+            
+            const overLimitContainer = document.getElementById('over-limit-container');
+            const justifikasiInput = document.getElementById('justifikasi_over_limit');
+            if (overLimitContainer && justifikasiInput) {
+                if (isAnyOverLimit) {
+                    overLimitContainer.classList.remove('hidden');
+                    justifikasiInput.setAttribute('required', 'required');
+                } else {
+                    overLimitContainer.classList.add('hidden');
+                    justifikasiInput.removeAttribute('required');
+                }
+            }
         }
     });
 
@@ -208,6 +254,8 @@ export function initForm() {
 
             const state = getState();
             const globalNotes = document.getElementById('catatan_umum')?.value || '';
+            const justifikasiInput = document.getElementById('justifikasi_over_limit');
+            const justifikasiOverLimit = justifikasiInput ? justifikasiInput.value : '';
 
             // Validation checks
             if (state.projectRows.length === 0) {
@@ -222,6 +270,7 @@ export function initForm() {
             const itemsPayload = [];
             let isValid = true;
             let validationError = '';
+            let isAnyOverLimit = false;
 
             state.projectRows.forEach((row, index) => {
                 if (!row.selectedProjectId) {
@@ -253,12 +302,18 @@ export function initForm() {
                         return;
                     }
 
+                    const sisaVolume = parseFloat(item.sisa_volume) || 0;
+                    if (item.jumlah > Math.max(0, sisaVolume)) {
+                        isAnyOverLimit = true;
+                    }
+
                     itemsPayload.push({
                         id_project: row.selectedProjectId,
                         id_rap_detail_item: item.id_rap_detail_item,
                         nama_barang: item.nama_barang,
                         jumlah: item.jumlah,
                         satuan: item.satuan,
+                        kategori: item.kategori,
                         keterangan: item.keterangan
                     });
                 });
@@ -273,8 +328,24 @@ export function initForm() {
                 return;
             }
 
+            if (isAnyOverLimit && !justifikasiOverLimit.trim()) {
+                AppSwal.fire({
+                    icon: 'warning',
+                    title: 'Justifikasi Diperlukan',
+                    text: 'Terdapat item yang melebihi sisa volume RAP. Anda wajib mengisi justifikasi over-limit.'
+                });
+                const overLimitContainer = document.getElementById('over-limit-container');
+                if (overLimitContainer) overLimitContainer.classList.remove('hidden');
+                if (justifikasiInput) {
+                    justifikasiInput.setAttribute('required', 'required');
+                    justifikasiInput.focus();
+                }
+                return;
+            }
+
             const payload = {
                 keterangan: globalNotes,
+                justifikasi_over_limit: justifikasiOverLimit,
                 items: itemsPayload
             };
 

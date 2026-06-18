@@ -200,7 +200,7 @@ if (!tbody) {
                 const src = state.activeSource;
                 state.currentPage = 1;
                 state.hasMoreData = true;
-                modalTbody.innerHTML = '<tr><td colspan="8" class="text-center py-8 text-table-subtle text-xs italic">Mencari...</td></tr>';
+                modalTbody.innerHTML = '<tr><td colspan="9" class="text-center py-8 text-table-subtle text-xs italic">Mencari...</td></tr>';
 
                 if (src === 'proyek') {
                     await fetchProyekItems(state.idProject, state.idDetail, 1, q, false);
@@ -226,7 +226,7 @@ if (!tbody) {
                 state.hasMoreData = true;
                 const q   = (modalSearch?.value || '').trim();
                 const src = state.activeSource;
-                modalTbody.innerHTML = '<tr><td colspan="8" class="text-center py-8 text-table-subtle text-xs italic">Memuat data filter...</td></tr>';
+                modalTbody.innerHTML = '<tr><td colspan="9" class="text-center py-8 text-table-subtle text-xs italic">Memuat data filter...</td></tr>';
                 if (src === 'proyek') {
                     await fetchProyekItems(state.idProject, state.idDetail, 1, q, false);
                 } else if (src === 'shbj') {

@@ -31,6 +31,11 @@ if (! function_exists('is_nav_active')) {
             return str_contains($currUrl, '/gudang/dashboard') || $currUrl === $baseGudang;
         }
 
+        if ($path === 'gudang/permintaan') {
+            $isDeviasiGudang = str_contains($currUrl, '/permintaan/deviasi') && isset($_GET['source']) && $_GET['source'] === 'gudang';
+            return str_contains($currUrl, '/gudang/permintaan') || $isDeviasiGudang;
+        }
+
         if ($path === 'menu-rap') {
             $baseProyek = rtrim(base_url('proyek'), '/');
             return (str_starts_with($currUrl . '/', $linkUrl . '/')

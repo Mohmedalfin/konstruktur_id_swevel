@@ -5,6 +5,7 @@ let state = {
         total: 0,
         pending: 0,
         disetujui: 0,
+        diproses: 0,
         selesai: 0,
         ditolak: 0
     },

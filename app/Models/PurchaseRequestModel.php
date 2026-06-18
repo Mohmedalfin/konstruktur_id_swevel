@@ -13,15 +13,17 @@ class PurchaseRequestModel extends Model
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
     protected $allowedFields    = [
+        'id_perusahaan',
         'pr_number', 
         'request_date', 
-        'status'
+        'status',
+        'keterangan',
+        'created_by'
     ];
 
     protected $useTimestamps = true;
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
-
     public function getPRsWithItemCount()
     {
         $db = \Config\Database::connect();

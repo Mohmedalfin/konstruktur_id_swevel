@@ -194,6 +194,7 @@ export function renderReadonly(data) {
     bindCategoryActionButtons();
     bindDeleteCategoryButtons();
     bindSubItemButtons();
+    bindVolumeInputs();
 
     // Bind save button for reorder mode
     const saveBtn = document.getElementById('save-reorder-btn');
@@ -641,7 +642,24 @@ function renderItemRows(items, catId, subClass, isEditable, prefix = '', depth =
                 </td>
                 ${!isReorderMode ? `
                 ${!hasChildren ? `
-                <td class="px-3 md:px-5 py-2 md:py-2.5 text-center tabular-nums border-l border-table-border">${volume}</td>
+                <td class="px-3 md:px-5 py-2 md:py-2.5 text-center tabular-nums border-l border-table-border group relative w-[120px]">
+                    ${isEditable ? `
+                        <div class="flex items-center justify-center gap-2 volume-display-container">
+                            <span class="volume-text">${volume}</span>
+                            <button type="button" class="edit-volume-btn text-slate-400 hover:text-primary transition-colors p-1 focus:outline-none" title="Edit Volume">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                            </button>
+                        </div>
+                        <div class="hidden volume-edit-container items-center justify-center gap-1">
+                            <input type="number" min="0" step="0.01" class="volume-input w-14 px-1.5 py-1 text-center text-[10px] md:text-xs border border-table-border rounded focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all" data-id-rap-detail="${item.id_rap_detail || ''}" value="${volume}">
+                            <div class="flex items-center flex-col gap-0.5">
+                                <button type="button" class="save-volume-btn flex items-center justify-center w-5 h-5 rounded bg-primary text-white hover:bg-primary-hover focus:outline-none transition-colors shadow-sm" title="Simpan">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                    ` : volume}
+                </td>
                 <td class="px-3 md:px-5 py-2 md:py-2.5 text-center text-table-subtle border-l border-table-border">${escHtml(item.satuan || '')}</td>
                 <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums whitespace-nowrap border-l border-table-border">${fmt(hargaBahan)}</td>
                 <td class="px-3 md:px-5 py-2 md:py-2.5 text-right tabular-nums whitespace-nowrap border-l border-table-border">${fmt(hargaUpah)}</td>
@@ -777,6 +795,128 @@ function bindSubItemButtons() {
 
                 // fallback reload on error if stuck loading
                 if (!window.fetchRabData) window.location.reload();
+            }
+        });
+    });
+}
+
+function bindVolumeInputs() {
+    // Bind Edit Buttons
+    tbody.querySelectorAll('.edit-volume-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const td = this.closest('td');
+            const displayContainer = td.querySelector('.volume-display-container');
+            const editContainer = td.querySelector('.volume-edit-container');
+            const input = editContainer.querySelector('.volume-input');
+
+            displayContainer.classList.add('hidden');
+            displayContainer.classList.remove('flex');
+            editContainer.classList.remove('hidden');
+            editContainer.classList.add('flex');
+            
+            input.focus();
+            input.select();
+        });
+    });
+
+    // Replace blur saving with explicit buttons
+    tbody.querySelectorAll('.volume-edit-container').forEach(container => {
+        const input = container.querySelector('.volume-input');
+        const saveBtn = container.querySelector('.save-volume-btn');
+        const displayContainer = container.closest('td').querySelector('.volume-display-container');
+        
+        let lastValue = input.value;
+
+        const resetView = () => {
+            container.classList.add('hidden');
+            container.classList.remove('flex');
+            displayContainer.classList.remove('hidden');
+            displayContainer.classList.add('flex');
+            input.value = lastValue; // Revert input to original
+        };
+
+        const saveVolume = async () => {
+            const idRapDetail = input.dataset.idRapDetail;
+            const newVolume = parseFloat(input.value);
+
+            if (isNaN(newVolume) || newVolume < 0) {
+                resetView();
+                return;
+            }
+
+            if (input.value === lastValue) {
+                resetView();
+                return;
+            }
+
+            try {
+                if (window.renderLoading) window.renderLoading();
+                const res = await fetch(`/api/rap/pekerjaan/${idRapDetail}/volume`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify({ volume: newVolume })
+                });
+
+                const json = await res.json();
+                if (!res.ok || json.status !== 'success') {
+                    throw new Error(json.message || 'Gagal mengubah volume');
+                }
+
+                if (window.Toast) window.Toast.show('Volume berhasil diubah', 'success');
+
+                // Refresh data
+                const idProject = window.RAB_INIT?.idProject || window.RAB_INIT?.id;
+                if (idProject && window.fetchRabData) {
+                    const data = await window.fetchRabData(idProject);
+                    if (window.state) {
+                        window.state.activeCategories = (data.categories || []).map(cat => ({
+                            id: String(cat.id),
+                            nama: cat.name
+                        }));
+                    }
+                    if (window.renderReadonly) {
+                        window.renderReadonly(data);
+                    } else {
+                        window.location.reload();
+                    }
+                } else {
+                    window.location.reload();
+                }
+            } catch (err) {
+                console.error(err);
+                if (window.Toast) window.Toast.show(err.message, 'error');
+                else alert(err.message);
+                
+                resetView();
+                if (!window.fetchRabData) window.location.reload();
+            }
+        };
+
+        saveBtn.addEventListener('mousedown', function(e) {
+            // Prevent blur from firing before click
+            e.preventDefault();
+        });
+
+        saveBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            saveVolume();
+        });
+
+        input.addEventListener('blur', function(e) {
+            // If they click the save button, mousedown prevented this from firing or e.relatedTarget is saveBtn
+            if (e.relatedTarget !== saveBtn) {
+                resetView();
+            }
+        });
+
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                saveVolume();
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                resetView();
             }
         });
     });

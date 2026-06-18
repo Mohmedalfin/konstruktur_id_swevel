@@ -2,7 +2,7 @@ export function renderStats(stats) {
     if (!stats) return;
     document.getElementById('stat-total').textContent = stats.total ?? 0;
     document.getElementById('stat-pending').textContent = stats.pending ?? 0;
-    document.getElementById('stat-proses').textContent = stats.disetujui ?? 0;
+    document.getElementById('stat-proses').textContent = (stats.disetujui || 0) + (stats.diproses || 0);
     document.getElementById('stat-kirim').textContent = stats.selesai ?? 0;
 }
 
@@ -12,9 +12,12 @@ export function renderRequestsList(requests) {
 
     if (!Array.isArray(requests) || requests.length === 0) {
         container.innerHTML = `
-            <div class="text-center py-12 bg-white rounded-xl border border-slate-100 shadow-sm text-slate-400">
-                <i class="fas fa-inbox text-4xl mb-3 text-slate-300"></i>
-                <p class="text-sm font-semibold">Belum ada riwayat permintaan item.</p>
+            <div class="text-center py-12 bg-white rounded-xl border border-slate-100 shadow-sm">
+                <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-inbox text-2xl text-slate-300"></i>
+                </div>
+                <p class="text-sm font-semibold text-slate-600">Belum ada permintaan</p>
+                <p class="text-xs mt-1 text-slate-400">Tidak ada data yang sesuai dengan filter saat ini.</p>
             </div>
         `;
         return;
@@ -31,51 +34,54 @@ export function renderRequestsList(requests) {
 
         switch (req.status) {
             case 'pending':
-                statusBadgeClass = 'bg-amber-100 text-amber-800 border-amber-200';
+                statusBadgeClass = 'bg-amber-50 text-amber-600 border-transparent';
                 statusLabel = 'Menunggu';
-                borderLeftColor = 'bg-amber-400';
-                iconBg = 'bg-amber-100 text-amber-600';
+                borderLeftColor = 'bg-amber-500';
+                iconBg = 'bg-amber-50 text-amber-500';
                 iconName = 'fa-clock';
                 break;
             case 'disetujui':
-                statusBadgeClass = 'bg-indigo-100 text-indigo-800 border-indigo-200';
+                statusBadgeClass = 'bg-indigo-50 text-indigo-600 border-transparent';
                 statusLabel = 'Diterima';
                 borderLeftColor = 'bg-indigo-500';
-                iconBg = 'bg-indigo-100 text-indigo-600';
+                iconBg = 'bg-indigo-50 text-indigo-500';
                 iconName = 'fa-check-double';
                 break;
             case 'diproses':
-                statusBadgeClass = 'bg-blue-100 text-blue-800 border-blue-200';
+                statusBadgeClass = 'bg-blue-50 text-blue-600 border-transparent';
                 statusLabel = 'Diproses';
                 borderLeftColor = 'bg-blue-500';
-                iconBg = 'bg-blue-100 text-blue-600';
+                iconBg = 'bg-blue-50 text-blue-500';
                 iconName = 'fa-cog fa-spin-hover';
                 break;
             case 'selesai':
-                statusBadgeClass = 'bg-emerald-100 text-emerald-800 border-emerald-200';
+                statusBadgeClass = 'bg-emerald-50 text-emerald-600 border-transparent';
                 statusLabel = 'Terkirim';
                 borderLeftColor = 'bg-emerald-500';
-                iconBg = 'bg-emerald-100 text-emerald-600';
+                iconBg = 'bg-emerald-50 text-emerald-500';
                 iconName = 'fa-check-circle';
                 break;
             case 'ditolak':
-                statusBadgeClass = 'bg-rose-100 text-rose-800 border-rose-200';
+                statusBadgeClass = 'bg-rose-50 text-rose-600 border-transparent';
                 statusLabel = 'Ditolak';
                 borderLeftColor = 'bg-rose-500';
-                iconBg = 'bg-rose-100 text-rose-600';
+                iconBg = 'bg-rose-50 text-rose-500';
                 iconName = 'fa-times-circle';
                 break;
             default:
-                statusBadgeClass = 'bg-slate-100 text-slate-800 border-slate-200';
+                statusBadgeClass = 'bg-slate-50 text-slate-600 border-transparent';
                 statusLabel = req.status;
+                borderLeftColor = 'bg-slate-500';
+                iconBg = 'bg-slate-50 text-slate-500';
+                iconName = 'fa-file-alt';
         }
 
         let projectBadgesHtml = '';
         if (req.projects && req.projects.length > 0) {
             req.projects.forEach(proj => {
                 projectBadgesHtml += `
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 border border-emerald-200 rounded text-[11px] font-bold text-emerald-700 transition-colors hover:bg-emerald-100 shadow-sm">
-                        <i class="fas fa-building text-[10px] text-emerald-500"></i>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 rounded-full text-xs font-bold text-emerald-600 transition-colors hover:bg-emerald-100">
+                        <i class="fas fa-map-marker-alt text-emerald-500"></i>
                         ${proj.nama_proyek}
                     </span>
                 `;
@@ -92,47 +98,47 @@ export function renderRequestsList(requests) {
         }
 
         html += `
-            <div class="group relative bg-white rounded-xl shadow-sm border border-slate-200 hover:border-slate-300 transition-all duration-300 hover:shadow-md overflow-hidden flex flex-col mb-4">
-                <div class="absolute left-0 top-0 bottom-0 w-1 ${borderLeftColor}"></div>
-                
-                <div class="p-5 pl-6">
-                    <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                        <div class="flex items-start gap-4 flex-1">
-                            <!-- Icon -->
-                            <div class="w-10 h-10 rounded-xl ${iconBg} flex items-center justify-center shrink-0 border border-slate-100 shadow-sm">
-                                <i class="fas ${iconName} text-lg"></i>
-                            </div>
-                            
-                            <!-- Info -->
-                            <div class="space-y-1.5 w-full">
-                                <div class="flex items-center justify-between sm:justify-start gap-3 flex-wrap">
-                                    <h4 class="font-bold text-slate-800 text-base group-hover:text-blue-600 transition-colors cursor-pointer btn-detail-ajax" data-id="${req.id}">${req.nomor_permintaan}</h4>
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold border uppercase tracking-wider ${statusBadgeClass}">
-                                        ${statusLabel}
-                                    </span>
-                                </div>
-                                <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 font-medium">
-                                    <span class="flex items-center gap-1.5"><i class="fas fa-calendar-alt text-slate-400"></i> ${formattedDate}</span>
-                                    <span class="hidden sm:inline-block w-1 h-1 rounded-full bg-slate-300"></span>
-                                    <span class="flex items-center gap-1.5"><i class="fas fa-user text-slate-400"></i> ${req.pemohon_nama || 'Pemohon'}</span>
-                                    <span class="hidden sm:inline-block w-1 h-1 rounded-full bg-slate-300"></span>
-                                    <span class="flex items-center gap-1.5"><i class="fas fa-box text-slate-400"></i> ${req.item_count} Item</span>
-                                </div>
-                            </div>
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4 mb-4 transition-all hover:shadow-md">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    
+                    <!-- Left Side: Icon & Info -->
+                    <div class="flex items-start sm:items-center gap-4 flex-1">
+                        <div class="w-12 h-12 rounded-full ${iconBg} flex items-center justify-center shrink-0">
+                            <i class="fas ${iconName} text-xl"></i>
                         </div>
-
-                        <!-- Right Content (Action) -->
-                        <div class="shrink-0 flex items-center justify-end mt-2 sm:mt-0 gap-2">
-                            <button type="button" data-id="${req.id}" class="btn-detail-ajax w-8 h-8 flex items-center justify-center text-emerald-600 hover:text-white bg-emerald-50 hover:bg-emerald-500 border border-emerald-200 rounded-lg transition-all shadow-sm focus:outline-none" title="Ubah/Lihat Detail">
-                                <i class="fas fa-edit text-xs"></i>
-                            </button>
+                        <div class="space-y-1">
+                            <div class="flex items-center flex-wrap gap-3">
+                                <span class="font-bold text-blue-700 text-base sm:text-lg cursor-pointer hover:text-blue-800 transition-colors btn-detail-ajax" data-id="${req.id}">${req.nomor_permintaan}</span>
+                                <span class="hidden sm:inline-block w-px h-4 bg-slate-200"></span>
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold border uppercase tracking-wider ${statusBadgeClass}">
+                                    <span class="w-1.5 h-1.5 rounded-full ${borderLeftColor}"></span>
+                                    ${statusLabel}
+                                </span>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 font-medium">
+                                <span class="flex items-center gap-1.5"><i class="fas fa-calendar-alt text-slate-400"></i> ${formattedDate}</span>
+                                <span class="hidden sm:inline-block w-px h-3 bg-slate-200"></span>
+                                <span class="flex items-center gap-1.5"><i class="fas fa-user text-slate-400"></i> ${req.pemohon_nama || 'Pemohon'}</span>
+                                <span class="hidden sm:inline-block w-px h-3 bg-slate-200"></span>
+                                <span class="flex items-center gap-1.5"><i class="fas fa-box text-slate-400"></i> ${req.item_count} Item</span>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="h-px bg-slate-100 my-4"></div>
+                    <!-- Right Side: Actions -->
+                    <div class="flex items-center gap-2 shrink-0">
+                        <button type="button" data-id="${req.id}" class="btn-detail-ajax w-10 h-10 flex items-center justify-center text-emerald-600 hover:text-white bg-emerald-50 hover:bg-emerald-500 border border-emerald-200 rounded-lg transition-all shadow-sm focus:outline-none" title="Ubah/Lihat Detail">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </div>
 
+                </div>
+
+                <!-- Bottom Side: Project -->
+                ${projectBadgesHtml ? `
+                    <div class="h-px bg-slate-100 my-4"></div>
                     <div class="flex flex-col sm:flex-row gap-4 sm:items-center justify-between">
-                        <div class="flex flex-wrap gap-2 flex-1">
+                        <div class="flex items-center gap-2 flex-wrap flex-1">
                             ${projectBadgesHtml}
                         </div>
                         ${req.keterangan ? `
@@ -142,7 +148,7 @@ export function renderRequestsList(requests) {
                             </div>
                         ` : ''}
                     </div>
-                </div>
+                ` : ''}
             </div>
         `;
     });
@@ -150,19 +156,19 @@ export function renderRequestsList(requests) {
 }
 
 export function renderDetailModal(req, userRole) {
-    const titleText = document.getElementById('detail-nomor-tanggal');
-    const badgeContainer = document.getElementById('detail-status-badge-container');
-    const modalBody = document.getElementById('detail-modal-body');
-    const timelineContainer = document.getElementById('detail-modal-timeline');
-    const actionsContainer = document.getElementById('detail-modal-actions');
-    const contractorNameEl = document.getElementById('detail-contractor-name');
-    const requestDateEl = document.getElementById('detail-request-date');
-    const projectAddressesEl = document.getElementById('detail-project-addresses');
-    const changeStatusContainer = document.getElementById('detail-change-status-container');
-    const statusDescEl = document.getElementById('detail-status-description');
+    const elNomor = document.getElementById('detail-nomor-permintaan');
+    const elTanggal = document.getElementById('detail-tanggal-permintaan');
+    const elInfoGrid = document.getElementById('detail-info-grid');
+    const elModalBody = document.getElementById('detail-modal-body');
+    const elActions = document.getElementById('detail-modal-actions');
+    const stepperProgress = document.getElementById('stepper-permintaan-progress');
+    const stepperSteps = document.getElementById('stepper-permintaan-steps');
+    const rejectedAlert = document.getElementById('detail-permintaan-rejected-alert');
+    const rejectedNote = document.getElementById('detail-permintaan-rejected-note');
 
-    if (!titleText || !modalBody) return;
+    if (!elNomor || !elModalBody) return;
 
+    // 1. Format Date
     let formattedDate = req.tanggal_permintaan;
     if (formattedDate) {
         const parts = formattedDate.split('-');
@@ -172,69 +178,188 @@ export function renderDetailModal(req, userRole) {
         }
     }
 
-    titleText.textContent = `${req.nomor_permintaan} | ${formattedDate}`;
+    // 2. Set Header Info
+    elNomor.textContent = req.nomor_permintaan || '-';
+    elTanggal.textContent = `Tanggal: ${formattedDate || '-'}`;
 
-    let badgeClass = '';
-    let statusLabel = '';
-    switch (req.status) {
-        case 'pending':
-            badgeClass = 'bg-amber-500/20 border-amber-400/30 text-amber-500';
-            statusLabel = 'Menunggu';
-            break;
-        case 'disetujui':
-            badgeClass = 'bg-indigo-500/20 border-indigo-400/30 text-indigo-400';
-            statusLabel = 'Diterima';
-            break;
-        case 'diproses':
-            badgeClass = 'bg-cyan-500/20 border-cyan-400/30 text-cyan-400';
-            statusLabel = 'Diproses';
-            break;
-        case 'selesai':
-            badgeClass = 'bg-emerald-500/20 border-emerald-400/30 text-emerald-400';
-            statusLabel = 'Selesai';
-            break;
-        case 'ditolak':
-            badgeClass = 'bg-rose-500/20 border-rose-400/30 text-rose-400';
-            statusLabel = 'Ditolak';
-            break;
-        default:
-            badgeClass = 'bg-slate-500/20 border-slate-400/30 text-slate-300';
-            statusLabel = req.status;
-    }
-    if (badgeContainer) {
-        badgeContainer.innerHTML = `<span class="px-3 py-1 ${badgeClass} border rounded-full text-xs font-bold shadow-sm inline-block tracking-wide">${statusLabel}</span>`;
+    // 3. Info Grid (Pemohon, Alamat, Catatan)
+    let addressesHtml = '';
+    if (req.projects && req.projects.length > 0) {
+        req.projects.forEach(proj => {
+            const lokasi = proj.lokasi_proyek || '-';
+            addressesHtml += `
+                <div class="flex items-start gap-1.5 text-sm">
+                    <i class="fas fa-map-marker-alt text-slate-400 mt-1 shrink-0 text-xs"></i>
+                    <div>
+                        <span class="font-bold text-slate-700 block">${proj.nama_proyek}</span>
+                        <span class="text-xs text-slate-500">${lokasi}</span>
+                    </div>
+                </div>
+            `;
+        });
+    } else {
+        addressesHtml = '<p class="text-xs text-slate-400 font-medium">Tidak ada proyek terkait.</p>';
     }
 
-    // Populate Contractor Info
-    if (contractorNameEl) {
-        contractorNameEl.textContent = req.pemohon_nama || 'Pemohon';
-    }
-    if (requestDateEl) {
-        requestDateEl.textContent = formattedDate || '-';
+    const catatanHtml = req.keterangan 
+        ? `<p class="text-sm text-slate-700 italic">"${req.keterangan}"</p>` 
+        : `<p class="text-sm text-slate-400 italic">Tidak ada catatan umum.</p>`;
+
+    const justifikasiHtml = (req.is_over_limit === '1' || req.is_over_limit === 1)
+        ? `<div class="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+               <h5 class="text-[10px] font-bold text-red-600 uppercase tracking-wider mb-1"><i class="fas fa-exclamation-triangle mr-1"></i> Justifikasi Over-Limit</h5>
+               <p class="text-xs text-red-800 italic">"${req.justifikasi_over_limit || '-'}"</p>
+           </div>`
+        : '';
+
+    if (elInfoGrid) {
+        elInfoGrid.innerHTML = `
+            <div class="bg-slate-50 rounded-xl p-4 border border-slate-100 flex flex-col gap-3">
+                <div>
+                    <h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Informasi Pemohon</h4>
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
+                            <i class="fas fa-user text-sm"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-slate-800">${req.pemohon_nama || 'Pemohon'}</p>
+                            <p class="text-xs text-slate-500">Kontraktor</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="h-px bg-slate-200 my-1"></div>
+                <div>
+                    <h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Tujuan Pengiriman / Proyek</h4>
+                    <div class="space-y-2">
+                        ${addressesHtml}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-slate-50 rounded-xl p-4 border border-slate-100 flex flex-col">
+                <h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Keterangan / Catatan</h4>
+                <div class="flex-1">
+                    ${catatanHtml}
+                    ${justifikasiHtml}
+                </div>
+            </div>
+        `;
     }
 
-    // Populate Project Addresses
-    if (projectAddressesEl) {
-        let addressesHtml = '';
-        if (req.projects && req.projects.length > 0) {
-            req.projects.forEach(proj => {
-                const lokasi = proj.lokasi_proyek || '-';
-                addressesHtml += `
-                    <div class="space-y-1.5 pl-3 border-l-4 border-emerald-500 bg-emerald-50/50 py-2 rounded-r-lg">
-                        <div class="font-bold text-emerald-700 text-xs"><i class="fas fa-building mr-1.5 text-emerald-500"></i>${proj.nama_proyek}</div>
-                        <div class="text-[11px] text-slate-600 font-medium leading-relaxed flex items-start gap-1.5">
-                            <i class="fas fa-map-marker-alt text-slate-400 mt-0.5 shrink-0"></i>
-                            <span>${lokasi}</span>
+    // 4. Stepper Timeline
+    if (stepperProgress && stepperSteps) {
+        const formatTimelineDate = (dateStr) => {
+            if (!dateStr) return '';
+            const d = new Date(dateStr);
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
+            const pad = (n) => n.toString().padStart(2, '0');
+            return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()} ${pad(d.getHours())}.${pad(d.getMinutes())}`;
+        };
+
+        const logsMap = {};
+        if (req.status_logs) {
+            req.status_logs.forEach(log => {
+                logsMap[log.status] = {
+                    date: formatTimelineDate(log.created_at),
+                    user: log.nama_pengubah || '',
+                    note: log.keterangan || ''
+                };
+            });
+        }
+
+        const currentStatus = req.status;
+        
+        if (currentStatus === 'ditolak') {
+            if (rejectedAlert) {
+                rejectedAlert.classList.remove('hidden');
+                if (rejectedNote) {
+                    rejectedNote.textContent = logsMap['ditolak']?.note || 'Permintaan ini telah ditolak dan tidak akan diproses lebih lanjut.';
+                }
+            }
+            stepperProgress.style.width = '0%';
+            stepperProgress.style.height = '0%';
+            
+            stepperSteps.innerHTML = `
+                <div class="flex sm:flex-col items-center gap-3 sm:gap-2 relative group w-full">
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors shadow-sm bg-red-100 border-2 border-red-500 text-red-600 z-10">
+                        <i class="fas fa-times"></i>
+                    </div>
+                    <div class="sm:text-center flex flex-col items-start sm:items-center w-full">
+                        <h5 class="text-sm font-bold text-red-700">Ditolak</h5>
+                        <p class="text-[10px] text-slate-500 font-semibold mt-1">${logsMap['ditolak']?.date || ''}</p>
+                        <p class="text-[9px] text-slate-400 truncate w-full max-w-[100px] sm:max-w-none"><i class="fas fa-user mr-1"></i>${logsMap['ditolak']?.user || ''}</p>
+                    </div>
+                </div>
+            `;
+        } else {
+            if (rejectedAlert) rejectedAlert.classList.add('hidden');
+            
+            const statusLevels = { 'pending': 1, 'disetujui': 2, 'diproses': 3, 'selesai': 4 };
+            const currentStep = statusLevels[currentStatus] || 1;
+            
+            let percentage = 0;
+            if (currentStep === 2) percentage = 33;
+            if (currentStep === 3) percentage = 66;
+            if (currentStep === 4) percentage = 100;
+            
+            const isMobile = window.innerWidth < 640;
+            if (isMobile) {
+                stepperProgress.style.height = `${percentage}%`;
+                stepperProgress.style.width = '100%';
+                stepperProgress.classList.remove('scale-y-0');
+                stepperProgress.classList.add('scale-y-100');
+            } else {
+                stepperProgress.style.width = `${percentage}%`;
+                stepperProgress.style.height = '100%';
+                stepperProgress.classList.remove('scale-x-0');
+                stepperProgress.classList.add('scale-x-100');
+            }
+
+            const stepDefinitions = [
+                { id: 1, key: 'pending', title: 'Diajukan', desc: 'Menunggu Persetujuan', icon: 'fa-file-alt' },
+                { id: 2, key: 'disetujui', title: 'Diterima', desc: 'Disetujui Gudang', icon: 'fa-check' },
+                { id: 3, key: 'diproses', title: 'Diproses', desc: 'Sedang Disiapkan', icon: 'fa-cog' },
+                { id: 4, key: 'selesai', title: 'Selesai', desc: 'Terkirim', icon: 'fa-box' }
+            ];
+
+            let stepsHtml = '';
+            stepDefinitions.forEach(step => {
+                let iconClass = '';
+                let titleClass = '';
+                
+                if (step.id < currentStep) {
+                    iconClass = 'bg-emerald-500 border-emerald-500 text-white';
+                    titleClass = 'text-emerald-700';
+                } else if (step.id === currentStep) {
+                    iconClass = 'bg-white border-emerald-500 text-emerald-600 ring-4 ring-emerald-50';
+                    titleClass = 'text-emerald-700';
+                } else {
+                    iconClass = 'bg-white border-slate-300 text-slate-400';
+                    titleClass = 'text-slate-500';
+                }
+
+                const logData = logsMap[step.key] || {};
+                const dateHtml = logData.date ? `<p class="text-[10px] text-slate-500 font-semibold mt-1">${logData.date}</p>` : `<p class="text-[10px] text-slate-400 mt-1">${step.desc}</p>`;
+                const userHtml = logData.user ? `<p class="text-[9px] text-slate-400 truncate w-full max-w-[100px] sm:max-w-none mt-0.5"><i class="fas fa-user mr-1"></i>${logData.user}</p>` : '';
+
+                stepsHtml += `
+                    <div class="flex sm:flex-col items-center gap-3 sm:gap-2 relative group flex-1">
+                        <div class="w-8 h-8 rounded-full border-2 flex items-center justify-center text-xs font-bold transition-colors shadow-sm z-10 ${iconClass}">
+                            <i class="fas ${step.icon}"></i>
+                        </div>
+                        <div class="sm:text-center flex flex-col items-start sm:items-center w-full">
+                            <h5 class="text-sm font-bold ${titleClass}">${step.title}</h5>
+                            ${dateHtml}
+                            ${userHtml}
                         </div>
                     </div>
                 `;
             });
-        } else {
-            addressesHtml = '<p class="text-xs text-slate-400 font-medium">Tidak ada proyek terkait.</p>';
+            stepperSteps.innerHTML = stepsHtml;
         }
-        projectAddressesEl.innerHTML = addressesHtml;
     }
 
+    // 5. Items List per Project
     let bodyHtml = '';
     if (req.projects && req.projects.length > 0) {
         req.projects.forEach(proj => {
@@ -250,23 +375,32 @@ export function renderDetailModal(req, userRole) {
                 if (groupedItems[cat].length > 0) {
                     const catIcon = cat === 'Bahan' ? 'fa-layer-group' : 'fa-wrench';
                     itemsHtml += `
-                        <div class="mt-2.5 mb-2 flex items-center gap-2 px-1">
+                        <div class="mt-3 mb-2 flex items-center gap-2 px-2">
                             <i class="fas ${catIcon} text-slate-600 text-xs"></i>
                             <h4 class="font-bold text-slate-700 text-xs uppercase tracking-wider">${cat}</h4>
                         </div>
                     `;
                     groupedItems[cat].forEach(item => {
                         const isKurang = parseFloat(item.stok_aktual) < parseFloat(item.jumlah);
-                        const warningHtml = isKurang ? `<span class="px-2 py-0.5 text-[9px] font-bold bg-rose-100 text-rose-800 border border-rose-200 rounded uppercase ml-2">Stok Kurang</span>` : '';
+                        const warningHtml = isKurang ? `<span class="px-2 py-0.5 text-[9px] font-bold bg-rose-100 text-rose-800 border border-rose-200 rounded uppercase ml-2 shadow-sm">Stok Kurang</span>` : '';
                         const stokColor = isKurang ? 'text-rose-600' : 'text-emerald-600';
                         
+                        const overLimitBadge = (item.is_over_limit === '1' || item.is_over_limit === 1)
+                            ? `<span class="px-2 py-0.5 text-[9px] font-bold bg-red-100 text-red-700 border border-red-200 rounded uppercase ml-2 shadow-sm"><i class="fas fa-exclamation-triangle mr-1"></i> Over: ${parseFloat(item.jumlah_over_limit)} ${item.satuan}</span>`
+                            : '';
+                        
                         itemsHtml += `
-                            <div class="flex items-center justify-between py-2 border-b border-slate-100 last:border-0 px-1 hover:bg-slate-50/50 transition-colors">
+                            <div class="flex items-center justify-between py-2.5 border-b border-slate-100 last:border-0 px-2 hover:bg-slate-50 transition-colors rounded-lg">
                                 <div class="flex flex-col">
-                                    <span class="text-xs font-semibold text-slate-600">${item.nama_barang}</span>
-                                    <span class="text-[10px] font-medium text-slate-500 mt-0.5">Stok Gudang: <span class="font-bold ${stokColor}">${parseFloat(item.stok_aktual || 0)} ${item.satuan}</span> ${warningHtml}</span>
+                                    <div class="flex items-center flex-wrap gap-2">
+                                        <span class="text-sm font-bold text-slate-800">${item.nama_barang}</span>
+                                        ${overLimitBadge}
+                                    </div>
+                                    <span class="text-[10px] font-medium text-slate-500 mt-0.5 flex flex-wrap items-center gap-1">Stok Gudang: <span class="font-bold ${stokColor}">${parseFloat(item.stok_aktual || 0)} ${item.satuan}</span> ${warningHtml}</span>
                                 </div>
-                                <span class="text-xs font-bold text-slate-700">${parseFloat(item.jumlah)} <span class="text-[10px] text-slate-400 font-medium ml-1">${item.satuan}</span></span>
+                                <div class="text-right flex flex-col items-end">
+                                    <span class="text-sm font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-3 py-1 rounded-lg shadow-sm whitespace-nowrap">${parseFloat(item.jumlah)} <span class="text-[10px] font-semibold text-emerald-500 ml-0.5">${item.satuan}</span></span>
+                                </div>
                             </div>
                         `;
                     });
@@ -274,12 +408,12 @@ export function renderDetailModal(req, userRole) {
             });
 
             bodyHtml += `
-                <div class="border border-emerald-200/60 rounded-xl overflow-hidden bg-white shadow-sm mb-4 last:mb-0 transition-all hover:shadow-md">
-                    <div class="bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2.5 border-b border-emerald-700/50 flex items-center gap-2">
-                        <i class="fas fa-building text-emerald-200 text-xs"></i>
-                        <h3 class="text-white font-bold text-sm tracking-wide">${proj.nama_proyek}</h3>
+                <div class="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm mb-4 last:mb-0">
+                    <div class="bg-slate-50 px-4 py-3 border-b border-slate-200 flex items-center gap-2">
+                        <i class="fas fa-building text-slate-500 text-sm"></i>
+                        <h3 class="text-slate-800 font-bold text-sm tracking-wide">${proj.nama_proyek}</h3>
                     </div>
-                    <div class="p-3 px-4">
+                    <div class="p-2">
                         ${itemsHtml}
                     </div>
                 </div>
@@ -287,189 +421,56 @@ export function renderDetailModal(req, userRole) {
         });
     }
 
-    if (req.keterangan) {
-        bodyHtml += `
-            <div class="mt-4 p-4 bg-white rounded-lg border border-slate-200 shadow-sm">
-                <h4 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2"><i class="fas fa-comment-dots mr-1"></i> Catatan Pemohon</h4>
-                <p class="text-sm text-slate-700 italic font-medium">${req.keterangan}</p>
-            </div>
-        `;
-    }
+    elModalBody.innerHTML = bodyHtml || '<p class="text-sm text-slate-500 text-center py-4">Tidak ada detail item.</p>';
 
-    modalBody.innerHTML = bodyHtml || '<p class="text-sm text-slate-500 text-center py-4">Tidak ada detail item.</p>';
-
-    if (timelineContainer) {
-        const formatTimelineDate = (dateStr) => {
-            if (!dateStr) return '';
-            const d = new Date(dateStr);
-            const months = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
-            const pad = (n) => n.toString().padStart(2, '0');
-            return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()} | ${pad(d.getHours())}.${pad(d.getMinutes())}`;
-        };
-
-        const logsMap = {};
-        if (req.status_logs) {
-            req.status_logs.forEach(log => {
-                logsMap[log.status] = {
-                    date: formatTimelineDate(log.created_at),
-                    user: log.nama_pengubah || '',
-                    note: log.keterangan || ''
-                };
-            });
-        }
-
+    // 6. Action Buttons in Footer
+    if (elActions) {
+        let actionsHtml = '';
         const isAuthorized = userRole && ['gudang', 'admin', 'purchasing'].includes(userRole.toLowerCase());
 
-        let timelineSteps = [];
-
-        // 1. Dibuat
-        timelineSteps.push({
-            id: 'created',
-            label: 'Permintaan Dibuat',
-            date: logsMap['pending'] ? logsMap['pending'].date : formatTimelineDate(req.created_at),
-            user: logsMap['pending'] ? logsMap['pending'].user : (req.pemohon_nama || 'Pemohon'),
-            active: true,
-            color: 'text-slate-800',
-            dot: 'bg-slate-800',
-            actions: ''
-        });
-
-        // If rejected
-        if (req.status === 'ditolak') {
-            timelineSteps.push({
-                id: 'rejected',
-                label: 'Permintaan Ditolak',
-                date: logsMap['ditolak'] ? logsMap['ditolak'].date : formatTimelineDate(req.updated_at),
-                user: logsMap['ditolak'] ? logsMap['ditolak'].user : '',
-                note: logsMap['ditolak'] ? logsMap['ditolak'].note : '',
-                active: true,
-                color: 'text-rose-600',
-                dot: 'bg-rose-500',
-                actions: ''
-            });
-        } else {
-            // 2. Diterima Gudang
-            const isApproved = req.status === 'disetujui' || req.status === 'diproses' || req.status === 'selesai';
-            let actionsDiterima = '';
-            if (req.status === 'pending' && isAuthorized) {
-                actionsDiterima = `
-                    <div class="mt-2.5 flex items-center gap-2">
-                        <button type="button" data-id="${req.id}" data-action="disetujui" class="btn-change-status px-3 py-1.5 text-[10px] font-bold text-white bg-emerald-500 hover:bg-emerald-600 rounded shadow-sm focus:outline-none transition-colors">Terima</button>
-                        <button type="button" data-id="${req.id}" data-action="ditolak" class="btn-change-status px-3 py-1.5 text-[10px] font-bold text-white bg-rose-500 hover:bg-rose-600 rounded shadow-sm focus:outline-none transition-colors">Tolak</button>
-                    </div>
+        if (isAuthorized) {
+            if (req.status === 'pending') {
+                actionsHtml += `
+                    <button type="button" data-id="${req.id}" data-action="ditolak" class="btn-change-status px-5 py-2 text-sm font-bold text-rose-600 bg-rose-50 border border-rose-200 hover:bg-rose-500 hover:text-white rounded-xl shadow-sm focus:outline-none transition-all flex items-center gap-2">
+                        <i class="fas fa-times"></i> Tolak
+                    </button>
+                    <button type="button" data-id="${req.id}" data-action="disetujui" class="btn-change-status px-5 py-2 text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 border border-emerald-600 rounded-xl shadow-sm shadow-emerald-600/30 focus:outline-none transition-all flex items-center gap-2">
+                        <i class="fas fa-check"></i> Terima Permintaan
+                    </button>
+                `;
+            } else if (req.status === 'disetujui') {
+                actionsHtml += `
+                    <button type="button" data-id="${req.id}" data-action="diproses" class="btn-change-status px-5 py-2 text-sm font-bold text-white bg-cyan-500 hover:bg-cyan-600 border border-cyan-500 rounded-xl shadow-sm shadow-cyan-500/30 focus:outline-none transition-all flex items-center gap-2">
+                        <i class="fas fa-cog"></i> Proses Pengiriman
+                    </button>
+                `;
+            } else if (req.status === 'diproses') {
+                actionsHtml += `
+                    <button type="button" data-id="${req.id}" data-action="selesai" class="btn-change-status px-5 py-2 text-sm font-bold text-white bg-emerald-500 hover:bg-emerald-600 border border-emerald-500 rounded-xl shadow-sm shadow-emerald-500/30 focus:outline-none transition-all flex items-center gap-2">
+                        <i class="fas fa-clipboard-check"></i> Tandai Selesai (Diterima Lapangan)
+                    </button>
                 `;
             }
-            timelineSteps.push({
-                id: 'approved',
-                label: 'Permintaan diterima oleh gudang',
-                date: isApproved ? (logsMap['disetujui'] ? logsMap['disetujui'].date : formatTimelineDate(req.updated_at)) : '',
-                user: isApproved && logsMap['disetujui'] ? logsMap['disetujui'].user : '',
-                active: isApproved,
-                color: isApproved ? 'text-slate-800' : 'text-slate-400',
-                dot: isApproved ? 'bg-slate-800' : 'bg-slate-200',
-                actions: actionsDiterima
-            });
 
-            // 3. Diproses
-            const isProcessed = req.status === 'diproses' || req.status === 'selesai';
-            let actionsDiproses = '';
-            if (req.status === 'disetujui' && isAuthorized) {
-                actionsDiproses = `
-                    <div class="mt-2.5">
-                        <button type="button" data-id="${req.id}" data-action="diproses" class="btn-change-status px-3 py-1.5 text-[10px] font-bold text-white bg-cyan-500 hover:bg-cyan-600 rounded shadow-sm focus:outline-none transition-colors w-full sm:w-auto">Proses Sekarang</button>
-                    </div>
-                `;
-            }
-            timelineSteps.push({
-                id: 'processed',
-                label: 'Permintaan sedang diproses oleh gudang',
-                date: isProcessed ? (logsMap['diproses'] ? logsMap['diproses'].date : formatTimelineDate(req.updated_at)) : '',
-                user: isProcessed && logsMap['diproses'] ? logsMap['diproses'].user : '',
-                active: isProcessed,
-                color: isProcessed ? 'text-slate-800' : 'text-slate-400',
-                dot: isProcessed ? 'bg-slate-800' : 'bg-slate-200',
-                actions: actionsDiproses
-            });
-
-            // 4. Selesai
-            const isCompleted = req.status === 'selesai';
-            let actionsSelesai = '';
-            if (req.status === 'diproses' && isAuthorized) {
-                actionsSelesai = `
-                    <div class="mt-2.5">
-                        <button type="button" data-id="${req.id}" data-action="selesai" class="btn-change-status px-3 py-1.5 text-[10px] font-bold text-white bg-emerald-500 hover:bg-emerald-600 rounded shadow-sm focus:outline-none transition-colors w-full sm:w-auto">Tandai Diterima di Lapangan</button>
-                    </div>
-                `;
-            }
-            timelineSteps.push({
-                id: 'completed',
-                label: 'Permintaan selesai (Telah diterima di lapangan)',
-                date: isCompleted ? (logsMap['selesai'] ? logsMap['selesai'].date : formatTimelineDate(req.updated_at)) : '',
-                user: isCompleted && logsMap['selesai'] ? logsMap['selesai'].user : '',
-                active: isCompleted,
-                color: isCompleted ? 'text-emerald-600' : 'text-slate-400',
-                dot: isCompleted ? 'bg-emerald-500' : 'bg-slate-200',
-                actions: actionsSelesai
-            });
-        }
-
-        let timelineHtml = '';
-        timelineSteps.forEach((step, idx) => {
-            const isLast = idx === timelineSteps.length - 1;
-            const titleColor = step.color || 'text-slate-400';
-            const dotColor = step.dot || 'bg-slate-200';
-            const titleFont = step.active ? 'font-bold' : 'font-medium';
-            
-            timelineHtml += `
-                <div class="relative pl-6 pb-6 last:pb-0">
-                    <!-- Line -->
-                    ${!isLast ? `<div class="absolute left-[3px] top-2 bottom-[-14px] w-0.5 bg-slate-200"></div>` : ''}
-                    <!-- Dot -->
-                    <div class="absolute -left-[4.5px] top-1.5 w-3.5 h-3.5 rounded-full border-2 border-white shadow-sm z-10 ${dotColor}"></div>
-                    <!-- Content -->
-                    <div class="pt-0.5">
-                        <h4 class="text-xs ${titleFont} ${titleColor}">${step.label}</h4>
-                        ${step.date ? `<p class="text-[10px] text-slate-500 font-semibold mt-1">${step.date}</p>` : ''}
-                        ${step.user ? `<p class="text-[10px] text-slate-400 mt-0.5"><i class="fas fa-user mr-1"></i>${step.user}</p>` : ''}
-                        ${step.note && step.id === 'rejected' ? `<p class="text-[10px] text-rose-500 italic mt-0.5">${step.note}</p>` : ''}
-                        ${step.actions || ''}
-                    </div>
-                </div>
-            `;
-        });
-        timelineContainer.innerHTML = timelineHtml;
-
-        // Auto-Procure Button Logic
-        if (isAuthorized && (req.status === 'pending' || req.status === 'disetujui')) {
-            let hasKurang = false;
-            req.projects.forEach(proj => {
-                proj.items.forEach(item => {
-                    if (parseFloat(item.stok_aktual || 0) < parseFloat(item.jumlah)) hasKurang = true;
+            // Auto-Procure Logic
+            if (req.status === 'pending' || req.status === 'disetujui') {
+                let hasKurang = false;
+                req.projects.forEach(proj => {
+                    proj.items.forEach(item => {
+                        if (parseFloat(item.stok_aktual || 0) < parseFloat(item.jumlah)) hasKurang = true;
+                    });
                 });
-            });
 
-            if (hasKurang) {
-                // Remove existing auto procure container if any
-                const existingBtn = document.getElementById('auto-procure-container');
-                if (existingBtn) existingBtn.remove();
-                
-                const btnHtml = `
-                    <div id="auto-procure-container" class="mt-6 pt-4 border-t border-slate-100 flex justify-end">
-                        <button type="button" data-id="${req.id}" class="btn-auto-procure px-4 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition-colors flex items-center gap-2">
-                            <i class="fas fa-shopping-cart"></i>
-                            <span>Ajukan Pengadaan Otomatis</span>
+                if (hasKurang) {
+                    actionsHtml = `
+                        <button type="button" data-id="${req.id}" class="btn-auto-procure px-5 py-2 text-sm font-bold text-indigo-600 bg-indigo-50 border border-indigo-200 hover:bg-indigo-600 hover:text-white rounded-xl shadow-sm focus:outline-none transition-all flex items-center gap-2 mr-auto order-first sm:order-none">
+                            <i class="fas fa-shopping-cart"></i> Ajukan Pengadaan
                         </button>
-                    </div>
-                `;
-                timelineContainer.parentElement.insertAdjacentHTML('beforeend', btnHtml);
-            } else {
-                const existingBtn = document.getElementById('auto-procure-container');
-                if (existingBtn) existingBtn.remove();
+                    ` + actionsHtml;
+                }
             }
-        } else {
-            const existingBtn = document.getElementById('auto-procure-container');
-            if (existingBtn) existingBtn.remove();
         }
+        elActions.innerHTML = actionsHtml;
     }
 }
 
@@ -519,6 +520,15 @@ export function renderFormProjectBlocks(projectRows, projects) {
                     ? '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-600 border border-blue-100 uppercase">Bahan</span>'
                     : '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-600 border border-purple-100 uppercase">Alat</span>';
 
+                const sisaVolumeVal = parseFloat(item.sisa_volume || 0);
+                const isOverLimit = parseFloat(item.jumlah) > Math.max(0, sisaVolumeVal);
+                const inputClass = isOverLimit 
+                    ? 'border-red-500 focus:border-red-500 bg-red-50' 
+                    : 'border-slate-300 focus:border-blue-500 bg-slate-50';
+                const errorDisplay = isOverLimit ? '' : 'hidden';
+                const excess = parseFloat(item.jumlah) - Math.max(0, sisaVolumeVal);
+                const errorText = isOverLimit ? `Over: ${excess}` : '';
+
                 itemsRowsHtml += `
                     <tr class="hover:bg-slate-50 transition-colors">
                         <td class="px-4 py-3 text-center text-xs font-semibold text-slate-500">${itemIdx + 1}</td>
@@ -533,7 +543,10 @@ export function renderFormProjectBlocks(projectRows, projects) {
                             ${categoryBadge}
                         </td>
                         <td class="px-4 py-3 w-28 text-center">
-                            <input type="number" step="0.01" min="0.01" value="${item.jumlah}" data-block-id="${row.id}" data-idx="${itemIdx}" class="input-qty w-20 px-2 py-1 text-center font-bold text-slate-800 bg-slate-50 border border-slate-300 rounded focus:outline-none focus:border-blue-500">
+                            <div class="flex flex-col items-center">
+                                <input type="number" step="0.01" min="0.01" value="${item.jumlah}" data-block-id="${row.id}" data-idx="${itemIdx}" class="input-qty w-20 px-2 py-1 text-center font-bold text-slate-800 border rounded focus:outline-none transition-colors ${inputClass}">
+                                <span class="error-qty text-[10px] text-red-500 font-semibold mt-1 ${errorDisplay}">${errorText}</span>
+                            </div>
                         </td>
                         <td class="px-4 py-3 w-28 text-center flex flex-col items-center justify-center">
                             <span class="text-sm font-bold ${(item.sisa_volume < 0) ? 'text-red-600' : 'text-slate-500'}">${item.sisa_volume ?? '0'}</span>
