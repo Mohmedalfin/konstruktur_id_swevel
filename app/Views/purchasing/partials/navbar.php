@@ -14,8 +14,8 @@ $firstSegment = service('uri')->getSegment(1);
 $isProfilePage = $firstSegment === 'profile';
 
 $accountTriggerClass = $isProfilePage
-    ? 'hs-dropdown-toggle w-full h-14 p-2 md:w-auto md:px-4 md:justify-center flex items-center gap-3 text-sm bg-white text-slate-800 hover:bg-white/95 focus:outline-hidden focus:bg-white transition-colors duration-200'
-    : 'hs-dropdown-toggle w-full h-14 p-2 md:w-auto md:px-4 md:justify-center flex items-center gap-3 text-sm text-navbar-foreground hover:bg-navbar-hover focus:outline-hidden focus:bg-navbar-focus transition-colors duration-200';
+    ? 'hs-dropdown-toggle w-full h-[72px] p-2 md:w-auto md:px-4 md:justify-center flex items-center gap-3 text-sm bg-white text-slate-800 hover:bg-white/95 focus:outline-hidden focus:bg-white transition-colors duration-200'
+    : 'hs-dropdown-toggle w-full h-[72px] p-2 md:w-auto md:px-4 md:justify-center flex items-center gap-3 text-sm text-navbar-foreground hover:bg-navbar-hover focus:outline-hidden focus:bg-navbar-focus transition-colors duration-200';
 
 $accountIconWrapperClass = $isProfilePage
     ? 'w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center'
@@ -35,9 +35,9 @@ $accountChevronClass = $isProfilePage
 ?>
 <!-- ========== PURCHASING HEADER ========== -->
 <header class="flex flex-wrap md:justify-start md:flex-nowrap z-50 bg-navbar border-b border-navbar-line sticky top-0 transition-all duration-200 ease-in-out">
-  <nav class="relative max-w-[85rem] w-full mx-auto md:flex md:items-center md:justify-between md:gap-3 py-2 px-4 sm:px-6 lg:px-8">
+  <nav class="relative max-w-[85rem] w-full mx-auto md:flex md:items-center md:justify-between md:gap-3 px-4 sm:px-6 lg:px-8">
     
-    <div class="flex justify-between items-center gap-x-1">
+    <div class="flex justify-between items-center gap-x-1 h-[72px]">
       <a class="flex-none font-semibold text-xl text-foreground focus:outline-hidden focus:opacity-80" href="<?= base_url('purchasing') ?>" aria-label="Brand">
         <div class="flex items-center gap-2">
           <img src="<?= base_url('assets/images/logoKonstruktor.png') ?>" alt="Kontraktor.id Logo"
@@ -74,7 +74,7 @@ $accountChevronClass = $isProfilePage
               <a class="<?= get_nav_class('purchasing/purchase-request') ?>" href="<?= base_url('purchasing/purchase-request') ?>"
                 <?= is_nav_active('purchasing/purchase-request') ? 'aria-current="page"' : '' ?>>
                 <svg class="shrink-0 size-4 me-3 md:me-2 block md:hidden" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-                Purchase Request
+                Request
               </a>
 
               <a class="<?= get_nav_class('purchasing/po-tracking') ?>" href="<?= base_url('purchasing/po-tracking') ?>"
@@ -92,7 +92,7 @@ $accountChevronClass = $isProfilePage
               <!-- Dropdown Notifikasi -->
               <div class="hs-dropdown [--strategy:static] md:[--strategy:fixed] [--adaptive:none] md:[--adaptive:adaptive] [--is-collapse:true] md:[--is-collapse:false]">
                   <button id="hs-header-notification-dropdown" type="button"
-                      class="hs-dropdown-toggle relative w-full h-14 p-2 md:w-auto md:px-4 md:justify-center flex items-center gap-3 text-sm text-navbar-foreground hover:bg-navbar-hover focus:outline-none focus:bg-navbar-focus transition-colors duration-200"
+                      class="hs-dropdown-toggle relative w-full h-[72px] p-2 md:w-auto md:px-4 md:justify-center flex items-center gap-3 text-sm text-navbar-foreground hover:bg-navbar-hover focus:outline-none focus:bg-navbar-focus transition-colors duration-200"
                       aria-haspopup="menu" aria-expanded="false" aria-label="Notifikasi">
                       <div class="shrink-0 relative">
                           <i class="fa-regular fa-bell text-white text-[1.1rem]"></i>
