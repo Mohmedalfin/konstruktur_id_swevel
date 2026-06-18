@@ -491,6 +491,8 @@ class PermintaanService
         $this->permintaanModel->delete($id);
 
         $db->transComplete();
+
+        return $db->transStatus();
     }
 
     /**
