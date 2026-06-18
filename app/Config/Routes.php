@@ -199,6 +199,13 @@ $routes->group('api', ['namespace' => 'App\Controllers\Api'], function ($routes)
     $routes->delete('permintaan/delete/(:num)', '\App\Controllers\menu\PermintaanController::destroy/$1');
     $routes->get('permintaan/projects', '\App\Controllers\menu\PermintaanController::getProjects');
     $routes->get('permintaan/rap-items/(:num)', '\App\Controllers\menu\PermintaanController::getRapItems/$1');
+
+    // Notifikasi API
+    $routes->get('notifications', 'NotifikasiApiController::index');
+    $routes->get('notifications/unread', 'NotifikasiApiController::getUnread');
+    $routes->post('notifications/mark-read/(:num)', 'NotifikasiApiController::markAsRead/$1');
+    $routes->post('notifications/mark-all-read', 'NotifikasiApiController::markAllAsRead');
+    $routes->delete('notifications/delete/(:num)', 'NotifikasiApiController::delete/$1');
 });
 
 // Modul Gudang Web Routes
@@ -209,4 +216,5 @@ $routes->group('gudang', function($routes) {
     $routes->get('stok', '\App\Controllers\gudang\GudangController::stok');
     $routes->get('pengadaan', '\App\Controllers\gudang\GudangController::pengadaan');
     $routes->get('riwayat', '\App\Controllers\gudang\GudangController::riwayat');
+    $routes->get('notifikasi', '\App\Controllers\gudang\GudangController::notifikasi');
 });

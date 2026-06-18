@@ -4,6 +4,7 @@ namespace App\Controllers\gudang;
 
 use App\Controllers\BaseController;
 use App\Services\PengadaanService;
+use App\Services\NotificationService;
 use CodeIgniter\HTTP\ResponseInterface;
 
 class PengadaanController extends BaseController
@@ -176,6 +177,29 @@ class PengadaanController extends BaseController
             }
 
             $result = $this->pengadaanService->createManualPurchaseRequest($idPerusahaan, $userId, $items, $keterangan);
+
+            // === TRIGGER NOTIFIKASI: Beritahu purchasing ada PR manual baru dari Gudang ===
+            if (($result['status'] ?? '') === 'success') {
+                try {
+                    $nomorPR   = $result['pr_number'] ?? '-';
+                    $buatOleh  = session()->get('nama_pengguna') ?? session()->get('nama') ?? 'Tim Gudang';
+                    $jumlahItem = count($items);
+
+                    $notifService = new NotificationService();
+                    $notifService->sendToRole(
+                        'purchasing',
+                        'Purchase Request Baru 📋',
+                        "{$buatOleh} mengajukan PR {$nomorPR} dengan {$jumlahItem} item barang yang perlu diproses.",
+                        '/gudang/pengadaan',
+                        'fa-solid fa-file-invoice',
+                        'blue',
+                        'gudang'
+                    );
+                } catch (\Throwable $notifEx) {
+                    log_message('warning', '[PengadaanController::store] Gagal kirim notifikasi: ' . $notifEx->getMessage());
+                }
+            }
+            // === END TRIGGER NOTIFIKASI ===
 
             return $this->response->setJSON($result);
             

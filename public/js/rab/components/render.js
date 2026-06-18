@@ -301,7 +301,6 @@ export function renderReadonly(data) {
                         prevDepth = parseInt(prev.dataset.depth || '0', 10);
                     }
 
-                    // Calculate "Family Height" (deepest child's relative depth from parent)
                     let familyHeight = 0;
                     if (item._dragChildren && item._dragChildren.length > 0) {
                         item._dragChildren.forEach(child => {
@@ -310,16 +309,12 @@ export function renderReadonly(data) {
                         });
                     }
 
-                    // Max absolute depth is 2 (level 3: 1.1.1)
-                    // The parent's max depth is (2 - familyHeight) to ensure the deepest child stays <= 2
-                    // AND at most previous sibling's depth + 1
                     const maxAllowedForFamily = 2 - familyHeight;
                     const maxDepth = Math.min(maxAllowedForFamily, prevDepth + 1);
 
                     let targetDepth = startDepth + deltaDepth;
                     let clampedDepth = Math.max(0, Math.min(targetDepth, maxDepth));
 
-                    // Visual feedback colors
                     let indicatorClass = '';
                     let bgColor = '';
 

@@ -4,6 +4,7 @@ namespace App\Controllers\menu;
 
 use App\Controllers\BaseController;
 use App\Services\PermintaanService;
+use App\Services\NotificationService;
 use CodeIgniter\HTTP\ResponseInterface;
 
 class PermintaanController extends BaseController
@@ -140,6 +141,31 @@ class PermintaanController extends BaseController
 
             $requestId = $this->permintaanService->storeRequest((int)$pemohonId, $payload);
 
+            // === TRIGGER NOTIFIKASI: Beritahu divisi Gudang ada permintaan baru ===
+            try {
+                // Ambil info permintaan yang baru dibuat untuk detail notif
+                $db = \Config\Database::connect();
+                $permintaan = $db->table('permintaan')->where('id', $requestId)->get()->getRowArray();
+                $pemohonNama = session()->get('nama_pengguna') ?? session()->get('nama') ?? 'Tim Proyek';
+
+                $jumlahItem = count($payload['items']);
+                $nomorPermintaan = $permintaan['nomor_permintaan'] ?? 'REQ-' . $requestId;
+
+                $notifService = new NotificationService();
+                $notifService->sendToRole(
+                    'gudang',
+                    'Permintaan Material Baru',
+                    "{$pemohonNama} mengajukan permintaan {$nomorPermintaan} dengan {$jumlahItem} item material.",
+                    '/gudang/permintaan',
+                    'fa-solid fa-box-open',
+                    'blue',
+                    'proyek'
+                );
+            } catch (\Throwable $notifEx) {
+                log_message('warning', '[PermintaanController::store] Gagal kirim notifikasi: ' . $notifEx->getMessage());
+            }
+            // === END TRIGGER NOTIFIKASI ===
+
             return $this->response->setJSON([
                 'status'  => 'success',
                 'message' => 'Permintaan item berhasil dibuat.',
@@ -185,9 +211,48 @@ class PermintaanController extends BaseController
                 ]);
             }
 
+            // Ambil info permintaan SEBELUM update untuk notifikasi ke pemohon
+            $db = \Config\Database::connect();
+            $permintaan = $db->table('permintaan p')
+                ->select('p.*, u.nama_pengguna as pemohon_nama')
+                ->join('pengguna u', 'u.id_pengguna = p.pemohon_id', 'left')
+                ->where('p.id', $id)
+                ->get()->getRowArray();
+
             $success = $this->permintaanService->updateStatus($id, $newStatus);
 
             if ($success) {
+                // === TRIGGER NOTIFIKASI: Kirim update status ke pemohon ===
+                try {
+                    $nomorPermintaan = $permintaan['nomor_permintaan'] ?? 'REQ-' . $id;
+                    $pemohonId       = $permintaan['pemohon_id'] ?? null;
+                    $prosesOleh      = session()->get('nama_pengguna') ?? session()->get('nama') ?? 'Tim Gudang';
+
+                    $statusPesan = [
+                        'disetujui' => ['judul' => 'Permintaan Disetujui ✅',    'pesan' => "{$nomorPermintaan} telah disetujui oleh {$prosesOleh}. Material sedang disiapkan.",         'ikon' => 'fa-solid fa-circle-check',  'warna' => 'green'],
+                        'diproses'  => ['judul' => 'Permintaan Sedang Diproses 🔄', 'pesan' => "{$nomorPermintaan} sedang diproses oleh gudang. Stok material telah dipotong.",       'ikon' => 'fa-solid fa-rotate',        'warna' => 'orange'],
+                        'ditolak'   => ['judul' => 'Permintaan Ditolak ❌',       'pesan' => "{$nomorPermintaan} ditolak oleh {$prosesOleh}. Silakan hubungi tim gudang untuk info lebih lanjut.", 'ikon' => 'fa-solid fa-circle-xmark',  'warna' => 'red'],
+                        'selesai'   => ['judul' => 'Permintaan Selesai 🎉',       'pesan' => "{$nomorPermintaan} telah selesai dan material sudah diterima di lapangan.",             'ikon' => 'fa-solid fa-flag-checkered','warna' => 'green'],
+                    ];
+
+                    if (isset($statusPesan[$newStatus]) && $pemohonId) {
+                        $info = $statusPesan[$newStatus];
+                        $notifService = new NotificationService();
+                        $notifService->sendToUser(
+                            (int)$pemohonId,
+                            $info['judul'],
+                            $info['pesan'],
+                            '/permintaan',
+                            $info['ikon'],
+                            $info['warna'],
+                            'gudang'
+                        );
+                    }
+                } catch (\Throwable $notifEx) {
+                    log_message('warning', '[PermintaanController::updateStatus] Gagal kirim notifikasi: ' . $notifEx->getMessage());
+                }
+                // === END TRIGGER NOTIFIKASI ===
+
                 return $this->response->setJSON([
                     'status'  => 'success',
                     'message' => 'Status permintaan berhasil diperbarui.',
@@ -275,6 +340,31 @@ class PermintaanController extends BaseController
             $pengadaanService = new \App\Services\PengadaanService();
             
             $result = $pengadaanService->createAutoDraftFromPermintaan($id, (int)$userId);
+
+            // === TRIGGER NOTIFIKASI: Beritahu purchasing ada PR auto-draft baru ===
+            if (($result['status'] ?? '') === 'success') {
+                try {
+                    $db = \Config\Database::connect();
+                    $permintaan = $db->table('permintaan')->where('id', $id)->get()->getRowArray();
+                    $nomorPermintaan = $permintaan['nomor_permintaan'] ?? 'REQ-' . $id;
+                    $nomorPR = $result['pr_number'] ?? '-';
+                    $prosesOleh = session()->get('nama_pengguna') ?? session()->get('nama') ?? 'Tim Gudang';
+
+                    $notifService = new NotificationService();
+                    $notifService->sendToRole(
+                        'purchasing',
+                        'Purchase Request Baru (Auto) 📋',
+                        "{$prosesOleh} membuat PR otomatis {$nomorPR} dari kekurangan stok permintaan {$nomorPermintaan}.",
+                        '/gudang/pengadaan',
+                        'fa-solid fa-cart-plus',
+                        'purple',
+                        'gudang'
+                    );
+                } catch (\Throwable $notifEx) {
+                    log_message('warning', '[PermintaanController::autoProcure] Gagal kirim notifikasi: ' . $notifEx->getMessage());
+                }
+            }
+            // === END TRIGGER NOTIFIKASI ===
 
             return $this->response->setJSON($result);
         } catch (\InvalidArgumentException $e) {

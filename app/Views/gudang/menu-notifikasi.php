@@ -1,4 +1,4 @@
-<?= $this->extend($layout ?? 'layouts/app') ?>
+<?= $this->extend('gudang/layouts/main') ?>
 <?= $this->section('content') ?>
 
 <div class="mx-auto max-w-5xl">    

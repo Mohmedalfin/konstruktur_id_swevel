@@ -50,6 +50,11 @@ class GudangController extends BaseController
         return view('gudang/menu-riwayat', ['activeMenu' => 'riwayat', 'topbarTitle' => 'Gudang - Riwayat']);
     }
 
+    public function notifikasi()
+    {
+        return view('gudang/menu-notifikasi', ['activeMenu' => 'notifikasi', 'topbarTitle' => 'Pusat Notifikasi']);
+    }
+
     public function getDashboardData(): \CodeIgniter\HTTP\ResponseInterface
     {
         try {

@@ -7,52 +7,52 @@
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <!-- Total -->
         <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-4 transition-all duration-200 hover:shadow-md">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-                    <i class="fas fa-boxes text-lg"></i>
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                    <i class="fas fa-boxes text-xl"></i>
                 </div>
                 <div>
-                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Item</p>
-                    <h3 id="stat-total" class="text-xl font-bold text-slate-800 mt-0.5">7</h3>
+                    <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">Total Item</p>
+                    <h3 id="stat-total" class="text-2xl font-black text-slate-800 leading-none">7</h3>
                 </div>
             </div>
         </div>
 
         <!-- Stok Aman -->
         <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-4 transition-all duration-200 hover:shadow-md">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-                    <i class="fas fa-check-circle text-lg"></i>
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                    <i class="fas fa-check-circle text-xl"></i>
                 </div>
                 <div>
-                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Stok Aman</p>
-                    <h3 id="stat-aman" class="text-xl font-bold text-slate-800 mt-0.5">3</h3>
+                    <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">Stok Aman</p>
+                    <h3 id="stat-aman" class="text-2xl font-black text-slate-800 leading-none">3</h3>
                 </div>
             </div>
         </div>
 
         <!-- Stok Kritis -->
         <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-4 transition-all duration-200 hover:shadow-md">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
-                    <i class="fas fa-exclamation-triangle text-lg"></i>
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                    <i class="fas fa-exclamation-triangle text-xl"></i>
                 </div>
                 <div>
-                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Stok Kritis</p>
-                    <h3 id="stat-kritis" class="text-xl font-bold text-slate-800 mt-0.5">3</h3>
+                    <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">Stok Kritis</p>
+                    <h3 id="stat-kritis" class="text-2xl font-black text-slate-800 leading-none">3</h3>
                 </div>
             </div>
         </div>
 
         <!-- Stok Kosong -->
         <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-4 transition-all duration-200 hover:shadow-md">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg bg-red-50 text-red-600 flex items-center justify-center shrink-0">
-                    <i class="fas fa-times-circle text-lg"></i>
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-red-50 text-red-600 flex items-center justify-center shrink-0">
+                    <i class="fas fa-times-circle text-xl"></i>
                 </div>
                 <div>
-                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Stok Kosong</p>
-                    <h3 id="stat-kosong" class="text-xl font-bold text-slate-800 mt-0.5">1</h3>
+                    <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">Stok Kosong</p>
+                    <h3 id="stat-kosong" class="text-2xl font-black text-slate-800 leading-none">1</h3>
                 </div>
             </div>
         </div>

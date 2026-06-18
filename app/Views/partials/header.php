@@ -134,7 +134,7 @@ $projectListMenuClass = $isProjectListPage
                                     aria-haspopup="menu" aria-expanded="false" aria-label="Notifikasi">
                                     <div class="shrink-0 relative">
                                         <i class="fa-regular fa-bell text-white text-[1.1rem]"></i>
-                                        <span class="absolute top-0 right-0 inline-flex items-center justify-center w-3.5 h-3.5 text-[9px] font-bold text-white bg-red-500 border border-primary rounded-full -mt-1 -mr-1.5">3</span>
+                                        <span class="notif-badge-count absolute top-0 right-0 inline-flex items-center justify-center w-3.5 h-3.5 text-[9px] font-bold text-white bg-red-500 border border-primary rounded-full -mt-1 -mr-1.5 hidden">0</span>
                                     </div>
                                     <span class="md:hidden">Notifikasi</span>
                                 </button>
@@ -142,20 +142,13 @@ $projectListMenuClass = $isProjectListPage
                                 <div class="hs-dropdown-menu transition-[opacity,margin] duration-[150ms] hs-dropdown-open:opacity-100 opacity-0 absolute right-0 md:right-auto md:left-auto md:translate-x-[-70%] w-80 hidden z-50 top-full mt-2 bg-white border border-gray-200 shadow-md rounded-xl" role="menu" aria-orientation="vertical" aria-labelledby="hs-header-notification-dropdown">
                                     <div class="p-3 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-xl">
                                         <h3 class="text-sm font-bold text-gray-800">Notifikasi</h3>
-                                        <span class="text-xs text-red-600 bg-red-50 px-2 py-0.5 rounded-full font-semibold">Baru</span>
+                                        <span class="notif-header-count text-xs text-red-600 bg-red-50 px-2 py-0.5 rounded-full font-semibold">0 Baru</span>
                                     </div>
-                                    <div class="max-h-72 overflow-y-auto bg-white [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:bg-gray-300">
-                                        <a class="p-3 flex items-start gap-3 hover:bg-gray-50 bg-blue-50/20 border-b border-gray-100 transition-colors" href="#">
-                                            <div class="shrink-0 p-2 bg-purple-100 text-purple-600 rounded-full mt-0.5">
-                                                <i class="fa-solid fa-cart-shopping w-3.5 h-3.5 text-center flex items-center justify-center"></i>
-                                            </div>
-                                            <div class="flex-1">
-                                                <p class="text-sm text-gray-800 font-bold">Pengajuan Purchasing</p>
-                                                <p class="text-xs text-gray-500 mt-0.5 line-clamp-2">PO-2023-001 telah disetujui oleh Direktur dan siap diproses.</p>
-                                                <p class="text-[10px] text-[#3b82f6] font-semibold mt-1">1 jam yang lalu</p>
-                                            </div>
-                                            <div class="shrink-0 w-2 h-2 bg-[#3b82f6] rounded-full mt-2"></div>
-                                        </a>
+                                    <div class="notif-dropdown-list max-h-72 overflow-y-auto bg-white [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:bg-gray-300">
+                                        <div class="p-4 text-center text-gray-500">
+                                            <i class="fa-solid fa-circle-notch fa-spin text-2xl mb-2 text-gray-300"></i>
+                                            <p class="text-xs">Memuat notifikasi...</p>
+                                        </div>
                                     </div>
                                     <div class="p-2 border-t border-gray-100 text-center bg-gray-50 rounded-b-xl">
                                         <a class="text-xs font-bold text-[#3b82f6] hover:text-[#2563eb] flex items-center justify-center gap-1 transition-colors" href="#">
@@ -221,3 +214,4 @@ $projectListMenuClass = $isProjectListPage
 <!-- ========== END HEADER ========== -->
 
 <script src="<?= base_url('assets/js/partials/header.js') ?>"></script>
+<script src="<?= base_url('js/shared/notification-poll.js') ?>"></script>
