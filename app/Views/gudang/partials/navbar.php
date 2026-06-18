@@ -96,7 +96,7 @@ $accountChevronClass = $isProfilePage
               </a> -->
 
               <!-- Dropdown Notifikasi -->
-              <div class="hs-dropdown [--strategy:static] md:[--strategy:fixed] [--adaptive:none] md:[--adaptive:adaptive] [--is-collapse:true] md:[--is-collapse:false]">
+              <div class="hs-dropdown [--strategy:static] md:[--strategy:fixed] [--adaptive:none] [--is-collapse:true] md:[--is-collapse:false]">
                   <button id="hs-header-notification-dropdown" type="button"
                       class="hs-dropdown-toggle relative w-full p-2 md:w-auto md:px-4 md:justify-center flex items-center gap-3 text-sm text-navbar-foreground hover:bg-navbar-hover focus:outline-none focus:bg-navbar-focus transition-colors duration-200"
                       aria-haspopup="menu" aria-expanded="false" aria-label="Notifikasi">
@@ -128,7 +128,7 @@ $accountChevronClass = $isProfilePage
               </div>
 
               <!-- Dropdown (User Profile) -->
-              <div class="hs-dropdown [--strategy:static] md:[--strategy:fixed] [--adaptive:none] md:[--adaptive:adaptive] [--is-collapse:true] md:[--is-collapse:false]">
+              <div class="hs-dropdown [--strategy:static] md:[--strategy:fixed] [--adaptive:none] [--is-collapse:true] md:[--is-collapse:false]">
                   <button id="hs-header-base-dropdown" type="button"
                       class="<?= esc($accountTriggerClass) ?>"
                       aria-haspopup="menu" aria-expanded="false" aria-label="Dropdown">
