@@ -1,111 +1,30 @@
-<!DOCTYPE html>
-<html lang="en">
+<?= $this->extend('purchasing/layouts/main') ?>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= esc($title) ?></title>
-    <link href="<?= base_url('assets/css/output.css') ?>" rel="stylesheet">
-    <link rel="stylesheet" href="<?= base_url('assets/fontawesome/css/all.min.css') ?>">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<?= $this->section('styles') ?>
     <style>
-        body { background-color: #f3f4f6; }
-        .nav-item {
-            color: #d1d5db;
-            font-size: 13px;
-            font-weight: 600;
-            padding: 0 24px;
-            display: flex;
-            align-items: center;
-            transition: color 0.2s;
-        }
-        .nav-item:hover { color: white; }
-        .nav-active {
-            background-color: white;
-            color: #111827;
-            font-weight: bold;
-            font-size: 13px;
-            padding: 0 24px;
-            display: flex;
-            align-items: center;
-        }
-        .badge-parsial {
-            background-color: #fef08a; /* yellow-200 */
-            color: #854d0e; /* yellow-800 */
-            border-radius: 9999px;
-            padding: 2px 10px;
-            font-size: 11px;
-            font-weight: bold;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .badge-parsial::before {
-            content: '';
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            background-color: #eab308;
-            border-radius: 50%;
-        }
-        .badge-diproses {
-            background-color: #eff6ff; /* blue-50 */
-            color: #2563eb; /* blue-600 */
-            border-radius: 9999px;
-            padding: 2px 10px;
-            font-size: 11px;
-            font-weight: bold;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .badge-diproses::before {
-            content: '';
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            background-color: #3b82f6;
-            border-radius: 50%;
-        }
-        .badge-selesai {
-            background-color: #bbf7d0; /* green-200 */
-            color: #166534; /* green-800 */
-            border-radius: 9999px;
-            padding: 2px 10px;
-            font-size: 11px;
-            font-weight: bold;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .badge-selesai::before {
-            content: '';
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            background-color: #22c55e;
-            border-radius: 50%;
-        }
-        
         .kpi-card {
             background: white;
-            border-radius: 0.5rem;
+            border-radius: 0.75rem;
             padding: 1.25rem;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+            position: relative;
+            overflow: hidden;
+            transition: box-shadow 0.2s;
+        }
+        .kpi-card:hover {
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
         }
         
         .master-data-card {
             background: white;
-            border-radius: 0.5rem;
+            border-radius: 0.75rem;
             padding: 1.25rem;
-            border: 2px solid #1e293b;
+            border: 1px solid #e2e8f0;
             display: flex;
             align-items: center;
             gap: 1rem;
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
         }
 
         .chart-container {
@@ -132,73 +51,79 @@
             flex-shrink: 0;
         }
     </style>
-</head>
+<?= $this->endSection() ?>
 
-<body class="font-sans antialiased text-sm">
-
-    <!-- Top Navigation & Header Container -->
-    <div class="bg-[#111827] w-full shadow-md">
-        <!-- Navbar -->
-        <?= view('purchasing/partials/navbar', ['activeNav' => 'dashboard']) ?>
-
-        <!-- Title -->
-        <div class="py-12 flex justify-center items-center relative overflow-hidden bg-cover bg-center bg-no-repeat" style="background-image: url('<?= base_url('assets/images/BackgroundTopBar.png') ?>');">
-            <div class="absolute inset-0 bg-[#111827]/80"></div>
-            <h1 class="relative z-10 text-white text-4xl font-bold tracking-widest uppercase">DASHBOARD</h1>
-        </div>
-    </div>
-
-    <!-- Main Content Container -->
-    <div class="max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8 mt-6 pb-12 space-y-6">
+<?= $this->section('content') ?>
+    <div class="space-y-6">
         
         <!-- TOP KPI CARDS -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <!-- Card 1 -->
-            <div class="kpi-card relative">
-                <div class="flex justify-between items-start mb-2">
-                    <h3 class="text-sm font-bold text-[#1e293b]">Total PR Masuk</h3>
-                    <i class="fa-solid fa-money-check-dollar text-[#1e293b] text-xl"></i>
-                </div>
-                <div class="text-3xl font-black text-[#1e293b] mb-2"><?= $pr['total'] ?></div>
-                <div class="text-sm font-semibold text-gray-500">
-                    <?= $pr['menunggu'] ?> Menunggu
+            <div class="kpi-card group">
+                <div class="absolute -right-6 -top-6 w-24 h-24 rounded-full bg-blue-50 transition-transform duration-500 group-hover:scale-110"></div>
+                <div class="relative flex items-start gap-4">
+                    <div class="w-12 h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-money-check-dollar text-xl"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Total PR Masuk</p>
+                        <h3 class="text-3xl font-black text-[#1e293b] mb-2"><?= $pr['total'] ?></h3>
+                        <p class="text-[11px] font-semibold text-gray-500">
+                            <?= $pr['menunggu'] ?> Menunggu
+                        </p>
+                    </div>
                 </div>
             </div>
 
             <!-- Card 2 -->
-            <div class="kpi-card relative">
-                <div class="flex justify-between items-start mb-2">
-                    <h3 class="text-sm font-bold text-[#1e293b]">Total PO Aktif</h3>
-                    <i class="fa-solid fa-file-invoice text-[#1e293b] text-xl"></i>
-                </div>
-                <div class="text-3xl font-black text-[#1e293b] mb-2"><?= $po['total'] ?></div>
-                <div class="flex items-center gap-2">
-                    <span class="bg-[#e0f2fe] text-[#0284c7] px-2 py-1 rounded text-[11px] font-bold"><?= $po['diproses'] ?> Diproses</span>
-                    <span class="bg-[#dcfce3] text-[#166534] px-2 py-1 rounded text-[11px] font-bold"><?= $po['selesai_tiba'] ?> Selesai Tiba</span>
+            <div class="kpi-card group">
+                <div class="absolute -right-6 -top-6 w-24 h-24 rounded-full bg-indigo-50 transition-transform duration-500 group-hover:scale-110"></div>
+                <div class="relative flex items-start gap-4">
+                    <div class="w-12 h-12 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-file-invoice text-xl"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Total PO Aktif</p>
+                        <h3 class="text-3xl font-black text-[#1e293b] mb-2"><?= $po['total'] ?></h3>
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <span class="bg-[#e0f2fe] text-[#0284c7] px-2 py-0.5 rounded text-[10px] font-bold"><?= $po['diproses'] ?> Diproses</span>
+                            <span class="bg-[#dcfce3] text-[#166534] px-2 py-0.5 rounded text-[10px] font-bold"><?= $po['selesai_tiba'] ?> Selesai</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <!-- Card 3 -->
-            <div class="kpi-card relative">
-                <div class="flex justify-between items-start mb-2">
-                    <h3 class="text-sm font-bold text-[#1e293b]">Nilai PO Bulan Ini</h3>
-                    <i class="fa-solid fa-coins text-[#1e293b] text-xl"></i>
-                </div>
-                <div class="text-2xl font-black text-[#1e293b] mb-2">Rp <?= number_format($po['nilai_bulan_ini'], 0, ',', '.') ?></div>
-                <div class="text-sm font-bold <?= $po['persentase_kenaikan'] >= 0 ? 'text-green-500' : 'text-red-500' ?> flex items-center gap-1">
-                    <i class="fa-solid <?= $po['persentase_kenaikan'] >= 0 ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down' ?>"></i> <?= $po['persentase_kenaikan'] >= 0 ? '+' : '' ?><?= $po['persentase_kenaikan'] ?>% dari bulan lalu
+            <div class="kpi-card group">
+                <div class="absolute -right-6 -top-6 w-24 h-24 rounded-full bg-emerald-50 transition-transform duration-500 group-hover:scale-110"></div>
+                <div class="relative flex items-start gap-4">
+                    <div class="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-coins text-xl"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Nilai PO Bulan Ini</p>
+                        <h3 class="text-xl font-black text-[#1e293b] mb-2">Rp <?= number_format($po['nilai_bulan_ini'], 0, ',', '.') ?></h3>
+                        <p class="text-[11px] font-bold <?= $po['persentase_kenaikan'] >= 0 ? 'text-emerald-500' : 'text-rose-500' ?> flex items-center gap-1">
+                            <i class="fa-solid <?= $po['persentase_kenaikan'] >= 0 ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down' ?>"></i> <?= $po['persentase_kenaikan'] >= 0 ? '+' : '' ?><?= $po['persentase_kenaikan'] ?>% dari bulan lalu
+                        </p>
+                    </div>
                 </div>
             </div>
 
             <!-- Card 4 -->
-            <div class="kpi-card relative">
-                <div class="flex justify-between items-start mb-2">
-                    <h3 class="text-sm font-bold text-[#1e293b]">PR Belum Diproses</h3>
-                    <i class="fa-regular fa-clock text-[#1e293b] text-xl"></i>
-                </div>
-                <div class="text-3xl font-black text-[#1e293b] mb-2"><?= $pr['menunggu'] ?></div>
-                <div class="text-sm font-bold text-red-500 bg-red-100 rounded-full px-3 py-1 inline-block w-max">
-                    Perlu perhatian
+            <div class="kpi-card group">
+                <div class="absolute -right-6 -top-6 w-24 h-24 rounded-full bg-amber-50 transition-transform duration-500 group-hover:scale-110"></div>
+                <div class="relative flex items-start gap-4">
+                    <div class="w-12 h-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
+                        <i class="fa-regular fa-clock text-xl"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">PR Belum Diproses</p>
+                        <h3 class="text-3xl font-black text-[#1e293b] mb-2"><?= $pr['menunggu'] ?></h3>
+                        <p class="text-[10px] font-bold text-rose-600 bg-rose-50 border border-rose-100 rounded-full px-2 py-0.5 inline-block">
+                            Perlu perhatian
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -222,19 +147,19 @@
                     </div>
                     <div class="col-span-6 md:col-span-7 flex flex-col justify-center">
                         <div class="legend-item">
-                            <div class="flex items-center"><div class="legend-color bg-[#0ea5e9]"></div> Diproses</div>
+                            <div class="flex items-center"><div class="legend-color bg-blue-500"></div> Diproses</div>
                             <span><?= $pr['diproses'] ?></span>
                         </div>
                         <div class="legend-item">
-                            <div class="flex items-center"><div class="legend-color bg-[#cbd5e1]"></div> Menunggu</div>
+                            <div class="flex items-center"><div class="legend-color bg-purple-500"></div> Menunggu</div>
                             <span><?= $pr['menunggu'] ?></span>
                         </div>
                         <div class="legend-item">
-                            <div class="flex items-center"><div class="legend-color bg-[#f59e0b]"></div> Parsial</div>
+                            <div class="flex items-center"><div class="legend-color bg-amber-500"></div> Parsial</div>
                             <span><?= $pr['parsial'] ?></span>
                         </div>
                         <div class="legend-item">
-                            <div class="flex items-center"><div class="legend-color bg-[#22c55e]"></div> Selesai</div>
+                            <div class="flex items-center"><div class="legend-color bg-emerald-500"></div> Selesai</div>
                             <span><?= $pr['selesai'] ?></span>
                         </div>
                     </div>
@@ -257,15 +182,15 @@
                     </div>
                     <div class="col-span-6 md:col-span-7 flex flex-col justify-center">
                         <div class="legend-item">
-                            <div class="flex items-center"><div class="legend-color bg-[#f59e0b]"></div> Diproses</div>
+                            <div class="flex items-center"><div class="legend-color bg-amber-500"></div> Diproses</div>
                             <span><?= $po['diproses'] ?></span>
                         </div>
                         <div class="legend-item">
-                            <div class="flex items-center"><div class="legend-color bg-[#0ea5e9]"></div> Pengiriman</div>
+                            <div class="flex items-center"><div class="legend-color bg-blue-500"></div> Pengiriman</div>
                             <span><?= $po['pengiriman'] ?></span>
                         </div>
                         <div class="legend-item">
-                            <div class="flex items-center whitespace-normal leading-tight"><div class="legend-color bg-[#22c55e]"></div> <span>Selesai Tiba</span></div>
+                            <div class="flex items-center whitespace-normal leading-tight"><div class="legend-color bg-emerald-500"></div> <span>Selesai Tiba</span></div>
                             <span class="ml-1"><?= $po['selesai_tiba'] ?></span>
                         </div>
                     </div>
@@ -324,48 +249,47 @@
             <h3 class="text-md font-bold text-[#1e293b] mb-4">Ringkasan Master Data</h3>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <!-- Data 1 -->
-                <div class="master-data-card">
-                    <div class="bg-[#f1f5f9] p-4 rounded-lg">
-                        <i class="fa-solid fa-store text-3xl text-[#1e293b]"></i>
+                <div class="master-data-card group relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+                    <div class="absolute -right-6 -top-6 w-24 h-24 rounded-full bg-blue-50 opacity-50 transition-transform duration-500 group-hover:scale-125 z-0"></div>
+                    <div class="bg-blue-100 p-4 rounded-xl z-10 relative transition-transform duration-300 group-hover:rotate-6">
+                        <i class="fa-solid fa-store text-3xl text-blue-600 drop-shadow-sm"></i>
                     </div>
-                    <div>
-                        <div class="text-2xl font-black text-[#1e293b]"><?= number_format($master_data['supplier'], 0, ',', '.') ?></div>
-                        <div class="text-sm font-bold text-gray-600">Supplier Terdaftar</div>
+                    <div class="z-10 relative">
+                        <div class="text-3xl font-black text-slate-800"><?= number_format($master_data['supplier'], 0, ',', '.') ?></div>
+                        <div class="text-xs font-bold text-slate-500 uppercase tracking-wider mt-1">Supplier Terdaftar</div>
                     </div>
                 </div>
 
                 <!-- Data 2 -->
-                <div class="master-data-card">
-                    <div class="bg-[#f1f5f9] p-4 rounded-lg">
-                        <i class="fa-solid fa-boxes-stacked text-3xl text-[#1e293b]"></i>
+                <div class="master-data-card group relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+                    <div class="absolute -right-6 -top-6 w-24 h-24 rounded-full bg-emerald-50 opacity-50 transition-transform duration-500 group-hover:scale-125 z-0"></div>
+                    <div class="bg-emerald-100 p-4 rounded-xl z-10 relative transition-transform duration-300 group-hover:rotate-6">
+                        <i class="fa-solid fa-boxes-stacked text-3xl text-emerald-600 drop-shadow-sm"></i>
                     </div>
-                    <div>
-                        <div class="text-2xl font-black text-[#1e293b]"><?= number_format($master_data['material'], 0, ',', '.') ?></div>
-                        <div class="text-sm font-bold text-gray-600">Material Terdaftar</div>
+                    <div class="z-10 relative">
+                        <div class="text-3xl font-black text-slate-800"><?= number_format($master_data['material'], 0, ',', '.') ?></div>
+                        <div class="text-xs font-bold text-slate-500 uppercase tracking-wider mt-1">Material Terdaftar</div>
                     </div>
                 </div>
 
                 <!-- Data 3 -->
-                <div class="master-data-card">
-                    <div class="bg-[#f1f5f9] p-4 rounded-lg">
-                        <i class="fa-solid fa-tags text-3xl text-[#1e293b]"></i>
+                <div class="master-data-card group relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+                    <div class="absolute -right-6 -top-6 w-24 h-24 rounded-full bg-amber-50 opacity-50 transition-transform duration-500 group-hover:scale-125 z-0"></div>
+                    <div class="bg-amber-100 p-4 rounded-xl z-10 relative transition-transform duration-300 group-hover:rotate-6">
+                        <i class="fa-solid fa-tags text-3xl text-amber-600 drop-shadow-sm"></i>
                     </div>
-                    <div>
-                        <div class="text-2xl font-black text-[#1e293b]"><?= number_format($master_data['harga'], 0, ',', '.') ?></div>
-                        <div class="text-sm font-bold text-gray-600">Data Harga Tercatat</div>
+                    <div class="z-10 relative">
+                        <div class="text-3xl font-black text-slate-800"><?= number_format($master_data['harga'], 0, ',', '.') ?></div>
+                        <div class="text-xs font-bold text-slate-500 uppercase tracking-wider mt-1">Data Harga Tercatat</div>
                     </div>
                 </div>
             </div>
         </div>
 
-    </div>
+<?= $this->endSection() ?>
 
-    <!-- Scripts -->
-    <script src="<?= base_url('assets/js/preline.js') ?>"></script>
-    <script src="<?= base_url('node_modules/preline/dist/preline.js') ?>"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<?= $this->section('scripts') ?>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
     <script>
         $(document).ready(function() {
             // Chart.js Configuration
@@ -380,10 +304,10 @@
                     datasets: [{
                         data: [<?= $pr['diproses'] ?>, <?= $pr['menunggu'] ?>, <?= $pr['parsial'] ?>, <?= $pr['selesai'] ?>],
                         backgroundColor: [
-                            '#0ea5e9', // Diproses (Blue)
-                            '#cbd5e1', // Menunggu (Gray)
+                            '#3b82f6', // Diproses (Blue)
+                            '#8b5cf6', // Menunggu (Purple)
                             '#f59e0b', // Parsial (Orange)
-                            '#22c55e'  // Selesai (Green)
+                            '#10b981'  // Selesai (Green)
                         ],
                         borderWidth: 0,
                         hoverOffset: 4
@@ -410,8 +334,8 @@
                         data: [<?= $po['diproses'] ?>, <?= $po['pengiriman'] ?>, <?= $po['selesai_tiba'] ?>],
                         backgroundColor: [
                             '#f59e0b', // Diproses (Orange)
-                            '#0ea5e9', // Pengiriman (Blue)
-                            '#22c55e'  // Selesai Tiba (Green)
+                            '#3b82f6', // Pengiriman (Blue)
+                            '#10b981'  // Selesai Tiba (Green)
                         ],
                         borderWidth: 0,
                         hoverOffset: 4
@@ -430,5 +354,4 @@
             });
         });
     </script>
-</body>
-</html>
+<?= $this->endSection() ?>

@@ -50,6 +50,8 @@ abstract class BaseController extends Controller
         $targetRole = null;
         if ($firstSegment === 'gudang') {
             $targetRole = 'gudang';
+        } elseif ($firstSegment === 'purchasing') {
+            $targetRole = 'purchasing';
         } elseif (in_array($firstSegment, [
             '', 'permintaan', 'proyek', 'dashboard', 'schedule', 
             'realisasi', 'kelola-akun', 'notifikasi'
@@ -64,16 +66,21 @@ abstract class BaseController extends Controller
 
             if ($targetRole === 'gudang' && $currentUserId != 12) {
                 $shouldSwitch = true;
-                $userId = 12;
+                $userId = 12; // Asumsi ID Gudang adalah 12
+            } elseif ($targetRole === 'purchasing' && $currentUserId != 13) {
+                $shouldSwitch = true;
+                $userId = 13; // Asumsi ID Purchasing adalah 13, ganti jika berbeda
             } elseif ($targetRole === 'kontraktor' && $currentUserId != 1) {
                 $shouldSwitch = true;
-                $userId = 1;
+                $userId = 1; // Asumsi ID Kontraktor adalah 1
             }
 
             // Jika belum login sama sekali, login-kan juga
             if (!$this->session->get('logged_in')) {
                 $shouldSwitch = true;
-                $userId = ($targetRole === 'gudang') ? 12 : 1;
+                if ($targetRole === 'gudang') $userId = 12;
+                elseif ($targetRole === 'purchasing') $userId = 13;
+                else $userId = 1;
             }
 
             log_message('error', "[DEBUG] targetRole: {$targetRole}, currentUserId: {$currentUserId}, shouldSwitch: " . ($shouldSwitch ? 'true' : 'false'));
@@ -82,14 +89,16 @@ abstract class BaseController extends Controller
                 $db = \Config\Database::connect();
                 $user = $db->table('pengguna')->where('id_pengguna', $userId)->get()->getRow();
                 if ($user) {
+                    $id_perusahaan = !empty($user->parent_id) ? $user->parent_id : $user->id_pengguna;
                     $this->session->set([
                         'id_pengguna'   => $user->id_pengguna,
                         'id_user'       => $user->id_pengguna,
                         'nama_pengguna' => $user->nama_pengguna,
-                        'nama'          => $user->nama_pengguna, // Also set 'nama' to be safe
+                        'nama'          => $user->nama_pengguna,
                         'username'      => $user->username,
                         'kategori_akun' => strtolower($user->kategori_akun),
-                        'role'          => strtolower($user->kategori_akun), // Also set 'role' to be safe
+                        'role'          => strtolower($user->kategori_akun),
+                        'id_perusahaan' => $id_perusahaan,
                         'logged_in'     => true,
                     ]);
                     log_message('error', "[DEBUG] Session successfully switched to user ID {$userId} ({$user->nama_pengguna})");

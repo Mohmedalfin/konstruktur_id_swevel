@@ -24,13 +24,18 @@ class PurchaseRequestModel extends Model
     protected $useTimestamps = true;
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
-    public function getPRsWithItemCount()
+    public function getPRsWithItemCount($id_perusahaan = null)
     {
         $db = \Config\Database::connect();
-        return $db->table('purchase_requests')
+        $builder = $db->table('purchase_requests')
             ->select('purchase_requests.*, COUNT(purchase_request_items.id) as total_items')
-            ->join('purchase_request_items', 'purchase_request_items.pr_id = purchase_requests.id', 'left')
-            ->groupBy('purchase_requests.id')
+            ->join('purchase_request_items', 'purchase_request_items.pr_id = purchase_requests.id', 'left');
+            
+        if ($id_perusahaan !== null) {
+            $builder->where('purchase_requests.id_perusahaan', $id_perusahaan);
+        }
+
+        return $builder->groupBy('purchase_requests.id')
             ->orderBy('purchase_requests.created_at', 'DESC')
             ->get()
             ->getResultArray();

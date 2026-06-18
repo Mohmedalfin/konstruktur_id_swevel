@@ -1,8 +1,16 @@
 <?php
 $requestSource = isset($_GET['source']) ? $_GET['source'] : '';
-$isGudang = ($requestSource === 'gudang') || in_array(strtolower($userRole ?? ''), ['gudang', 'purchasing', 'logistik']);
-$layout = $isGudang ? 'gudang/layouts/main' : 'layouts/app';
-$backUrl = $isGudang ? base_url('gudang/permintaan') : base_url('permintaan');
+
+if ($requestSource === 'purchasing') {
+    $layout = 'purchasing/layouts/main';
+    $backUrl = base_url('purchasing/purchase-request');
+} elseif ($requestSource === 'gudang' || in_array(strtolower($userRole ?? ''), ['gudang', 'logistik'])) {
+    $layout = 'gudang/layouts/main';
+    $backUrl = base_url('gudang/permintaan');
+} else {
+    $layout = 'layouts/app';
+    $backUrl = base_url('permintaan');
+}
 ?>
 <?= $this->extend($layout) ?>
 

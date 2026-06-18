@@ -28,7 +28,7 @@
                         <select name="material_id" id="tambah_material_id" class="py-2 px-3 block w-full border-gray-300 rounded-md text-[13px] focus:border-blue-500 focus:ring-blue-500 border" onchange="autoFillMaterialDetails(this, 'tambah')">
                             <option value="" disabled selected>Pilih material</option>
                             <?php foreach ($materials as $material): ?>
-                                <option value="<?= $material['id'] ?>"><?= esc($material['nama_material']) ?></option>
+                                <option value="<?= $material['id'] ?>"><?= esc($material['nama_barang']) ?></option>
                             <?php endforeach; ?>
                         </select>
                     </div>
@@ -98,7 +98,7 @@
                         <label class="block text-[13px] font-bold text-[#1e293b] mb-1.5">Material</label>
                         <select name="material_id" id="edit_material_id" class="py-2 px-3 block w-full border-gray-300 rounded-md text-[13px] focus:border-blue-500 focus:ring-blue-500 border" onchange="autoFillMaterialDetails(this, 'edit')">
                             <?php foreach ($materials as $material): ?>
-                                <option value="<?= $material['id'] ?>"><?= esc($material['nama_material']) ?></option>
+                                <option value="<?= $material['id'] ?>"><?= esc($material['nama_barang']) ?></option>
                             <?php endforeach; ?>
                         </select>
                     </div>

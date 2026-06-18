@@ -1,91 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
+<?= $this->extend('purchasing/layouts/main') ?>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= esc($title) ?></title>
-    <link href="<?= base_url('assets/css/output.css') ?>" rel="stylesheet">
-    <link rel="stylesheet" href="<?= base_url('assets/fontawesome/css/all.min.css') ?>">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<?= $this->section('styles') ?>
     <style>
-        body { background-color: #f3f4f6; }
-        .nav-item {
-            color: #d1d5db;
-            font-size: 13px;
-            font-weight: 600;
-            padding: 0 24px;
-            display: flex;
-            align-items: center;
-            transition: color 0.2s;
-        }
-        .nav-item:hover { color: white; }
-        .nav-active {
-            background-color: white;
-            color: #111827;
-            font-weight: bold;
-            font-size: 13px;
-            padding: 0 24px;
-            display: flex;
-            align-items: center;
-        }
-        .badge-parsial {
-            background-color: #fef08a; /* yellow-200 */
-            color: #854d0e; /* yellow-800 */
-            border-radius: 4px;
-            padding: 2px 12px;
-            font-size: 11px;
-            font-weight: bold;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .badge-parsial::before {
-            content: '';
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            background-color: #eab308;
-            border-radius: 50%;
-        }
-        .badge-diproses {
-            background-color: #eff6ff; /* blue-50 */
-            color: #2563eb; /* blue-600 */
-            border-radius: 4px;
-            padding: 2px 12px;
-            font-size: 11px;
-            font-weight: bold;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .badge-diproses::before {
-            content: '';
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            background-color: #3b82f6;
-            border-radius: 50%;
-        }
-        .badge-selesai {
-            background-color: #bbf7d0; /* green-200 */
-            color: #166534; /* green-800 */
-            border-radius: 4px;
-            padding: 2px 12px;
-            font-size: 11px;
-            font-weight: bold;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .badge-selesai::before {
-            content: '';
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            background-color: #22c55e;
-            border-radius: 50%;
-        }
         .btn-details {
             background-color: #2563eb; /* blue-600 */
             color: white;
@@ -99,78 +15,158 @@
             background-color: #1d4ed8;
         }
     </style>
-</head>
+<?= $this->endSection() ?>
 
-<body class="font-sans antialiased text-sm">
-
-    <!-- Top Navigation & Header Container -->
-    <div class="bg-[#111827] w-full shadow-md">
-        <!-- Navbar -->
-        <?= view('purchasing/partials/navbar', ['activeNav' => 'purchase-request']) ?>
-
-        <!-- Title -->
-        <div class="py-12 flex justify-center items-center relative overflow-hidden bg-cover bg-center bg-no-repeat" style="background-image: url('<?= base_url('assets/images/BackgroundTopBar.png') ?>');">
-            <div class="absolute inset-0 bg-[#111827]/80"></div>
-            <h1 class="relative z-10 text-white text-4xl font-bold tracking-widest uppercase">PURCHASE REQUEST</h1>
-        </div>
-    </div>
-
-    <!-- Main Content Container -->
-    <div class="max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8 mt-6 pb-12">
-        
-        <!-- Card Body -->
-        <div class="bg-white rounded-xl shadow-md p-6 border border-gray-200">
-            
-            <!-- Toolbar -->
-            <div class="flex gap-4 items-center mb-6">
-                <!-- Search -->
-                <div class="relative w-80">
-                    <div class="absolute inset-y-0 start-0 flex items-center pointer-events-none ps-3">
-                        <i class="fa-solid fa-search text-gray-500"></i>
+<?= $this->section('content') ?>
+        <!-- STATS CARDS -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <!-- Total -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-4 transition-all duration-200 hover:shadow-md">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                        <i class="fas fa-file-invoice text-lg"></i>
                     </div>
-                    <input type="text" id="searchPR" class="py-2 px-4 ps-10 block w-full border-gray-300 rounded-lg text-[13px] font-medium focus:border-blue-500 focus:ring-blue-500 border placeholder-gray-400" placeholder="Cari No. PR">
-                </div>
-                <!-- Date Filter -->
-                <div class="relative w-64">
-                    <div class="absolute inset-y-0 start-0 flex items-center pointer-events-none ps-3">
-                        <i class="fa-regular fa-calendar text-gray-500"></i>
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Total Permintaan</p>
+                        <h3 id="stat-total" class="text-xl font-bold text-slate-800 mt-0.5"><?= $stats['total'] ?></h3>
                     </div>
-                    <input type="text" id="dateFilter" class="py-2 px-4 ps-10 block w-full border-gray-300 rounded-lg text-[13px] font-medium focus:border-blue-500 focus:ring-blue-500 border placeholder-gray-400" placeholder="Date Filters">
                 </div>
             </div>
+
+            <!-- Menunggu -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-4 transition-all duration-200 hover:shadow-md">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                        <i class="fas fa-clock text-lg"></i>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Menunggu</p>
+                        <h3 id="stat-pending" class="text-xl font-bold text-slate-800 mt-0.5"><?= $stats['menunggu'] ?></h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Diproses -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-4 transition-all duration-200 hover:shadow-md">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                        <i class="fas fa-cog text-lg"></i>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Diproses</p>
+                        <h3 id="stat-proses" class="text-xl font-bold text-slate-800 mt-0.5"><?= $stats['diproses'] + $stats['parsial'] ?></h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Selesai -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-4 transition-all duration-200 hover:shadow-md">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                        <i class="fas fa-check-circle text-lg"></i>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Selesai</p>
+                        <h3 id="stat-kirim" class="text-xl font-bold text-slate-800 mt-0.5"><?= $stats['selesai'] ?></h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ACTIONS & FILTERS -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <!-- Filters -->
+            <div class="flex flex-wrap items-center gap-3">
+                <div class="flex items-center gap-2 relative w-48">
+                    <div class="absolute inset-y-0 start-0 flex items-center pointer-events-none ps-3">
+                        <i class="fa-solid fa-search text-gray-500 text-xs"></i>
+                    </div>
+                    <input type="text" id="searchPR" class="py-1.5 px-4 ps-8 block w-full border-slate-300 rounded-lg text-xs font-medium focus:border-blue-500 focus:ring-blue-500 border placeholder-slate-400 shadow-sm" placeholder="Cari No. PR...">
+                </div>
+                <div class="flex items-center gap-2">
+                    <input type="month" id="filter-month" class="px-3 py-1.5 text-xs font-bold text-slate-700 bg-white border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:border-blue-500 cursor-pointer" value="<?= date('Y-m') ?>">
+                </div>
+                <div class="hidden sm:block w-px h-6 bg-slate-200"></div>
+                <div class="flex flex-wrap items-center gap-2" id="status-filters">
+                    <button data-status="all" class="filter-btn px-4 py-1.5 text-[11px] font-bold rounded-lg shadow-sm border transition-all focus:outline-none bg-slate-800 text-white border-slate-800 uppercase tracking-wider">
+                        Semua
+                    </button>
+                    <button data-status="pending" class="filter-btn px-4 py-1.5 text-[11px] font-bold rounded-lg shadow-sm border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition-all focus:outline-none uppercase tracking-wider">
+                        Menunggu
+                    </button>
+                    <button data-status="diproses" class="filter-btn px-4 py-1.5 text-[11px] font-bold rounded-lg shadow-sm border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition-all focus:outline-none uppercase tracking-wider">
+                        Diproses
+                    </button>
+                    <button data-status="selesai" class="filter-btn px-4 py-1.5 text-[11px] font-bold rounded-lg shadow-sm border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition-all focus:outline-none uppercase tracking-wider">
+                        Selesai
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="flex items-center gap-2 mt-3 sm:mt-0">
+                <a href="<?= base_url('permintaan/deviasi?source=purchasing') ?>" class="inline-flex items-center justify-center gap-2 px-4 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-bold shadow-sm transition-all focus:outline-none cursor-pointer">
+                    <i class="fas fa-chart-line text-[10px]"></i>
+                    <span>Laporan Deviasi</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Card Body -->
+        <div class="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden">
 
             <!-- Table -->
             <div class="border border-gray-300 rounded-lg overflow-hidden shadow-sm">
                 <table class="min-w-full divide-y divide-gray-300">
-                    <thead class="bg-[#111827] text-white">
+                    <thead class="bg-[#111827] text-white border-b border-gray-200">
                         <tr>
-                            <th scope="col" class="px-4 py-3 text-center text-[13px] font-bold tracking-wide w-16">No</th>
-                            <th scope="col" class="px-4 py-3 text-center text-[13px] font-bold tracking-wide">Nomor PR</th>
-                            <th scope="col" class="px-4 py-3 text-center text-[13px] font-bold tracking-wide">Tgl Permintaan</th>
-                            <th scope="col" class="px-4 py-3 text-center text-[13px] font-bold tracking-wide">Total Item</th>
-                            <th scope="col" class="px-4 py-3 text-center text-[13px] font-bold tracking-wide">Status PR</th>
-                            <th scope="col" class="px-4 py-3 text-center text-[13px] font-bold tracking-wide w-24">Aksi</th>
+                            <th scope="col" class="px-6 py-4 text-center text-xs font-bold text-white uppercase tracking-wider w-16">No</th>
+                            <th scope="col" class="px-6 py-4 text-center text-xs font-bold text-white uppercase tracking-wider">Nomor PR</th>
+                            <th scope="col" class="px-6 py-4 text-center text-xs font-bold text-white uppercase tracking-wider">Tgl Permintaan</th>
+                            <th scope="col" class="px-6 py-4 text-center text-xs font-bold text-white uppercase tracking-wider">Keterangan</th>
+                            <th scope="col" class="px-6 py-4 text-center text-xs font-bold text-white uppercase tracking-wider">Total Item</th>
+                            <th scope="col" class="px-6 py-4 text-center text-xs font-bold text-white uppercase tracking-wider">Status PR</th>
+                            <th scope="col" class="px-6 py-4 text-center text-xs font-bold text-white uppercase tracking-wider w-24">Aksi</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-300 bg-white text-[#1e293b]" id="prTableBody">
+                    <tbody class="divide-y divide-gray-100 bg-white" id="prTableBody">
                         <?php if (empty($prs)): ?>
                             <tr>
-                                <td colspan="6" class="px-4 py-4 text-center text-[13px] font-semibold text-gray-500">Belum ada data PR.</td>
+                                <td colspan="7" class="px-6 py-12 text-center bg-white">
+                                    <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                                        <i class="fas fa-box-open text-2xl text-slate-300"></i>
+                                    </div>
+                                    <p class="text-sm font-semibold text-slate-600">Belum ada data Purchase Request</p>
+                                    <p class="text-xs mt-1 text-slate-400">Tidak ada data yang sesuai dengan filter saat ini.</p>
+                                </td>
                             </tr>
                         <?php else: ?>
+                            <!-- Empty State for JS Filter -->
+                            <tr id="empty-state-row" style="display: none;">
+                                <td colspan="7" class="px-6 py-12 text-center bg-white">
+                                    <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                                        <i class="fas fa-box-open text-2xl text-slate-300"></i>
+                                    </div>
+                                    <p class="text-sm font-semibold text-slate-600">Belum ada data Purchase Request</p>
+                                    <p class="text-xs mt-1 text-slate-400">Tidak ada data yang sesuai dengan filter saat ini.</p>
+                                </td>
+                            </tr>
                             <?php $no = 1; foreach ($prs as $pr): 
                                 // Format tanggal to indonesian style manually: 10 Mei 2026
                                 $date = new DateTime($pr['request_date']);
                                 $months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
                                 $formattedDate = $date->format('j') . ' ' . $months[$date->format('n') - 1] . ' ' . $date->format('Y');
                             ?>
-                                <tr class="<?= $no % 2 == 0 ? 'bg-[#cbd5e1]' : 'bg-[#f1f5f9]' ?> hover:bg-gray-200 transition-colors">
-                                    <td class="px-4 py-3 whitespace-nowrap text-[13px] font-bold text-center text-[#1e293b]"><?= $no++ ?></td>
-                                    <td class="px-4 py-3 whitespace-nowrap text-[13px] font-bold text-center text-[#1e293b]"><?= esc($pr['pr_number']) ?></td>
-                                    <td class="px-4 py-3 whitespace-nowrap text-[13px] font-bold text-center text-[#1e293b]"><?= $formattedDate ?></td>
-                                    <td class="px-4 py-3 whitespace-nowrap text-[13px] font-bold text-center text-[#1e293b]"><?= esc($pr['total_items']) ?></td>
-                                    <td class="px-4 py-3 whitespace-nowrap text-center">
-                                        <?php if ($pr['status'] == 'diproses'): ?>
+                                <tr class="table-row hover:bg-slate-50/80 transition-colors" data-status="<?= esc($pr['status']) ?>" data-date="<?= date('Y-m', strtotime($pr['request_date'])) ?>">
+                                    <td class="px-6 py-4 whitespace-nowrap text-xs font-bold text-center text-slate-500"><?= $no++ ?></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-center text-slate-800"><?= esc($pr['pr_number']) ?></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-xs font-medium text-center text-slate-600"><?= $formattedDate ?></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-xs font-medium text-center text-slate-500 truncate max-w-[200px]"><?= esc($pr['keterangan'] ?? '-') ?></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-xs font-bold text-center text-slate-800"><?= esc($pr['total_items']) ?></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                                        <?php if ($pr['status'] == 'pending' || $pr['status'] == 'draft'): ?>
+                                            <span class="badge-pending">Pending</span>
+                                        <?php elseif ($pr['status'] == 'diproses' || $pr['status'] == 'ordered'): ?>
                                             <span class="badge-diproses">Diproses</span>
                                         <?php elseif ($pr['status'] == 'parsial'): ?>
                                             <span class="badge-parsial">Parsial</span>
@@ -178,7 +174,7 @@
                                             <span class="badge-selesai">Selesai</span>
                                         <?php endif; ?>
                                     </td>
-                                    <td class="px-4 py-3 whitespace-nowrap text-center">
+                                    <td class="px-6 py-4 whitespace-nowrap text-center">
                                         <button type="button" class="btn-details" onclick="openDetailModal(<?= $pr['id'] ?>)">Details</button>
                                     </td>
                                 </tr>
@@ -189,20 +185,14 @@
             </div>
 
         </div>
-    </div>
 
     <!-- Modals -->
     <?php echo view('purchasing/purchase-request/partials/modal-detail'); ?>
     <?php echo view('purchasing/purchase-request/partials/modal-create-po'); ?>
     <?php echo view('purchasing/purchase-request/partials/modal-success'); ?>
 
-    <!-- Scripts -->
-    <script src="<?= base_url('assets/js/preline.js') ?>"></script>
-    <script src="<?= base_url('node_modules/preline/dist/preline.js') ?>"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
-    <script src="<?= base_url('assets/js/purchasing/purchase-request.js?v=' . time()) ?>"></script>
-</body>
+<?= $this->endSection() ?>
 
-</html>
+<?= $this->section('scripts') ?>
+    <script src="<?= base_url('assets/js/purchasing/purchase-request.js?v=' . time()) ?>"></script>
+<?= $this->endSection() ?>

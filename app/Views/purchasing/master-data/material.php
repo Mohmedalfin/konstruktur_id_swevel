@@ -1,16 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
+<?= $this->extend('purchasing/layouts/main') ?>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= esc($title) ?></title>
-    <link href="<?= base_url('assets/css/output.css') ?>" rel="stylesheet">
-    <link rel="stylesheet" href="<?= base_url('assets/fontawesome/css/all.min.css') ?>">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<?= $this->section('styles') ?>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <style>
-        body { background-color: #f3f4f6; }
         .tab-active {
             background-color: white;
             color: #0f172a;
@@ -133,24 +125,9 @@
             background: #94a3b8;
         }
     </style>
-</head>
+<?= $this->endSection() ?>
 
-<body class="font-sans antialiased text-sm">
-
-    <!-- Top Navigation & Header Container -->
-    <div class="bg-[#111827] w-full shadow-md">
-        <!-- Navbar -->
-        <?= view('purchasing/partials/navbar', ['activeNav' => 'master-data']) ?>
-
-        <!-- Title -->
-        <div class="py-12 flex justify-center items-center relative overflow-hidden bg-cover bg-center bg-no-repeat" style="background-image: url('<?= base_url('assets/images/BackgroundTopBar.png') ?>');">
-            <div class="absolute inset-0 bg-[#111827]/80"></div>
-            <h1 class="relative z-10 text-white text-4xl font-bold tracking-widest uppercase">MASTER DATA</h1>
-        </div>
-    </div>
-
-    <!-- Main Content Container -->
-    <div class="max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8 mt-6 pb-12">
+<?= $this->section('content') ?>
         
         <!-- Tabs -->
         <div class="flex">
@@ -176,50 +153,41 @@
                     </div>
                     <input type="text" id="searchMaterial" class="py-2.5 px-4 ps-10 block w-full border-gray-400 rounded-lg text-[13px] font-medium focus:border-blue-500 focus:ring-blue-500 border placeholder-gray-500" placeholder="Cari nama material...">
                 </div>
-                
-                <button type="button" class="py-2.5 px-5 inline-flex items-center gap-x-2 text-sm font-bold rounded-lg bg-[#111827] text-white hover:bg-[#0f172a] transition-colors" onclick="openTambahModal()">
-                    <i class="fa-solid fa-plus"></i> Tambah Material
-                </button>
             </div>
 
             <!-- Table -->
             <div class="border border-gray-300 rounded-lg overflow-hidden">
                 <table class="min-w-full divide-y divide-gray-300">
-                    <thead class="bg-[#111827] text-white">
+                    <thead class="bg-[#111827] text-white border-b border-gray-200">
                         <tr>
-                            <th scope="col" class="px-4 py-3 text-center text-[13px] font-bold tracking-wide">No</th>
-                            <th scope="col" class="px-4 py-3 text-left text-[13px] font-bold tracking-wide">Nama Material</th>
-                            <th scope="col" class="px-4 py-3 text-center text-[13px] font-bold tracking-wide">Satuan</th>
-                            <th scope="col" class="px-4 py-3 text-center text-[13px] font-bold tracking-wide">Spesifikasi</th>
-                            <th scope="col" class="px-4 py-3 text-center text-[13px] font-bold tracking-wide">Kategori</th>
-                            <th scope="col" class="px-4 py-3 text-center text-[13px] font-bold tracking-wide">Jumlah Supplier</th>
-                            <th scope="col" class="px-4 py-3 text-center text-[13px] font-bold tracking-wide w-24">Aksi</th>
+                            <th scope="col" class="px-6 py-4 text-center text-xs font-bold text-white uppercase tracking-wider w-16">No</th>
+                            <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">Nama Material</th>
+                            <th scope="col" class="px-6 py-4 text-center text-xs font-bold text-white uppercase tracking-wider">Satuan</th>
+                            <th scope="col" class="px-6 py-4 text-center text-xs font-bold text-white uppercase tracking-wider">Spesifikasi</th>
+                            <th scope="col" class="px-6 py-4 text-center text-xs font-bold text-white uppercase tracking-wider">Kategori</th>
+                            <th scope="col" class="px-6 py-4 text-center text-xs font-bold text-white uppercase tracking-wider">Jumlah Supplier</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-300 bg-white text-[#1e293b]" id="materialTableBody">
+                    <tbody class="divide-y divide-gray-100 bg-white" id="materialTableBody">
                         <?php if (empty($materials)): ?>
                             <tr>
-                                <td colspan="7" class="px-4 py-4 text-center text-[13px] font-semibold text-gray-500">Belum ada data material.</td>
+                                <td colspan="6" class="px-6 py-12 text-center bg-white">
+                                    <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                                        <i class="fas fa-cube text-2xl text-slate-300"></i>
+                                    </div>
+                                    <p class="text-sm font-semibold text-slate-600">Belum ada data material</p>
+                                    <p class="text-xs mt-1 text-slate-400">Data material diambil dari RAP dan Gudang.</p>
+                                </td>
                             </tr>
                         <?php else: ?>
                             <?php $no = 1; foreach ($materials as $material): ?>
-                                <tr class="<?= $no % 2 == 0 ? 'bg-[#cbd5e1]' : 'bg-[#f1f5f9]' ?> hover:bg-gray-200 transition-colors">
-                                    <td class="px-4 py-2.5 whitespace-nowrap text-[13px] font-bold text-center text-[#1e293b]"><?= $no++ ?></td>
-                                    <td class="px-4 py-2.5 whitespace-nowrap text-[13px] font-bold text-[#1e293b]"><?= esc($material['nama_material']) ?></td>
-                                    <td class="px-4 py-2.5 whitespace-nowrap text-[13px] font-bold text-center text-[#1e293b]"><?= esc($material['satuan']) ?></td>
-                                    <td class="px-4 py-2.5 whitespace-nowrap text-[13px] font-bold text-center text-[#1e293b]"><?= esc($material['spesifikasi']) ?></td>
-                                    <td class="px-4 py-2.5 whitespace-nowrap text-[13px] font-bold text-center text-[#1e293b]"><?= esc($material['kategori']) ?></td>
-                                    <td class="px-4 py-2.5 whitespace-nowrap text-[13px] font-bold text-center text-[#1e293b]">0</td>
-                                    <td class="px-4 py-2.5 whitespace-nowrap text-center text-[13px]">
-                                        <div class="flex items-center justify-center gap-2">
-                                            <button type="button" class="btn-action-edit size-6 flex items-center justify-center hover:bg-gray-50 transition-colors" onclick='openEditModal(<?= json_encode($material) ?>)'>
-                                                <i class="fa-solid fa-pen-to-square text-[13px]"></i>
-                                            </button>
-                                            <button type="button" class="btn-action-delete size-6 flex items-center justify-center hover:bg-red-600 transition-colors" onclick="deleteMaterial(<?= $material['id'] ?>)">
-                                                <i class="fa-solid fa-trash-can text-[13px]"></i>
-                                            </button>
-                                        </div>
-                                    </td>
+                                <tr class="hover:bg-slate-50/80 transition-colors group">
+                                    <td class="px-6 py-4 whitespace-nowrap text-xs font-bold text-center text-slate-500"><?= $no++ ?></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-slate-800"><?= esc($material['nama_barang']) ?></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-xs font-bold text-center text-slate-800"><?= esc($material['satuan']) ?></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-xs font-bold text-center text-slate-800"><?= esc($material['spesifikasi']) ?></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-xs font-bold text-center text-slate-800"><?= esc($material['jenis_item']) ?></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-xs font-bold text-center text-slate-800">0</td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php endif; ?>
@@ -228,18 +196,13 @@
             </div>
 
         </div>
-    </div>
 
     <!-- Modals -->
-    <?php echo view('purchasing/master-data/partials/modal-material'); ?>
+    <!-- Modal Material Dihapus (Hanya Read-Only) -->
 
-    <!-- Scripts -->
-    <script src="<?= base_url('assets/js/preline.js') ?>"></script>
-    <script src="<?= base_url('node_modules/preline/dist/preline.js') ?>"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<?= $this->endSection() ?>
+
+<?= $this->section('scripts') ?>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="<?= base_url('assets/js/purchasing/master-data-material.js?v=' . time()) ?>"></script>
-</body>
-
-</html>
+<?= $this->endSection() ?>

@@ -19,17 +19,36 @@ class POTrackingController extends BaseController
 
     public function index()
     {
+        $pos = $this->poModel->getPOsWithSupplier(session()->get('id_perusahaan'));
+        
+        $stats = [
+            'total' => count($pos),
+            'diproses' => 0,
+            'pengiriman' => 0,
+            'selesai' => 0
+        ];
+        
+        foreach ($pos as $po) {
+            $status = strtolower($po['status']);
+            if ($status == 'diproses' || $status == 'proses') $stats['diproses']++;
+            elseif ($status == 'pengiriman' || $status == 'dikirim') $stats['pengiriman']++;
+            elseif ($status == 'selesai' || $status == 'selesai_tiba') $stats['selesai']++;
+            else $stats['diproses']++;
+        }
+
         $data = [
             'title' => 'PO Tracking - Kontraktor.id',
-            'pos'   => $this->poModel->getPOsWithSupplier()
+            'pos'   => $pos,
+            'stats' => $stats
         ];
 
+        $data['activeNav'] = 'po-tracking';
         return view('purchasing/po-tracking/index', $data);
     }
 
     public function getDetail($id)
     {
-        $po = $this->poModel->getPOWithDetails($id);
+        $po = $this->poModel->getPOWithDetails($id, session()->get('id_perusahaan'));
         
         if ($po) {
             return $this->response->setJSON([

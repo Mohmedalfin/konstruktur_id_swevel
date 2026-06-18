@@ -6,7 +6,7 @@ use App\Controllers\BaseController;
 use App\Models\PurchaseRequestModel;
 use App\Models\PurchaseOrderModel;
 use App\Models\SupplierModel;
-use App\Models\MaterialModel;
+use App\Models\MasterBarangModel;
 use App\Models\MaterialSupplierModel;
 
 class DashboardController extends BaseController
@@ -16,11 +16,13 @@ class DashboardController extends BaseController
         $prModel = new PurchaseRequestModel();
         $poModel = new PurchaseOrderModel();
         $supplierModel = new SupplierModel();
-        $materialModel = new MaterialModel();
+        $masterBarangModel = new MasterBarangModel();
         $materialSupplierModel = new MaterialSupplierModel();
 
+        $id_perusahaan = session()->get('id_perusahaan');
+
         // PR Stats
-        $prs = $prModel->findAll();
+        $prs = $prModel->where('id_perusahaan', $id_perusahaan)->findAll();
         $totalPr = count($prs);
         $prMenunggu = 0;
         $prDiproses = 0;
@@ -37,10 +39,10 @@ class DashboardController extends BaseController
         }
 
         // PR Terbaru (Latest 5)
-        $prTerbaru = $prModel->orderBy('created_at', 'DESC')->limit(5)->find();
+        $prTerbaru = $prModel->where('id_perusahaan', $id_perusahaan)->orderBy('created_at', 'DESC')->limit(5)->find();
 
         // PO Stats
-        $pos = $poModel->findAll();
+        $pos = $poModel->where('id_perusahaan', $id_perusahaan)->findAll();
         $totalPo = count($pos);
         $poDiproses = 0;
         $poPengiriman = 0;
@@ -83,8 +85,8 @@ class DashboardController extends BaseController
 
         // Master Data Stats
         $totalSupplier = $supplierModel->countAllResults();
-        $totalMaterial = $materialModel->countAllResults();
-        $totalHarga = $materialSupplierModel->countAllResults();
+        $totalMaterial = $masterBarangModel->where('id_perusahaan', $id_perusahaan)->countAllResults();
+        $totalHarga = count($materialSupplierModel->getHargaWithDetails($id_perusahaan));
 
         $data = [
             'title' => 'Purchasing Dashboard - Kontraktor.id',
@@ -111,6 +113,7 @@ class DashboardController extends BaseController
             ]
         ];
 
+        $data['activeNav'] = 'dashboard';
         return view('purchasing/dashboard', $data);
     }
 }

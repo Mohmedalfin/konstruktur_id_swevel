@@ -29,8 +29,8 @@ function openTambahModal() {
 function openEditModal(material) {
     formEdit.reset();
     document.getElementById('edit_id').value = material.id;
-    document.getElementById('edit_nama_material').value = material.nama_material;
-    $('#edit_kategori').val(material.kategori).trigger('change');
+    document.getElementById('edit_nama_material').value = material.nama_barang;
+    $('#edit_kategori').val(material.jenis_item).trigger('change');
     document.getElementById('edit_satuan').value = material.satuan;
     document.getElementById('edit_spesifikasi').value = material.spesifikasi || '';
     

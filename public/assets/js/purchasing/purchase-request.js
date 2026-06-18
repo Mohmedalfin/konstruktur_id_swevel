@@ -151,7 +151,7 @@ function renderCreatePOData(data) {
         tr.className = index % 2 === 0 ? 'bg-[#f8fafc]' : 'bg-[#e2e8f0]';
         tr.innerHTML = `
             <td class="px-3 py-3 text-center border-r border-gray-300">
-                <input type="checkbox" class="item-checkbox rounded border-gray-400 text-blue-600 focus:ring-blue-500 cursor-pointer w-5 h-5" value="${item.id}" data-material="${item.material_id}" data-volume="${item.volume}">
+                <input type="checkbox" class="item-checkbox rounded border-gray-400 text-blue-600 focus:ring-blue-500 cursor-pointer w-5 h-5" value="${item.id}" data-material="${item.id_barang || item.material_id}" data-volume="${item.volume}">
             </td>
             <td class="px-3 py-3 text-[13px] font-semibold text-[#1e293b] border-r border-gray-300">${item.nama_material}</td>
             <td class="px-3 py-3 text-[13px] font-bold text-center text-[#1e293b] border-r border-gray-300">${item.volume}</td>
@@ -275,17 +275,70 @@ function showSuccessModal(pos) {
 }
 
 // Search
-document.getElementById('searchPR')?.addEventListener('keyup', function() {
-    let filter = this.value.toLowerCase();
-    let rows = document.querySelectorAll('#prTableBody tr');
+// Filtering Logic
+const searchInput = document.getElementById('searchPR');
+const monthInput = document.getElementById('filter-month');
+const statusButtons = document.querySelectorAll('.filter-btn');
+let currentStatus = 'all';
+
+function filterTable() {
+    const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+    const monthTerm = monthInput ? monthInput.value : '';
+    const rows = document.querySelectorAll('#prTableBody tr.table-row');
+    
+    let visibleCount = 0;
     
     rows.forEach(row => {
         let prNum = row.cells[1]?.textContent.toLowerCase() || '';
+        let rowStatus = row.dataset.status || '';
+        let rowDate = row.dataset.date || '';
         
-        if (prNum.indexOf(filter) > -1) {
+        let matchSearch = prNum.includes(searchTerm);
+        let matchMonth = monthTerm === '' || rowDate === monthTerm;
+        let matchStatus = currentStatus === 'all';
+        
+        if (!matchStatus) {
+            if (currentStatus === 'pending') {
+                matchStatus = ['pending', 'draft', 'menunggu'].includes(rowStatus.toLowerCase());
+            } else if (currentStatus === 'diproses') {
+                matchStatus = ['diproses', 'ordered', 'parsial'].includes(rowStatus.toLowerCase());
+            } else if (currentStatus === 'selesai') {
+                matchStatus = rowStatus.toLowerCase() === 'selesai';
+            }
+        }
+        
+        if (matchSearch && matchMonth && matchStatus) {
             row.style.display = '';
+            visibleCount++;
         } else {
             row.style.display = 'none';
         }
+    });
+    
+    const emptyStateRow = document.getElementById('empty-state-row');
+    if (emptyStateRow) {
+        if (visibleCount === 0 && rows.length > 0) {
+            emptyStateRow.style.display = '';
+        } else {
+            emptyStateRow.style.display = 'none';
+        }
+    }
+}
+
+if (searchInput) searchInput.addEventListener('keyup', filterTable);
+if (monthInput) monthInput.addEventListener('change', filterTable);
+
+statusButtons.forEach(btn => {
+    btn.addEventListener('click', function() {
+        // Update active class
+        statusButtons.forEach(b => {
+            b.classList.remove('bg-slate-800', 'text-white', 'border-slate-800');
+            b.classList.add('bg-white', 'text-slate-600', 'border-slate-200');
+        });
+        this.classList.remove('bg-white', 'text-slate-600', 'border-slate-200');
+        this.classList.add('bg-slate-800', 'text-white', 'border-slate-800');
+        
+        currentStatus = this.dataset.status;
+        filterTable();
     });
 });

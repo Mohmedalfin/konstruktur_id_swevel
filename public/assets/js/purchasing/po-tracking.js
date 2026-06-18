@@ -224,19 +224,71 @@ function updateStatus(newStatus, title, text) {
     });
 }
 
-// Search functionality
-document.getElementById('searchPO').addEventListener('keyup', function() {
-    let filter = this.value.toLowerCase();
-    let rows = document.querySelectorAll('#poTableBody tr');
+// Filtering Logic
+const searchInput = document.getElementById('searchPO');
+const monthInput = document.getElementById('filter-month');
+const statusButtons = document.querySelectorAll('.filter-btn');
+let currentStatus = 'all';
+
+function filterTable() {
+    const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+    const monthTerm = monthInput ? monthInput.value : '';
+    const rows = document.querySelectorAll('#poTableBody tr.table-row');
+    
+    let visibleCount = 0;
     
     rows.forEach(row => {
         let poNum = row.cells[1]?.textContent.toLowerCase() || '';
         let supplier = row.cells[2]?.textContent.toLowerCase() || '';
+        let rowStatus = row.dataset.status || '';
+        let rowDate = row.dataset.date || '';
         
-        if (poNum.indexOf(filter) > -1 || supplier.indexOf(filter) > -1) {
+        let matchSearch = poNum.includes(searchTerm) || supplier.includes(searchTerm);
+        let matchMonth = monthTerm === '' || rowDate === monthTerm;
+        let matchStatus = currentStatus === 'all';
+        
+        if (!matchStatus) {
+            if (currentStatus === 'diproses') {
+                matchStatus = ['diproses', 'proses'].includes(rowStatus.toLowerCase());
+            } else if (currentStatus === 'pengiriman') {
+                matchStatus = ['pengiriman', 'dalam pengiriman', 'dikirim'].includes(rowStatus.toLowerCase());
+            } else if (currentStatus === 'selesai') {
+                matchStatus = ['selesai', 'selesai tiba', 'selesai_tiba'].includes(rowStatus.toLowerCase());
+            }
+        }
+        
+        if (matchSearch && matchMonth && matchStatus) {
             row.style.display = '';
+            visibleCount++;
         } else {
             row.style.display = 'none';
         }
+    });
+    
+    const emptyStateRow = document.getElementById('empty-state-row');
+    if (emptyStateRow) {
+        if (visibleCount === 0 && rows.length > 0) {
+            emptyStateRow.style.display = '';
+        } else {
+            emptyStateRow.style.display = 'none';
+        }
+    }
+}
+
+if (searchInput) searchInput.addEventListener('keyup', filterTable);
+if (monthInput) monthInput.addEventListener('change', filterTable);
+
+statusButtons.forEach(btn => {
+    btn.addEventListener('click', function() {
+        // Update active class
+        statusButtons.forEach(b => {
+            b.classList.remove('bg-slate-800', 'text-white', 'border-slate-800');
+            b.classList.add('bg-white', 'text-slate-600', 'border-slate-200');
+        });
+        this.classList.remove('bg-white', 'text-slate-600', 'border-slate-200');
+        this.classList.add('bg-slate-800', 'text-white', 'border-slate-800');
+        
+        currentStatus = this.dataset.status;
+        filterTable();
     });
 });

@@ -4,19 +4,19 @@ namespace App\Controllers\purchasing;
 
 use App\Controllers\BaseController;
 use App\Models\SupplierModel;
-use App\Models\MaterialModel;
+use App\Models\MasterBarangModel;
 use App\Models\MaterialSupplierModel;
 
 class MasterDataController extends BaseController
 {
     protected $supplierModel;
-    protected $materialModel;
+    protected $masterBarangModel;
     protected $materialSupplierModel;
 
     public function __construct()
     {
         $this->supplierModel = new SupplierModel();
-        $this->materialModel = new MaterialModel();
+        $this->masterBarangModel = new MasterBarangModel();
         $this->materialSupplierModel = new MaterialSupplierModel();
     }
 
@@ -27,6 +27,7 @@ class MasterDataController extends BaseController
             'suppliers' => $this->supplierModel->orderBy('id', 'DESC')->findAll(),
         ];
 
+        $data['activeNav'] = 'master-data';
         return view('purchasing/master-data/index', $data);
     }
 
@@ -34,16 +35,17 @@ class MasterDataController extends BaseController
     {
         $data = [
             'title'     => 'Master Data Purchasing - Material',
-            'materials' => $this->materialModel->orderBy('id', 'DESC')->findAll(),
+            'materials' => $this->masterBarangModel->where('id_perusahaan', session()->get('id_perusahaan'))->orderBy('id', 'DESC')->findAll(),
         ];
 
+        $data['activeNav'] = 'master-data';
         return view('purchasing/master-data/material', $data);
     }
 
     public function harga()
     {
         $group = $this->request->getGet('group') ?? 'none';
-        $hargasFlat = $this->materialSupplierModel->getHargaWithDetails();
+        $hargasFlat = $this->materialSupplierModel->getHargaWithDetails(session()->get('id_perusahaan'));
         
         $hargasGrouped = [];
         if ($group === 'supplier') {
@@ -66,9 +68,10 @@ class MasterDataController extends BaseController
             'hargasGrouped' => $hargasGrouped,
             'group'     => $group,
             'suppliers' => $this->supplierModel->orderBy('nama_supplier', 'ASC')->findAll(),
-            'materials' => $this->materialModel->orderBy('nama_material', 'ASC')->findAll(),
+            'materials' => $this->masterBarangModel->where('id_perusahaan', session()->get('id_perusahaan'))->orderBy('nama_barang', 'ASC')->findAll(),
         ];
 
+        $data['activeNav'] = 'master-data';
         return view('purchasing/master-data/harga', $data);
     }
 
@@ -188,111 +191,10 @@ class MasterDataController extends BaseController
 
     public function getMaterials()
     {
-        $materials = $this->materialModel->orderBy('id', 'DESC')->findAll();
+        $materials = $this->masterBarangModel->where('id_perusahaan', session()->get('id_perusahaan'))->orderBy('id', 'DESC')->findAll();
         return $this->response->setJSON([
             'status' => 'success',
             'data'   => $materials
-        ]);
-    }
-
-    public function storeMaterial()
-    {
-        $json = $this->request->getJSON(true);
-
-        if (!$json) {
-            $json = $this->request->getPost();
-        }
-
-        $rules = [
-            'nama_material' => 'required',
-            'kategori'      => 'required',
-            'satuan'        => 'required',
-        ];
-
-        if (!$this->validateData($json, $rules)) {
-            return $this->response->setJSON([
-                'status'  => 'error',
-                'message' => 'Data material belum lengkap',
-                'errors'  => $this->validator->getErrors()
-            ]);
-        }
-
-        $save = $this->materialModel->save([
-            'nama_material' => $json['nama_material'],
-            'kategori'      => $json['kategori'],
-            'satuan'        => $json['satuan'],
-            'spesifikasi'   => $json['spesifikasi'] ?? null,
-        ]);
-
-        if ($save) {
-            return $this->response->setJSON([
-                'status'  => 'success',
-                'message' => 'Material berhasil ditambahkan'
-            ]);
-        }
-
-        return $this->response->setJSON([
-            'status'  => 'error',
-            'message' => 'Gagal menambahkan material'
-        ]);
-    }
-
-    public function updateMaterial($id)
-    {
-        $json = $this->request->getJSON(true);
-
-        if (!$json) {
-            $json = $this->request->getRawInput();
-        }
-
-        $rules = [
-            'nama_material' => 'required',
-            'kategori'      => 'required',
-            'satuan'        => 'required',
-        ];
-
-        if (!$this->validateData($json, $rules)) {
-            return $this->response->setJSON([
-                'status'  => 'error',
-                'message' => 'Data material belum lengkap',
-                'errors'  => $this->validator->getErrors()
-            ]);
-        }
-
-        $update = $this->materialModel->update($id, [
-            'nama_material' => $json['nama_material'],
-            'kategori'      => $json['kategori'],
-            'satuan'        => $json['satuan'],
-            'spesifikasi'   => $json['spesifikasi'] ?? null,
-        ]);
-
-        if ($update) {
-            return $this->response->setJSON([
-                'status'  => 'success',
-                'message' => 'Material berhasil diperbarui'
-            ]);
-        }
-
-        return $this->response->setJSON([
-            'status'  => 'error',
-            'message' => 'Gagal memperbarui material'
-        ]);
-    }
-
-    public function deleteMaterial($id)
-    {
-        $delete = $this->materialModel->delete($id);
-
-        if ($delete) {
-            return $this->response->setJSON([
-                'status'  => 'success',
-                'message' => 'Material berhasil dihapus'
-            ]);
-        }
-
-        return $this->response->setJSON([
-            'status'  => 'error',
-            'message' => 'Gagal menghapus material'
         ]);
     }
 
@@ -322,7 +224,7 @@ class MasterDataController extends BaseController
 
         $save = $this->materialSupplierModel->save([
             'supplier_id' => $json['supplier_id'],
-            'material_id' => $json['material_id'],
+            'id_barang'   => $json['material_id'],
             'harga'       => $json['harga'],
         ]);
 
@@ -363,7 +265,7 @@ class MasterDataController extends BaseController
 
         $update = $this->materialSupplierModel->update($id, [
             'supplier_id' => $json['supplier_id'],
-            'material_id' => $json['material_id'],
+            'id_barang'   => $json['material_id'],
             'harga'       => $json['harga'],
         ]);
 

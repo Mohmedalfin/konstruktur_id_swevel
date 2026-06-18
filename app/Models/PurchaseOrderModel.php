@@ -13,31 +13,43 @@ class PurchaseOrderModel extends Model
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
     protected $allowedFields    = [
+        'id_perusahaan',
         'po_number', 
         'supplier_id', 
         'total_nilai', 
         'status', 
-        'estimasi_tanggal'
+        'estimasi_tanggal',
+        'created_by'
     ];
 
     protected $useTimestamps = true;
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
 
-    public function getPOsWithSupplier()
+    public function getPOsWithSupplier($id_perusahaan = null)
     {
-        return $this->select('purchase_orders.*, suppliers.nama_supplier')
-                    ->join('suppliers', 'suppliers.id = purchase_orders.supplier_id')
-                    ->orderBy('purchase_orders.created_at', 'DESC')
+        $builder = $this->select('purchase_orders.*, suppliers.nama_supplier')
+                    ->join('suppliers', 'suppliers.id = purchase_orders.supplier_id');
+                    
+        if ($id_perusahaan !== null) {
+            $builder->where('purchase_orders.id_perusahaan', $id_perusahaan);
+        }
+        
+        return $builder->orderBy('purchase_orders.created_at', 'DESC')
                     ->findAll();
     }
     
-    public function getPOWithDetails($id)
+    public function getPOWithDetails($id, $id_perusahaan = null)
     {
-        $po = $this->select('purchase_orders.*, suppliers.nama_supplier')
+        $builder = $this->select('purchase_orders.*, suppliers.nama_supplier')
                    ->join('suppliers', 'suppliers.id = purchase_orders.supplier_id')
-                   ->where('purchase_orders.id', $id)
-                   ->first();
+                   ->where('purchase_orders.id', $id);
+                   
+        if ($id_perusahaan !== null) {
+            $builder->where('purchase_orders.id_perusahaan', $id_perusahaan);
+        }
+        
+        $po = $builder->first();
                    
         if ($po) {
             $itemModel = new PurchaseOrderItemModel();
