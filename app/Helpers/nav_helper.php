@@ -3,9 +3,9 @@
 if (! function_exists('get_nav_class')) {
     function get_nav_class(string $path): string
     {
-        $base     = 'p-2 md:w-28 md:justify-center flex items-center text-sm'
+        $base     = 'px-4 h-14 md:py-0 md:w-28 md:justify-center flex items-center gap-3 text-sm'
                   . ' focus:outline-hidden md:rounded-none transition-colors duration-200';
-        $active   = 'bg-white text-gray-900 font-semibold';
+        $active   = 'bg-white text-primary font-semibold';
         $inactive = 'text-navbar-foreground hover:bg-navbar-hover focus:bg-navbar-focus';
 
         return $base . ' ' . (is_nav_active($path) ? $active : $inactive);

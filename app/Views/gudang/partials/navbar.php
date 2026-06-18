@@ -14,8 +14,8 @@ $firstSegment = service('uri')->getSegment(1);
 $isProfilePage = $firstSegment === 'profile';
 
 $accountTriggerClass = $isProfilePage
-    ? 'hs-dropdown-toggle w-full p-2 md:w-auto md:px-4 md:justify-center flex items-center gap-3 text-sm bg-white text-slate-800 hover:bg-white/95 focus:outline-hidden focus:bg-white transition-colors duration-200'
-    : 'hs-dropdown-toggle w-full p-2 md:w-auto md:px-4 md:justify-center flex items-center gap-3 text-sm text-navbar-foreground hover:bg-navbar-hover focus:outline-hidden focus:bg-navbar-focus transition-colors duration-200';
+    ? 'hs-dropdown-toggle w-full h-14 p-2 md:w-auto md:px-4 md:justify-center flex items-center gap-3 text-sm bg-white text-slate-800 hover:bg-white/95 focus:outline-hidden focus:bg-white transition-colors duration-200'
+    : 'hs-dropdown-toggle w-full h-14 p-2 md:w-auto md:px-4 md:justify-center flex items-center gap-3 text-sm text-navbar-foreground hover:bg-navbar-hover focus:outline-hidden focus:bg-navbar-focus transition-colors duration-200';
 
 $accountIconWrapperClass = $isProfilePage
     ? 'w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center'
@@ -98,7 +98,7 @@ $accountChevronClass = $isProfilePage
               <!-- Dropdown Notifikasi -->
               <div class="hs-dropdown [--strategy:static] md:[--strategy:fixed] [--adaptive:none] md:[--adaptive:adaptive] [--is-collapse:true] md:[--is-collapse:false]">
                   <button id="hs-header-notification-dropdown" type="button"
-                      class="hs-dropdown-toggle relative w-full p-2 md:w-auto md:px-4 md:justify-center flex items-center gap-3 text-sm text-navbar-foreground hover:bg-navbar-hover focus:outline-none focus:bg-navbar-focus transition-colors duration-200"
+                      class="hs-dropdown-toggle relative w-full h-14 p-2 md:w-auto md:px-4 md:justify-center flex items-center gap-3 text-sm text-navbar-foreground hover:bg-navbar-hover focus:outline-none focus:bg-navbar-focus transition-colors duration-200"
                       aria-haspopup="menu" aria-expanded="false" aria-label="Notifikasi">
                       <div class="shrink-0 relative">
                           <i class="fa-regular fa-bell text-white text-[1.1rem]"></i>
