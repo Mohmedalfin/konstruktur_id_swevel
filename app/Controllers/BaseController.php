@@ -47,8 +47,7 @@ abstract class BaseController extends Controller
         log_message('error', "[DEBUG] BaseController initialized. firstSegment: '{$firstSegment}'");
 
         // Determinisasi role berdasarkan path halaman web
-        // Fitur auto-switch role dinonaktifkan agar login aslinya (akun purchasing baru) tidak tertimpa oleh hardcode ID 13
-        /*
+        // Fitur auto-switch role diaktifkan kembali dan disempurnakan (dinamis tanpa hardcode)
         $targetRole = null;
         if ($firstSegment === 'gudang') {
             $targetRole = 'gudang';
@@ -62,30 +61,32 @@ abstract class BaseController extends Controller
         }
 
         if ($targetRole !== null) {
-            $currentUserId = $this->session->get('id_pengguna');
+            $currentRole = strtolower((string)$this->session->get('kategori_akun'));
             $shouldSwitch = false;
             $userId = null;
 
-            if ($targetRole === 'gudang' && $currentUserId != 12) {
+            // Jika role saat ini tidak sesuai dengan target role, kita perlu switch
+            if ($currentRole !== $targetRole || !$this->session->get('logged_in')) {
                 $shouldSwitch = true;
-                $userId = 12; // Asumsi ID Gudang adalah 12
-            } elseif ($targetRole === 'purchasing' && $currentUserId != 13) {
-                $shouldSwitch = true;
-                $userId = 13; // Asumsi ID Purchasing adalah 13, ganti jika berbeda
-            } elseif ($targetRole === 'kontraktor' && $currentUserId != 1) {
-                $shouldSwitch = true;
-                $userId = 1; // Asumsi ID Kontraktor adalah 1
-            }
+                $db = \Config\Database::connect();
+                
+                // Cari user pertama yang memiliki role sesuai target
+                // Untuk Gudang dan Purchasing
+                $user = $db->table('pengguna')
+                           ->where('kategori_akun', $targetRole)
+                           ->orderBy('id_pengguna', 'DESC')
+                           ->get()
+                           ->getRow();
+                           
+                // Fallback khusus untuk kontraktor jika tidak nemu (biasanya ID 1)
+                if (!$user && $targetRole === 'kontraktor') {
+                    $user = $db->table('pengguna')->where('id_pengguna', 1)->get()->getRow();
+                }
 
-            // Jika belum login sama sekali, login-kan juga
-            if (!$this->session->get('logged_in')) {
-                $shouldSwitch = true;
-                if ($targetRole === 'gudang') $userId = 12;
-                elseif ($targetRole === 'purchasing') $userId = 13;
-                else $userId = 1;
+                if ($user) {
+                    $userId = $user->id_pengguna;
+                }
             }
-
-            log_message('error', "[DEBUG] targetRole: {$targetRole}, currentUserId: {$currentUserId}, shouldSwitch: " . ($shouldSwitch ? 'true' : 'false'));
 
             if ($shouldSwitch && $userId !== null) {
                 $db = \Config\Database::connect();
@@ -103,12 +104,11 @@ abstract class BaseController extends Controller
                         'id_perusahaan' => $id_perusahaan,
                         'logged_in'     => true,
                     ]);
-                    log_message('error', "[DEBUG] Session successfully switched to user ID {$userId} ({$user->nama_pengguna})");
+                    log_message('error', "[DEBUG] Session successfully switched to user ID {$userId} ({$user->nama_pengguna}) via dynamic query.");
                 } else {
                     log_message('error', "[DEBUG] User ID {$userId} not found in database!");
                 }
             }
         }
-        */
     }
 }
