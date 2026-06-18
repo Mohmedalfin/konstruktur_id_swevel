@@ -53,6 +53,16 @@ abstract class BaseController extends Controller
             $targetRole = 'gudang';
         } elseif ($firstSegment === 'purchasing') {
             $targetRole = 'purchasing';
+        } elseif ($firstSegment === 'api') {
+            // For API requests, check the referer to maintain the correct role session
+            $referer = $this->request->getHeaderLine('referer');
+            if (strpos($referer, '/gudang') !== false) {
+                $targetRole = 'gudang';
+            } elseif (strpos($referer, '/purchasing') !== false) {
+                $targetRole = 'purchasing';
+            } else {
+                $targetRole = 'kontraktor';
+            }
         } elseif (in_array($firstSegment, [
             '', 'permintaan', 'proyek', 'dashboard', 'schedule', 
             'realisasi', 'kelola-akun', 'notifikasi'
