@@ -220,8 +220,10 @@ class PengadaanController extends BaseController
     public function delete($id)
     {
         try {
-            $user = $this->getUserData();
-            $idPerusahaan = $user['id_perusahaan'] ?: $user['parent_id'];
+            $idPerusahaan = $this->getIdPerusahaan();
+            if (!$idPerusahaan) {
+                return $this->response->setStatusCode(401)->setJSON(['status' => 'error', 'message' => 'Unauthorized']);
+            }
 
             $result = $this->pengadaanService->deletePurchaseRequest($id, $idPerusahaan);
             return $this->response->setJSON($result);
