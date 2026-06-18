@@ -19,121 +19,6 @@
             backdrop-filter: blur(4px) !important;
             -webkit-backdrop-filter: blur(4px) !important;
         }
-        .nav-item {
-            color: #d1d5db;
-            font-size: 13px;
-            font-weight: 600;
-            padding: 0 24px;
-            display: flex;
-            align-items: center;
-            transition: color 0.2s;
-        }
-        .nav-item:hover { color: white; }
-        .nav-active {
-            background-color: white;
-            color: #111827;
-            font-weight: bold;
-            font-size: 13px;
-            padding: 0 24px;
-            display: flex;
-            align-items: center;
-        }
-        
-        .badge-pending {
-            background-color: #f3f4f6; /* gray-100 */
-            color: #4b5563; /* gray-600 */
-            border-radius: 4px;
-            padding: 2px 12px;
-            font-size: 11px;
-            font-weight: bold;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .badge-pending::before {
-            content: '';
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            background-color: #9ca3af;
-            border-radius: 50%;
-        }
-        .badge-parsial {
-            background-color: #fef08a; /* yellow-200 */
-            color: #854d0e; /* yellow-800 */
-            border-radius: 4px;
-            padding: 2px 12px;
-            font-size: 11px;
-            font-weight: bold;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .badge-parsial::before {
-            content: '';
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            background-color: #eab308;
-            border-radius: 50%;
-        }
-        .badge-diproses {
-            background-color: #eff6ff; /* blue-50 */
-            color: #2563eb; /* blue-600 */
-            border-radius: 4px;
-            padding: 2px 12px;
-            font-size: 11px;
-            font-weight: bold;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .badge-diproses::before {
-            content: '';
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            background-color: #3b82f6;
-            border-radius: 50%;
-        }
-        .badge-selesai {
-            background-color: #bbf7d0; /* green-200 */
-            color: #166534; /* green-800 */
-            border-radius: 4px;
-            padding: 2px 12px;
-            font-size: 11px;
-            font-weight: bold;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .badge-selesai::before {
-            content: '';
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            background-color: #22c55e;
-            border-radius: 50%;
-        }
-        .badge-ditolak {
-            background-color: #fecdd3; /* rose-200 */
-            color: #9f1239; /* rose-800 */
-            border-radius: 4px;
-            padding: 2px 12px;
-            font-size: 11px;
-            font-weight: bold;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .badge-ditolak::before {
-            content: '';
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            background-color: #e11d48;
-            border-radius: 50%;
-        }
     </style>
 </head>
 
@@ -141,10 +26,8 @@
 
     <?= $this->include('partials/global-loader') ?>
     
-    <div class="bg-[#111827] w-full shadow-md z-50 relative">
-        <?= view('purchasing/partials/navbar', ['activeNav' => $activeNav ?? '']) ?>
-        <?= view('partials/topbar', ['title' => $title ?? 'Purchasing']) ?>
-    </div>
+    <?= view('purchasing/partials/navbar', ['activeNav' => $activeNav ?? '']) ?>
+    <?= view('partials/topbar', ['title' => $title ?? 'Purchasing']) ?>
 
     <main class="w-full max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-12 space-y-6">
         <?= $this->renderSection('content') ?>
