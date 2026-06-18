@@ -139,8 +139,9 @@ $projectListMenuClass = $isProjectListPage
                                     <span class="md:hidden">Notifikasi</span>
                                 </button>
 
-                                <div class="hs-dropdown-menu transition-[opacity,margin] duration-[150ms] hs-dropdown-open:opacity-100 opacity-0 absolute right-0 md:right-auto md:left-auto md:translate-x-[-70%] w-80 hidden z-50 top-full mt-2 bg-white border border-gray-200 shadow-md rounded-xl" role="menu" aria-orientation="vertical" aria-labelledby="hs-header-notification-dropdown">
-                                    <div class="p-3 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-xl">
+                                <div class="hs-dropdown-menu transition-[opacity,margin] duration-[0.1ms] md:duration-[150ms] hs-dropdown-open:opacity-100 opacity-0 relative w-full md:w-80 hidden z-10 top-full ps-7 md:ps-0 md:bg-white md:border md:border-gray-200 md:shadow-md md:rounded-xl before:absolute before:-top-4 before:start-0 before:w-full before:h-5"
+                                    role="menu" aria-orientation="vertical" aria-labelledby="hs-header-notification-dropdown">
+                                    <div class="p-3 border-b border-gray-100 flex justify-between items-center bg-white md:rounded-t-xl">
                                         <h3 class="text-sm font-bold text-gray-800">Notifikasi</h3>
                                         <span class="notif-header-count text-xs text-red-600 bg-red-50 px-2 py-0.5 rounded-full font-semibold">0 Baru</span>
                                     </div>
@@ -150,8 +151,8 @@ $projectListMenuClass = $isProjectListPage
                                             <p class="text-xs">Memuat notifikasi...</p>
                                         </div>
                                     </div>
-                                    <div class="p-2 border-t border-gray-100 text-center bg-gray-50 rounded-b-xl">
-                                        <a class="text-xs font-bold text-[#3b82f6] hover:text-[#2563eb] flex items-center justify-center gap-1 transition-colors" href="#">
+                                    <div class="p-2 border-t border-gray-100 text-center bg-gray-50 md:rounded-b-xl">
+                                        <a class="text-xs font-bold text-primary hover:text-primary/80 flex items-center justify-center gap-1 transition-colors" href="<?= base_url('notifikasi') ?>">
                                             Lihat Semua Notifikasi <i class="fa-solid fa-chevron-right text-[10px]"></i>
                                         </a>
                                     </div>
