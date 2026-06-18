@@ -167,3 +167,5 @@ $accountChevronClass = $isProfilePage
     </div>
   </nav>
 </header>
+<script src="<?= base_url('assets/js/partials/header.js') ?>" defer></script>
+<script src="<?= base_url('js/shared/notification-poll.js') ?>" defer></script>
