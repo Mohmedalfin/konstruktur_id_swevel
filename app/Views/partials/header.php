@@ -16,7 +16,7 @@ $isProfilePage = $firstSegment === 'profile';
 $isTeamAccountsPage = $firstSegment === 'kelola-akun';
 $isProjectListPage = $firstSegment === 'proyek';
 $isPermintaanPage = $firstSegment === 'permintaan';
-$isAccountSectionActive = $isProfilePage || $isTeamAccountsPage || $isProjectListPage;
+$isAccountSectionActive = $isProfilePage || $isTeamAccountsPage;
 $isDashboardPage = in_array($firstSegment, ['', 'dashboard'], true) && !$isAccountSectionActive;
 
 $permintaanNavClass = $isPermintaanPage
@@ -26,6 +26,10 @@ $permintaanNavClass = $isPermintaanPage
 $dashboardNavClass = $isDashboardPage
     ? 'px-4 h-14 md:py-0 md:w-28 md:justify-center flex items-center gap-3 text-sm bg-white text-primary font-semibold md:rounded-none focus:outline-hidden'
     : 'px-4 h-14 md:py-0 md:w-28 md:justify-center flex items-center gap-3 text-sm text-navbar-foreground hover:bg-navbar-hover focus:bg-navbar-focus md:rounded-none focus:outline-hidden';
+
+$proyekNavClass = $isProjectListPage
+    ? 'px-4 h-14 md:py-0 md:w-32 md:justify-center flex items-center gap-3 text-sm bg-white text-primary font-semibold md:rounded-none focus:outline-hidden'
+    : 'px-4 h-14 md:py-0 md:w-32 md:justify-center flex items-center gap-3 text-sm text-navbar-foreground hover:bg-navbar-hover focus:bg-navbar-focus md:rounded-none focus:outline-hidden';
 
 $accountTriggerClass = $isAccountSectionActive
     ? 'hs-dropdown-toggle w-full h-14 px-4 md:px-3 md:justify-center flex items-center gap-3 text-sm bg-white text-slate-800 hover:bg-white/95 focus:outline-hidden focus:bg-white'
@@ -52,10 +56,6 @@ $profileMenuClass = $isProfilePage
     : 'p-2 md:px-3 flex items-center text-sm text-slate-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 rounded-lg gap-3';
 
 $teamAccountsMenuClass = $isTeamAccountsPage
-    ? 'p-2 md:px-3 flex items-center text-sm text-slate-700 bg-gray-100 focus:outline-none focus:bg-gray-100 rounded-lg gap-3'
-    : 'p-2 md:px-3 flex items-center text-sm text-slate-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 rounded-lg gap-3';
-
-$projectListMenuClass = $isProjectListPage
     ? 'p-2 md:px-3 flex items-center text-sm text-slate-700 bg-gray-100 focus:outline-none focus:bg-gray-100 rounded-lg gap-3'
     : 'p-2 md:px-3 flex items-center text-sm text-slate-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 rounded-lg gap-3';
 ?>
@@ -114,6 +114,18 @@ $projectListMenuClass = $isProjectListPage
                                         d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
                                 </svg>
                                 Dashboard
+                            </a>
+
+                            <a class="<?= esc($proyekNavClass) ?> header-nav-link" href="<?= base_url('proyek') ?>"<?= $isProjectListPage ? ' aria-current="page"' : '' ?>>
+                                <svg class="shrink-0 size-4 block md:hidden" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M8 6h13"></path>
+                                    <path d="M8 12h13"></path>
+                                    <path d="M8 18h13"></path>
+                                    <path d="M3 6h.01"></path>
+                                    <path d="M3 12h.01"></path>
+                                    <path d="M3 18h.01"></path>
+                                </svg>
+                                Daftar Proyek
                             </a>
 
                             <a class="<?= esc($permintaanNavClass) ?> header-nav-link" href="<?= base_url('permintaan') ?>"<?= $isPermintaanPage ? ' aria-current="page"' : '' ?>>
@@ -192,10 +204,6 @@ $projectListMenuClass = $isProjectListPage
                                         <a class="<?= esc($teamAccountsMenuClass) ?> header-nav-link" href="<?= base_url('kelola-akun') ?>"<?= $isTeamAccountsPage ? ' aria-current="page"' : '' ?>>
                                             <i class="fa-solid fa-users-gear w-4"></i>
                                             Kelola Akun
-                                        </a>
-                                        <a class="<?= esc($projectListMenuClass) ?> header-nav-link" href="<?= base_url('proyek') ?>"<?= $isProjectListPage ? ' aria-current="page"' : '' ?>>
-                                            <i class="fa-solid fa-list-check w-4"></i>
-                                            Daftar Proyek
                                         </a>
                                         <a class="p-2 md:px-3 flex items-center text-sm text-red-600 hover:bg-red-50 focus:outline-none focus:bg-red-50 rounded-lg gap-3"
                                             href="<?= base_url('logout') ?>">

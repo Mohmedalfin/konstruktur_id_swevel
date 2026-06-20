@@ -376,13 +376,35 @@ export function renderDetailModal(req, userRole) {
                         </div>
                     `;
                     groupedItems[cat].forEach(item => {
-                        const isKurang = parseFloat(item.stok_aktual) < parseFloat(item.jumlah);
+                        const hasKemasan = item.satuan_kemasan && String(item.satuan_kemasan).trim() !== '';
+                        const kf = parseFloat(item.konversi_faktor) || 1;
+                        const isDifferentName = hasKemasan && String(item.satuan_kemasan).toLowerCase() !== String(item.satuan).toLowerCase();
+                        
+                        const stokBase = parseFloat(item.stok_aktual || 0) * kf;
+                        const isKurang = stokBase < parseFloat(item.jumlah);
+                        
                         const warningHtml = isKurang ? `<span class="px-2 py-0.5 text-[9px] font-bold bg-rose-100 text-rose-800 border border-rose-200 rounded uppercase ml-2 shadow-sm">Stok Kurang</span>` : '';
                         const stokColor = isKurang ? 'text-rose-600' : 'text-emerald-600';
                         
                         const overLimitBadge = (item.is_over_limit === '1' || item.is_over_limit === 1)
                             ? `<span class="px-2 py-0.5 text-[9px] font-bold bg-red-100 text-red-700 border border-red-200 rounded uppercase ml-2 shadow-sm"><i class="fas fa-exclamation-triangle mr-1"></i> Over: ${parseFloat(item.jumlah_over_limit)} ${item.satuan}</span>`
                             : '';
+                        
+
+                        let jumlahDisplayHtml = `<span class="text-sm font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-3 py-1 rounded-lg shadow-sm whitespace-nowrap">${parseFloat(item.jumlah)} <span class="text-[10px] font-semibold text-emerald-500 ml-0.5">${item.satuan}</span></span>`;
+                        
+                        if (hasKemasan && (kf > 1 || isDifferentName)) {
+                            const jumlahKemasan = parseFloat(item.jumlah) / kf;
+                            // avoid long decimals
+                            const qtyKemasanFmt = Number.isInteger(jumlahKemasan) ? jumlahKemasan : jumlahKemasan.toFixed(2).replace(/\.?0+$/, '');
+                            
+                            jumlahDisplayHtml = `
+                                <div class="flex flex-col items-end gap-1.5">
+                                    <span class="text-sm font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-3 py-1 rounded-lg shadow-sm whitespace-nowrap">${qtyKemasanFmt} <span class="text-[10px] font-semibold text-emerald-500 ml-0.5">${item.satuan_kemasan}</span></span>
+                                    <span class="text-[9px] text-slate-500 font-medium bg-slate-50 px-2 py-0.5 rounded border border-slate-200 shadow-sm whitespace-nowrap"><i class="fas fa-exchange-alt mr-1 text-slate-400"></i> ${parseFloat(item.jumlah)} ${item.satuan}</span>
+                                </div>
+                            `;
+                        }
                         
                         itemsHtml += `
                             <div class="flex items-center justify-between py-2.5 border-b border-slate-100 last:border-0 px-2 hover:bg-slate-50 transition-colors rounded-lg">
@@ -391,10 +413,10 @@ export function renderDetailModal(req, userRole) {
                                         <span class="text-sm font-bold text-slate-800">${item.nama_barang}</span>
                                         ${overLimitBadge}
                                     </div>
-                                    <span class="text-[10px] font-medium text-slate-500 mt-0.5 flex flex-wrap items-center gap-1">Stok Gudang: <span class="font-bold ${stokColor}">${parseFloat(item.stok_aktual || 0)} ${item.satuan}</span> ${warningHtml}</span>
+                                    <span class="text-[10px] font-medium text-slate-500 mt-0.5 flex flex-wrap items-center gap-1">Stok Gudang: <span class="font-bold ${stokColor}">${parseFloat(item.stok_aktual || 0)} ${item.satuan_kemasan || item.satuan}</span> ${warningHtml}</span>
                                 </div>
-                                <div class="text-right flex flex-col items-end">
-                                    <span class="text-sm font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-3 py-1 rounded-lg shadow-sm whitespace-nowrap">${parseFloat(item.jumlah)} <span class="text-[10px] font-semibold text-emerald-500 ml-0.5">${item.satuan}</span></span>
+                                <div class="text-right flex flex-col items-end justify-center">
+                                    ${jumlahDisplayHtml}
                                 </div>
                             </div>
                         `;
@@ -482,42 +504,74 @@ export function renderFormProjectBlocks(projectRows, projects) {
                     ? '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-600 border border-blue-100 uppercase">Bahan</span>'
                     : '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-600 border border-purple-100 uppercase">Alat</span>';
 
-                const sisaVolumeVal = parseFloat(item.sisa_volume || 0);
-                const isOverLimit = parseFloat(item.jumlah) > Math.max(0, sisaVolumeVal);
+                const hasKemasan = item.satuan_kemasan && String(item.satuan_kemasan).trim() !== '';
+                const kf = parseFloat(item.konversi_faktor) || 1;
+                const isDifferentName = hasKemasan && String(item.satuan_kemasan).toLowerCase() !== String(item.satuan).toLowerCase();
+                const displaySatuan = (hasKemasan && (kf > 1 || isDifferentName)) ? item.satuan_kemasan : item.satuan;
+                
+                // Base Sisa Volume (Satuan RAP Asli)
+                const sisaVolumeBase = parseFloat(item.sisa_volume || 0);
+                const sisaVolumeFormatted = Number.isInteger(sisaVolumeBase) ? sisaVolumeBase : sisaVolumeBase.toFixed(2).replace(/\.?0+$/, '');
+
+                const qtyInputValue = item.jumlah ? parseFloat(item.jumlah) : '';
+                const deductedQty = (parseFloat(item.jumlah) || 0) * kf;
+                const isOverLimit = deductedQty > Math.max(0, sisaVolumeBase);
+
                 const inputClass = isOverLimit 
                     ? 'border-red-500 focus:border-red-500 bg-red-50' 
                     : 'border-slate-300 focus:border-blue-500 bg-slate-50';
+                
                 const errorDisplay = isOverLimit ? '' : 'hidden';
-                const excess = parseFloat(item.jumlah) - Math.max(0, sisaVolumeVal);
-                const errorText = isOverLimit ? `Over: ${excess}` : '';
+                const excess = deductedQty - Math.max(0, sisaVolumeBase);
+                const errorText = isOverLimit ? `Over: ${excess} ${item.satuan}` : '';
+
+                let conversionInfoHtml = '';
+                if (hasKemasan && (kf > 1 || isDifferentName)) {
+                    if (deductedQty > 0) {
+                        conversionInfoHtml = `<div class="mt-1 sm:mt-0 sm:ml-2 text-[9px] text-indigo-700 bg-indigo-50 px-2 py-1 rounded border border-indigo-200 whitespace-nowrap leading-tight text-left">
+                            Memotong RAP: <b>${deductedQty} ${item.satuan}</b>
+                        </div>`;
+                    } else {
+                        conversionInfoHtml = `<div class="mt-1 sm:mt-0 sm:ml-2 text-[9px] text-slate-500 bg-slate-50 px-2 py-1 rounded border border-slate-200 whitespace-nowrap leading-tight text-left">
+                            <i class="fas fa-info-circle mr-0.5"></i> 1 ${displaySatuan} = ${kf} ${item.satuan}
+                        </div>`;
+                    }
+                }
 
                 itemsRowsHtml += `
                     <tr class="hover:bg-slate-50 transition-colors">
-                        <td class="px-4 py-3 text-center text-xs font-semibold text-slate-500">${itemIdx + 1}</td>
-                        <td class="px-4 py-3">
+                        <td class="px-4 py-3 text-center text-xs font-semibold text-slate-500 align-middle">${itemIdx + 1}</td>
+                        <td class="px-4 py-3 align-middle">
                             <div class="flex items-center gap-1.5">
                                 <span class="font-bold text-slate-800 text-sm">${item.nama_barang}</span>
                             </div>
                             <p class="text-[9px] text-slate-400 font-semibold mt-0.5">Merk: ${item.merk || '-'} • Spek: ${item.spesifikasi || '-'}</p>
                         </td>
-                        <td class="px-4 py-3 text-center w-24">
+                        <td class="px-4 py-3 text-center w-24 align-middle">
                             ${categoryBadge}
                         </td>
-                        <td class="px-4 py-3 w-28 text-center">
-                            <div class="flex flex-col items-center">
-                                <input type="number" step="0.01" min="0.01" value="${item.jumlah}" data-block-id="${row.id}" data-idx="${itemIdx}" class="input-qty w-20 px-2 py-1 text-center font-bold text-slate-800 border rounded focus:outline-none transition-colors ${inputClass}">
-                                <span class="error-qty text-[10px] text-red-500 font-semibold mt-1 ${errorDisplay}">${errorText}</span>
+                        <td class="px-4 py-3 align-middle">
+                            <div class="flex items-center justify-center flex-wrap sm:flex-nowrap">
+                                <div>
+                                    <input type="number" step="0.01" min="0.01" placeholder="0" value="${qtyInputValue}" data-block-id="${row.id}" data-idx="${itemIdx}" class="input-qty w-24 px-2 py-1.5 text-center text-sm font-bold text-slate-700 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all ${inputClass}">
+                                    <span class="error-qty text-[10px] text-red-500 font-semibold mt-1 block text-center ${errorDisplay}">${errorText}</span>
+                                </div>
+                                <div class="conversion-info-container flex flex-col sm:flex-row items-center">
+                                    ${conversionInfoHtml}
+                                </div>
                             </div>
                         </td>
-                        <td class="px-4 py-3 w-28 text-center flex flex-col items-center justify-center">
-                            <span class="text-sm font-bold ${(item.sisa_volume < 0) ? 'text-red-600' : 'text-slate-500'}">${item.sisa_volume ?? '0'}</span>
+                        <td class="px-4 py-3 w-28 text-center flex flex-col items-center justify-center align-middle h-full border-b-0">
+                            <span class="text-sm font-bold ${(item.sisa_volume < 0) ? 'text-red-600' : 'text-slate-500'}">${sisaVolumeFormatted}</span>
                             <span class="text-[10px] font-semibold text-slate-400 lowercase">${item.satuan}</span>
                         </td>
-                        <td class="px-4 py-3 w-20 text-center">
-                            <input type="text" value="${item.satuan}" data-block-id="${row.id}" data-idx="${itemIdx}" readonly class="input-satuan w-14 px-1 py-1 text-center text-xs font-bold text-slate-600 border bg-slate-100 border-slate-200 cursor-not-allowed rounded">
+                        <td class="px-4 py-3 align-middle">
+                            <div class="flex items-center">
+                                <input type="text" value="${displaySatuan}" data-block-id="${row.id}" data-idx="${itemIdx}" readonly class="input-satuan w-24 px-2 py-1.5 text-center text-sm font-bold text-slate-500 border bg-slate-100 border-slate-200 cursor-not-allowed rounded-lg shadow-sm">
+                            </div>
                         </td>
                         <td class="px-4 py-3">
-                            <input type="text" placeholder="Catatan item..." value="${item.keterangan || ''}" data-block-id="${row.id}" data-idx="${itemIdx}" class="input-item-keterangan w-full px-2 py-1 text-xs text-slate-700 bg-white border border-slate-300 rounded focus:outline-none focus:border-blue-500">
+                            <input type="text" placeholder="Catatan item (opsional)" value="${item.keterangan || ''}" data-block-id="${row.id}" data-idx="${itemIdx}" class="input-item-keterangan w-full px-3 py-1.5 text-sm text-slate-700 bg-white border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all">
                         </td>
                         <td class="px-4 py-3 w-12 text-center">
                             <button type="button" data-block-id="${row.id}" data-idx="${itemIdx}" class="btn-remove-item w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors focus:outline-none">

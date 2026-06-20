@@ -126,52 +126,50 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
+        <!-- ACTIONS & FILTERS -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <div class="flex flex-col sm:flex-row gap-4 items-center">
+                <div class="flex items-center gap-2 relative w-64 md:w-80">
+                    <div class="absolute inset-y-0 start-0 flex items-center pointer-events-none ps-3">
+                        <i class="fa-solid fa-search text-slate-400 text-xs"></i>
+                    </div>
+                    <input type="text" id="searchHarga" class="py-2 px-4 ps-8 block w-full border-slate-300 rounded-lg text-xs font-medium focus:border-blue-500 focus:ring-blue-500 border placeholder-slate-400 shadow-sm" placeholder="Cari material atau suppli...">
+                </div>
+                
+                <div class="bg-gray-100/80 p-1 rounded-lg inline-flex items-center border border-gray-200/60 shadow-sm backdrop-blur-sm">
+                    <a href="?group=none" class="px-4 py-1.5 rounded-md text-[13px] font-bold transition-all duration-200 flex items-center gap-1.5 <?= $group == 'none' ? 'bg-white text-[#111827] shadow-sm ring-1 ring-black/5' : 'text-gray-500 hover:text-gray-800 hover:bg-gray-200/50' ?>">
+                        <i class="fa-solid fa-list text-[11px] <?= $group == 'none' ? 'text-blue-600' : '' ?>"></i> Semua
+                    </a>
+                    <a href="?group=supplier" class="px-4 py-1.5 rounded-md text-[13px] font-bold transition-all duration-200 flex items-center gap-1.5 <?= $group == 'supplier' ? 'bg-white text-[#111827] shadow-sm ring-1 ring-black/5' : 'text-gray-500 hover:text-gray-800 hover:bg-gray-200/50' ?>">
+                        <i class="fa-solid fa-store text-[11px] <?= $group == 'supplier' ? 'text-amber-500' : '' ?>"></i> Supplier
+                    </a>
+                    <a href="?group=material" class="px-4 py-1.5 rounded-md text-[13px] font-bold transition-all duration-200 flex items-center gap-1.5 <?= $group == 'material' ? 'bg-white text-[#111827] shadow-sm ring-1 ring-black/5' : 'text-gray-500 hover:text-gray-800 hover:bg-gray-200/50' ?>">
+                        <i class="fa-solid fa-cube text-[11px] <?= $group == 'material' ? 'text-teal-500' : '' ?>"></i> Material
+                    </a>
+                </div>
+            </div>
+            
+            <button type="button" class="inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white font-semibold text-sm py-2 px-5 rounded-lg transition-all shadow-sm focus:ring-2 focus:ring-primary/20" onclick="openTambahModal()">
+                <i class="fa-solid fa-plus text-xs"></i> Tambah Harga
+            </button>
+        </div>
+
         <!-- Tabs -->
-        <div class="flex">
-            <a href="<?= base_url('purchasing/master-data') ?>" class="tab-inactive px-8 py-3 rounded-tl-xl rounded-tr-xl text-[15px] flex items-center gap-2 z-0 relative">
+        <div class="flex flex-wrap gap-3 mb-6">
+            <a href="<?= base_url('purchasing/master-data') ?>" class="px-6 py-2.5 bg-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-50 border-b-2 border-transparent rounded-t-lg text-sm font-semibold flex items-center gap-2 transition-all">
                 <i class="fa-solid fa-store"></i> Supplier
             </a>
-            <a href="<?= base_url('purchasing/master-data/material') ?>" class="tab-inactive px-8 py-3 rounded-tl-xl rounded-tr-xl text-[15px] flex items-center gap-2 -ml-3 z-0 relative">
+            <a href="<?= base_url('purchasing/master-data/material') ?>" class="px-6 py-2.5 bg-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-50 border-b-2 border-transparent rounded-t-lg text-sm font-semibold flex items-center gap-2 transition-all">
                 <i class="fa-solid fa-cube"></i> Material
             </a>
-            <a href="<?= base_url('purchasing/master-data/harga') ?>" class="tab-active px-8 py-3 rounded-tl-xl rounded-tr-xl text-[15px] flex items-center gap-2 -ml-3 z-10 relative shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
-                <i class="fa-solid fa-tags"></i> Harga
+            <a href="<?= base_url('purchasing/master-data/harga') ?>" class="px-6 py-2.5 bg-white text-[#111827] border-b-2 border-primary shadow-sm rounded-t-lg text-sm font-bold flex items-center gap-2 transition-all">
+                <i class="fa-solid fa-tags text-primary"></i> Harga
             </a>
         </div>
 
-        <!-- Card Body -->
-        <div class="bg-white rounded-b-xl rounded-tl-xl rounded-tr-xl shadow-md p-6 border border-gray-200">
-            
-            <!-- Toolbar -->
-            <div class="flex justify-between items-center mb-5">
-                <div class="flex gap-4 items-center">
-                    <div class="relative w-80">
-                        <div class="absolute inset-y-0 start-0 flex items-center pointer-events-none ps-3">
-                            <i class="fa-solid fa-search text-gray-500"></i>
-                        </div>
-                        <input type="text" id="searchHarga" class="py-2.5 px-4 ps-10 block w-full border-gray-400 rounded-lg text-[13px] font-medium focus:border-blue-500 focus:ring-blue-500 border placeholder-gray-500" placeholder="Cari material atau suppli...">
-                    </div>
-                    
-                    <div class="bg-gray-100/80 p-1 rounded-lg inline-flex items-center border border-gray-200/60 shadow-sm backdrop-blur-sm">
-                        <a href="?group=none" class="px-4 py-1.5 rounded-md text-[13px] font-bold transition-all duration-200 flex items-center gap-1.5 <?= $group == 'none' ? 'bg-white text-[#111827] shadow-sm ring-1 ring-black/5' : 'text-gray-500 hover:text-gray-800 hover:bg-gray-200/50' ?>">
-                            <i class="fa-solid fa-list text-[11px] <?= $group == 'none' ? 'text-blue-600' : '' ?>"></i> Semua
-                        </a>
-                        <a href="?group=supplier" class="px-4 py-1.5 rounded-md text-[13px] font-bold transition-all duration-200 flex items-center gap-1.5 <?= $group == 'supplier' ? 'bg-white text-[#111827] shadow-sm ring-1 ring-black/5' : 'text-gray-500 hover:text-gray-800 hover:bg-gray-200/50' ?>">
-                            <i class="fa-solid fa-store text-[11px] <?= $group == 'supplier' ? 'text-amber-500' : '' ?>"></i> Supplier
-                        </a>
-                        <a href="?group=material" class="px-4 py-1.5 rounded-md text-[13px] font-bold transition-all duration-200 flex items-center gap-1.5 <?= $group == 'material' ? 'bg-white text-[#111827] shadow-sm ring-1 ring-black/5' : 'text-gray-500 hover:text-gray-800 hover:bg-gray-200/50' ?>">
-                            <i class="fa-solid fa-cube text-[11px] <?= $group == 'material' ? 'text-teal-500' : '' ?>"></i> Material
-                        </a>
-                    </div>
-                </div>
-                
-                <button type="button" class="py-2.5 px-5 inline-flex items-center gap-x-2 text-sm font-bold rounded-lg bg-[#111827] text-white hover:bg-[#0f172a] transition-colors" onclick="openTambahModal()">
-                    <i class="fa-solid fa-plus"></i> Tambah Harga
-                </button>
-            </div>
-
-            <!-- Table -->
-            <div class="border border-gray-300 rounded-lg overflow-hidden">
+        <!-- Card Body (Table Container) -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-300">
                     <thead class="bg-[#111827] text-white border-b border-gray-200">
                         <tr>
@@ -210,7 +208,7 @@
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-slate-800 material-name"><?= esc($harga['nama_material']) ?></td>
                                         <td class="px-6 py-4 whitespace-nowrap text-xs font-bold text-slate-800 supplier-name"><?= esc($harga['nama_supplier']) ?></td>
                                         <td class="px-6 py-4 whitespace-nowrap text-xs font-bold text-center text-slate-800"><?= esc($harga['spesifikasi']) ?></td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-xs font-bold text-center text-slate-800"><?= esc($harga['satuan']) ?></td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-xs font-bold text-center text-slate-800"><?= esc($harga['satuan_kemasan'] ?: $harga['satuan']) ?></td>
                                         <td class="px-6 py-4 whitespace-nowrap text-xs font-bold text-center text-slate-800">Rp <?= number_format($harga['harga'], 0, ',', '.') ?></td>
                                         <td class="px-6 py-4 whitespace-nowrap text-center text-[13px]">
                                             <div class="flex items-center justify-center gap-2">
@@ -229,7 +227,6 @@
                     </tbody>
                 </table>
             </div>
-
         </div>
 
     <!-- Modals -->

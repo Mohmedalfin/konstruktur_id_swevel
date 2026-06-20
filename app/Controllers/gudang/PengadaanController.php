@@ -178,7 +178,6 @@ class PengadaanController extends BaseController
 
             $result = $this->pengadaanService->createManualPurchaseRequest($idPerusahaan, $userId, $items, $keterangan);
 
-            // === TRIGGER NOTIFIKASI: Beritahu purchasing ada PR manual baru dari Gudang ===
             if (($result['status'] ?? '') === 'success') {
                 try {
                     $nomorPR   = $result['pr_number'] ?? '-';
@@ -199,7 +198,6 @@ class PengadaanController extends BaseController
                     log_message('warning', '[PengadaanController::store] Gagal kirim notifikasi: ' . $notifEx->getMessage());
                 }
             }
-            // === END TRIGGER NOTIFIKASI ===
 
             return $this->response->setJSON($result);
             

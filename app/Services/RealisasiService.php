@@ -6,6 +6,7 @@ use App\Models\ProyekModel;
 use App\Models\RapModel;
 use App\Models\RapDetailModel;
 use App\Models\RapKategoriModel;
+use App\Services\ProjectInventoryService;
 use CodeIgniter\Exceptions\PageNotFoundException;
 
 class RealisasiService
@@ -335,6 +336,37 @@ class RealisasiService
             $item['qty_budget'] = (float) $item['qty_budget'];
             $item['qty_used']   = $used;
             $item['qty_sisa']   = $item['qty_budget'] - $used;
+
+            $item['stok_lapangan'] = 0.0;
+            $kategoriInput = strtolower(trim($item['kategori'] ?? ''));
+            $kategori = 'Bahan';
+            if ($kategoriInput === 'tenaga kerja' || $kategoriInput === 'tenaga' || $kategoriInput === 'upah') {
+                $kategori = 'Tenaga Kerja';
+            } elseif ($kategoriInput === 'alat') {
+                $kategori = 'Alat';
+            }
+
+            if (in_array($kategori, ['Bahan', 'Alat'])) {
+                $merk = trim((string) ($item['merk'] ?? '')) ?: 'Tanpa Merk';
+                $spesifikasi = trim((string) ($item['spesifikasi'] ?? '')) ?: '-';
+
+                $stokProyek = $db->table('stok_proyek sp')
+                    ->select('sp.stok_aktual')
+                    ->join('master_barang mb', 'mb.id = sp.id_barang')
+                    ->where('sp.id_project', $idProject)
+                    ->where('mb.nama_barang', $item['nama_item'])
+                    ->where('mb.merk', $merk)
+                    ->where('mb.spesifikasi', $spesifikasi)
+                    ->groupStart()
+                        ->where('mb.jenis_item', $kategori)
+                        ->orWhere('mb.jenis_item', $item['kategori'])
+                    ->groupEnd()
+                    ->get()->getRowArray();
+
+                if ($stokProyek) {
+                    $item['stok_lapangan'] = (float) $stokProyek['stok_aktual'];
+                }
+            }
         }
 
         return $budgetItems;
@@ -470,7 +502,73 @@ class RealisasiService
             if (!$success) {
                 throw new \RuntimeException('Gagal menyimpan item SDM: ' . json_encode($this->realisasiSdmItemModel->errors()));
             }
-        }
+
+            // --- Catat pemakaian di stok_proyek (Lapangan) ---
+            // Hanya untuk kategori Bahan dan Alat (bukan Tenaga Kerja)
+            if (in_array($kategori, ['Bahan', 'Alat'])) {
+                // Cari id_barang dari master_barang berdasarkan nama, spesifikasi, merk, kategori (mengabaikan satuan)
+                $merkRaw = trim((string) ($item['merk'] ?? ''));
+                $merk = ($merkRaw === '' || $merkRaw === '-') ? 'Tanpa Merk' : $merkRaw;
+                
+                $spekRaw = trim((string) ($item['spesifikasi'] ?? ''));
+                $spesifikasi = ($spekRaw === '') ? '-' : $spekRaw;
+
+                // Cek prioritas pertama di stok_proyek proyek ini sendiri
+                $masterBarang = $db->table('stok_proyek sp')
+                    ->select('mb.id')
+                    ->join('master_barang mb', 'mb.id = sp.id_barang')
+                    ->where('sp.id_project', $idProject)
+                    ->where('mb.nama_barang', $item['nama_item'])
+                    ->where('mb.merk', $merk)
+                    ->where('mb.spesifikasi', $spesifikasi)
+                    ->where('mb.jenis_item', $kategori)
+                    ->orderBy('sp.id', 'ASC')
+                    ->limit(1)
+                    ->get()->getRowArray();
+
+                if (!$masterBarang) {
+                    // Fallback jika belum ada di stok_proyek, cari di master_barang (dengan relasi company/project)
+                    $masterBarang = $db->table('master_barang mb')
+                        ->select('mb.id')
+                        ->join('projects p', 'p.id_pengguna = mb.id_perusahaan', 'left')
+                        ->where('mb.nama_barang', $item['nama_item'])
+                        ->where('mb.merk', $merk)
+                        ->where('mb.spesifikasi', $spesifikasi)
+                        ->where('mb.jenis_item', $kategori)
+                        ->groupStart()
+                            ->where('p.id_project', $idProject)
+                            ->orWhere('mb.id_perusahaan IS NULL', null, false)
+                        ->groupEnd()
+                        ->orderBy('mb.id', 'ASC')
+                        ->limit(1)
+                        ->get()->getRowArray();
+                        
+                    // Fallback pencarian terakhir tanpa filter id_perusahaan (untuk proyek yang id_pengguna-nya kosong)
+                    if (!$masterBarang) {
+                        $masterBarang = $db->table('master_barang mb')
+                            ->select('mb.id')
+                            ->where('mb.nama_barang', $item['nama_item'])
+                            ->where('mb.merk', $merk)
+                            ->where('mb.spesifikasi', $spesifikasi)
+                            ->where('mb.jenis_item', $kategori)
+                            ->orderBy('mb.id', 'ASC')
+                            ->limit(1)
+                            ->get()->getRowArray();
+                    }
+                }
+
+                if ($masterBarang) {
+                    $projectInventory = new ProjectInventoryService();
+                    $projectInventory->catatPemakaian(
+                        idProject:     $idProject,
+                        idBarang:      (int)$masterBarang['id'],
+                        jumlah:        $qtyInput,
+                        idRealisasiSdm: (int)$idHeader,
+                        namaBarang:    $item['nama_item']
+                    );
+                }
+            }
+        } // end foreach $items
 
         $db->transComplete();
 

@@ -38,12 +38,20 @@ if (! function_exists('is_nav_active')) {
 
         if ($path === 'menu-rap') {
             $baseProyek = rtrim(base_url('proyek'), '/');
-            return (str_starts_with($currUrl . '/', $linkUrl . '/')
+            return (
+                str_starts_with($currUrl . '/', $linkUrl . '/')
                 || str_starts_with($currUrl . '/', $baseProyek . '/')
-                || str_contains($currUrl, '/proyek/menu/'))
+                || str_contains($currUrl, '/proyek/menu/')
+            )
                 && !str_contains($currUrl, '/schedule')
                 && !str_contains($currUrl, '/realisasi')
-                && !str_contains($currUrl, '/permintaan');
+                && !str_contains($currUrl, '/permintaan')
+                && !str_contains($currUrl, '/gudang-lapangan')
+                && !str_contains($currUrl, '/dashboard');
+        }
+
+        if ($path === 'realisasi') {
+            return str_contains($currUrl, '/realisasi') || str_contains($currUrl, '/gudang-lapangan');
         }
 
         return $linkUrl === $currUrl

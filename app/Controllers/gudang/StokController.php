@@ -89,20 +89,23 @@ class StokController extends BaseController
             $json = $this->request->getJSON(true);
             $idBarang = isset($json['id_barang']) ? (int) $json['id_barang'] : 0;
             $stokMinimum = isset($json['stok_minimum']) ? (float) $json['stok_minimum'] : -1;
+            $satuan = isset($json['satuan']) ? trim($json['satuan']) : '';
+            $satuanKemasan = isset($json['satuan_kemasan']) ? trim($json['satuan_kemasan']) : null;
+            $konversiFaktor = isset($json['konversi_faktor']) && $json['konversi_faktor'] !== '' ? (float) $json['konversi_faktor'] : 1.0000;
 
-            if ($idBarang <= 0 || $stokMinimum < 0) {
+            if ($idBarang <= 0) {
                 return $this->response->setStatusCode(400)->setJSON([
                     'status'  => 'error',
-                    'message' => 'Data id_barang atau stok_minimum tidak valid.'
+                    'message' => 'Data id_barang tidak valid.'
                 ]);
             }
 
-            $updated = $this->stokService->updateMinimumStock($idPerusahaan, $idBarang, $stokMinimum);
+            $updated = $this->stokService->updateMinimumStock($idPerusahaan, $idBarang, $stokMinimum, $satuan, $satuanKemasan, $konversiFaktor);
 
             if ($updated) {
                 return $this->response->setJSON([
                     'status'  => 'success',
-                    'message' => 'Batas minimum stok berhasil diperbarui.'
+                    'message' => 'Detail barang berhasil diperbarui.'
                 ]);
             }
 

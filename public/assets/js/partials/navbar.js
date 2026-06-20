@@ -14,20 +14,22 @@
         if (isRoot) {
             isActive = currentPath === '' || currentPath === '/';
         } else if (navPath === '/dashboard') {
-            isActive = currentPath.includes('/dashboard');
-        } else if (navPath === '/menu-rap') {
-            isActive = currentPath === navPath
-                || currentPath.startsWith(navPath + '/')
-                || currentPath.startsWith('/proyek/')
+            isActive = currentPath.includes('/dashboard')
+                || (currentPath.startsWith('/proyek/')
                 && !currentPath.includes('/schedule')
                 && !currentPath.includes('/realisasi')
-                && !currentPath.includes('/dashboard');
+                && !currentPath.includes('/permintaan')
+                && !currentPath.includes('/gudang-lapangan')
+                && !currentPath.includes('/rap'));
+        } else if (navPath === '/menu-rap') {
+            isActive = currentPath.includes('/rap');
         } else if (navPath === '/schedule') {
             isActive = currentPath === navPath
                 || currentPath.endsWith('/schedule');
         } else if (navPath === '/realisasi') {
             isActive = currentPath === navPath
-                || currentPath.endsWith('/realisasi');
+                || currentPath.endsWith('/realisasi')
+                || currentPath.includes('/gudang-lapangan');
         } else {
             isActive = currentPath === navPath || currentPath.startsWith(navPath + '/');
         }
@@ -53,10 +55,10 @@
     if (lastSlug) {
         const baseOrigin = window.location.origin;
         if (dashboardLink) {
-            dashboardLink.href = baseOrigin + '/proyek/' + lastSlug + '/dashboard';
+            dashboardLink.href = baseOrigin + '/proyek/' + lastSlug;
         }
         if (rabLink) {
-            rabLink.href = baseOrigin + '/proyek/' + lastSlug;
+            rabLink.href = baseOrigin + '/proyek/' + lastSlug + '/rap';
         }
         if (scheduleLink) {
             scheduleLink.href = baseOrigin + '/proyek/' + lastSlug + '/schedule';
@@ -86,13 +88,81 @@
     if (toggleBtn) {
         const iconHamburger = document.getElementById('nav-icon-hamburger');
         const iconClose     = document.getElementById('nav-icon-close');
+        const navMenu       = document.getElementById('hs-header-base');
 
         toggleBtn.addEventListener('click', function () {
-            const isCurrentlyOpen = toggleBtn.getAttribute('aria-expanded') === 'true';
-            if (iconHamburger) iconHamburger.classList.toggle('hidden', !isCurrentlyOpen);
-            if (iconClose)     iconClose.classList.toggle('hidden',      isCurrentlyOpen);
+            const isOpen = toggleBtn.getAttribute('aria-expanded') === 'true';
+            if (isOpen) {
+                toggleBtn.setAttribute('aria-expanded', 'false');
+                if (navMenu)       navMenu.classList.add('hidden');
+                if (iconHamburger) iconHamburger.classList.remove('hidden');
+                if (iconClose)     iconClose.classList.add('hidden');
+            } else {
+                toggleBtn.setAttribute('aria-expanded', 'true');
+                if (navMenu)       navMenu.classList.remove('hidden');
+                if (iconHamburger) iconHamburger.classList.add('hidden');
+                if (iconClose)     iconClose.classList.remove('hidden');
+            }
         });
     }
+
+    /* ── Dropdown Toggle Logic (Profile & Notifikasi) ─────────── */
+    const profileBtnEl  = document.getElementById('hs-header-base-dropdown');
+    const profileMenuEl = profileBtnEl ? profileBtnEl.closest('.hs-dropdown')?.querySelector('.hs-dropdown-menu') : null;
+
+    const notifBtnEl  = document.getElementById('hs-header-notification-dropdown');
+    const notifMenuEl = notifBtnEl ? notifBtnEl.closest('.hs-dropdown')?.querySelector('.hs-dropdown-menu') : null;
+
+    const profileChevronEl = profileBtnEl ? profileBtnEl.querySelector('svg') : null;
+
+    function toggleNavDropdown(btn, menu, e) {
+        if (!btn || !menu) return;
+        e.stopPropagation();
+        const isOpen = btn.getAttribute('aria-expanded') === 'true';
+
+        if (profileBtnEl && profileBtnEl !== btn) {
+            if (profileMenuEl) { profileMenuEl.classList.add('hidden', 'opacity-0'); profileMenuEl.classList.remove('opacity-100'); }
+            profileBtnEl.setAttribute('aria-expanded', 'false');
+            profileBtnEl.classList.remove('hs-dropdown-open');
+            if (profileChevronEl) profileChevronEl.classList.remove('-rotate-180');
+        }
+        if (notifBtnEl && notifBtnEl !== btn) {
+            if (notifMenuEl) { notifMenuEl.classList.add('hidden', 'opacity-0'); notifMenuEl.classList.remove('opacity-100'); }
+            notifBtnEl.setAttribute('aria-expanded', 'false');
+            notifBtnEl.classList.remove('hs-dropdown-open');
+        }
+
+        if (isOpen) {
+            menu.classList.add('hidden', 'opacity-0');
+            menu.classList.remove('opacity-100');
+            btn.setAttribute('aria-expanded', 'false');
+            btn.classList.remove('hs-dropdown-open');
+            if (btn === profileBtnEl && profileChevronEl) profileChevronEl.classList.remove('-rotate-180');
+        } else {
+            menu.classList.remove('hidden', 'opacity-0');
+            menu.classList.add('opacity-100');
+            btn.setAttribute('aria-expanded', 'true');
+            btn.classList.add('hs-dropdown-open');
+            if (btn === profileBtnEl && profileChevronEl) profileChevronEl.classList.add('-rotate-180');
+        }
+    }
+
+    if (profileBtnEl) profileBtnEl.addEventListener('click', (e) => toggleNavDropdown(profileBtnEl, profileMenuEl, e));
+    if (notifBtnEl)   notifBtnEl.addEventListener('click', (e) => toggleNavDropdown(notifBtnEl, notifMenuEl, e));
+
+    document.addEventListener('click', function () {
+        if (profileBtnEl && profileBtnEl.getAttribute('aria-expanded') === 'true') {
+            if (profileMenuEl) { profileMenuEl.classList.add('hidden', 'opacity-0'); profileMenuEl.classList.remove('opacity-100'); }
+            profileBtnEl.setAttribute('aria-expanded', 'false');
+            profileBtnEl.classList.remove('hs-dropdown-open');
+            if (profileChevronEl) profileChevronEl.classList.remove('-rotate-180');
+        }
+        if (notifBtnEl && notifBtnEl.getAttribute('aria-expanded') === 'true') {
+            if (notifMenuEl) { notifMenuEl.classList.add('hidden', 'opacity-0'); notifMenuEl.classList.remove('opacity-100'); }
+            notifBtnEl.setAttribute('aria-expanded', 'false');
+            notifBtnEl.classList.remove('hs-dropdown-open');
+        }
+    });
 
     /* ── Floating navbar on scroll ──────────────────────────────── */
     const header = document.querySelector('header');

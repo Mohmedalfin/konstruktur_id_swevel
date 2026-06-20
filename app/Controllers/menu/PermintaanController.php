@@ -29,6 +29,7 @@ class PermintaanController extends BaseController
         $projects = $proyekModel->orderBy('nama_proyek', 'ASC')->findAll();
 
         return view('proyek/menu/menu-monitoring', [
+            'title'       => 'Permintaan',
             'userRole'    => $userRole,
             'topbarTitle' => 'PERMINTAAN',
             'projects'    => $projects
@@ -426,6 +427,7 @@ class PermintaanController extends BaseController
         $projects = $proyekModel->orderBy('nama_proyek', 'ASC')->findAll();
 
         return view('proyek/menu/deviasi', [
+            'title'       => 'Laporan Deviasi & Margin',
             'userRole'    => $userRole,
             'topbarTitle' => 'Laporan Deviasi & Margin',
             'projects'    => $projects

@@ -1,35 +1,42 @@
 <!-- Create PO Modal -->
 <div id="modalCreatePO" class="fixed inset-0 z-50 hidden bg-black/50 items-center justify-center font-sans">
-    <div class="bg-white shadow-xl w-full max-w-4xl mx-4 relative flex flex-col max-h-[95vh]">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-4xl mx-4 relative flex flex-col max-h-[95vh] overflow-hidden">
         
-        <!-- Header (Dark) -->
-        <div class="bg-[#111827] p-6 text-center">
-            <h2 class="text-3xl font-bold text-white tracking-widest uppercase">PURCHASE ORDER</h2>
-        </div>
-
-        <!-- Sub Header -->
-        <div class="p-6 pb-2 border-b border-gray-200">
-            <h3 class="text-lg font-bold text-[#1e293b]">Detail Permintaan Barang</h3>
-            <p class="text-[14px] font-bold text-[#475569] mt-0.5" id="create_po_pr_number">Nomor PR: -</p>
+        <!-- Header -->
+        <div class="bg-[#0f172a] px-5 py-4 flex items-center justify-between border-b border-slate-800 rounded-t-xl">
+            <div class="flex items-center gap-4">
+                <div class="w-8 h-8 rounded border border-blue-500/30 flex items-center justify-center bg-transparent text-blue-500">
+                    <i class="fas fa-file-signature text-base md:text-lg"></i>
+                </div>
+                <div>
+                    <h2 class="text-white font-bold text-base md:text-lg">Buat Purchase Order (PO)</h2>
+                    <div class="flex items-center gap-2 mt-0.5">
+                        <p class="text-slate-400 text-[10px] md:text-xs" id="create_po_pr_number">Nomor PR: -</p>
+                    </div>
+                </div>
+            </div>
+            <button type="button" class="w-8 h-8 flex items-center justify-center rounded bg-slate-800/80 text-slate-300 hover:bg-slate-700 hover:text-white transition-colors focus:outline-none" onclick="closeCreatePOModal()">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
 
         <!-- Body -->
-        <div class="p-6 overflow-y-auto">
-            <div class="border border-gray-300 rounded-lg overflow-hidden shadow-sm">
-                <table class="min-w-full divide-y divide-gray-300">
-                    <thead class="bg-[#111827] text-white">
+        <div class="p-6 overflow-y-auto bg-slate-50/30">
+            <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                <table class="min-w-full divide-y divide-slate-200">
+                    <thead class="bg-[#0f172a] text-white">
                         <tr>
-                            <th scope="col" class="px-3 py-3 text-center w-12">
-                                <input type="checkbox" id="checkAllItems" class="rounded border-gray-400 text-blue-600 focus:ring-blue-500 cursor-pointer">
+                            <th scope="col" class="px-4 py-3 text-center w-12">
+                                <input type="checkbox" id="checkAllItems" class="rounded border-slate-600 bg-slate-800 text-primary focus:ring-primary focus:ring-offset-slate-900 cursor-pointer">
                             </th>
-                            <th scope="col" class="px-3 py-3 text-left text-[13px] font-bold">Nama Material</th>
-                            <th scope="col" class="px-3 py-3 text-center text-[13px] font-bold">Volume</th>
-                            <th scope="col" class="px-3 py-3 text-center text-[13px] font-bold">Satuan</th>
-                            <th scope="col" class="px-3 py-3 text-center text-[13px] font-bold">Spesifikasi</th>
-                            <th scope="col" class="px-3 py-3 text-left text-[13px] font-bold w-64">Pilih Supplier</th>
+                            <th scope="col" class="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider">Nama Material</th>
+                            <th scope="col" class="px-4 py-3 text-center text-[11px] font-bold uppercase tracking-wider">Volume</th>
+                            <th scope="col" class="px-4 py-3 text-center text-[11px] font-bold uppercase tracking-wider">Satuan</th>
+                            <th scope="col" class="px-4 py-3 text-center text-[11px] font-bold uppercase tracking-wider">Spesifikasi</th>
+                            <th scope="col" class="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider w-64">Pilih Supplier</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-300 bg-white" id="create_po_items_body">
+                    <tbody class="divide-y divide-slate-200 bg-white" id="create_po_items_body">
                         <!-- Pending items injected via JS -->
                     </tbody>
                 </table>
@@ -37,12 +44,12 @@
         </div>
 
         <!-- Footer -->
-        <div class="p-5 bg-gray-50 border-t border-gray-200 flex justify-center gap-4">
-            <button type="button" class="bg-[#fca5a5] hover:bg-[#f87171] text-[#991b1b] font-bold text-[14px] py-2.5 px-8 rounded transition-colors shadow-sm" onclick="closeCreatePOModal()">
+        <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
+            <button type="button" class="inline-flex items-center justify-center bg-white border border-slate-200 hover:bg-slate-50 hover:text-slate-800 text-slate-600 font-semibold text-sm py-2 px-5 rounded-lg transition-all focus:ring-2 focus:ring-slate-100" onclick="closeCreatePOModal()">
                 Batal
             </button>
-            <button type="button" class="bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-bold text-[14px] py-2.5 px-6 rounded flex items-center gap-2 transition-colors shadow-sm" onclick="submitCreatePO()">
-                <i class="fa-solid fa-file-circle-plus"></i> Buat PO untuk Item Terpilih
+            <button type="button" class="inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white font-semibold text-sm py-2 px-5 rounded-lg transition-all shadow-sm focus:ring-2 focus:ring-primary/20" onclick="submitCreatePO()">
+                <i class="fa-solid fa-file-circle-plus"></i> Buat PO Terpilih
             </button>
         </div>
     </div>

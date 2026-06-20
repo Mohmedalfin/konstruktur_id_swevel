@@ -9,6 +9,7 @@ use App\Models\PermintaanStatusLogModel;
 use App\Models\StokGudangModel;
 use App\Helpers\InventoryHelper;
 use Config\Database;
+use App\Services\ProjectInventoryService;
 
 class PermintaanService
 {
@@ -121,10 +122,11 @@ class PermintaanService
 
         // Fetch detail items
         $details = $db->table('permintaan_detail pd')
-            ->select('pd.*, pr.nama_proyek, pr.lokasi_proyek, rdi.spesifikasi, rdi.merk, COALESCE(sg.stok_aktual, 0) as stok_aktual')
+            ->select('pd.*, pr.nama_proyek, pr.lokasi_proyek, rdi.spesifikasi, rdi.merk, COALESCE(sg.stok_aktual, 0) as stok_aktual, mb.satuan_kemasan, mb.konversi_faktor')
             ->join('projects pr', 'pr.id_project = pd.id_project')
             ->join('rap_detail_item rdi', 'rdi.id_rap_detail_item = pd.id_rap_detail_item', 'left')
             ->join('stok_gudang sg', 'sg.id_barang = pd.id_barang', 'left')
+            ->join('master_barang mb', 'mb.id = pd.id_barang', 'left')
             ->where('pd.id_permintaan', $id)
             ->orderBy('pr.nama_proyek', 'ASC')
             ->orderBy('pd.nama_barang', 'ASC')
@@ -161,11 +163,15 @@ class PermintaanService
                 'nama_barang'        => $det['nama_barang'],
                 'jumlah'             => (float) $det['jumlah'],
                 'satuan'             => $det['satuan'],
+                'satuan_kemasan'     => $det['satuan_kemasan'] ?? null,
+                'konversi_faktor'    => $det['konversi_faktor'] ?? 1,
                 'spesifikasi'        => $det['spesifikasi'] ?? '-',
                 'merk'               => $det['merk'] ?? '-',
                 'kategori'           => $det['jenis_item'] ?? 'Bahan',
                 'keterangan'         => $det['keterangan'] ?? '-',
                 'stok_aktual'        => (float) ($det['stok_aktual'] ?? 0),
+                'is_over_limit'      => $det['is_over_limit'] ?? 0,
+                'jumlah_over_limit'  => $det['jumlah_over_limit'] ?? 0,
             ];
         }
 
@@ -220,6 +226,7 @@ class PermintaanService
             
             $isOverLimit = 0;
             $jumlahOverLimit = 0;
+            $finalJumlah = $jumlah;
 
             if ($idRapDetailItem) {
                 if (!isset($cumulativeRequestQty[$idRapDetailItem])) {
@@ -227,7 +234,6 @@ class PermintaanService
                 }
                 
                 $qtyBeforeThis = $cumulativeRequestQty[$idRapDetailItem];
-                $cumulativeRequestQty[$idRapDetailItem] += $jumlah;
 
                 if (!isset($projectRapItemsCache[$idProject])) {
                     $projectRapItemsCache[$idProject] = $this->getProjectRapItems($idProject);
@@ -250,12 +256,19 @@ class PermintaanService
                         $jumlahOverLimit = $jumlah - max(0, $availableForThisItem);
                         $isGlobalOverLimit = 1;
                     }
+
+                    if (!empty($rapItem['satuan_kemasan']) && (float)$rapItem['konversi_faktor'] > 1) {
+                        $kf = (float)$rapItem['konversi_faktor'];
+                        $finalJumlah = ceil($jumlah / $kf) * $kf;
+                    }
                 }
+                $cumulativeRequestQty[$idRapDetailItem] += $finalJumlah;
             }
             
             $processedItems[] = array_merge($item, [
                 'is_over_limit' => $isOverLimit,
-                'jumlah_over_limit' => $jumlahOverLimit
+                'jumlah_over_limit' => $jumlahOverLimit,
+                'final_jumlah' => $finalJumlah
             ]);
         }
         
@@ -299,7 +312,7 @@ class PermintaanService
                 'id_rap_detail_item' => !empty($item['id_rap_detail_item']) ? (int) $item['id_rap_detail_item'] : null,
                 'id_barang'          => $idBarang,
                 'nama_barang'        => $namaBarang,
-                'jumlah'             => (float) $item['jumlah'],
+                'jumlah'             => $item['final_jumlah'],
                 'satuan'             => $satuan,
                 'jenis_item'         => $jenisItem,
                 'is_over_limit'      => $item['is_over_limit'],
@@ -333,6 +346,11 @@ class PermintaanService
 
     /**
      * Update status of request
+     *
+     * Alur Stok:
+     * - 'diproses'/'selesai' : Potong stok_gudang (Central)
+     * - 'selesai'            : TAMBAH stok_proyek (Lapangan) — barang tiba di proyek
+     * - 'pending'/'ditolak'  : Kembalikan stok_gudang + batalkan stok_proyek (jika sudah pernah 'selesai')
      */
     public function updateStatus(int $id, string $status): bool
     {
@@ -348,36 +366,93 @@ class PermintaanService
             throw new \InvalidArgumentException("Permintaan tidak ditemukan.");
         }
 
-        $stokTerpotong = (int) ($req['stok_terpotong'] ?? 0);
-        $shouldDeduct = in_array($status, ['diproses', 'selesai']);
-        $shouldRestore = in_array($status, ['pending', 'ditolak']);
+        $stokTerpotong      = (int) ($req['stok_terpotong'] ?? 0);
+        $stokProyekMasuk    = (int) ($req['stok_proyek_masuk'] ?? 0);  // flag: apakah sudah masuk ke stok proyek
+        $statusLama         = $req['status'];
 
+        $shouldDeduct  = in_array($status, ['diproses', 'selesai']);
+        $shouldRestore = in_array($status, ['pending', 'ditolak']);
+        $isSelesai     = ($status === 'selesai');
+
+        $details = $db->table('permintaan_detail pd')
+            ->select('pd.*, pr.id_pengguna as id_perusahaan, mb.konversi_faktor')
+            ->join('projects pr', 'pr.id_project = pd.id_project', 'left')
+            ->join('master_barang mb', 'mb.id = pd.id_barang', 'left')
+            ->where('pd.id_permintaan', $id)
+            ->get()->getResultArray();
+
+        $projectInventory = new ProjectInventoryService();
+        $nomor = $req['nomor_permintaan'] ?? "#$id";
+
+        // --- Potong stok Gudang Central ---
         if ($shouldDeduct && $stokTerpotong === 0) {
-            // Deduct stock
-            $details = $db->table('permintaan_detail')->where('id_permintaan', $id)->get()->getResultArray();
             foreach ($details as $det) {
                 if ($det['id_barang']) {
+                    $kf = (float)($det['konversi_faktor'] ?? 1);
+                    if ($kf <= 0) $kf = 1;
+                    $jumlahGudang = (float)$det['jumlah'] / $kf;
+
                     $db->table('stok_gudang')
                        ->where('id_barang', $det['id_barang'])
-                       ->set('stok_aktual', 'stok_aktual - ' . (float)$det['jumlah'], false)
+                       ->set('stok_aktual', 'stok_aktual - ' . $jumlahGudang, false)
                        ->set('updated_at', date('Y-m-d H:i:s'))
                        ->update();
                 }
             }
             $this->permintaanModel->update($id, ['stok_terpotong' => 1]);
-        } elseif ($shouldRestore && $stokTerpotong === 1) {
-            // Restore stock
-            $details = $db->table('permintaan_detail')->where('id_permintaan', $id)->get()->getResultArray();
+            $stokTerpotong = 1;
+        }
+
+        // --- Tambah stok Lapangan Proyek (hanya saat status = 'selesai') ---
+        if ($isSelesai && $stokProyekMasuk === 0) {
             foreach ($details as $det) {
-                if ($det['id_barang']) {
-                    $db->table('stok_gudang')
-                       ->where('id_barang', $det['id_barang'])
-                       ->set('stok_aktual', 'stok_aktual + ' . (float)$det['jumlah'], false)
-                       ->set('updated_at', date('Y-m-d H:i:s'))
-                       ->update();
+                if ($det['id_barang'] && $det['id_project']) {
+                    $projectInventory->terimaDariCentral(
+                        idProject:    (int)$det['id_project'],
+                        idBarang:     (int)$det['id_barang'],
+                        jumlah:       (float)$det['jumlah'],
+                        idPermintaan: $id,
+                        nomor:        $nomor
+                    );
                 }
             }
-            $this->permintaanModel->update($id, ['stok_terpotong' => 0]);
+            $this->permintaanModel->update($id, ['stok_proyek_masuk' => 1]);
+            $stokProyekMasuk = 1;
+        }
+
+        // --- Kembalikan stok Gudang Central + batalkan stok Lapangan ---
+        if ($shouldRestore) {
+            if ($stokTerpotong === 1) {
+                foreach ($details as $det) {
+                    if ($det['id_barang']) {
+                        $kf = (float)($det['konversi_faktor'] ?? 1);
+                        if ($kf <= 0) $kf = 1;
+                        $jumlahGudang = (float)$det['jumlah'] / $kf;
+
+                        $db->table('stok_gudang')
+                           ->where('id_barang', $det['id_barang'])
+                           ->set('stok_aktual', 'stok_aktual + ' . $jumlahGudang, false)
+                           ->set('updated_at', date('Y-m-d H:i:s'))
+                           ->update();
+                    }
+                }
+                $this->permintaanModel->update($id, ['stok_terpotong' => 0]);
+            }
+
+            if ($stokProyekMasuk === 1) {
+                foreach ($details as $det) {
+                    if ($det['id_barang'] && $det['id_project']) {
+                        $projectInventory->batalPenerimaan(
+                            idProject:    (int)$det['id_project'],
+                            idBarang:     (int)$det['id_barang'],
+                            jumlah:       (float)$det['jumlah'],
+                            idPermintaan: $id,
+                            nomor:        $nomor
+                        );
+                    }
+                }
+                $this->permintaanModel->update($id, ['stok_proyek_masuk' => 0]);
+            }
         }
 
         $updated = $this->permintaanModel->update($id, [
@@ -389,16 +464,16 @@ class PermintaanService
             $pemohonId = session()->get('id_pengguna') ?? session()->get('id_user') ?? null;
             
             $keteranganMap = [
-                'pending'   => 'Permintaan dibuat',
+                'pending'   => 'Permintaan dikembalikan ke status menunggu',
                 'disetujui' => 'Permintaan diterima oleh gudang',
                 'diproses'  => 'Permintaan sedang diproses oleh gudang (Stok dipotong)',
-                'selesai'   => 'Permintaan selesai (Telah diterima di lapangan)',
+                'selesai'   => 'Permintaan selesai — Material tiba di lapangan proyek (Stok Proyek ditambah)',
                 'ditolak'   => 'Permintaan ditolak',
             ];
             $keterangan = $keteranganMap[$status] ?? ('Status diubah menjadi ' . $status);
 
             if ($shouldRestore && $stokTerpotong === 1) {
-                $keterangan .= ' (Stok dikembalikan)';
+                $keterangan .= ' (Stok Gudang & Proyek dikembalikan)';
             }
 
             $db->table('permintaan_status_log')->insert([
@@ -422,15 +497,18 @@ class PermintaanService
     {
         $db = Database::connect();
 
+        $idPerusahaan = session()->get('id_perusahaan') ?? 0;
+
         $budgetItems = $db->table('rap_detail_item rdi')
             ->select('MIN(rdi.id_rap_detail_item) as id_rap_detail_item, rdi.nama_item as nama, rdi.satuan, rdi.spesifikasi, rdi.merk, rdi.jenis_item as kategori')
             ->select('SUM(rd.volume * rdi.koefisien) as qty_budget', false)
             ->select('COALESCE(MAX(sg.stok_aktual), 0) as stok_aktual', false)
+            ->select('MAX(mb.satuan_kemasan) as satuan_kemasan, MAX(mb.konversi_faktor) as konversi_faktor', false)
             ->join('rap_detail rd', 'rd.id_rap_detail = rdi.id_rap_detail')
             ->join('rap r', 'r.id_rap = rd.id_rap')
             ->join('projects p', 'p.id_project = r.id_project')
-            ->join('master_barang mb', 'mb.nama_barang COLLATE utf8mb4_general_ci = rdi.nama_item COLLATE utf8mb4_general_ci AND mb.merk COLLATE utf8mb4_general_ci = COALESCE(rdi.merk, \'Tanpa Merk\') COLLATE utf8mb4_general_ci AND mb.spesifikasi COLLATE utf8mb4_general_ci = COALESCE(rdi.spesifikasi, \'-\') COLLATE utf8mb4_general_ci AND mb.id_perusahaan = p.id_pengguna', 'left', false)
-            ->join('stok_gudang sg', 'sg.id_barang = mb.id', 'left')
+            ->join('master_barang mb', 'mb.nama_barang COLLATE utf8mb4_general_ci = rdi.nama_item COLLATE utf8mb4_general_ci AND mb.merk COLLATE utf8mb4_general_ci = COALESCE(NULLIF(TRIM(rdi.merk), \'\'), \'Tanpa Merk\') COLLATE utf8mb4_general_ci AND mb.spesifikasi COLLATE utf8mb4_general_ci = COALESCE(NULLIF(TRIM(rdi.spesifikasi), \'\'), \'-\') COLLATE utf8mb4_general_ci AND (mb.id_perusahaan = p.id_pengguna OR mb.id_perusahaan = ' . (int)$idPerusahaan . ')', 'left', false)
+            ->join('stok_gudang sg', 'sg.id_barang = mb.id AND sg.id_perusahaan = mb.id_perusahaan', 'left')
             ->where('r.id_project', $projectId)
             ->groupStart()
                 ->where('rdi.jenis_item', 'Bahan')
@@ -465,6 +543,8 @@ class PermintaanService
             $item['qty_budget']  = (float) $item['qty_budget'];
             $item['qty_used']    = $used;
             $item['sisa_volume'] = $item['qty_budget'] - $used;
+            $item['satuan_kemasan'] = $item['satuan_kemasan'] ?? null;
+            $item['konversi_faktor'] = $item['konversi_faktor'] ? (float) $item['konversi_faktor'] : 1.0;
         }
 
         return $budgetItems;

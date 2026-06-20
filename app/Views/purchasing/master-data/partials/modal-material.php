@@ -2,26 +2,33 @@
 <div id="modalTambahMaterial" class="fixed inset-0 z-50 hidden bg-black/50 items-center justify-center font-sans">
     <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 relative flex flex-col max-h-[90vh]">
         <!-- Header -->
-        <div class="flex justify-between items-center p-5 border-b border-gray-200">
-            <h3 class="text-[17px] font-bold text-[#1e293b]">Tambah Material</h3>
-            <button type="button" class="text-gray-400 hover:text-gray-700 transition-colors size-8 flex justify-center items-center rounded-lg hover:bg-gray-100" onclick="closeTambahModal()">
-                <i class="fa-solid fa-xmark text-xl"></i>
+        <div class="bg-[#0f172a] px-5 py-4 flex items-center justify-between border-b border-slate-800 rounded-t-xl">
+            <div class="flex items-center gap-4">
+                <div class="w-8 h-8 rounded border border-blue-500/30 flex items-center justify-center bg-transparent text-blue-500">
+                    <i class="fas fa-cube text-base"></i>
+                </div>
+                <div>
+                    <h2 class="text-white font-bold text-base">Tambah Material</h2>
+                </div>
+            </div>
+            <button type="button" class="w-8 h-8 flex items-center justify-center rounded bg-slate-800/80 text-slate-300 hover:bg-slate-700 hover:text-white transition-colors focus:outline-none" onclick="closeTambahModal()">
+                <i class="fas fa-times"></i>
             </button>
         </div>
 
         <!-- Body -->
-        <div class="p-5 overflow-y-auto">
+        <div class="p-6 overflow-y-auto bg-slate-50/30">
             <form id="formTambahMaterial">
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-[13px] font-bold text-[#1e293b] mb-1.5">Nama Material</label>
-                        <input type="text" name="nama_material" class="py-2 px-3 block w-full border-gray-300 rounded-md text-[13px] focus:border-blue-500 focus:ring-blue-500 border" placeholder="Masukkan nama material">
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Nama Material</label>
+                        <input type="text" name="nama_material" class="w-full px-3 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors shadow-sm" placeholder="Masukkan nama material">
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-[13px] font-bold text-[#1e293b] mb-1.5">Kategori</label>
-                            <select name="kategori" id="tambah_kategori" class="py-2 px-3 block w-full border-gray-300 rounded-md text-[13px] focus:border-blue-500 focus:ring-blue-500 border">
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Kategori</label>
+                            <select name="kategori" id="tambah_kategori" class="w-full px-3 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors shadow-sm">
                                 <option value="" disabled selected>Pilih Kategori</option>
                                 <option value="Struktur">Struktur</option>
                                 <option value="Finishing">Finishing</option>
@@ -31,26 +38,27 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-[13px] font-bold text-[#1e293b] mb-1.5">Satuan</label>
-                            <input type="text" name="satuan" id="tambah_satuan" list="datalist-satuan" class="py-2 px-3 block w-full border-gray-300 rounded-md text-[13px] focus:border-blue-500 focus:ring-blue-500 border" placeholder="Ketik atau pilih satuan">
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Satuan</label>
+                            <input type="text" name="satuan" id="tambah_satuan" list="datalist-satuan" class="w-full px-3 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors shadow-sm" placeholder="Ketik atau pilih satuan">
                         </div>
                     </div>
 
                     <div>
-                        <label class="block text-[13px] font-bold text-[#1e293b] mb-1.5">Spesifikasi</label>
-                        <input type="text" name="spesifikasi" class="py-2 px-3 block w-full border-gray-300 rounded-md text-[13px] focus:border-blue-500 focus:ring-blue-500 border" placeholder="Contoh: SNI, Standard, 3 inch...">
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Spesifikasi</label>
+                        <input type="text" name="spesifikasi" class="w-full px-3 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors shadow-sm" placeholder="Contoh: SNI, Standard, 3 inch...">
                     </div>
                 </div>
             </form>
         </div>
 
         <!-- Footer -->
-        <div class="flex justify-end items-center gap-x-2 p-5 border-t border-gray-200">
-            <button type="button" class="py-2 px-4 inline-flex items-center gap-x-2 text-[13px] font-bold rounded-lg bg-[#ef4444] text-white hover:bg-red-600 transition-colors" onclick="closeTambahModal()">
+        <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-100 bg-white rounded-b-xl">
+            <button type="button" class="px-5 py-2.5 text-xs font-bold text-slate-500 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors focus:outline-none" onclick="closeTambahModal()">
                 Batal
             </button>
-            <button type="button" class="py-2 px-4 inline-flex items-center gap-x-2 text-[13px] font-bold rounded-lg bg-[#2563eb] text-white hover:bg-blue-700 transition-colors" onclick="submitTambahMaterial()">
-                Simpan Perubahan
+            <button type="button" class="px-5 py-2.5 text-xs font-bold text-white bg-primary hover:bg-primary/90 rounded-lg transition-colors focus:outline-none shadow-sm inline-flex items-center gap-2" onclick="submitTambahMaterial()">
+                <i class="fas fa-save"></i>
+                <span>Simpan Perubahan</span>
             </button>
         </div>
     </div>
@@ -60,27 +68,34 @@
 <div id="modalEditMaterial" class="fixed inset-0 z-50 hidden bg-black/50 items-center justify-center font-sans">
     <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 relative flex flex-col max-h-[90vh]">
         <!-- Header -->
-        <div class="flex justify-between items-center p-5 border-b border-gray-200">
-            <h3 class="text-[17px] font-bold text-[#1e293b]">Edit Material</h3>
-            <button type="button" class="text-gray-400 hover:text-gray-700 transition-colors size-8 flex justify-center items-center rounded-lg hover:bg-gray-100" onclick="closeEditModal()">
-                <i class="fa-solid fa-xmark text-xl"></i>
+        <div class="bg-[#0f172a] px-5 py-4 flex items-center justify-between border-b border-slate-800 rounded-t-xl">
+            <div class="flex items-center gap-4">
+                <div class="w-8 h-8 rounded border border-blue-500/30 flex items-center justify-center bg-transparent text-blue-500">
+                    <i class="fas fa-edit text-base"></i>
+                </div>
+                <div>
+                    <h2 class="text-white font-bold text-base">Edit Material</h2>
+                </div>
+            </div>
+            <button type="button" class="w-8 h-8 flex items-center justify-center rounded bg-slate-800/80 text-slate-300 hover:bg-slate-700 hover:text-white transition-colors focus:outline-none" onclick="closeEditModal()">
+                <i class="fas fa-times"></i>
             </button>
         </div>
 
         <!-- Body -->
-        <div class="p-5 overflow-y-auto">
+        <div class="p-6 overflow-y-auto bg-slate-50/30">
             <form id="formEditMaterial">
                 <input type="hidden" name="id" id="edit_id">
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-[13px] font-bold text-[#1e293b] mb-1.5">Nama Material</label>
-                        <input type="text" name="nama_material" id="edit_nama_material" class="py-2 px-3 block w-full border-gray-300 rounded-md text-[13px] focus:border-blue-500 focus:ring-blue-500 border">
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Nama Material</label>
+                        <input type="text" name="nama_material" id="edit_nama_material" class="w-full px-3 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors shadow-sm">
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-[13px] font-bold text-[#1e293b] mb-1.5">Kategori</label>
-                            <select name="kategori" id="edit_kategori" class="py-2 px-3 block w-full border-gray-300 rounded-md text-[13px] focus:border-blue-500 focus:ring-blue-500 border">
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Kategori</label>
+                            <select name="kategori" id="edit_kategori" class="w-full px-3 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors shadow-sm">
                                 <option value="Struktur">Struktur</option>
                                 <option value="Finishing">Finishing</option>
                                 <option value="Atap">Atap</option>
@@ -89,26 +104,27 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-[13px] font-bold text-[#1e293b] mb-1.5">Satuan</label>
-                            <input type="text" name="satuan" id="edit_satuan" list="datalist-satuan" class="py-2 px-3 block w-full border-gray-300 rounded-md text-[13px] focus:border-blue-500 focus:ring-blue-500 border" placeholder="Ketik atau pilih satuan">
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Satuan</label>
+                            <input type="text" name="satuan" id="edit_satuan" list="datalist-satuan" class="w-full px-3 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors shadow-sm" placeholder="Ketik atau pilih satuan">
                         </div>
                     </div>
 
                     <div>
-                        <label class="block text-[13px] font-bold text-[#1e293b] mb-1.5">Spesifikasi</label>
-                        <input type="text" name="spesifikasi" id="edit_spesifikasi" class="py-2 px-3 block w-full border-gray-300 rounded-md text-[13px] focus:border-blue-500 focus:ring-blue-500 border">
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Spesifikasi</label>
+                        <input type="text" name="spesifikasi" id="edit_spesifikasi" class="w-full px-3 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors shadow-sm">
                     </div>
                 </div>
             </form>
         </div>
 
         <!-- Footer -->
-        <div class="flex justify-end items-center gap-x-2 p-5 border-t border-gray-200">
-            <button type="button" class="py-2 px-4 inline-flex items-center gap-x-2 text-[13px] font-bold rounded-lg bg-[#ef4444] text-white hover:bg-red-600 transition-colors" onclick="closeEditModal()">
+        <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-100 bg-white rounded-b-xl">
+            <button type="button" class="px-5 py-2.5 text-xs font-bold text-slate-500 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors focus:outline-none" onclick="closeEditModal()">
                 Batal
             </button>
-            <button type="button" class="py-2 px-4 inline-flex items-center gap-x-2 text-[13px] font-bold rounded-lg bg-[#2563eb] text-white hover:bg-blue-700 transition-colors" onclick="submitEditMaterial()">
-                Simpan Perubahan
+            <button type="button" class="px-5 py-2.5 text-xs font-bold text-white bg-primary hover:bg-primary/90 rounded-lg transition-colors focus:outline-none shadow-sm inline-flex items-center gap-2" onclick="submitEditMaterial()">
+                <i class="fas fa-save"></i>
+                <span>Simpan Perubahan</span>
             </button>
         </div>
     </div>

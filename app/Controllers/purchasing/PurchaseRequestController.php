@@ -47,7 +47,7 @@ class PurchaseRequestController extends BaseController
         }
 
         $data = [
-            'title' => 'Purchase Request - Kontraktor.id',
+            'title' => 'Purchase Request',
             'prs'   => $prs,
             'stats' => $stats
         ];
@@ -85,7 +85,7 @@ class PurchaseRequestController extends BaseController
         
         // Get all pending items for this PR
         $items = $db->table('purchase_request_items')
-            ->select('purchase_request_items.*, master_barang.nama_barang as nama_material, master_barang.satuan, master_barang.spesifikasi')
+            ->select('purchase_request_items.*, master_barang.nama_barang as nama_material, master_barang.satuan, master_barang.satuan_kemasan, master_barang.spesifikasi')
             ->join('master_barang', 'master_barang.id = purchase_request_items.id_barang')
             ->where('pr_id', $id)
             ->where('status', 'pending')
@@ -194,7 +194,8 @@ class PurchaseRequestController extends BaseController
                     ]);
 
                     $mat = $db->table('master_barang')->where('id', $item->material_id ?? $item->id_barang)->get()->getRow();
-                    $poSummary['items_desc'][] = $mat->nama_barang . ' ' . $mat->spesifikasi . ' ' . $item->volume . ' ' . $mat->satuan;
+                    $satuan_text = $mat->satuan_kemasan ?: $mat->satuan;
+                    $poSummary['items_desc'][] = $mat->nama_barang . ' ' . $mat->spesifikasi . ' ' . $item->volume . ' ' . $satuan_text;
                 }
 
                 $poSummary['items_desc'] = implode(', ', $poSummary['items_desc']);

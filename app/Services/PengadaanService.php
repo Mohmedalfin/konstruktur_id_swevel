@@ -223,7 +223,7 @@ class PengadaanService
         if (!$pr) return null;
 
         $items = $db->table('purchase_request_items pri')
-            ->select('pri.*, mb.kode_barang, mb.nama_barang, mb.satuan, mb.spesifikasi, mb.merk')
+            ->select('pri.*, mb.kode_barang, mb.nama_barang, mb.satuan, mb.satuan_kemasan, mb.spesifikasi, mb.merk')
             ->join('master_barang mb', 'mb.id = pri.id_barang', 'left')
             ->where('pri.pr_id', $prId)
             ->get()
@@ -237,7 +237,7 @@ class PengadaanService
     {
         $db = Database::connect();
         return $db->table('stok_gudang sg')
-            ->select('sg.*, mb.kode_barang, mb.nama_barang, mb.satuan, mb.spesifikasi, mb.merk')
+            ->select('sg.*, mb.kode_barang, mb.nama_barang, mb.satuan, mb.satuan_kemasan, mb.spesifikasi, mb.merk')
             ->join('master_barang mb', 'mb.id = sg.id_barang', 'inner')
             ->where('sg.id_perusahaan', $idPerusahaan)
             ->where('sg.stok_aktual <= sg.stok_minimum')
@@ -249,7 +249,7 @@ class PengadaanService
     {
         $db = Database::connect();
         $builder = $db->table('master_barang mb')
-            ->select('mb.id as id_barang, mb.kode_barang, mb.nama_barang, mb.satuan, mb.spesifikasi, COALESCE(sg.stok_aktual, 0) as stok_aktual, COALESCE(sg.stok_minimum, 0) as stok_minimum')
+            ->select('mb.id as id_barang, mb.kode_barang, mb.nama_barang, mb.satuan, mb.satuan_kemasan, mb.spesifikasi, COALESCE(sg.stok_aktual, 0) as stok_aktual, COALESCE(sg.stok_minimum, 0) as stok_minimum')
             ->join('stok_gudang sg', 'sg.id_barang = mb.id AND sg.id_perusahaan = ' . $db->escape($idPerusahaan), 'left')
             ->where('mb.id_perusahaan', $idPerusahaan);
 

@@ -5,7 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="base-url" content="<?= base_url() ?>">
-    <title><?= esc($title ?? 'Purchasing') ?></title>
+    <?php
+    $pageTitle = $title ?? 'Purchasing';
+    if (strpos($pageTitle, ' - Kontraktor.id') === false) {
+        $pageTitle .= ' - Kontraktor.id';
+    }
+    ?>
+    <title><?= esc($pageTitle) ?></title>
 
     <link rel="stylesheet" href="<?= base_url('assets/css/output.css') ?>">
     <link rel="stylesheet" href="<?= base_url('assets/fontawesome/css/all.min.css') ?>">
@@ -38,6 +44,8 @@
     <script src="<?= base_url('assets/js/preline.js') ?>"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="module" src="<?= base_url('js/shared/ui/confirm.js') ?>"></script>
+    <script type="module" src="<?= base_url('js/shared/ui/toast.js') ?>"></script>
     <script>
         window.addEventListener('load', () => {
             window.HSStaticMethods?.autoInit();

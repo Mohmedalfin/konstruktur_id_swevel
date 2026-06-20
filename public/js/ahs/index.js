@@ -294,5 +294,5 @@ window.goBackToRab = function() {
     // Fallback if no return URL in session
     let slug = '';
     try { slug = localStorage.getItem('lastProjectSlug'); } catch (_) {}
-    window.location.href = slug ? `/proyek/${slug}` : '/proyek';
+    window.location.href = slug ? `/proyek/${slug}/rap` : '/proyek';
 };

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tambah AHS</title>
+    <title>Tambah AHS - Kontraktor.id</title>
     <link href="<?= base_url('assets/css/output.css') ?>" rel="stylesheet">
     <link href="<?= base_url('assets/fontawesome/css/all.min.css') ?>" rel="stylesheet">
 </head>
@@ -30,7 +30,7 @@
 
     <script src="<?= base_url('node_modules/preline/dist/preline.js') ?>"></script>
     <script src="<?= base_url('assets/js/preline.js') ?>"></script>
-    <script src="<?= base_url('assets/js/partials/navbar.js') ?>"></script>
+
     <script>
         (function () {
             const params = new URLSearchParams(window.location.search);
@@ -48,7 +48,7 @@
 
             // Build the return URL so after submit we land back on the right project
             if (slug) {
-                sessionStorage.setItem('rab_return_url', `/proyek/${slug}`);
+                sessionStorage.setItem('rab_return_url', `/proyek/${slug}/rap`);
                 localStorage.setItem('lastProjectSlug', slug);
             }
 

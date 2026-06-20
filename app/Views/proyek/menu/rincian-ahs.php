@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rincian AHS</title>
+    <title>Rincian AHS - Kontraktor.id</title>
     <link href="<?= base_url('assets/css/output.css') ?>" rel="stylesheet">
 </head>
 <body class="bg-gray-50 min-h-screen">
@@ -29,7 +29,7 @@
     <script src="<?= base_url('assets/js/preline.js') ?>"></script>
     <script src="<?= base_url('node_modules/preline/dist/preline.js') ?>"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="<?= base_url('assets/js/partials/navbar.js') ?>"></script>
+
     <script type="module" src="<?= base_url('js/ahs/index.js') ?>"></script>
 </body>
 </html>

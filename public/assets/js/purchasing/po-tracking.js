@@ -46,12 +46,12 @@ function openDetailModal(id) {
             modalDetail.classList.remove('hidden');
             modalDetail.classList.add('flex');
         } else {
-            Swal.fire('Error', 'Data tidak ditemukan', 'error');
+            window.Toast.show('Data tidak ditemukan', 'error');
         }
     })
     .catch(err => {
         console.error(err);
-        Swal.fire('Error', 'Terjadi kesalahan sistem', 'error');
+        window.Toast.show('Terjadi kesalahan sistem', 'error');
     });
 }
 
@@ -181,17 +181,8 @@ function renderStepperAndCTA(po) {
 }
 
 function updateStatus(newStatus, title, text) {
-    Swal.fire({
-        title: title,
-        text: text,
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#2563eb',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Ya, Konfirmasi',
-        cancelButtonText: 'Batal'
-    }).then((result) => {
-        if (result.isConfirmed) {
+    window.confirmAction(title, text, 'Ya, Konfirmasi').then((isConfirmed) => {
+        if (isConfirmed) {
             fetch(`/purchasing/po-tracking/status/${currentPoId}`, {
                 method: 'PUT',
                 headers: {
@@ -203,22 +194,17 @@ function updateStatus(newStatus, title, text) {
             .then(res => res.json())
             .then(data => {
                 if(data.status === 'success') {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Berhasil',
-                        text: data.message,
-                        showConfirmButton: false,
-                        timer: 1500
-                    }).then(() => {
+                    window.Toast.show(data.message, 'success');
+                    setTimeout(() => {
                         window.location.reload();
-                    });
+                    }, 1000);
                 } else {
-                    Swal.fire('Gagal', data.message, 'error');
+                    window.Toast.show(data.message, 'error');
                 }
             })
             .catch(err => {
                 console.error(err);
-                Swal.fire('Error', 'Terjadi kesalahan sistem', 'error');
+                window.Toast.show('Terjadi kesalahan sistem', 'error');
             });
         }
     });

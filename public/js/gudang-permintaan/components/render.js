@@ -381,14 +381,35 @@ export function renderDetailModal(req, userRole) {
                         </div>
                     `;
                     groupedItems[cat].forEach(item => {
-                        const isKurang = parseFloat(item.stok_aktual) < parseFloat(item.jumlah);
+                        const hasKemasan = item.satuan_kemasan && String(item.satuan_kemasan).trim() !== '';
+                        const kf = parseFloat(item.konversi_faktor) || 1;
+                        const isDifferentName = hasKemasan && String(item.satuan_kemasan).toLowerCase() !== String(item.satuan).toLowerCase();
+                        
+                        const stokBase = parseFloat(item.stok_aktual || 0) * kf;
+                        const isKurang = stokBase < parseFloat(item.jumlah);
+                        
                         const warningHtml = isKurang ? `<span class="px-2 py-0.5 text-[9px] font-bold bg-rose-100 text-rose-800 border border-rose-200 rounded uppercase ml-2 shadow-sm">Stok Kurang</span>` : '';
                         const stokColor = isKurang ? 'text-rose-600' : 'text-emerald-600';
                         
                         const overLimitBadge = (item.is_over_limit === '1' || item.is_over_limit === 1)
                             ? `<span class="px-2 py-0.5 text-[9px] font-bold bg-red-100 text-red-700 border border-red-200 rounded uppercase ml-2 shadow-sm"><i class="fas fa-exclamation-triangle mr-1"></i> Over: ${parseFloat(item.jumlah_over_limit)} ${item.satuan}</span>`
                             : '';
+
+                        let jumlahDisplayHtml = `<span class="text-sm font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-3 py-1 rounded-lg shadow-sm whitespace-nowrap">${parseFloat(item.jumlah)} <span class="text-[10px] font-semibold text-emerald-500 ml-0.5">${item.satuan}</span></span>`;
                         
+                        if (hasKemasan && (kf > 1 || isDifferentName)) {
+                            const jumlahKemasan = parseFloat(item.jumlah) / kf;
+                            // avoid long decimals
+                            const qtyKemasanFmt = Number.isInteger(jumlahKemasan) ? jumlahKemasan : jumlahKemasan.toFixed(2).replace(/\.?0+$/, '');
+                            
+                            jumlahDisplayHtml = `
+                                <div class="flex flex-col items-end gap-1.5">
+                                    <span class="text-sm font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-3 py-1 rounded-lg shadow-sm whitespace-nowrap">${qtyKemasanFmt} <span class="text-[10px] font-semibold text-emerald-500 ml-0.5">${item.satuan_kemasan}</span></span>
+                                    <span class="text-[9px] text-slate-500 font-medium bg-slate-50 px-2 py-0.5 rounded border border-slate-200 shadow-sm whitespace-nowrap"><i class="fas fa-exchange-alt mr-1 text-slate-400"></i> ${parseFloat(item.jumlah)} ${item.satuan}</span>
+                                </div>
+                            `;
+                        }
+
                         itemsHtml += `
                             <div class="flex items-center justify-between py-2.5 border-b border-slate-100 last:border-0 px-2 hover:bg-slate-50 transition-colors rounded-lg">
                                 <div class="flex flex-col">
@@ -396,10 +417,10 @@ export function renderDetailModal(req, userRole) {
                                         <span class="text-sm font-bold text-slate-800">${item.nama_barang}</span>
                                         ${overLimitBadge}
                                     </div>
-                                    <span class="text-[10px] font-medium text-slate-500 mt-0.5 flex flex-wrap items-center gap-1">Stok Gudang: <span class="font-bold ${stokColor}">${parseFloat(item.stok_aktual || 0)} ${item.satuan}</span> ${warningHtml}</span>
+                                    <span class="text-[10px] font-medium text-slate-500 mt-0.5 flex flex-wrap items-center gap-1">Stok Gudang: <span class="font-bold ${stokColor}">${parseFloat(item.stok_aktual || 0)} ${item.satuan_kemasan || item.satuan}</span> ${warningHtml}</span>
                                 </div>
-                                <div class="text-right flex flex-col items-end">
-                                    <span class="text-sm font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-3 py-1 rounded-lg shadow-sm whitespace-nowrap">${parseFloat(item.jumlah)} <span class="text-[10px] font-semibold text-emerald-500 ml-0.5">${item.satuan}</span></span>
+                                <div class="text-right flex flex-col items-end justify-center">
+                                    ${jumlahDisplayHtml}
                                 </div>
                             </div>
                         `;

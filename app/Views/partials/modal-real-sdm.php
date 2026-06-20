@@ -31,12 +31,7 @@
     }
     
     #modal-real-sdm [role="tablist"] button.active {
-        border-bottom-color: #16a34a !important; /* green-600 */
-        color: #16a34a !important; /* green-600 */
-        background-color: transparent !important;
-    }
-    #modal-real-sdm [role="tablist"] button.active i {
-        color: #16a34a !important; /* green-600 */
+        /* Removed old border-bottom styling to support new card tabs */
     }
 </style>
 
@@ -76,19 +71,43 @@
                         <label class="text-md font-semibold text-[#1e293b]">Input Penggunaan</label>
                         <p class="text-xs text-slate-500 mb-4">Pilih tab kategori untuk menambahkan bahan, alat, atau tenaga kerja</p>
 
-                        <div class="bg-white border border-slate-200 rounded-xl shadow-sm">
-                            <nav class="flex w-full border-b border-slate-200 bg-slate-50 rounded-t-xl" aria-label="Tabs" role="tablist">
-                                <button type="button" class="flex-1 py-3 px-2 sm:px-4 inline-flex justify-center items-center gap-2 border-b-2 border-transparent text-xs sm:text-sm font-bold text-slate-500 hover:text-slate-700 active" id="tab-sdm-bahan" data-hs-tab="#content-sdm-bahan" aria-controls="content-sdm-bahan" role="tab">
-                                    <i class="fas fa-box"></i> Bahan
-                                </button>
-                                <button type="button" class="flex-1 py-3 px-2 sm:px-4 inline-flex justify-center items-center gap-2 border-b-2 border-transparent text-xs sm:text-sm font-bold text-slate-500 hover:text-slate-700" id="tab-sdm-alat" data-hs-tab="#content-sdm-alat" aria-controls="content-sdm-alat" role="tab">
-                                    <i class="fas fa-tools"></i> Alat
-                                </button>
-                                <button type="button" class="flex-1 py-3 px-2 sm:px-4 inline-flex justify-center items-center gap-2 border-b-2 border-transparent text-xs sm:text-sm font-bold text-slate-500 hover:text-slate-700" id="tab-sdm-upah" data-hs-tab="#content-sdm-upah" aria-controls="content-sdm-upah" role="tab">
-                                    <i class="fas fa-hard-hat"></i> Tenaga
-                                </button>
-                            </nav>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4" aria-label="Tabs" role="tablist">
+                            <button type="button" class="group flex items-center justify-between p-3 rounded-xl border-2 border-slate-100 bg-white hover:border-slate-200 [&.active]:border-green-600 [&.active]:bg-green-50/30 text-left focus:outline-none transition-all active" id="tab-sdm-bahan" data-hs-tab="#content-sdm-bahan" aria-controls="content-sdm-bahan" role="tab">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-orange-50 text-orange-500 group-[.active]:bg-green-600 group-[.active]:text-white flex items-center justify-center shrink-0 transition-colors">
+                                        <i class="fas fa-box text-xs"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-bold text-slate-700 group-[.active]:text-green-700 text-sm">Bahan</h3>
+                                        <p class="text-[10px] text-slate-500 font-medium leading-tight">Input penggunaan bahan</p>
+                                    </div>
+                                </div>
+                            </button>
+                            <button type="button" class="group flex items-center justify-between p-3 rounded-xl border-2 border-slate-100 bg-white hover:border-slate-200 [&.active]:border-green-600 [&.active]:bg-green-50/30 text-left focus:outline-none transition-all" id="tab-sdm-alat" data-hs-tab="#content-sdm-alat" aria-controls="content-sdm-alat" role="tab">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-500 group-[.active]:bg-green-600 group-[.active]:text-white flex items-center justify-center shrink-0 transition-colors">
+                                        <i class="fas fa-tools text-xs"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-bold text-slate-700 group-[.active]:text-green-700 text-sm">Alat</h3>
+                                        <p class="text-[10px] text-slate-500 font-medium leading-tight">Input penggunaan alat</p>
+                                    </div>
+                                </div>
+                            </button>
+                            <button type="button" class="group flex items-center justify-between p-3 rounded-xl border-2 border-slate-100 bg-white hover:border-slate-200 [&.active]:border-green-600 [&.active]:bg-green-50/30 text-left focus:outline-none transition-all" id="tab-sdm-upah" data-hs-tab="#content-sdm-upah" aria-controls="content-sdm-upah" role="tab">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-red-50 text-red-500 group-[.active]:bg-green-600 group-[.active]:text-white flex items-center justify-center shrink-0 transition-colors">
+                                        <i class="fas fa-hard-hat text-xs"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-bold text-slate-700 group-[.active]:text-green-700 text-sm">Tenaga</h3>
+                                        <p class="text-[10px] text-slate-500 font-medium leading-tight">Input penggunaan tenaga</p>
+                                    </div>
+                                </div>
+                            </button>
+                        </div>
 
+                        <div class="bg-white border border-slate-200 rounded-xl shadow-sm">
                             <div class="p-4">
                                 <?php
                                 $categories = [

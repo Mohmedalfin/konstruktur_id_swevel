@@ -21,6 +21,19 @@
 
             <!-- Modal Body (Form) -->
             <div class="p-6 overflow-y-auto flex-1">
+                
+                <!-- Info Alert Konversi Satuan -->
+                <div class="bg-indigo-50 border border-indigo-200 text-indigo-800 rounded-lg p-4 mb-5 flex gap-3 text-sm shadow-sm">
+                    <i class="fas fa-info-circle text-indigo-500 mt-0.5 text-lg shrink-0"></i>
+                    <div>
+                        <p class="font-bold text-xs uppercase tracking-wider text-indigo-900 mb-1">Panduan Pengisian Jumlah</p>
+                        <p class="text-xs text-indigo-700/90 leading-relaxed">
+                            Silakan masukkan <span class="font-semibold">Jumlah Minta</span> langsung menggunakan <span class="font-semibold">Satuan Kemasan Produk</span> (misal: Sak, Pail, dsb) sesuai dengan informasi gudang. 
+                            Sistem akan otomatis memotong sisa kuota RAP Anda berdasarkan faktor konversi kemasan produk tersebut.
+                        </p>
+                    </div>
+                </div>
+
                 <form id="permintaan-form" class="space-y-6">
                     
                     <!-- Project Blocks Container -->

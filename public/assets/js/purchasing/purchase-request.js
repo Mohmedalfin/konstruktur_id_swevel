@@ -33,12 +33,12 @@ function openDetailModal(id) {
             modalDetail.classList.remove('hidden');
             modalDetail.classList.add('flex');
         } else {
-            Swal.fire('Error', 'Data tidak ditemukan', 'error');
+            window.Toast.show('Data tidak ditemukan', 'error');
         }
     })
     .catch(err => {
         console.error(err);
-        Swal.fire('Error', 'Terjadi kesalahan sistem', 'error');
+        window.Toast.show('Terjadi kesalahan sistem', 'error');
     });
 }
 
@@ -112,7 +112,7 @@ function openCreatePOModal() {
             modalCreatePO.classList.remove('hidden');
             modalCreatePO.classList.add('flex');
         } else {
-            Swal.fire('Error', 'Data tidak ditemukan', 'error');
+            window.Toast.show('Data tidak ditemukan', 'error');
             // Re-open detail
             modalDetail.classList.remove('hidden');
             modalDetail.classList.add('flex');
@@ -120,7 +120,7 @@ function openCreatePOModal() {
     })
     .catch(err => {
         console.error(err);
-        Swal.fire('Error', 'Terjadi kesalahan sistem', 'error');
+        window.Toast.show('Terjadi kesalahan sistem', 'error');
     });
 }
 
@@ -178,7 +178,7 @@ function renderCreatePOData(data) {
 function submitCreatePO() {
     const checkboxes = document.querySelectorAll('.item-checkbox:checked');
     if (checkboxes.length === 0) {
-        Swal.fire('Peringatan', 'Pilih minimal satu item untuk dibuatkan PO.', 'warning');
+        window.Toast.show('Pilih minimal satu item untuk dibuatkan PO.', 'warning');
         return;
     }
 
@@ -207,20 +207,12 @@ function submitCreatePO() {
     });
 
     if (!valid) {
-        Swal.fire('Peringatan', 'Harap pilih supplier untuk semua item yang dicentang.', 'warning');
+        window.Toast.show('Harap pilih supplier untuk semua item yang dicentang.', 'warning');
         return;
     }
 
-    Swal.fire({
-        title: 'Buat PO?',
-        text: `Anda akan membuat PO untuk ${selections.length} item. Lanjutkan?`,
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#2563eb',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Ya, Buat PO'
-    }).then((result) => {
-        if (result.isConfirmed) {
+    window.confirmAction('Buat PO?', `Anda akan membuat PO untuk ${selections.length} item. Lanjutkan?`, 'Ya, Buat PO').then((isConfirmed) => {
+        if (isConfirmed) {
             // POST to backend
             fetch('/purchasing/purchase-request/generate-po', {
                 method: 'POST',
@@ -237,13 +229,14 @@ function submitCreatePO() {
             .then(data => {
                 if(data.status === 'success') {
                     showSuccessModal(data.created_pos);
+                    window.Toast.show('PO berhasil dibuat!', 'success');
                 } else {
-                    Swal.fire('Gagal', data.message, 'error');
+                    window.Toast.show(data.message, 'error');
                 }
             })
             .catch(err => {
                 console.error(err);
-                Swal.fire('Error', 'Terjadi kesalahan sistem', 'error');
+                window.Toast.show('Terjadi kesalahan sistem', 'error');
             });
         }
     });

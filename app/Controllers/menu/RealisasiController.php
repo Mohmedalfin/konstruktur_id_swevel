@@ -33,6 +33,9 @@ class RealisasiController extends BaseController
                 $idProject    = $project['id_project'];
                 $progressData = $this->realisasiService->getPekerjaanProgressData($idProject);
 
+                // Simpan slug ke session agar navbar menampilkan link Gudang Lapangan
+                session()->set('current_project_slug', $slug);
+
                 $kategoriModel = new \App\Models\KategoriPekerjaanModel();
                 $categories = $kategoriModel
                     ->groupStart()

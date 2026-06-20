@@ -16,6 +16,11 @@ function getInputBindings() {
 function setNodeVisibility(node, isVisible) {
     if (!node) return;
     node.hidden = !isVisible;
+    if (isVisible) {
+        node.classList.remove("!hidden");
+    } else {
+        node.classList.add("!hidden");
+    }
 }
 
 export function renderProfileFields(profile) {

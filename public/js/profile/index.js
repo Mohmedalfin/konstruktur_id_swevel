@@ -157,6 +157,8 @@ async function initProfilePage() {
         notify("error", error.message || "Gagal memuat data profile.");
     } finally {
         hideGlobalLoader();
+        const form = document.getElementById("profile-form");
+        if (form) form.classList.remove("opacity-0");
     }
 }
 

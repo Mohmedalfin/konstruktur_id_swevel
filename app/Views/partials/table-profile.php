@@ -1,15 +1,22 @@
 <div class="w-full px-3 sm:px-6 lg:px-8 py-4 md:py-8">
-    <form id="profile-form" class="max-w-[90rem] mx-auto space-y-4" enctype="multipart/form-data">
+    <form id="profile-form" class="max-w-[90rem] mx-auto space-y-4 opacity-0 transition-opacity duration-300" enctype="multipart/form-data">
         <div class="relative overflow-hidden bg-white/90 bg-gradient-to-br from-white via-white to-slate-50 border border-slate-200/80 rounded-2xl shadow-[0_10px_30px_rgba(15,23,42,0.08)] p-4 sm:p-6">
             <div class="pointer-events-none absolute -top-20 -right-20 h-40 w-40 rounded-full bg-slate-100/70"></div>
             <div class="relative z-10">
                 <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                 <div class="flex items-center gap-4">
-                    <div class="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-slate-900 text-yellow-500 shadow-inner overflow-hidden">
-                        <img id="profile-photo-preview" src="" alt="Foto profile" class="hidden absolute inset-0 w-full h-full object-cover">
-                        <div id="profile-photo-fallback" class="absolute inset-0 flex items-center justify-center">
+                    <div class="group relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-slate-900 text-yellow-500 shadow-inner overflow-hidden">
+                        <img id="profile-photo-preview" src="" alt="Foto profile" class="hidden absolute inset-0 w-full h-full object-cover z-10">
+                        <div id="profile-photo-fallback" class="absolute inset-0 flex items-center justify-center z-10 bg-slate-900">
                             <i class="fas fa-city text-3xl"></i>
                         </div>
+                        
+                        <!-- Overlay edit foto -->
+                        <label data-profile-edit-only hidden class="absolute inset-0 bg-black/60 text-white flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity z-20">
+                            <i class="fas fa-camera text-xl mb-1"></i>
+                            <span class="text-[9px] font-medium">Ubah Foto</span>
+                            <input id="profile-photo-input" type="file" name="foto" accept=".jpg,.jpeg,.png" class="hidden">
+                        </label>
                     </div>
 
                     <div>
@@ -298,11 +305,6 @@
                 <i class="fas fa-arrow-left text-[11px]"></i>
                 Kembali ke Dashboard
             </a>
-            <label data-profile-edit-only class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 shadow-sm transition-colors cursor-pointer" hidden>
-                <i class="fas fa-upload text-[11px]"></i>
-                Upload Logo/Foto
-                <input id="profile-photo-input" type="file" name="foto" accept=".jpg,.jpeg,.png" class="hidden">
-            </label>
         </div>
 
     </form>

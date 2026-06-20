@@ -117,7 +117,7 @@ export class DetailModal {
                     <div class="text-[10px] text-slate-400 mt-0.5">Kode: ${item.kode_barang || '-'}</div>
                 </td>
                 <td class="px-4 py-3 text-center font-bold text-indigo-600">
-                    ${item.volume} <span class="text-xs font-normal text-slate-500">${item.satuan}</span>
+                    ${item.volume} <span class="text-xs font-normal text-slate-500">${item.satuan_kemasan || item.satuan}</span>
                 </td>
                 <td class="px-4 py-3 text-sm text-slate-600 max-w-[200px] truncate" title="${item.keterangan || ''}">
                     ${item.keterangan || '<span class="italic text-slate-400">Tidak ada</span>'}

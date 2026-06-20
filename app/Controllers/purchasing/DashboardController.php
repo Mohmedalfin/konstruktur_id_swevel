@@ -89,7 +89,7 @@ class DashboardController extends BaseController
         $totalHarga = count($materialSupplierModel->getHargaWithDetails($id_perusahaan));
 
         $data = [
-            'title' => 'Purchasing Dashboard - Kontraktor.id',
+            'title' => 'Dashboard',
             'pr' => [
                 'total' => $totalPr,
                 'menunggu' => $prMenunggu,

@@ -138,6 +138,7 @@ class DashboardController extends BaseController
             }
 
             return view('proyek/menu/dashboard', [
+                'title' => 'Dashboard',
                 'topbarTitle' => 'Dashboard',
                 'totalProyek' => $totalProyek,
                 'totalProyekAktif' => $totalProyekAktif,

@@ -40,8 +40,6 @@ function saveSupplier(e) {
     btnSave.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
     btnSave.disabled = true;
 
-    // Use fetch or jQuery ajax. Since jQuery is included, let's use it for simplicity with PUT override if needed.
-    // Fetch is cleaner.
     fetch(url, {
         method: method,
         headers: {
@@ -53,30 +51,17 @@ function saveSupplier(e) {
     .then(response => response.json())
     .then(res => {
         if (res.status === 'success') {
-            Swal.fire({
-                icon: 'success',
-                title: 'Berhasil',
-                text: res.message,
-                showConfirmButton: false,
-                timer: 1500
-            }).then(() => {
+            window.Toast.show(res.message, 'success');
+            setTimeout(() => {
                 window.location.reload();
-            });
+            }, 1000);
         } else {
-            Swal.fire({
-                icon: 'error',
-                title: 'Gagal',
-                text: res.message || 'Terjadi kesalahan'
-            });
+            window.Toast.show(res.message || 'Terjadi kesalahan', 'error');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        Swal.fire({
-            icon: 'error',
-            title: 'Gagal',
-            text: 'Terjadi kesalahan sistem'
-        });
+        window.Toast.show('Terjadi kesalahan sistem', 'error');
     })
     .finally(() => {
         btnSave.innerHTML = originalText;
@@ -85,17 +70,8 @@ function saveSupplier(e) {
 }
 
 function deleteSupplier(id) {
-    Swal.fire({
-        title: 'Hapus Supplier?',
-        text: "Data yang dihapus tidak dapat dikembalikan!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Ya, Hapus!',
-        cancelButtonText: 'Batal'
-    }).then((result) => {
-        if (result.isConfirmed) {
+    window.confirmAction('Hapus Supplier?', 'Data yang dihapus tidak dapat dikembalikan!', 'Ya, Hapus').then((isConfirmed) => {
+        if (isConfirmed) {
             fetch(`/purchasing/master-data/delete/${id}`, {
                 method: 'DELETE',
                 headers: {
@@ -105,22 +81,17 @@ function deleteSupplier(id) {
             .then(response => response.json())
             .then(res => {
                 if (res.status === 'success') {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Dihapus!',
-                        text: res.message,
-                        showConfirmButton: false,
-                        timer: 1500
-                    }).then(() => {
+                    window.Toast.show(res.message, 'success');
+                    setTimeout(() => {
                         window.location.reload();
-                    });
+                    }, 1000);
                 } else {
-                    Swal.fire('Gagal!', res.message, 'error');
+                    window.Toast.show(res.message, 'error');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                Swal.fire('Gagal!', 'Terjadi kesalahan sistem.', 'error');
+                window.Toast.show('Terjadi kesalahan sistem', 'error');
             });
         }
     })

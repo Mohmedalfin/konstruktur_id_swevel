@@ -7,7 +7,7 @@ $idProject = $idProject ?? null;
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Realisasi</title>
+    <title>Realisasi - Kontraktor.id</title>
     <link href="<?= base_url('assets/css/output.css') ?>" rel="stylesheet">
     <link rel="stylesheet" href="<?= base_url('assets/fontawesome/css/all.min.css') ?>">
 </head>
@@ -32,6 +32,7 @@ $idProject = $idProject ?? null;
                             <i class="fas fa-ellipsis-v text-sm"></i>
                         </button>
                         <div id="mobileActionMenu" class="hidden absolute left-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-100 p-2 z-[90] animate-in fade-in zoom-in duration-200">
+
                             <button type="button" data-hs-overlay="#modal-log-dokumentasi" class="flex items-center gap-3 w-full px-3 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 rounded-lg transition-colors text-left focus:outline-none">
                                 <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
                                     <i class="fas fa-image text-xs"></i>
@@ -82,8 +83,9 @@ $idProject = $idProject ?? null;
 
                     <div class="flex items-center gap-2">
                         <div class="hidden md:flex items-center gap-2">
-                            <button type="button" data-hs-overlay="#modal-log-dokumentasi" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[#0f172a] hover:bg-slate-800 text-white text-xs font-semibold shadow-sm transition-all focus:outline-none">
-                                <i class="fas fa-image text-[10px]"></i> Log Dokumentasi
+
+                            <button type="button" data-hs-overlay="#modal-log-dokumentasi" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 text-slate-700 text-xs font-semibold shadow-sm transition-all focus:outline-none">
+                                <i class="fas fa-image text-slate-400"></i> Log Dokumentasi
                             </button>
 
                             <div class="relative z-[40]">
@@ -119,7 +121,7 @@ $idProject = $idProject ?? null;
                             </div>
                         </div>
 
-                        <button type="button" data-hs-overlay="#modal-tambah-realisasi" class="inline-flex items-center gap-1.5 px-3 py-2 md:px-4 md:py-2 rounded-lg bg-[#0f172a] hover:bg-slate-800 text-white text-xs font-bold shadow-sm transition-all focus:outline-none">
+                        <button type="button" data-hs-overlay="#modal-tambah-realisasi" class="inline-flex items-center gap-1.5 px-3 py-2 md:px-4 md:py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md shadow-emerald-600/20 transition-all focus:outline-none">
                             <i class="fas fa-plus"></i>
                             <span class="hidden sm:inline">Tambah Progress</span>
                             <span class="sm:hidden">Tambah</span>
@@ -147,6 +149,13 @@ $idProject = $idProject ?? null;
                         </button>
                         <div id="mobileActionMenuSDM" class="hidden absolute left-0 mt-2 w-52 bg-white rounded-xl shadow-xl border border-gray-100 p-4 z-[70] animate-in fade-in zoom-in duration-200">
                             <div class="flex flex-col gap-3">
+                                <a href="<?= base_url('proyek/' . ($slug ?? '') . '/gudang-lapangan') ?>" class="flex items-center gap-3 w-full px-3 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 rounded-lg transition-colors text-left focus:outline-none">
+                                    <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                                        <i class="fas fa-boxes text-xs"></i>
+                                    </div>
+                                    <span>Gudang Lapangan</span>
+                                </a>
+                                <div class="h-px bg-slate-100"></div>
                                 <div class="space-y-1">
                                     <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Tanggal Mulai</label>
                                     <input type="date" id="mobile-sdm-start" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-slate-600 text-xs font-semibold rounded-lg focus:outline-none focus:border-primary">
@@ -162,7 +171,11 @@ $idProject = $idProject ?? null;
                         </div>
                     </div>
 
-                    <button type="button" data-hs-overlay="#modal-list-sdm" class="inline-flex items-center gap-1.5 px-3 py-2 md:px-4 md:py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-sm transition-all focus:outline-none ml-auto md:ml-0">
+                    <a href="<?= base_url('proyek/' . ($slug ?? '') . '/gudang-lapangan') ?>" class="hidden md:inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 text-slate-700 text-xs font-semibold shadow-sm transition-all focus:outline-none ml-auto md:ml-0">
+                        <i class="fas fa-boxes text-blue-500"></i>
+                        <span>Gudang Lapangan</span>
+                    </a>
+                    <button type="button" data-hs-overlay="#modal-list-sdm" class="inline-flex items-center gap-1.5 px-3 py-2 md:px-4 md:py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-sm transition-all focus:outline-none ml-auto md:ml-2">
                         <i class="fas fa-list"></i>
                         <span class="hidden sm:inline">Daftar Kebutuhan</span>
                         <span class="sm:hidden">Daftar</span>
@@ -197,7 +210,7 @@ $idProject = $idProject ?? null;
         </script>
         <script src="<?= base_url('assets/js/preline.js') ?>"></script>
         <script src="<?= base_url('node_modules/preline/dist/preline.js') ?>"></script>
-        <script src="<?= base_url('assets/js/partials/navbar.js') ?>"></script>
+
         <script type="module" src="<?= base_url('js/realisasi/index.js') ?>"></script>
     </body>
 </html>

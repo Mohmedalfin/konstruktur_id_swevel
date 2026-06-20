@@ -10,6 +10,8 @@ if (strpos($titleLower, 'permintaan') !== false) {
     $tagline = 'Buat dan kelola permohonan pembelian (Purchase Request) material secara efisien.';
 } elseif (strpos($titleLower, 'stok') !== false) {
     $tagline = 'Pantau ketersediaan dan status batas minimum setiap item di gudang.';
+} elseif (strpos($titleLower, 'gudang lapangan') !== false || strpos($titleLower, 'site inventory') !== false) {
+    $tagline = 'Pantau stok material fisik di lapangan proyek dan kelola retur ke gudang pusat.';
 } elseif (strpos($titleLower, 'master') !== false || strpos($titleLower, 'barang') !== false) {
     $tagline = 'Kelola data referensi master barang, kategori, dan satuan.';
 } elseif (strpos($titleLower, 'rab') !== false) {

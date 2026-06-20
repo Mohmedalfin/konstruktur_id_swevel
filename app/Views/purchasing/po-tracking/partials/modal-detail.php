@@ -1,19 +1,24 @@
 <!-- PO Detail Modal -->
 <div id="modalDetailPO" class="fixed inset-0 z-50 hidden bg-black/50 items-center justify-center font-sans">
-    <div class="bg-white rounded-xl shadow-xl w-full max-w-3xl mx-4 relative flex flex-col max-h-[95vh]">
-        <!-- Close Button (Floating) -->
-        <button type="button" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 transition-colors size-8 flex justify-center items-center rounded-lg hover:bg-gray-100 z-10" onclick="closeDetailModal()">
-            <i class="fa-solid fa-xmark text-xl"></i>
-        </button>
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-3xl mx-4 relative flex flex-col max-h-[95vh] overflow-hidden">
 
         <!-- Header -->
-        <div class="p-6 pb-2 relative">
-            <h2 class="text-2xl font-black text-[#1e293b]" id="detail_po_number">PO-XXXX-XX-XXX</h2>
-            <p class="text-[15px] font-bold text-[#334155] mt-1" id="detail_supplier_name">Supplier: -</p>
-            
-            <div class="mt-4" id="detail_status_container">
-                <!-- Status badge injected via JS -->
+        <div class="bg-[#0f172a] px-5 py-4 flex items-center justify-between border-b border-slate-800 rounded-t-xl">
+            <div class="flex items-center gap-4">
+                <div class="w-8 h-8 rounded border border-blue-500/30 flex items-center justify-center bg-transparent text-blue-500">
+                    <i class="fas fa-file-invoice-dollar text-base md:text-lg"></i>
+                </div>
+                <div>
+                    <h2 class="text-white font-bold text-base md:text-lg" id="detail_po_number">PO-XXXX-XX-XXX</h2>
+                    <div class="flex items-center gap-2 mt-0.5">
+                        <p class="text-slate-400 text-[10px] md:text-xs" id="detail_supplier_name">Supplier: -</p>
+                        <div id="detail_status_container" class="inline-flex scale-[0.8] origin-left"></div>
+                    </div>
+                </div>
             </div>
+            <button type="button" class="w-8 h-8 flex items-center justify-center rounded bg-slate-800/80 text-slate-300 hover:bg-slate-700 hover:text-white transition-colors focus:outline-none" onclick="closeDetailModal()">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
 
         <!-- Body -->
@@ -72,18 +77,13 @@
                 </div>
 
                 <!-- Call To Action Box (Hidden if Selesai) -->
-                <div id="cta_box" class="bg-white border border-gray-300 rounded-lg p-4 flex justify-between items-center shadow-sm">
-                    <div class="flex items-center gap-4">
-                        <div class="text-[#0f172a] text-3xl ml-2">
-                            <i class="fa-solid fa-box-open" id="cta_icon"></i>
-                        </div>
-                        <div>
-                            <h4 class="text-[15px] font-bold text-[#0f172a]" id="cta_title">Konfirmasi Pengiriman</h4>
-                            <p class="text-[12px] font-medium text-gray-600 mt-0.5" id="cta_desc">Klik tombol di samping jika supplier sudah mengonfirmasi pengiriman barang</p>
-                        </div>
+                <div id="cta_box" class="mt-8 border-t border-dashed border-slate-200 pt-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div>
+                        <h4 class="text-sm font-bold text-slate-800" id="cta_title">Tindakan Selanjutnya</h4>
+                        <p class="text-xs text-slate-500 mt-0.5" id="cta_desc">Klik tombol di samping untuk memperbarui status logistik PO ini.</p>
                     </div>
-                    <button type="button" class="bg-[#0061ff] hover:bg-blue-700 text-white font-bold text-[13px] py-2.5 px-5 rounded-lg flex items-center gap-2 transition-colors shadow-sm" id="cta_btn">
-                        <i class="fa-solid fa-truck"></i> <span id="cta_btn_text">Tandai Sedang Dikirim</span>
+                    <button type="button" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white font-semibold text-sm py-2 px-6 rounded-lg transition-all shadow-sm focus:ring-2 focus:ring-primary/20 shrink-0" id="cta_btn">
+                        <i class="fa-solid fa-check text-xs"></i> <span id="cta_btn_text">Tandai Sedang Dikirim</span>
                     </button>
                 </div>
             </div>
@@ -91,24 +91,24 @@
             <!-- Ringkasan Material PO -->
             <div>
                 <h3 class="text-[17px] font-bold text-[#1e293b] mb-4">Ringkasan Material PO</h3>
-                <div class="overflow-hidden border-t border-gray-200">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead>
+                <div class="overflow-hidden border border-slate-200 rounded-xl bg-white shadow-sm">
+                    <table class="min-w-full divide-y divide-slate-200">
+                        <thead class="bg-[#0f172a] text-white">
                             <tr>
-                                <th scope="col" class="px-2 py-3 text-left text-[13px] font-bold text-[#0f172a]">Nama Material</th>
-                                <th scope="col" class="px-2 py-3 text-center text-[13px] font-bold text-[#0f172a]">Volume</th>
-                                <th scope="col" class="px-2 py-3 text-center text-[13px] font-bold text-[#0f172a]">Satuan</th>
-                                <th scope="col" class="px-2 py-3 text-center text-[13px] font-bold text-[#0f172a]">Spesifikasi</th>
-                                <th scope="col" class="px-2 py-3 text-right text-[13px] font-bold text-[#0f172a]">Sub Total</th>
+                                <th scope="col" class="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider">Nama Material</th>
+                                <th scope="col" class="px-4 py-3 text-center text-[11px] font-bold uppercase tracking-wider">Volume</th>
+                                <th scope="col" class="px-4 py-3 text-center text-[11px] font-bold uppercase tracking-wider">Satuan</th>
+                                <th scope="col" class="px-4 py-3 text-center text-[11px] font-bold uppercase tracking-wider">Spesifikasi</th>
+                                <th scope="col" class="px-4 py-3 text-right text-[11px] font-bold uppercase tracking-wider">Sub Total</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-200" id="detail_items_body">
+                        <tbody class="divide-y divide-slate-200" id="detail_items_body">
                             <!-- Items injected via JS -->
                         </tbody>
-                        <tfoot>
+                        <tfoot class="bg-slate-50">
                             <tr>
-                                <td colspan="4" class="px-2 py-4 text-left text-[14px] font-black text-[#0f172a]">Total Harga</td>
-                                <td class="px-2 py-4 text-right text-[14px] font-black text-[#0f172a]" id="detail_total_harga">Rp 0</td>
+                                <td colspan="4" class="px-4 py-3 text-left text-sm font-black text-slate-800 uppercase">Total Harga</td>
+                                <td class="px-4 py-3 text-right text-sm font-black text-primary" id="detail_total_harga">Rp 0</td>
                             </tr>
                         </tfoot>
                     </table>

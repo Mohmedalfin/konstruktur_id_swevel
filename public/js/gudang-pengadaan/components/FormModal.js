@@ -56,7 +56,7 @@ export class FormModal {
                 this.addRow({
                     id_barang: this.selectedBarang.id_barang,
                     nama_barang: this.selectedBarang.nama_barang,
-                    satuan: this.selectedBarang.satuan,
+                    satuan: this.selectedBarang.satuan_kemasan || this.selectedBarang.satuan,
                     stok_aktual: this.selectedBarang.stok_aktual || 0,
                     stok_minimum: this.selectedBarang.stok_minimum || 0,
                     volume: ''
@@ -89,7 +89,7 @@ export class FormModal {
                         <div class="px-4 py-2 hover:bg-indigo-50 cursor-pointer border-b border-slate-100 last:border-0 transition-colors"
                                 data-item='${JSON.stringify(item).replace(/'/g, "&#39;")}'>
                             <div class="font-semibold text-sm text-slate-700">${item.nama_barang}</div>
-                            <div class="text-xs text-slate-500 mt-0.5">Stok Gudang: <span class="font-bold">${parseFloat(item.stok_aktual || 0)}</span> ${item.satuan}</div>
+                            <div class="text-xs text-slate-500 mt-0.5">Stok Gudang: <span class="font-bold">${parseFloat(item.stok_aktual || 0)}</span> ${item.satuan_kemasan || item.satuan}</div>
                         </div>
                     `).join('');
 
@@ -222,7 +222,7 @@ export class FormModal {
                 this.addRow({
                     id_barang: item.id_barang,
                     nama_barang: item.nama_barang,
-                    satuan: item.satuan,
+                    satuan: item.satuan_kemasan || item.satuan,
                     stok_aktual: item.stok_aktual,
                     stok_minimum: item.stok_minimum,
                     volume: suggestedVolume > 0 ? suggestedVolume : 1

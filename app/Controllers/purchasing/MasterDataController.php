@@ -23,7 +23,7 @@ class MasterDataController extends BaseController
     public function index()
     {
         $data = [
-            'title'     => 'Master Data Purchasing - Supplier',
+            'title'     => 'Supplier',
             'suppliers' => $this->supplierModel->orderBy('id', 'DESC')->findAll(),
         ];
 
@@ -34,7 +34,7 @@ class MasterDataController extends BaseController
     public function material()
     {
         $data = [
-            'title'     => 'Master Data Purchasing - Material',
+            'title'     => 'Material',
             'materials' => $this->masterBarangModel->where('id_perusahaan', session()->get('id_perusahaan'))->orderBy('id', 'DESC')->findAll(),
         ];
 
@@ -63,7 +63,7 @@ class MasterDataController extends BaseController
         }
 
         $data = [
-            'title'     => 'Master Data Purchasing - Harga',
+            'title'     => 'Harga',
             'hargas'    => $hargasFlat,
             'hargasGrouped' => $hargasGrouped,
             'group'     => $group,

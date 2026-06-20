@@ -32,38 +32,36 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
+        <!-- ACTIONS & FILTERS -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <div class="flex items-center gap-2 relative w-64 md:w-80">
+                <div class="absolute inset-y-0 start-0 flex items-center pointer-events-none ps-3">
+                    <i class="fa-solid fa-search text-slate-400 text-xs"></i>
+                </div>
+                <input type="text" id="searchSupplier" class="py-2 px-4 ps-8 block w-full border-slate-300 rounded-lg text-xs font-medium focus:border-blue-500 focus:ring-blue-500 border placeholder-slate-400 shadow-sm" placeholder="Cari nama supplier...">
+            </div>
+            
+            <button type="button" class="inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white font-semibold text-sm py-2 px-5 rounded-lg transition-all shadow-sm focus:ring-2 focus:ring-primary/20" onclick="openTambahModal()">
+                <i class="fa-solid fa-plus text-xs"></i> Tambah Supplier
+            </button>
+        </div>
+
         <!-- Tabs -->
-        <div class="flex">
-            <a href="<?= base_url('purchasing/master-data') ?>" class="tab-active px-8 py-3 rounded-tl-xl rounded-tr-xl text-[15px] flex items-center gap-2 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] z-10 relative">
-                <i class="fa-solid fa-store"></i> Supplier
+        <div class="flex flex-wrap gap-3 mb-6">
+            <a href="<?= base_url('purchasing/master-data') ?>" class="px-6 py-2.5 bg-white text-[#111827] border-b-2 border-primary shadow-sm rounded-t-lg text-sm font-bold flex items-center gap-2 transition-all">
+                <i class="fa-solid fa-store text-primary"></i> Supplier
             </a>
-            <a href="<?= base_url('purchasing/master-data/material') ?>" class="tab-inactive px-8 py-3 rounded-tl-xl rounded-tr-xl text-[15px] flex items-center gap-2 -ml-3 z-0 relative">
+            <a href="<?= base_url('purchasing/master-data/material') ?>" class="px-6 py-2.5 bg-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-50 border-b-2 border-transparent rounded-t-lg text-sm font-semibold flex items-center gap-2 transition-all">
                 <i class="fa-solid fa-cube"></i> Material
             </a>
-            <a href="<?= base_url('purchasing/master-data/harga') ?>" class="tab-inactive px-8 py-3 rounded-tl-xl rounded-tr-xl text-[15px] flex items-center gap-2 -ml-3 z-0 relative">
+            <a href="<?= base_url('purchasing/master-data/harga') ?>" class="px-6 py-2.5 bg-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-50 border-b-2 border-transparent rounded-t-lg text-sm font-semibold flex items-center gap-2 transition-all">
                 <i class="fa-solid fa-tags"></i> Harga
             </a>
         </div>
 
-        <!-- Card Body -->
-        <div class="bg-white rounded-b-xl rounded-tr-xl shadow-md p-6 border border-gray-200">
-            
-            <!-- Toolbar -->
-            <div class="flex justify-between items-center mb-5">
-                <div class="relative w-80">
-                    <div class="absolute inset-y-0 start-0 flex items-center pointer-events-none ps-3">
-                        <i class="fa-solid fa-search text-gray-500"></i>
-                    </div>
-                    <input type="text" id="searchSupplier" class="py-2.5 px-4 ps-10 block w-full border-gray-400 rounded-lg text-[13px] font-medium focus:border-blue-500 focus:ring-blue-500 border placeholder-gray-500" placeholder="Cari nama supplier...">
-                </div>
-                
-                <button type="button" class="py-2.5 px-5 inline-flex items-center gap-x-2 text-sm font-bold rounded-lg bg-[#111827] text-white hover:bg-[#0f172a] transition-colors" onclick="openTambahModal()">
-                    <i class="fa-solid fa-plus"></i> Tambah Supplier
-                </button>
-            </div>
-
-            <!-- Table -->
-            <div class="border border-gray-300 rounded-lg overflow-hidden">
+        <!-- Card Body (Table Container) -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-300">
                     <thead class="bg-[#111827] text-white border-b border-gray-200">
                         <tr>
@@ -112,7 +110,6 @@
                     </tbody>
                 </table>
             </div>
-
         </div>
 
     <!-- Modals -->

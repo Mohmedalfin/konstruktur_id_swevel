@@ -15,7 +15,7 @@ if (!in_array($rabMode, ['readonly', 'new'], true)) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Menu RAB &amp; RAP</title>
+    <title>RAP - Kontraktor.id</title>
     <link href="<?= base_url('assets/css/output.css') ?>" rel="stylesheet">
     <link rel="stylesheet" href="<?= base_url('assets/fontawesome/css/all.min.css') ?>">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.css" />
@@ -64,7 +64,7 @@ if (!in_array($rabMode, ['readonly', 'new'], true)) {
 
     <script src="<?= base_url('assets/js/preline.js') ?>"></script>
     <script src="<?= base_url('node_modules/preline/dist/preline.js') ?>"></script>
-    <script src="<?= base_url('assets/js/partials/navbar.js') ?>"></script>
+
     <script src="<?= base_url('assets/js/vendor/exceljs.min.js') ?>"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.js.iife.js"></script>

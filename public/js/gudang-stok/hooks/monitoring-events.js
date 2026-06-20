@@ -59,11 +59,19 @@ export async function initMonitoring() {
             const namaBarang = btn.dataset.nama;
             const satuan = btn.dataset.satuan;
             const currentMinimum = btn.dataset.minimum;
+            const satuanKemasan = btn.dataset.satuanKemasan || '';
+            let konversiFaktor = btn.dataset.konversiFaktor || '';
+
+            if (konversiFaktor !== '' && parseFloat(konversiFaktor) === 1.0) {
+                konversiFaktor = '';
+            }
 
             document.getElementById('edit-id-barang').value = idBarang;
             document.getElementById('edit-nama-barang').value = namaBarang;
             document.getElementById('edit-satuan').value = satuan;
             document.getElementById('edit-stok-minimum').value = currentMinimum;
+            document.getElementById('edit-satuan-kemasan').value = satuanKemasan;
+            document.getElementById('edit-konversi-faktor').value = konversiFaktor;
 
             // Buka Modal secara programmatis karena tombol ini digenerate JS
             const modal = document.querySelector('#modal-edit-minimum');
@@ -88,6 +96,9 @@ export async function initMonitoring() {
 
             const idBarang = document.getElementById('edit-id-barang').value;
             const stokMinimum = document.getElementById('edit-stok-minimum').value;
+            const satuan = document.getElementById('edit-satuan').value;
+            const satuanKemasan = document.getElementById('edit-satuan-kemasan').value;
+            const konversiFaktor = document.getElementById('edit-konversi-faktor').value;
 
             try {
                 const response = await fetch('/api/stok/update-minimum', {
@@ -96,7 +107,13 @@ export async function initMonitoring() {
                         'Content-Type': 'application/json',
                         'X-Requested-With': 'XMLHttpRequest'
                     },
-                    body: JSON.stringify({ id_barang: idBarang, stok_minimum: stokMinimum })
+                    body: JSON.stringify({ 
+                        id_barang: idBarang, 
+                        stok_minimum: stokMinimum, 
+                        satuan: satuan,
+                        satuan_kemasan: satuanKemasan,
+                        konversi_faktor: konversiFaktor
+                    })
                 });
 
                 const res = await response.json();

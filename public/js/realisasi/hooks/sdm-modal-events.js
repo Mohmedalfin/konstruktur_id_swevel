@@ -87,9 +87,14 @@ function _buildCustomDropdown(container, catId, items) {
             row.className = `w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-${catColor}-50 hover:text-${catColor}-700 transition-colors rounded-md mx-1 mt-1`;
             row.style.width = 'calc(100% - 8px)';
             
+            let sisaGudangHtml = '';
+            if (catId === 'bahan' || catId === 'alat') {
+                sisaGudangHtml = ` <span class="mx-1">•</span> Gudang: <span class="font-bold text-emerald-600">${item.stok_lapangan || 0}</span> ${item.satuan}`;
+            }
+
             row.innerHTML = `
                 <div class="font-medium">${item.nama_item}</div>
-                <div class="text-[10px] text-slate-500 mt-0.5">Sisa: <span class="font-bold ${item.qty_sisa < 0 ? 'text-red-600' : 'text-' + catColor + '-500'}">${item.qty_sisa}</span> ${item.satuan}</div>
+                <div class="text-[10px] text-slate-500 mt-0.5">RAB: <span class="font-bold ${item.qty_sisa < 0 ? 'text-red-600' : 'text-' + catColor + '-500'}">${item.qty_sisa}</span> ${item.satuan}${sisaGudangHtml}</div>
             `;
 
             if (selectedItem && selectedItem.id_rap_detail_item === item.id_rap_detail_item) {
@@ -107,6 +112,7 @@ function _buildCustomDropdown(container, catId, items) {
                     data-nama="${item.nama_item}"
                     data-satuan="${item.satuan}" 
                     data-sisa="${item.qty_sisa}"
+                    data-stok-lapangan="${item.stok_lapangan || 0}"
                     data-spek="${item.spesifikasi || ''}"
                     data-merk="${item.merk || ''}"
                     selected>${item.nama_item}</option>`;
@@ -171,11 +177,25 @@ function _bindDropdownChange() {
 
         const satuan = selected.dataset.satuan || '';
         const sisa   = parseFloat(selected.dataset.sisa) || 0;
+        const stokLapangan = parseFloat(selected.dataset.stokLapangan) || 0;
         const spek   = selected.dataset.spek || '-';
         const merk   = selected.dataset.merk || '-';
         
+        let catColor = catId === 'bahan' ? 'orange' : (catId === 'alat' ? 'blue' : 'red');
+
         if (satuanDisplay) satuanDisplay.textContent = satuan || '-';
-        if (sisaDisplay) sisaDisplay.textContent = sisa;
+        if (sisaDisplay) {
+            if (catId === 'bahan' || catId === 'alat') {
+                sisaDisplay.innerHTML = `
+                    <div class="flex flex-col gap-1 mt-1 sm:mt-0">
+                        <span class="text-slate-400 font-semibold text-[10px] mb-[-2px] uppercase">RAB: <span class="text-${catColor}-500 font-bold text-sm sm:text-[15px] ml-1">${sisa}</span></span>
+                        <span class="text-slate-400 font-semibold text-[10px] uppercase">Gudang: <span class="text-emerald-600 font-bold text-sm sm:text-[15px] ml-1">${stokLapangan}</span></span>
+                    </div>
+                `;
+            } else {
+                sisaDisplay.textContent = sisa;
+            }
+        }
         
         if (spekInput) spekInput.value = spek;
         if (merkInput) merkInput.value = merk;

@@ -20,6 +20,7 @@ class PermintaanModel extends Model
         'justifikasi_over_limit',
         'keterangan',
         'stok_terpotong',
+        'stok_proyek_masuk',
     ];
 
     protected $useTimestamps = true;

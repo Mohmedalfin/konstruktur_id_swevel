@@ -90,17 +90,17 @@
     <!-- TABLE CONTAINER -->
     <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
         <div class="overflow-x-auto">
-            <table class="w-full text-sm text-left">
+            <table class="w-full text-base text-left">
                 <thead class="bg-slate-50 border-b border-slate-100 text-slate-500 font-semibold text-xs uppercase tracking-wider">
                     <tr>
-                        <th class="px-6 py-4 whitespace-nowrap">Kode Item</th>
-                        <th class="px-6 py-4 whitespace-nowrap min-w-[200px]">Nama Item</th>
-                        <th class="px-6 py-4 whitespace-nowrap text-center">Kategori</th>
-                        <th class="px-6 py-4 whitespace-nowrap text-center">Satuan</th>
-                        <th class="px-6 py-4 whitespace-nowrap text-center">Batas Min</th>
-                        <th class="px-6 py-4 whitespace-nowrap text-center">Stok Aktual</th>
-                        <th class="px-6 py-4 whitespace-nowrap text-center">Status</th>
-                        <th class="px-6 py-4 whitespace-nowrap text-center">Aksi</th>
+                        <th class="px-4 py-3 whitespace-nowrap">Kode Item</th>
+                        <th class="px-4 py-3 whitespace-nowrap min-w-[200px]">Nama Item</th>
+                        <th class="px-4 py-3 whitespace-nowrap text-center">Kategori</th>
+                        <th class="px-4 py-3 whitespace-nowrap text-center">Satuan</th>
+                        <th class="px-4 py-3 whitespace-nowrap text-center">Batas Min</th>
+                        <th class="px-4 py-3 whitespace-nowrap text-center">Stok Aktual</th>
+                        <th class="px-4 py-3 whitespace-nowrap text-center">Status</th>
+                        <th class="px-4 py-3 whitespace-nowrap text-center">Aksi</th>
                     </tr>
                 </thead>
                 <tbody id="stok-table-body" class="divide-y divide-slate-100 text-slate-700">
@@ -125,10 +125,10 @@
             <div class="bg-[#1e293b] text-white px-6 py-4 flex items-center justify-between border-b border-slate-800">
                 <div class="flex items-center gap-3">
                     <div class="w-8 h-8 rounded-lg bg-blue-600/10 text-blue-400 flex items-center justify-center shrink-0 border border-blue-500/20">
-                        <i class="fas fa-sliders-h"></i>
+                        <i class="fas fa-edit"></i>
                     </div>
                     <div>
-                        <h2 class="text-white font-bold text-base">Edit Batas Minimum Stok</h2>
+                        <h2 class="text-white font-bold text-base">Edit Detail & Batas Minimum</h2>
                     </div>
                 </div>
                 <button type="button" class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white transition-colors focus:outline-none" data-hs-overlay="#modal-edit-minimum">
@@ -146,14 +146,29 @@
                         <input type="text" id="edit-nama-barang" class="w-full px-3 py-2 text-sm text-slate-500 bg-slate-100 border border-slate-200 rounded-lg focus:outline-none cursor-not-allowed" readonly>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-blue-50/60 border border-blue-100 text-blue-800 rounded-xl p-3 flex items-start gap-2.5">
+                        <i class="fas fa-info-circle text-blue-500 mt-0.5 shrink-0"></i>
+                        <p class="text-xs leading-normal">
+                            Atur <strong>Batas Min</strong> untuk peringatan stok kritis. Isi <strong>Satuan Kemasan</strong> & <strong>Isi per Kemasan</strong> jika gudang menggunakan unit pack/kemasan khusus (cth: 1 Sak = 50 Kg).
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="space-y-2">
-                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Satuan</label>
-                            <input type="text" id="edit-satuan" class="w-full px-3 py-2 text-sm font-medium text-slate-500 bg-slate-100 border border-slate-200 rounded-lg focus:outline-none cursor-not-allowed text-center" readonly>
+                            <label for="edit-stok-minimum" class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Batas Min (Satuan Dasar)</label>
+                            <input type="number" step="0.01" min="0" id="edit-stok-minimum" class="w-full px-3 py-2 text-sm font-bold text-slate-700 bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" required>
                         </div>
                         <div class="space-y-2">
-                            <label for="edit-stok-minimum" class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Batas Minimum Baru</label>
-                            <input type="number" step="0.01" min="0" id="edit-stok-minimum" class="w-full px-3 py-2 text-sm font-bold text-slate-700 bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" required>
+                            <label for="edit-satuan-kemasan" class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Satuan Kemasan (Opsional)</label>
+                            <input type="text" id="edit-satuan-kemasan" name="satuan_kemasan" placeholder="Cth: Sak, Pail, Box" class="w-full px-3 py-2 text-sm text-slate-700 bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                        </div>
+                        <div class="space-y-2">
+                            <label for="edit-konversi-faktor" class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Isi per Kemasan</label>
+                            <input type="number" step="0.0001" min="0" id="edit-konversi-faktor" name="konversi_faktor" placeholder="Cth: 50 (Artinya 1 Sak = 50 kg)" class="w-full px-3 py-2 text-sm text-slate-700 bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                        </div>
+                        <div class="space-y-2">
+                            <label for="edit-satuan" class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Satuan RAP (Dasar)</label>
+                            <input type="text" id="edit-satuan" name="satuan" class="w-full px-3 py-2 text-sm font-bold text-slate-700 bg-slate-100 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 cursor-not-allowed" readonly>
                         </div>
                     </div>
 

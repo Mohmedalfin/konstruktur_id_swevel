@@ -152,7 +152,7 @@ $accountChevronClass = $isProfilePage
                   <div class="hs-dropdown-menu transition-[opacity,margin] duration-[0.1ms] md:duration-[150ms] hs-dropdown-open:opacity-100 opacity-0 relative w-full md:w-52 hidden z-10 top-full ps-7 md:ps-0 md:bg-white md:border md:border-gray-200 md:shadow-md before:absolute before:-top-4 before:start-0 before:w-full before:h-5 md:after:hidden after:absolute after:top-1 after:start-4.5 after:h-[calc(100%-4px)] after:border-s after:border-white/20"
                       role="menu" aria-orientation="vertical" aria-labelledby="hs-header-base-dropdown">
                       <div class="py-1 md:px-1 space-y-0.5">
-                          <a class="p-2 md:px-3 flex items-center text-sm text-slate-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 rounded-lg gap-3" href="<?= base_url('profile') ?>">
+                          <a class="p-2 md:px-3 flex items-center text-sm text-slate-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 rounded-lg gap-3" href="<?= base_url('gudang/profile') ?>">
                               <i class="fa-regular fa-id-badge w-4"></i>
                               Profile
                           </a>

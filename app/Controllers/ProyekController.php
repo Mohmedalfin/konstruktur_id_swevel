@@ -63,7 +63,10 @@ class ProyekController extends BaseController
 
     public function create()
     {
-        return view('proyek/create', ['cities' => $this->getAllCities()]);
+        return view('proyek/create', [
+            'title'  => 'Tambah Proyek',
+            'cities' => $this->getAllCities()
+        ]);
     }
     public function store()
     {
@@ -137,6 +140,7 @@ class ProyekController extends BaseController
         }
 
         return view('proyek/edit', [
+            'title'  => 'Edit Proyek',
             'proyek' => $proyek,
             'cities' => $this->getAllCities()
         ]);
@@ -247,6 +251,130 @@ class ProyekController extends BaseController
             'status'  => 'success',
             'message' => 'Proyek berhasil ditandai selesai',
         ]);
+    }
+
+    /**
+     * GET /api/proyek/aktif
+     * Get active projects for mutasi dropdown
+     */
+    public function getActiveProjects(): ResponseInterface
+    {
+        try {
+            $db = db_connect();
+            $projects = $db->table('projects')
+                           ->select('id_project, nama_proyek')
+                           ->where('status_proyek !=', 'done')
+                           ->get()
+                           ->getResultArray();
+
+            $materialsByProject = [];
+            if (!empty($projects)) {
+                $projectIds = array_column($projects, 'id_project');
+                $allowedMaterialsQuery = $db->table('rap_detail_item rdi')
+                    ->select('r.id_project, rdi.id_barang')
+                    ->join('rap_detail rd', 'rdi.id_rap_detail = rd.id_rap_detail')
+                    ->join('rap r', 'rd.id_rap = r.id_rap')
+                    ->whereIn('r.id_project', $projectIds)
+                    ->where('rdi.id_barang IS NOT NULL')
+                    ->groupBy('r.id_project, rdi.id_barang')
+                    ->get()
+                    ->getResultArray();
+
+                foreach ($allowedMaterialsQuery as $row) {
+                    $materialsByProject[$row['id_project']][] = (int)$row['id_barang'];
+                }
+            }
+
+            foreach ($projects as &$project) {
+                $project['allowed_materials'] = $materialsByProject[$project['id_project']] ?? [];
+            }
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'data'   => $projects
+            ]);
+        } catch (\Throwable $e) {
+            log_message('error', '[ProyekController::getActiveProjects] ' . $e->getMessage());
+            return $this->response->setStatusCode(500)->setJSON([
+                'status'  => 'error',
+                'message' => 'Terjadi kesalahan saat mengambil data proyek'
+            ]);
+        }
+    }
+
+    /**
+     * POST /api/proyek/selesai-reconcile/:id
+     * Marks a project as done and reconciles remaining stock
+     */
+    public function selesaiReconcile($id): ResponseInterface
+    {
+        try {
+            $idProject = (int)$id;
+            if ($idProject <= 0) {
+                return $this->response->setStatusCode(400)->setJSON([
+                    'status'  => 'error',
+                    'message' => 'ID proyek tidak valid'
+                ]);
+            }
+
+            $body = $this->request->getJSON(true);
+            $reconciliations = $body['reconciliations'] ?? [];
+
+            $db = db_connect();
+            $project = $db->table('projects')->where('id_project', $idProject)->get()->getRowArray();
+            
+            if (!$project) {
+                return $this->response->setStatusCode(404)->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Proyek tidak ditemukan'
+                ]);
+            }
+
+            $idPerusahaan = (int)$project['id_pengguna'];
+            $inventoryService = new \App\Services\ProjectInventoryService();
+
+            $db->transStart();
+
+            // Looping alokasi item sisa dari request JSON
+            foreach ($reconciliations as $item) {
+                $idBarang = (int)$item['id_barang'];
+                $jumlahRetur = (float)($item['jumlah_retur'] ?? 0);
+                $jumlahMutasi = (float)($item['jumlah_mutasi'] ?? 0);
+                $idProyekTujuan = (int)($item['id_proyek_tujuan'] ?? 0);
+                $jumlahWaste = (float)($item['jumlah_waste'] ?? 0);
+
+                if ($jumlahRetur > 0) {
+                    $inventoryService->returKeCentral($idProject, $idBarang, $idPerusahaan, $jumlahRetur, 'Retur otomatis penutupan proyek');
+                }
+                if ($jumlahMutasi > 0 && $idProyekTujuan > 0) {
+                    $inventoryService->mutasiAntar($idProject, $idProyekTujuan, $idBarang, $jumlahMutasi, 'Mutasi penutupan proyek');
+                }
+                if ($jumlahWaste > 0) {
+                    $inventoryService->catatWaste($idProject, $idBarang, $jumlahWaste, 'Penyusutan sisa penutupan proyek');
+                }
+            }
+
+            // Set status proyek menjadi 'done'
+            $db->table('projects')->where('id_project', $idProject)->update(['status_proyek' => 'done']);
+            
+            $db->transComplete();
+
+            if ($db->transStatus() === false) {
+                throw new \Exception('Gagal memproses rekonsiliasi sisa stok');
+            }
+
+            return $this->response->setJSON([
+                'status'  => 'success',
+                'message' => 'Proyek berhasil ditandai selesai dan rekonsiliasi stok lapangan berhasil diproses.'
+            ]);
+
+        } catch (\Throwable $e) {
+            log_message('error', '[ProyekController::selesaiReconcile] ' . $e->getMessage());
+            return $this->response->setStatusCode(500)->setJSON([
+                'status'  => 'error',
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ]);
+        }
     }
 
     /**

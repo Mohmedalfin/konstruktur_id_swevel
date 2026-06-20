@@ -26,8 +26,12 @@ export const AppSwal = Swal.mixin({
     },
     buttonsStyling: false,   // ← We supply our own Tailwind classes
     reverseButtons:  true,   // Cancel on left, Confirm on right
-    scrollbarPadding: false, // Prevent background layout shift
+    scrollbarPadding: false, // Prevent body padding jump
+    heightAuto: false,       // Prevent scroll to top jump
 });
+
+// Expose to window for non-module scripts (like purchasing module)
+window.AppSwal = AppSwal;
 
 // -------------------------------------------------------------------
 // confirmDelete(label)
@@ -97,3 +101,8 @@ export async function confirmAction(title, html, confirmText = 'Ya, Lanjutkan') 
     });
     return result.isConfirmed;
 }
+
+window.confirmDelete = confirmDelete;
+window.confirmDeleteCategory = confirmDeleteCategory;
+window.confirmInfo = confirmInfo;
+window.confirmAction = confirmAction;

@@ -37,7 +37,7 @@ class POTrackingController extends BaseController
         }
 
         $data = [
-            'title' => 'PO Tracking - Kontraktor.id',
+            'title' => 'PO Tracking',
             'pos'   => $pos,
             'stats' => $stats
         ];
@@ -98,6 +98,80 @@ class POTrackingController extends BaseController
                             'blue',
                             'purchasing'
                         );
+                    }
+                } elseif ($newStatus === 'selesai tiba') {
+                    $db = \Config\Database::connect();
+                    $db->transStart();
+
+                    $poItems = $this->poItemModel->where('po_id', $id)->findAll();
+                    $prItemModel = new \App\Models\PurchaseRequestItemModel();
+                    $prModel = new \App\Models\PurchaseRequestModel();
+                    
+                    $prIds = [];
+                    foreach ($poItems as $item) {
+                        $idBarang = $item['id_barang'];
+                        $volume = (float)$item['volume'];
+                        
+                        // 1. Update stok_gudang
+                        $stokGudang = $db->table('stok_gudang')
+                            ->where('id_perusahaan', session()->get('id_perusahaan'))
+                            ->where('id_barang', $idBarang)
+                            ->get()->getRowArray();
+                            
+                        if ($stokGudang) {
+                            $db->table('stok_gudang')
+                               ->where('id', $stokGudang['id'])
+                               ->set('stok_aktual', 'stok_aktual + ' . $volume, false)
+                               ->set('updated_at', date('Y-m-d H:i:s'))
+                               ->update();
+                        } else {
+                            $db->table('stok_gudang')->insert([
+                                'id_perusahaan' => session()->get('id_perusahaan'),
+                                'id_barang' => $idBarang,
+                                'stok_aktual' => $volume,
+                                'stok_minimum' => 0,
+                                'harga_rata_rata' => $item['harga_satuan'],
+                                'lokasi' => 'Gudang Utama',
+                                'created_at' => date('Y-m-d H:i:s'),
+                                'updated_at' => date('Y-m-d H:i:s')
+                            ]);
+                        }
+
+                        // 2. Update PR items status
+                        $prItemsToUpdate = $prItemModel->where('po_id', $id)->where('id_barang', $idBarang)->findAll();
+                        foreach ($prItemsToUpdate as $prI) {
+                            $prItemModel->update($prI['id'], ['status' => 'received']);
+                            $prIds[] = $prI['pr_id'];
+                        }
+                    }
+
+                    // 3. Update parent PR status if fully received
+                    $prIds = array_unique($prIds);
+                    foreach ($prIds as $prId) {
+                        $totalItems = $prItemModel->where('pr_id', $prId)->countAllResults();
+                        $receivedItems = $prItemModel->where('pr_id', $prId)->where('status', 'received')->countAllResults();
+                        
+                        if ($totalItems > 0 && $totalItems === $receivedItems) {
+                            $prModel->update($prId, ['status' => 'completed']);
+                        }
+                    }
+
+                    $db->transComplete();
+                    
+                    if ($db->transStatus() !== false) {
+                        $notifService = new \App\Services\NotificationService();
+                        $po = $this->poModel->find($id);
+                        if ($po) {
+                            $notifService->sendToRole(
+                                'gudang',
+                                'Barang Telah Tiba ✅',
+                                "Pesanan PO {$po['po_number']} telah tiba. Stok gudang berhasil diperbarui.",
+                                '/gudang/stok',
+                                'fa-solid fa-box-open',
+                                'green',
+                                'gudang'
+                            );
+                        }
                     }
                 }
             } catch (\Throwable $e) {

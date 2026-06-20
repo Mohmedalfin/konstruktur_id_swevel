@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Profile Perusahaan</title>
+    <title>Profil Perusahaan - Kontraktor.id</title>
     <link rel="preload" href="<?= base_url('assets/css/output.css') ?>" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link href="<?= base_url('assets/css/output.css') ?>" rel="stylesheet"></noscript>
     <link rel="stylesheet" href="<?= base_url('assets/fontawesome/css/all.min.css') ?>">
@@ -12,6 +12,8 @@
     <?php echo view('partials/global-loader'); ?>
     <?php if (strtolower(session()->get('kategori_akun') ?? session()->get('role') ?? '') === 'gudang') : ?>
         <?php echo view('gudang/partials/navbar'); ?>
+    <?php elseif (strtolower(session()->get('kategori_akun') ?? session()->get('role') ?? '') === 'purchasing') : ?>
+        <?php echo view('purchasing/partials/navbar'); ?>
     <?php else : ?>
         <?php echo view('partials/header'); ?>
     <?php endif; ?>
@@ -25,6 +27,7 @@
     </main>
 
     <script>
+        window.manualLoader = true;
         window.PROFILE_INIT = {
             fetchUrl: <?= json_encode(base_url('profile/data')) ?>,
             updateUrl: <?= json_encode(base_url('profile/update')) ?>

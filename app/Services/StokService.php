@@ -52,7 +52,7 @@ class StokService
     {
         $db = Database::connect();
         $builder = $db->table('master_barang mb')
-                      ->select('mb.id as id_barang, mb.kode_barang, mb.nama_barang, mb.jenis_item, mb.satuan, COALESCE(sg.stok_aktual, 0) as stok_aktual, COALESCE(sg.stok_minimum, 0) as stok_minimum')
+                      ->select('mb.id as id_barang, mb.kode_barang, mb.nama_barang, mb.jenis_item, mb.satuan, mb.satuan_kemasan, mb.konversi_faktor, COALESCE(sg.stok_aktual, 0) as stok_aktual, COALESCE(sg.stok_minimum, 0) as stok_minimum')
                       ->join('stok_gudang sg', 'sg.id_barang = mb.id AND sg.id_perusahaan = mb.id_perusahaan', 'left')
                       ->where('mb.id_perusahaan', $idPerusahaan);
 
@@ -83,38 +83,62 @@ class StokService
     }
 
     /**
-     * Update Minimum Stock
+     * Update Minimum Stock and Packaging Units
      */
-    public function updateMinimumStock(int $idPerusahaan, int $idBarang, float $minimumStock): bool
+    public function updateMinimumStock(int $idPerusahaan, int $idBarang, float $minimumStock, string $satuan = '', ?string $satuanKemasan = null, ?float $konversiFaktor = null): bool
     {
         $db = Database::connect();
+        $db->transStart();
         
-        // Cek apakah stok_gudang sudah ada
-        $stokGudang = $db->table('stok_gudang')
-                         ->where('id_perusahaan', $idPerusahaan)
-                         ->where('id_barang', $idBarang)
-                         ->get()
-                         ->getRowArray();
-                         
-        if ($stokGudang) {
-            return $db->table('stok_gudang')
-                      ->where('id', $stokGudang['id'])
-                      ->update([
-                          'stok_minimum' => $minimumStock,
-                          'updated_at'   => date('Y-m-d H:i:s')
-                      ]);
+        // 1. Update/Insert di stok_gudang jika minimumStock valid (>= 0)
+        if ($minimumStock >= 0) {
+            $stokGudang = $db->table('stok_gudang')
+                             ->where('id_perusahaan', $idPerusahaan)
+                             ->where('id_barang', $idBarang)
+                             ->get()
+                             ->getRowArray();
+                             
+            if ($stokGudang) {
+                $db->table('stok_gudang')
+                   ->where('id', $stokGudang['id'])
+                   ->update([
+                       'stok_minimum' => $minimumStock,
+                       'updated_at'   => date('Y-m-d H:i:s')
+                   ]);
+            } else {
+                $db->table('stok_gudang')->insert([
+                    'id_perusahaan'   => $idPerusahaan,
+                    'id_barang'       => $idBarang,
+                    'stok_aktual'     => 0,
+                    'stok_minimum'    => $minimumStock,
+                    'harga_rata_rata' => 0,
+                    'lokasi'          => 'Gudang Utama',
+                    'created_at'      => date('Y-m-d H:i:s'),
+                    'updated_at'      => date('Y-m-d H:i:s')
+                ]);
+            }
         }
-        
-        // Jika belum ada, buat baru (meskipun jarang terjadi karena backfill/pendaftaran otomatis)
-        return $db->table('stok_gudang')->insert([
-            'id_perusahaan'   => $idPerusahaan,
-            'id_barang'       => $idBarang,
-            'stok_aktual'     => 0,
-            'stok_minimum'    => $minimumStock,
-            'harga_rata_rata' => 0,
-            'lokasi'          => 'Gudang Utama',
-            'created_at'      => date('Y-m-d H:i:s'),
-            'updated_at'      => date('Y-m-d H:i:s')
-        ]);
+
+        // 2. Update satuan, satuan_kemasan, konversi_faktor di master_barang
+        $updateData = ['updated_at' => date('Y-m-d H:i:s')];
+        if ($satuan !== '') {
+            $updateData['satuan'] = $satuan;
+        }
+        if ($satuanKemasan !== null) {
+            $updateData['satuan_kemasan'] = $satuanKemasan === '' ? null : $satuanKemasan;
+        }
+        if ($konversiFaktor !== null) {
+            $updateData['konversi_faktor'] = $konversiFaktor;
+        }
+
+        if (count($updateData) > 1) { // Lebih dari sekadar updated_at
+            $db->table('master_barang')
+               ->where('id', $idBarang)
+               ->where('id_perusahaan', $idPerusahaan)
+               ->update($updateData);
+        }
+
+        $db->transComplete();
+        return $db->transStatus();
     }
 }

@@ -20,6 +20,8 @@ class MasterBarangModel extends Model
         'merk',
         'spesifikasi',
         'satuan',
+        'satuan_kemasan',
+        'konversi_faktor',
         'jenis_item',
     ];
 

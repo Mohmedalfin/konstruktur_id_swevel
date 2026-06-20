@@ -7,7 +7,7 @@ $slug = $slug ?? null;
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project Dashboard</title>
+    <title>Project Dashboard - Kontraktor.id</title>
     <link href="<?= base_url('assets/css/output.css') ?>" rel="stylesheet">
     <link rel="stylesheet" href="<?= base_url('assets/fontawesome/css/all.min.css') ?>">
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script> 
@@ -79,7 +79,6 @@ $slug = $slug ?? null;
     </script>
     <script src="<?= base_url('assets/js/preline.js') ?>"></script>
     <script src="<?= base_url('node_modules/preline/dist/preline.js') ?>"></script>
-    <script src="<?= base_url('assets/js/partials/navbar.js') ?>"></script>
     <script type="module" src="<?= base_url('js/dashboard/index.js') ?>"></script>
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Schedule</title>
+    <title>Schedule - Kontraktor.id</title>
     <link rel="preload" href="<?= base_url('assets/css/output.css') ?>" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link href="<?= base_url('assets/css/output.css') ?>" rel="stylesheet"></noscript>
     <link rel="stylesheet" href="<?= base_url('assets/fontawesome/css/all.min.css') ?>">

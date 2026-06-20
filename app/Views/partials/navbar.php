@@ -1,3 +1,15 @@
+<?php
+$fullName = trim(session()->get('nama_pengguna') ?? session()->get('nama') ?? 'Moch. Alfin ');
+$userRole = ucfirst((string) (session()->get('kategori_akun') ?? session()->get('role') ?? 'Kontraktor'));
+
+$words = preg_split('/\s+/', $fullName);
+$wordLimit = 2;
+if (count($words) > $wordLimit) {
+    $userName = implode(' ', array_slice($words, 0, $wordLimit)) . '...';
+} else {
+    $userName = $fullName;
+}
+?>
 <!-- ========== GLOBAL LOADER ========== -->
 <?= view('partials/global-loader') ?>
 <script type="module" src="<?= base_url('js/shared/ui/global-loader.js') ?>"></script>
@@ -56,6 +68,7 @@
                   Kembali ke Proyek
                 </a>
               </div>
+
               <a class="<?= get_nav_class('dashboard') ?>" href="<?= base_url('dashboard') ?>" data-nav-path="dashboard"
                 <?= is_nav_active('dashboard') ? 'aria-current="page"' : '' ?>>
                 <svg class="shrink-0 size-4 me-3 md:me-2 block md:hidden" xmlns="http://www.w3.org/2000/svg" width="24"
@@ -105,67 +118,78 @@
                 Realisasi
               </a>
 
-              <!-- Notification Dropdown -->
-              <div class="hs-dropdown [--strategy:absolute] [--adaptive:none] flex items-center px-2 relative border-l border-white/10 ml-2 pl-4">
-                  <button id="hs-navbar-notification" type="button" class="hs-dropdown-toggle relative flex justify-center items-center h-9 w-9 text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors focus:outline-none" aria-haspopup="menu" aria-expanded="false" aria-label="Notifikasi">
-                      <i class="fa-regular fa-bell text-[1.1rem]"></i>
-                      <span class="absolute top-1.5 right-1.5 inline-flex items-center justify-center w-2.5 h-2.5 font-bold text-white bg-red-500 border border-navbar rounded-full"></span>
+              <!-- Dropdown Notifikasi -->
+              <div class="hs-dropdown [--strategy:static] md:[--strategy:fixed] [--adaptive:none] md:[--adaptive:adaptive] [--is-collapse:true] md:[--is-collapse:false]">
+                  <button id="hs-header-notification-dropdown" type="button"
+                      class="hs-dropdown-toggle relative w-full h-14 px-4 md:px-3 md:justify-center flex items-center gap-3 text-sm text-navbar-foreground hover:bg-navbar-hover focus:outline-none focus:bg-navbar-focus"
+                      aria-haspopup="menu" aria-expanded="false" aria-label="Notifikasi">
+                      <div class="shrink-0 relative">
+                          <i class="fa-regular fa-bell text-white text-[1.1rem]"></i>
+                          <span class="notif-badge-count absolute top-0 right-0 inline-flex items-center justify-center w-3.5 h-3.5 text-[9px] font-bold text-white bg-red-500 border border-primary rounded-full -mt-1 -mr-1.5 hidden">0</span>
+                      </div>
+                      <span class="md:hidden">Notifikasi</span>
                   </button>
 
-                  <div class="hs-dropdown-menu transition-[opacity,margin] duration-[150ms] hs-dropdown-open:opacity-100 opacity-0 absolute right-0 w-80 hidden z-50 top-full mt-2 bg-white border border-gray-200 shadow-md rounded-xl" role="menu" aria-orientation="vertical" aria-labelledby="hs-navbar-notification">
-                      <div class="p-3 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-xl">
+                  <div class="hs-dropdown-menu transition-[opacity,margin] duration-[0.1ms] md:duration-[150ms] hs-dropdown-open:opacity-100 opacity-0 relative w-full md:w-80 hidden z-10 top-full ps-7 md:ps-0 md:bg-white md:border md:border-gray-200 md:shadow-md md:rounded-xl before:absolute before:-top-4 before:start-0 before:w-full before:h-5"
+                      role="menu" aria-orientation="vertical" aria-labelledby="hs-header-notification-dropdown">
+                      <div class="p-3 border-b border-gray-100 flex justify-between items-center bg-white md:rounded-t-xl">
                           <h3 class="text-sm font-bold text-gray-800">Notifikasi</h3>
-                          <span class="text-xs text-red-600 bg-red-50 px-2 py-0.5 rounded-full font-semibold">Baru</span>
+                          <span class="notif-header-count text-xs text-red-600 bg-red-50 px-2 py-0.5 rounded-full font-semibold">0 Baru</span>
                       </div>
-                      <div class="max-h-72 overflow-y-auto bg-white [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:bg-gray-300">
-                          <a class="p-3 flex items-start gap-3 hover:bg-gray-50 bg-blue-50/20 border-b border-gray-100 transition-colors" href="#">
-                              <div class="shrink-0 p-2 bg-purple-100 text-purple-600 rounded-full mt-0.5">
-                                  <i class="fa-solid fa-cart-shopping w-3.5 h-3.5 text-center flex items-center justify-center"></i>
-                              </div>
-                              <div class="flex-1">
-                                  <p class="text-sm text-gray-800 font-bold">Pengajuan Purchasing</p>
-                                  <p class="text-xs text-gray-500 mt-0.5 line-clamp-2">PO-2023-001 telah disetujui oleh Direktur dan siap diproses.</p>
-                                  <p class="text-[10px] text-[#3b82f6] font-semibold mt-1">1 jam yang lalu</p>
-                              </div>
-                              <div class="shrink-0 w-2 h-2 bg-[#3b82f6] rounded-full mt-2"></div>
-                          </a>
+                      <div class="notif-dropdown-list max-h-72 overflow-y-auto bg-white [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:bg-gray-300">
+                          <div class="p-4 text-center text-gray-500">
+                              <i class="fa-solid fa-circle-notch fa-spin text-2xl mb-2 text-gray-300"></i>
+                              <p class="text-xs">Memuat notifikasi...</p>
+                          </div>
                       </div>
-                      <div class="p-2 border-t border-gray-100 text-center bg-gray-50 rounded-b-xl">
-                          <a class="text-xs font-bold text-[#3b82f6] hover:text-[#2563eb] flex items-center justify-center gap-1 transition-colors" href="#">
+                      <div class="p-2 border-t border-gray-100 text-center bg-gray-50 md:rounded-b-xl">
+                          <a class="text-xs font-bold text-primary hover:text-primary/80 flex items-center justify-center gap-1 transition-colors" href="<?= base_url('notifikasi') ?>">
                               Lihat Semua Notifikasi <i class="fa-solid fa-chevron-right text-[10px]"></i>
                           </a>
                       </div>
                   </div>
               </div>
 
-              <!-- User Dropdown -->
-              <div class="hs-dropdown [--strategy:absolute] [--adaptive:none] flex items-center relative">
-                  <button id="hs-navbar-user" type="button" class="hs-dropdown-toggle flex items-center gap-3 px-3 h-10 hover:bg-white/10 rounded-lg transition-colors focus:outline-none" aria-haspopup="menu" aria-expanded="false">
-                      <div class="w-8 h-8 rounded-full bg-gray-700 border border-gray-600 flex items-center justify-center overflow-hidden shrink-0">
-                          <i class="text-gray-300 fa-solid fa-user text-sm"></i>
+              <!-- Dropdown (User Profile) -->
+              <div class="hs-dropdown [--strategy:static] md:[--strategy:fixed] [--adaptive:none] md:[--adaptive:adaptive] [--is-collapse:true] md:[--is-collapse:false]">
+                  <button id="hs-header-base-dropdown" type="button"
+                      class="hs-dropdown-toggle w-full h-14 px-4 md:px-3 md:justify-center flex items-center gap-3 text-sm text-navbar-foreground hover:bg-navbar-hover focus:outline-hidden focus:bg-navbar-focus"
+                      aria-haspopup="menu" aria-expanded="false" aria-label="Dropdown">
+
+                      <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center ring-1 ring-white/30 shrink-0">
+                          <i class="text-white fa-solid fa-user text-sm"></i>
                       </div>
-                      <div class="leading-tight text-left hidden sm:block">
-                          <div class="text-[13px] font-semibold text-white"><?= esc(session()->get('nama_pengguna') ?? session()->get('nama') ?? 'Pengguna') ?></div>
-                          <div class="text-[11px] text-gray-400"><?= esc(session()->get('kategori_akun') ?? session()->get('role') ?? 'Proyek') ?></div>
+
+                      <div class="leading-tight text-left">
+                          <div class="text-sm font-medium text-white" title="<?= esc($fullName) ?>"><?= esc($userName) ?></div>
+                          <div class="text-xs text-secondary opacity-80"><?= esc($userRole) ?></div>
                       </div>
-                      <i class="fa-solid fa-chevron-down text-[10px] text-gray-400 hs-dropdown-open:rotate-180 transition-transform duration-300 ml-1"></i>
+
+                      <svg class="text-white hs-dropdown-open:-rotate-180 duration-300 shrink-0 size-4 ms-auto md:ms-1"
+                          xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                          fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="m6 9 6 6 6-6"/>
+                      </svg>
                   </button>
 
-                  <div class="hs-dropdown-menu transition-[opacity,margin] duration-[150ms] hs-dropdown-open:opacity-100 opacity-0 absolute right-0 w-52 hidden z-50 top-full mt-2 bg-white border border-gray-200 shadow-md rounded-xl" role="menu" aria-orientation="vertical" aria-labelledby="hs-navbar-user">
-                      <div class="py-2 px-1">
-                          <a class="px-3 py-2.5 flex items-center gap-3 text-[13px] font-medium text-gray-700 hover:bg-gray-100 rounded-lg mx-1 transition-colors" href="#">
-                              <i class="fa-regular fa-id-badge w-4 text-center text-gray-400"></i> Profile
+                  <div class="hs-dropdown-menu transition-[opacity,margin] duration-[0.1ms] md:duration-[150ms] hs-dropdown-open:opacity-100 opacity-0 relative w-full md:w-52 hidden z-10 top-full ps-7 md:ps-0 md:bg-white md:border md:border-gray-200 md:shadow-md before:absolute before:-top-4 before:start-0 before:w-full before:h-5 md:after:hidden after:absolute after:top-1 after:start-4.5 after:h-[calc(100%-4px)] after:border-s after:border-white/20"
+                      role="menu" aria-orientation="vertical" aria-labelledby="hs-header-base-dropdown">
+                      <div class="py-1 md:px-1 space-y-0.5">
+                          <a class="p-2 md:px-3 flex items-center text-sm text-slate-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 rounded-lg gap-3" href="<?= base_url('profile') ?>">
+                              <i class="fa-regular fa-id-badge w-4"></i>
+                              Profile
                           </a>
-                          <div class="my-1 border-t border-gray-100"></div>
-                          <a class="px-3 py-2.5 flex items-center gap-3 text-[13px] font-medium text-red-600 hover:bg-red-50 rounded-lg mx-1 transition-colors" href="<?= base_url('auth/logout') ?>">
-                              <i class="fa-solid fa-right-from-bracket w-4 text-center"></i> Logout
+                          <a class="p-2 md:px-3 flex items-center text-sm text-slate-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 rounded-lg gap-3" href="<?= base_url('kelola-akun') ?>">
+                              <i class="fa-solid fa-users-gear w-4"></i>
+                              Kelola Akun
+                          </a>
+                          <a class="p-2 md:px-3 flex items-center text-sm text-red-600 hover:bg-red-50 focus:outline-none focus:bg-red-50 rounded-lg gap-3" href="<?= base_url('logout') ?>">
+                              <i class="fa-solid fa-right-from-bracket w-4"></i>
+                              Logout
                           </a>
                       </div>
                   </div>
               </div>
-
-
-
 
             </div>
           </div>
@@ -175,54 +199,5 @@
   </nav>
 </header>
 
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const profileBtn = document.getElementById('hs-navbar-user');
-        const profileMenu = profileBtn ? profileBtn.nextElementSibling : null;
-
-        const notifBtn = document.getElementById('hs-navbar-notification');
-        const notifMenu = notifBtn ? notifBtn.nextElementSibling : null;
-
-        function toggleDropdown(btn, menu, e) {
-            if (!btn || !menu) return;
-            e.stopPropagation();
-            const isOpen = btn.getAttribute('aria-expanded') === 'true';
-
-            // Close other dropdowns
-            if (profileBtn && profileBtn !== btn && profileMenu) {
-                profileMenu.classList.add('hidden', 'opacity-0'); profileMenu.classList.remove('opacity-100');
-                profileBtn.setAttribute('aria-expanded', 'false');
-            }
-            if (notifBtn && notifBtn !== btn && notifMenu) {
-                notifMenu.classList.add('hidden', 'opacity-0'); notifMenu.classList.remove('opacity-100');
-                notifBtn.setAttribute('aria-expanded', 'false');
-            }
-
-            if (isOpen) {
-                menu.classList.add('hidden', 'opacity-0');
-                menu.classList.remove('opacity-100');
-                btn.setAttribute('aria-expanded', 'false');
-            } else {
-                menu.classList.remove('hidden', 'opacity-0');
-                menu.classList.add('opacity-100');
-                btn.setAttribute('aria-expanded', 'true');
-            }
-        }
-
-        if (profileBtn) profileBtn.addEventListener('click', (e) => toggleDropdown(profileBtn, profileMenu, e));
-        if (notifBtn) notifBtn.addEventListener('click', (e) => toggleDropdown(notifBtn, notifMenu, e));
-
-        document.addEventListener('click', function () {
-            if (profileBtn && profileBtn.getAttribute('aria-expanded') === 'true') {
-                if(profileMenu) { profileMenu.classList.add('hidden', 'opacity-0'); profileMenu.classList.remove('opacity-100'); }
-                profileBtn.setAttribute('aria-expanded', 'false');
-            }
-            if (notifBtn && notifBtn.getAttribute('aria-expanded') === 'true') {
-                if(notifMenu) { notifMenu.classList.add('hidden', 'opacity-0'); notifMenu.classList.remove('opacity-100'); }
-                notifBtn.setAttribute('aria-expanded', 'false');
-            }
-        });
-    });
-</script>
-
 <script src="<?= base_url('assets/js/partials/navbar.js') ?>" defer></script>
+<script src="<?= base_url('js/shared/notification-poll.js') ?>"></script>

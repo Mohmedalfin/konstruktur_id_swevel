@@ -14,8 +14,7 @@ const AppSwal = Swal.mixin({
         icon: 'app-swal-icon',
     },
     buttonsStyling: false,
-    reverseButtons: true,
-    scrollbarPadding: false,
+    reverseButtons: true
 });
 
 export function initForm() {
@@ -209,7 +208,9 @@ export function initForm() {
                 sisa_volume: item.sisa_volume || 0,
                 spesifikasi: item.spesifikasi || '-',
                 merk: item.merk || '-',
-                keterangan: ''
+                keterangan: '',
+                satuan_kemasan: item.satuan_kemasan,
+                konversi_faktor: item.konversi_faktor
             });
 
             // Reset the custom select UI instead of the hidden select value
@@ -266,16 +267,22 @@ export function initForm() {
             block.items[idx].jumlah = val;
             
             // Validate locally and update the DOM immediately
-            const sisaVolume = parseFloat(block.items[idx].sisa_volume) || 0;
+            const sisaVolumeBase = parseFloat(block.items[idx].sisa_volume) || 0;
+            const itemObj = block.items[idx];
+            const kf = parseFloat(itemObj.konversi_faktor) || 1;
+            const deductedQty = val * kf;
+            
             const container = input.closest('div');
             if (container) {
                 const errorSpan = container.querySelector('.error-qty');
-                if (val > Math.max(0, sisaVolume)) {
+                const isOverLimit = deductedQty > Math.max(0, sisaVolumeBase);
+
+                if (isOverLimit) {
                     input.classList.add('border-red-500', 'focus:border-red-500', 'bg-red-50');
                     input.classList.remove('border-slate-300', 'focus:border-blue-500', 'bg-slate-50');
                     if (errorSpan) {
-                        const excess = val - Math.max(0, sisaVolume);
-                        errorSpan.textContent = `Over-limit: ${excess}`;
+                        const excess = deductedQty - Math.max(0, sisaVolumeBase);
+                        errorSpan.textContent = `Over: ${excess} ${itemObj.satuan}`;
                         errorSpan.classList.remove('hidden');
                         errorSpan.classList.add('text-red-500');
                     }
@@ -288,6 +295,28 @@ export function initForm() {
                         errorSpan.classList.remove('text-red-500');
                     }
                 }
+
+                // Update conversion info container
+                const conversionContainer = container.querySelector('.conversion-info-container');
+                if (conversionContainer) {
+                    const hasKemasan = itemObj.satuan_kemasan && String(itemObj.satuan_kemasan).trim() !== '';
+                    const isDifferentName = hasKemasan && String(itemObj.satuan_kemasan).toLowerCase() !== String(itemObj.satuan).toLowerCase();
+                    const displaySatuan = (hasKemasan && (kf > 1 || isDifferentName)) ? itemObj.satuan_kemasan : itemObj.satuan;
+                    
+                    let conversionHtml = '';
+                    if (hasKemasan && (kf > 1 || isDifferentName)) {
+                        if (deductedQty > 0) {
+                            conversionHtml = `<div class="mt-1 sm:mt-0 sm:ml-2 text-[9px] text-indigo-700 bg-indigo-50 px-2 py-1 rounded border border-indigo-200 whitespace-nowrap leading-tight text-left">
+                                Memotong RAP: <b>${deductedQty} ${itemObj.satuan}</b>
+                            </div>`;
+                        } else {
+                            conversionHtml = `<div class="mt-1 sm:mt-0 sm:ml-2 text-[9px] text-slate-500 bg-slate-50 px-2 py-1 rounded border border-slate-200 whitespace-nowrap leading-tight text-left">
+                                <i class="fas fa-info-circle mr-0.5"></i> 1 ${displaySatuan} = ${kf} ${itemObj.satuan}
+                            </div>`;
+                        }
+                    }
+                    conversionContainer.innerHTML = conversionHtml;
+                }
             }
             
             // Check global over-limit status
@@ -295,7 +324,9 @@ export function initForm() {
             state.projectRows.forEach(r => {
                 r.items.forEach(i => {
                     const sv = parseFloat(i.sisa_volume) || 0;
-                    if (parseFloat(i.jumlah) > Math.max(0, sv)) isAnyOverLimit = true;
+                    const itemKf = parseFloat(i.konversi_faktor) || 1;
+                    const deducted = (parseFloat(i.jumlah) || 0) * itemKf;
+                    if (deducted > Math.max(0, sv)) isAnyOverLimit = true;
                 });
             });
             
@@ -404,7 +435,10 @@ export function initForm() {
                     }
 
                     const sisaVolume = parseFloat(item.sisa_volume) || 0;
-                    if (item.jumlah > Math.max(0, sisaVolume)) {
+                    const kf = parseFloat(item.konversi_faktor) || 1;
+                    const baseQty = (parseFloat(item.jumlah) || 0) * kf;
+                    
+                    if (baseQty > Math.max(0, sisaVolume)) {
                         isAnyOverLimit = true;
                     }
 
@@ -412,7 +446,7 @@ export function initForm() {
                         id_project: row.selectedProjectId,
                         id_rap_detail_item: item.id_rap_detail_item,
                         nama_barang: item.nama_barang,
-                        jumlah: item.jumlah,
+                        jumlah: baseQty,
                         satuan: item.satuan,
                         kategori: item.kategori,
                         keterangan: item.keterangan

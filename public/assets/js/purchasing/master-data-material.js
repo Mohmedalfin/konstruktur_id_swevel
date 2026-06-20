@@ -56,11 +56,7 @@ function submitTambahMaterial() {
     
     // Validasi basic
     if (!data.nama_material || !data.kategori || !data.satuan) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Peringatan',
-            text: 'Nama, Kategori, dan Satuan wajib diisi!'
-        });
+        window.Toast.show('Nama, Kategori, dan Satuan wajib diisi!', 'warning');
         return;
     }
 
@@ -75,22 +71,17 @@ function submitTambahMaterial() {
     .then(response => response.json())
     .then(res => {
         if (res.status === 'success') {
-            Swal.fire({
-                icon: 'success',
-                title: 'Berhasil',
-                text: res.message,
-                showConfirmButton: false,
-                timer: 1500
-            }).then(() => {
+            window.Toast.show(res.message, 'success');
+            setTimeout(() => {
                 window.location.reload();
-            });
+            }, 1000);
         } else {
-            Swal.fire('Gagal!', res.message, 'error');
+            window.Toast.show(res.message, 'error');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        Swal.fire('Gagal!', 'Terjadi kesalahan sistem.', 'error');
+        window.Toast.show('Terjadi kesalahan sistem', 'error');
     });
 }
 
@@ -101,11 +92,7 @@ function submitEditMaterial() {
 
     // Validasi basic
     if (!data.nama_material || !data.kategori || !data.satuan) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Peringatan',
-            text: 'Nama, Kategori, dan Satuan wajib diisi!'
-        });
+        window.Toast.show('Nama, Kategori, dan Satuan wajib diisi!', 'warning');
         return;
     }
 
@@ -120,37 +107,23 @@ function submitEditMaterial() {
     .then(response => response.json())
     .then(res => {
         if (res.status === 'success') {
-            Swal.fire({
-                icon: 'success',
-                title: 'Berhasil',
-                text: res.message,
-                showConfirmButton: false,
-                timer: 1500
-            }).then(() => {
+            window.Toast.show(res.message, 'success');
+            setTimeout(() => {
                 window.location.reload();
-            });
+            }, 1000);
         } else {
-            Swal.fire('Gagal!', res.message, 'error');
+            window.Toast.show(res.message, 'error');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        Swal.fire('Gagal!', 'Terjadi kesalahan sistem.', 'error');
+        window.Toast.show('Terjadi kesalahan sistem', 'error');
     });
 }
 
 function deleteMaterial(id) {
-    Swal.fire({
-        title: 'Hapus Material?',
-        text: "Data yang dihapus tidak dapat dikembalikan!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Ya, Hapus!',
-        cancelButtonText: 'Batal'
-    }).then((result) => {
-        if (result.isConfirmed) {
+    window.confirmAction('Hapus Material?', 'Data yang dihapus tidak dapat dikembalikan!', 'Ya, Hapus').then((isConfirmed) => {
+        if (isConfirmed) {
             fetch(`/purchasing/master-data/material/delete/${id}`, {
                 method: 'DELETE',
                 headers: {
@@ -160,22 +133,17 @@ function deleteMaterial(id) {
             .then(response => response.json())
             .then(res => {
                 if (res.status === 'success') {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Dihapus!',
-                        text: res.message,
-                        showConfirmButton: false,
-                        timer: 1500
-                    }).then(() => {
+                    window.Toast.show(res.message, 'success');
+                    setTimeout(() => {
                         window.location.reload();
-                    });
+                    }, 1000);
                 } else {
-                    Swal.fire('Gagal!', res.message, 'error');
+                    window.Toast.show(res.message, 'error');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                Swal.fire('Gagal!', 'Terjadi kesalahan sistem.', 'error');
+                window.Toast.show('Terjadi kesalahan sistem', 'error');
             });
         }
     })
