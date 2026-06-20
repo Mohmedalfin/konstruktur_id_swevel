@@ -89,8 +89,14 @@ class InventoryHelper
         $idPerusahaan = (int) ($project['id_pengguna'] ?? 1);
         
         $namaBarang = trim($namaBarang);
-        $merk = trim((string) $merk) ?: 'Tanpa Merk';
-        $spesifikasi = trim((string) $spesifikasi) ?: '-';
+        $merk = trim((string) $merk);
+        if ($merk === '' || $merk === '-') {
+            $merk = 'Tanpa Merk';
+        }
+        $spesifikasi = trim((string) $spesifikasi);
+        if ($spesifikasi === '') {
+            $spesifikasi = '-';
+        }
         $satuan = trim((string) $satuan) ?: '-';
         
         // Normalisasi jenis_item ke title case (Bahan, Alat, Upah)

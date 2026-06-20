@@ -64,6 +64,8 @@ export async function initMonitoring() {
 
             if (konversiFaktor !== '' && parseFloat(konversiFaktor) === 1.0) {
                 konversiFaktor = '';
+            } else if (konversiFaktor !== '') {
+                konversiFaktor = parseFloat(konversiFaktor); // This removes unnecessary decimals like 50.0000 -> 50
             }
 
             document.getElementById('edit-id-barang').value = idBarang;
@@ -72,6 +74,15 @@ export async function initMonitoring() {
             document.getElementById('edit-stok-minimum').value = currentMinimum;
             document.getElementById('edit-satuan-kemasan').value = satuanKemasan;
             document.getElementById('edit-konversi-faktor').value = konversiFaktor;
+
+            const labelMinimum = document.querySelector('label[for="edit-stok-minimum"]');
+            if (labelMinimum) {
+                if (satuanKemasan.trim() !== '') {
+                    labelMinimum.textContent = `Batas Min (${satuanKemasan})`;
+                } else {
+                    labelMinimum.textContent = `Batas Min (${satuan})`;
+                }
+            }
 
             // Buka Modal secara programmatis karena tombol ini digenerate JS
             const modal = document.querySelector('#modal-edit-minimum');
@@ -99,6 +110,12 @@ export async function initMonitoring() {
             const satuan = document.getElementById('edit-satuan').value;
             const satuanKemasan = document.getElementById('edit-satuan-kemasan').value;
             const konversiFaktor = document.getElementById('edit-konversi-faktor').value;
+            
+            let finalMinimum = parseFloat(stokMinimum || 0);
+            const kf = parseFloat(konversiFaktor);
+            if (!isNaN(kf) && kf > 0 && satuanKemasan.trim() !== '') {
+                finalMinimum = finalMinimum * kf;
+            }
 
             try {
                 const response = await fetch('/api/stok/update-minimum', {
@@ -109,7 +126,7 @@ export async function initMonitoring() {
                     },
                     body: JSON.stringify({ 
                         id_barang: idBarang, 
-                        stok_minimum: stokMinimum, 
+                        stok_minimum: finalMinimum, 
                         satuan: satuan,
                         satuan_kemasan: satuanKemasan,
                         konversi_faktor: konversiFaktor

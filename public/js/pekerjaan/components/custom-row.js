@@ -21,6 +21,21 @@ export function bindCustomRow() {
 
         const customRow = document.createElement('tr');
         customRow.className = 'tambah-ahs-custom-row border-b-2 border-primary/40 bg-gradient-to-r from-primary/5 to-white';
+        
+        // Custom ComboBox Options
+        const satuanOptions = [
+            {v: 'm', l: 'Meter (m)'}, {v: 'm2', l: 'Meter Persegi (m²)'}, {v: 'm3', l: 'Meter Kubik (m³)'},
+            {v: 'cm', l: 'Sentimeter (cm)'}, {v: 'mm', l: 'Milimeter (mm)'}, {v: 'km', l: 'Kilometer (km)'},
+            {v: 'kg', l: 'Kilogram (kg)'}, {v: 'ton', l: 'Ton'}, {v: 'gr', l: 'Gram (gr)'},
+            {v: 'bh', l: 'Buah (bh)'}, {v: 'unit', l: 'Unit'}, {v: 'set', l: 'Set'},
+            {v: 'ls', l: 'Lump Sum (ls)'}, {v: 'ttk', l: 'Titik (ttk)'}, {v: 'btg', l: 'Batang (btg)'},
+            {v: 'lbr', l: 'Lembar (lbr)'}, {v: 'mtr', l: "Meter Lari (m')"}, {v: 'org/hr', l: 'Orang/Hari (OH)'},
+            {v: 'jam', l: 'Jam'}, {v: 'hari', l: 'Hari'}, {v: 'bln', l: 'Bulan'}, {v: 'mgg', l: 'Minggu'},
+            {v: 'zak', l: 'Zak'}, {v: 'gln', l: 'Galon (gln)'}, {v: 'klg', l: 'Kaleng (klg)'},
+            {v: 'btl', l: 'Botol (btl)'}, {v: 'ktk', l: 'Kotak (ktk)'}, {v: 'rol', l: 'Rol'},
+            {v: 'dus', l: 'Dus'}, {v: 'rit', l: 'Ritase (rit)'}, {v: 'pax', l: 'Pax'}, {v: 'liter', l: 'Liter (L)'}
+        ];
+        
         // ... (HTML content unchanged)
         customRow.innerHTML = `
             <td class="px-3 md:px-5 py-3 text-center">
@@ -38,10 +53,13 @@ export function bindCustomRow() {
                 </div>
             </td>
             <td class="px-3 md:px-5 py-3">
-                <div class="flex flex-col gap-0.5">
-                    <label class="text-[9px] font-semibold text-table-subtle uppercase tracking-widest">Satuan</label>
-                    <input type="text" list="datalist-satuan" data-field="satuan" placeholder="m²"
-                        class="w-full px-2.5 py-1.5 text-xs border border-table-border rounded-lg text-center focus:outline-none focus:ring-0.5 focus:ring-primary focus:border-primary bg-white text-table-medium"/>
+                <div class="flex flex-col gap-0.5 w-[5rem] relative mx-auto items-center">
+                    <label class="text-[9px] font-semibold text-table-subtle uppercase tracking-widest text-center w-full">Satuan</label>
+                    <input type="text" data-field="satuan" placeholder="m²" value="m2" autocomplete="off"
+                        class="w-full px-2 py-1.5 text-xs border border-table-border rounded-lg text-center focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary bg-white text-table-medium truncate"/>
+                    <div class="custom-satuan-dropdown absolute top-full left-0 mt-1 w-32 bg-white border border-table-border rounded-md shadow-lg z-[60] hidden max-h-40 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-table-border [&::-webkit-scrollbar-thumb]:rounded-full">
+                        <ul class="py-1 text-xs text-table-medium"></ul>
+                    </div>
                 </div>
             </td>
             <td class="px-3 md:px-5 py-3">
@@ -68,6 +86,47 @@ export function bindCustomRow() {
             </td>`;
 
         tbody.insertBefore(customRow, tbody.firstChild);
+        
+        // Bind Custom ComboBox Events
+        const satuanInput = customRow.querySelector('input[data-field="satuan"]');
+        const satuanDropdown = customRow.querySelector('.custom-satuan-dropdown');
+        const satuanUl = satuanDropdown.querySelector('ul');
+        
+        const renderSatuan = (filter = '') => {
+            satuanUl.innerHTML = '';
+            const filtered = satuanOptions.filter(o => o.v.toLowerCase().includes(filter.toLowerCase()) || o.l.toLowerCase().includes(filter.toLowerCase()));
+            if (filtered.length === 0) {
+                satuanUl.innerHTML = '<li class="px-3 py-1.5 text-table-subtle italic">Tekan enter untuk manual</li>';
+            } else {
+                filtered.forEach(o => {
+                    const li = document.createElement('li');
+                    li.className = 'px-3 py-1.5 hover:bg-primary/10 hover:text-primary cursor-pointer truncate';
+                    li.textContent = o.v;
+                    li.title = o.l;
+                    li.addEventListener('mousedown', (e) => {
+                        e.preventDefault(); // prevent blur
+                        satuanInput.value = o.v;
+                        satuanDropdown.classList.add('hidden');
+                    });
+                    satuanUl.appendChild(li);
+                });
+            }
+        };
+
+        satuanInput.addEventListener('focus', () => {
+            renderSatuan(satuanInput.value);
+            satuanDropdown.classList.remove('hidden');
+        });
+
+        satuanInput.addEventListener('input', (e) => {
+            renderSatuan(e.target.value);
+            satuanDropdown.classList.remove('hidden');
+        });
+
+        satuanInput.addEventListener('blur', () => {
+            setTimeout(() => satuanDropdown.classList.add('hidden'), 150);
+        });
+        
         customRow.querySelector('input[data-field="nama"]').focus();
 
         customRow.querySelector('.custom-add-cancel').addEventListener('click', () => customRow.remove());

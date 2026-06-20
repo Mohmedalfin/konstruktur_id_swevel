@@ -325,12 +325,24 @@ class RealisasiService
 
         $usageMap = [];
         foreach ($usageItems as $u) {
-            $key = strtolower(trim($u['nama_item'] . '|' . $u['satuan'] . '|' . $u['spesifikasi'] . '|' . $u['merk']));
+            $spesifikasi = trim($u['spesifikasi'] ?? '');
+            $spesifikasi = ($spesifikasi === '-') ? '' : $spesifikasi;
+            
+            $merk = trim($u['merk'] ?? '');
+            $merk = ($merk === '-') ? '' : $merk;
+            
+            $key = strtolower(trim($u['nama_item'] . '|' . $u['satuan'] . '|' . $spesifikasi . '|' . $merk));
             $usageMap[$key] = (float) $u['total_usage'];
         }
 
         foreach ($budgetItems as &$item) {
-            $key = strtolower(trim($item['nama_item'] . '|' . $item['satuan'] . '|' . $item['spesifikasi'] . '|' . $item['merk']));
+            $spesifikasi = trim($item['spesifikasi'] ?? '');
+            $spesifikasi = ($spesifikasi === '-') ? '' : $spesifikasi;
+            
+            $merk = trim($item['merk'] ?? '');
+            $merk = ($merk === '-') ? '' : $merk;
+            
+            $key = strtolower(trim($item['nama_item'] . '|' . $item['satuan'] . '|' . $spesifikasi . '|' . $merk));
             $used = $usageMap[$key] ?? 0;
             
             $item['qty_budget'] = (float) $item['qty_budget'];

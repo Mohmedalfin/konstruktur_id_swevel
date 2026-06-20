@@ -223,8 +223,10 @@ class PengadaanService
         if (!$pr) return null;
 
         $items = $db->table('purchase_request_items pri')
-            ->select('pri.*, mb.kode_barang, mb.nama_barang, mb.satuan, mb.satuan_kemasan, mb.spesifikasi, mb.merk')
+            ->select('pri.*, mb.kode_barang, mb.nama_barang, mb.satuan, mb.satuan_kemasan, mb.spesifikasi, mb.merk, mb.konversi_faktor, po.po_number, s.nama_supplier')
             ->join('master_barang mb', 'mb.id = pri.id_barang', 'left')
+            ->join('purchase_orders po', 'po.id = pri.po_id', 'left')
+            ->join('suppliers s', 's.id = po.supplier_id', 'left')
             ->where('pri.pr_id', $prId)
             ->get()
             ->getResultArray();
@@ -249,7 +251,7 @@ class PengadaanService
     {
         $db = Database::connect();
         $builder = $db->table('master_barang mb')
-            ->select('mb.id as id_barang, mb.kode_barang, mb.nama_barang, mb.satuan, mb.satuan_kemasan, mb.spesifikasi, COALESCE(sg.stok_aktual, 0) as stok_aktual, COALESCE(sg.stok_minimum, 0) as stok_minimum')
+            ->select('mb.id as id_barang, mb.kode_barang, mb.nama_barang, mb.satuan, mb.satuan_kemasan, mb.spesifikasi, mb.konversi_faktor, COALESCE(sg.stok_aktual, 0) as stok_aktual, COALESCE(sg.stok_minimum, 0) as stok_minimum')
             ->join('stok_gudang sg', 'sg.id_barang = mb.id AND sg.id_perusahaan = ' . $db->escape($idPerusahaan), 'left')
             ->where('mb.id_perusahaan', $idPerusahaan);
 

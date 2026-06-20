@@ -26,7 +26,7 @@ class PurchaseOrderItemModel extends Model
 
     public function getItemsByPO($poId)
     {
-        return $this->select('purchase_order_items.*, master_barang.nama_barang as nama_material, master_barang.satuan, master_barang.satuan_kemasan, master_barang.spesifikasi')
+        return $this->select('purchase_order_items.*, master_barang.nama_barang as nama_material, master_barang.satuan, master_barang.satuan_kemasan, master_barang.spesifikasi, master_barang.konversi_faktor')
                     ->join('master_barang', 'master_barang.id = purchase_order_items.id_barang')
                     ->where('po_id', $poId)
                     ->findAll();

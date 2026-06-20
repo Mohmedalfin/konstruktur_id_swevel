@@ -56,10 +56,12 @@ export class FormModal {
                 this.addRow({
                     id_barang: this.selectedBarang.id_barang,
                     nama_barang: this.selectedBarang.nama_barang,
-                    satuan: this.selectedBarang.satuan_kemasan || this.selectedBarang.satuan,
+                    satuan: this.selectedBarang.satuan,
+                    satuan_kemasan: this.selectedBarang.satuan_kemasan,
                     stok_aktual: this.selectedBarang.stok_aktual || 0,
                     stok_minimum: this.selectedBarang.stok_minimum || 0,
-                    volume: ''
+                    konversi_faktor: this.selectedBarang.konversi_faktor || 1,
+                    jumlah: ''
                 });
                 
                 this.clearSearch();
@@ -85,13 +87,22 @@ export class FormModal {
                 if (items.length === 0) {
                     this.globalSearchDropdown.innerHTML = '<div class="px-4 py-8 text-sm text-slate-500 text-center">Barang tidak ditemukan</div>';
                 } else {
-                    this.globalSearchDropdown.innerHTML = items.map(item => `
+                    this.globalSearchDropdown.innerHTML = items.map(item => {
+                        let displayStok = parseFloat(item.stok_aktual || 0);
+                        let displaySatuan = item.satuan;
+                        if (item.satuan_kemasan && parseFloat(item.konversi_faktor || 1) > 1) {
+                            displayStok = displayStok / parseFloat(item.konversi_faktor);
+                            displayStok = Number.isInteger(displayStok) ? displayStok : parseFloat(displayStok.toFixed(2));
+                            displaySatuan = item.satuan_kemasan;
+                        }
+                        return `
                         <div class="px-4 py-2 hover:bg-indigo-50 cursor-pointer border-b border-slate-100 last:border-0 transition-colors"
                                 data-item='${JSON.stringify(item).replace(/'/g, "&#39;")}'>
                             <div class="font-semibold text-sm text-slate-700">${item.nama_barang}</div>
-                            <div class="text-xs text-slate-500 mt-0.5">Stok Gudang: <span class="font-bold">${parseFloat(item.stok_aktual || 0)}</span> ${item.satuan_kemasan || item.satuan}</div>
+                            <div class="text-xs text-slate-500 mt-0.5">Stok Gudang: <span class="font-bold">${displayStok}</span> ${displaySatuan}</div>
                         </div>
-                    `).join('');
+                        `;
+                    }).join('');
 
                     this.globalSearchDropdown.querySelectorAll('div[data-item]').forEach(option => {
                         option.addEventListener('click', () => {
@@ -219,13 +230,23 @@ export class FormModal {
             smartModeItems.forEach(item => {
                 // Calculate suggested volume: stok_minimum - stok_aktual
                 const suggestedVolume = Math.max(0, parseFloat(item.stok_minimum) - parseFloat(item.stok_aktual));
+                let suggestedJumlah = 1;
+                if (item.konversi_faktor && item.konversi_faktor > 0) {
+                    suggestedJumlah = Math.ceil(suggestedVolume / parseFloat(item.konversi_faktor));
+                    if (suggestedJumlah === 0) suggestedJumlah = 1;
+                } else {
+                    suggestedJumlah = suggestedVolume > 0 ? suggestedVolume : 1;
+                }
+                
                 this.addRow({
                     id_barang: item.id_barang,
                     nama_barang: item.nama_barang,
-                    satuan: item.satuan_kemasan || item.satuan,
+                    satuan: item.satuan,
+                    satuan_kemasan: item.satuan_kemasan,
                     stok_aktual: item.stok_aktual,
                     stok_minimum: item.stok_minimum,
-                    volume: suggestedVolume > 0 ? suggestedVolume : 1
+                    konversi_faktor: item.konversi_faktor || 1,
+                    jumlah: suggestedJumlah
                 });
             });
         } else {
@@ -264,21 +285,48 @@ export class FormModal {
         const inputIdBarang = tr.querySelector('.input-id-barang');
         const displayNama = tr.querySelector('.nama-text');
         const displaySatuanBadge = tr.querySelector('.satuan-badge');
+        const displaySatuanKemasan = tr.querySelector('.display-satuan-kemasan');
         const displayStokAktual = tr.querySelector('.display-stok-aktual');
         const displayStokMin = tr.querySelector('.display-stok-min');
+        const inputJumlah = tr.querySelector('.input-jumlah');
         const inputVolume = tr.querySelector('.input-volume');
+        const inputKonversi = tr.querySelector('.input-konversi');
         const btnRemove = tr.querySelector('.btn-remove-row');
 
         inputIdBarang.value = data.id_barang;
         displayNama.textContent = data.nama_barang;
-        displaySatuanBadge.textContent = data.satuan;
-        displayStokAktual.textContent = parseFloat(data.stok_aktual || 0);
-        displayStokMin.textContent = `Min: ${parseFloat(data.stok_minimum || 0)}`;
-        inputVolume.value = data.volume || '';
+        displaySatuanBadge.textContent = data.satuan_kemasan || data.satuan;
+        displaySatuanKemasan.textContent = data.satuan_kemasan || data.satuan;
+        const konversi = parseFloat(data.konversi_faktor || 1);
+        inputKonversi.value = konversi;
+        
+        let displayStok = parseFloat(data.stok_aktual || 0);
+        let displayMin = parseFloat(data.stok_minimum || 0);
+        
+        if (data.satuan_kemasan && konversi > 0) {
+            displayStok = displayStok / konversi;
+            displayStok = Number.isInteger(displayStok) ? displayStok : parseFloat(displayStok.toFixed(2));
+            
+            displayMin = displayMin / konversi;
+            displayMin = Number.isInteger(displayMin) ? displayMin : parseFloat(displayMin.toFixed(2));
+        }
 
-        // Auto focus the volume input
+        displayStokAktual.textContent = displayStok;
+        displayStokMin.textContent = `Min: ${displayMin}`;
+        
+        inputJumlah.value = data.jumlah || '';
+        if (data.jumlah) {
+            inputVolume.value = (parseFloat(data.jumlah) * konversi).toFixed(2).replace(/\.00$/, '');
+        }
+
+        inputJumlah.addEventListener('input', (e) => {
+            const val = parseFloat(e.target.value) || 0;
+            inputVolume.value = (val * konversi).toFixed(2).replace(/\.00$/, '');
+        });
+
+        // Auto focus the jumlah input
         setTimeout(() => {
-            inputVolume.focus();
+            inputJumlah.focus();
         }, 10);
 
         btnRemove.addEventListener('click', () => {
@@ -333,15 +381,17 @@ export class FormModal {
         
         rows.forEach(row => {
             const idBarang = row.querySelector('.input-id-barang').value;
+            const jumlah = row.querySelector('.input-jumlah').value;
             const volume = row.querySelector('.input-volume').value;
             
-            if (!idBarang || !volume || parseFloat(volume) <= 0) {
-                row.querySelector('.input-volume').classList.add('border-red-500', 'ring-red-200');
+            if (!idBarang || !jumlah || parseFloat(jumlah) <= 0) {
+                row.querySelector('.input-jumlah').classList.add('border-red-500', 'ring-red-200');
                 isValid = false;
             } else {
-                row.querySelector('.input-volume').classList.remove('border-red-500', 'ring-red-200');
+                row.querySelector('.input-jumlah').classList.remove('border-red-500', 'ring-red-200');
                 items.push({
                     id_barang: idBarang,
+                    jumlah: parseFloat(jumlah),
                     volume: parseFloat(volume)
                 });
             }

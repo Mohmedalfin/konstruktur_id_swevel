@@ -159,8 +159,12 @@ class ProjectInventoryService
 
         // 2. Tambah stok ke Gudang Central
         $stokGudang = $db->table('stok_gudang')
-            ->where('id_perusahaan', $idPerusahaan)
             ->where('id_barang', $idBarang)
+            ->groupStart()
+                ->where('id_perusahaan', $idPerusahaan)
+                ->orWhere('id_perusahaan', 0)
+            ->groupEnd()
+            ->orderBy('id_perusahaan', 'DESC')
             ->get()->getRowArray();
 
         if ($stokGudang) {
@@ -169,6 +173,17 @@ class ProjectInventoryService
                ->set('stok_aktual', 'stok_aktual + ' . (float)$jumlah, false)
                ->set('updated_at', date('Y-m-d H:i:s'))
                ->update();
+        } else {
+            $db->table('stok_gudang')->insert([
+                'id_perusahaan'   => $idPerusahaan,
+                'id_barang'       => $idBarang,
+                'stok_aktual'     => (float)$jumlah,
+                'stok_minimum'    => 0,
+                'harga_rata_rata' => 0,
+                'lokasi'          => 'Gudang Utama',
+                'created_at'      => date('Y-m-d H:i:s'),
+                'updated_at'      => date('Y-m-d H:i:s')
+            ]);
         }
 
         $db->transComplete();

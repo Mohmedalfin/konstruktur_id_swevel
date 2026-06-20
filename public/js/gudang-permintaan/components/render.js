@@ -385,11 +385,19 @@ export function renderDetailModal(req, userRole) {
                         const kf = parseFloat(item.konversi_faktor) || 1;
                         const isDifferentName = hasKemasan && String(item.satuan_kemasan).toLowerCase() !== String(item.satuan).toLowerCase();
                         
-                        const stokBase = parseFloat(item.stok_aktual || 0) * kf;
+                        const stokBase = parseFloat(item.stok_aktual || 0);
                         const isKurang = stokBase < parseFloat(item.jumlah);
                         
                         const warningHtml = isKurang ? `<span class="px-2 py-0.5 text-[9px] font-bold bg-rose-100 text-rose-800 border border-rose-200 rounded uppercase ml-2 shadow-sm">Stok Kurang</span>` : '';
                         const stokColor = isKurang ? 'text-rose-600' : 'text-emerald-600';
+                        
+                        let displayStokValue = stokBase;
+                        let displayStokUnit = item.satuan;
+                        if (hasKemasan && kf > 1) {
+                            displayStokValue = stokBase / kf;
+                            displayStokValue = Number.isInteger(displayStokValue) ? displayStokValue : parseFloat(displayStokValue.toFixed(2));
+                            displayStokUnit = item.satuan_kemasan;
+                        }
                         
                         const overLimitBadge = (item.is_over_limit === '1' || item.is_over_limit === 1)
                             ? `<span class="px-2 py-0.5 text-[9px] font-bold bg-red-100 text-red-700 border border-red-200 rounded uppercase ml-2 shadow-sm"><i class="fas fa-exclamation-triangle mr-1"></i> Over: ${parseFloat(item.jumlah_over_limit)} ${item.satuan}</span>`
@@ -417,7 +425,7 @@ export function renderDetailModal(req, userRole) {
                                         <span class="text-sm font-bold text-slate-800">${item.nama_barang}</span>
                                         ${overLimitBadge}
                                     </div>
-                                    <span class="text-[10px] font-medium text-slate-500 mt-0.5 flex flex-wrap items-center gap-1">Stok Gudang: <span class="font-bold ${stokColor}">${parseFloat(item.stok_aktual || 0)} ${item.satuan_kemasan || item.satuan}</span> ${warningHtml}</span>
+                                    <span class="text-[10px] font-medium text-slate-500 mt-0.5 flex flex-wrap items-center gap-1">Stok Gudang: <span class="font-bold ${stokColor}">${displayStokValue} ${displayStokUnit}</span> ${warningHtml}</span>
                                 </div>
                                 <div class="text-right flex flex-col items-end justify-center">
                                     ${jumlahDisplayHtml}
@@ -558,7 +566,11 @@ export function renderFormProjectBlocks(projectRows, projects) {
                                 <span class="font-bold text-slate-800 text-sm">${item.nama_barang}</span>
                             </div>
                             <p class="text-[9px] text-slate-400 font-semibold mt-0.5">Merk: ${item.merk || '-'} • Spek: ${item.spesifikasi || '-'}</p>
-                            <p class="text-[10px] text-emerald-600 font-bold mt-1 bg-emerald-50 inline-block px-1.5 py-0.5 rounded border border-emerald-100">Stok Gudang: ${item.stok_aktual || 0} ${item.satuan}</p>
+                            <p class="text-[10px] text-emerald-600 font-bold mt-1 bg-emerald-50 inline-block px-1.5 py-0.5 rounded border border-emerald-100">
+                                Stok Gudang: ${(item.satuan_kemasan && parseFloat(item.konversi_faktor || 1) > 1) 
+                                    ? (Number.isInteger(parseFloat(item.stok_aktual || 0) / parseFloat(item.konversi_faktor)) ? (parseFloat(item.stok_aktual || 0) / parseFloat(item.konversi_faktor)) : (parseFloat(item.stok_aktual || 0) / parseFloat(item.konversi_faktor)).toFixed(2)) + ' ' + item.satuan_kemasan 
+                                    : (item.stok_aktual || 0) + ' ' + item.satuan}
+                            </p>
                         </td>
                         <td class="px-4 py-3 text-center w-24">
                             ${categoryBadge}

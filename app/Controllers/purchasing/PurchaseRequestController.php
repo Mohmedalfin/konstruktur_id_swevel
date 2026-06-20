@@ -85,7 +85,7 @@ class PurchaseRequestController extends BaseController
         
         // Get all pending items for this PR
         $items = $db->table('purchase_request_items')
-            ->select('purchase_request_items.*, master_barang.nama_barang as nama_material, master_barang.satuan, master_barang.satuan_kemasan, master_barang.spesifikasi')
+            ->select('purchase_request_items.*, master_barang.nama_barang as nama_material, master_barang.satuan, master_barang.satuan_kemasan, master_barang.spesifikasi, master_barang.konversi_faktor')
             ->join('master_barang', 'master_barang.id = purchase_request_items.id_barang')
             ->where('pr_id', $id)
             ->where('status', 'pending')
@@ -146,7 +146,16 @@ class PurchaseRequestController extends BaseController
                 // Calculate total nilai
                 $totalNilai = 0;
                 foreach ($items as $item) {
-                    $totalNilai += ($item->volume * $item->harga);
+                    $mat = $db->table('master_barang')->where('id', $item->material_id ?? $item->id_barang)->get()->getRow();
+                    $konversiFaktor = (float)($mat->konversi_faktor ?? 1);
+                    if ($konversiFaktor <= 0) $konversiFaktor = 1;
+                    
+                    $volumeKemasan = ($mat->satuan_kemasan) ? ($item->volume / $konversiFaktor) : $item->volume;
+                    $item->sub_total_calculated = $volumeKemasan * $item->harga;
+                    $item->mat_obj = $mat;
+                    $item->volume_kemasan = $volumeKemasan;
+                    
+                    $totalNilai += $item->sub_total_calculated;
                 }
 
                 // Generate PO Number
@@ -183,7 +192,7 @@ class PurchaseRequestController extends BaseController
                         'id_barang' => $item->material_id ?? $item->id_barang,
                         'volume' => $item->volume,
                         'harga_satuan' => $item->harga,
-                        'sub_total' => $item->volume * $item->harga,
+                        'sub_total' => $item->sub_total_calculated,
                         'created_at' => date('Y-m-d H:i:s'),
                     ]);
 
@@ -193,9 +202,9 @@ class PurchaseRequestController extends BaseController
                         'po_id' => $poId
                     ]);
 
-                    $mat = $db->table('master_barang')->where('id', $item->material_id ?? $item->id_barang)->get()->getRow();
+                    $mat = $item->mat_obj;
                     $satuan_text = $mat->satuan_kemasan ?: $mat->satuan;
-                    $poSummary['items_desc'][] = $mat->nama_barang . ' ' . $mat->spesifikasi . ' ' . $item->volume . ' ' . $satuan_text;
+                    $poSummary['items_desc'][] = $mat->nama_barang . ' ' . $mat->spesifikasi . ' ' . $item->volume_kemasan . ' ' . $satuan_text;
                 }
 
                 $poSummary['items_desc'] = implode(', ', $poSummary['items_desc']);

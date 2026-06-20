@@ -393,15 +393,13 @@ class PermintaanService
         if ($shouldDeduct && $stokTerpotong === 0) {
             foreach ($details as $det) {
                 if ($det['id_barang']) {
-                    $kf = (float)($det['konversi_faktor'] ?? 1);
-                    if ($kf <= 0) $kf = 1;
-                    $jumlahGudang = (float)$det['jumlah'] / $kf;
+                        $jumlahGudang = (float)$det['jumlah']; // jumlah is already in base unit (kg)
 
-                    $db->table('stok_gudang')
-                       ->where('id_barang', $det['id_barang'])
-                       ->set('stok_aktual', 'stok_aktual - ' . $jumlahGudang, false)
-                       ->set('updated_at', date('Y-m-d H:i:s'))
-                       ->update();
+                        $db->table('stok_gudang')
+                           ->where('id_barang', $det['id_barang'])
+                           ->set('stok_aktual', 'stok_aktual - ' . $jumlahGudang, false)
+                           ->set('updated_at', date('Y-m-d H:i:s'))
+                           ->update();
                 }
             }
             $this->permintaanModel->update($id, ['stok_terpotong' => 1]);
@@ -430,9 +428,7 @@ class PermintaanService
             if ($stokTerpotong === 1) {
                 foreach ($details as $det) {
                     if ($det['id_barang']) {
-                        $kf = (float)($det['konversi_faktor'] ?? 1);
-                        if ($kf <= 0) $kf = 1;
-                        $jumlahGudang = (float)$det['jumlah'] / $kf;
+                        $jumlahGudang = (float)$det['jumlah']; // jumlah is already in base unit (kg)
 
                         $db->table('stok_gudang')
                            ->where('id_barang', $det['id_barang'])

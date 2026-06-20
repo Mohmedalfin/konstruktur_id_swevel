@@ -3,19 +3,19 @@ let currentPoId = null;
 
 // Helper to format Rupiah
 function formatRupiah(angka) {
-    let number_string = angka.toString().replace(/[^,\d]/g, ''),
-        split = number_string.split(','),
-        sisa = split[0].length % 3,
-        rupiah = split[0].substr(0, sisa),
-        ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+    let parsed = parseFloat(angka);
+    if (isNaN(parsed)) parsed = 0;
+    let number_string = Math.round(parsed).toString(),
+        sisa = number_string.length % 3,
+        rupiah = number_string.substr(0, sisa),
+        ribuan = number_string.substr(sisa).match(/\d{3}/gi);
 
     if (ribuan) {
         let separator = sisa ? '.' : '';
         rupiah += separator + ribuan.join('.');
     }
 
-    rupiah = split[1] != undefined ? rupiah + ',' + split[1] : rupiah;
-    return rupiah ? 'Rp ' + rupiah : '';
+    return 'Rp ' + rupiah;
 }
 
 // Helper to format Date
@@ -79,11 +79,19 @@ function renderModalData(po) {
     const tbody = document.getElementById('detail_items_body');
     tbody.innerHTML = '';
     po.items.forEach(item => {
+        let displayVolume = parseFloat(item.volume) || 0;
+        let displaySatuan = item.satuan_kemasan || item.satuan;
+        let konversiFaktor = parseFloat(item.konversi_faktor) || 1;
+        
+        if (item.satuan_kemasan && konversiFaktor > 0) {
+            displayVolume = displayVolume / konversiFaktor;
+        }
+
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td class="px-2 py-3 text-[13px] font-semibold text-[#1e293b]">${item.nama_material}</td>
-            <td class="px-2 py-3 text-[13px] font-bold text-center text-[#1e293b]">${item.volume}</td>
-            <td class="px-2 py-3 text-[13px] font-bold text-center text-[#1e293b]">${item.satuan}</td>
+            <td class="px-2 py-3 text-[13px] font-bold text-center text-[#1e293b]">${displayVolume}</td>
+            <td class="px-2 py-3 text-[13px] font-bold text-center text-[#1e293b]">${displaySatuan}</td>
             <td class="px-2 py-3 text-[13px] font-bold text-center text-[#1e293b]">${item.spesifikasi || '-'}</td>
             <td class="px-2 py-3 text-[13px] font-bold text-right text-[#1e293b]">${formatRupiah(item.sub_total)}</td>
         `;
@@ -132,7 +140,6 @@ function renderStepperAndCTA(po) {
         
         // CTA
         ctaBox.style.display = 'flex';
-        document.getElementById('cta_icon').className = 'fa-solid fa-box-open';
         document.getElementById('cta_title').textContent = 'Konfirmasi Pengiriman';
         document.getElementById('cta_desc').textContent = 'Klik tombol di samping jika supplier sudah mengonfirmasi pengiriman barang';
         
@@ -154,7 +161,6 @@ function renderStepperAndCTA(po) {
 
         // CTA
         ctaBox.style.display = 'flex';
-        document.getElementById('cta_icon').className = 'fa-solid fa-box-open';
         document.getElementById('cta_title').textContent = 'Konfirmasi Diterima';
         document.getElementById('cta_desc').textContent = 'Klik tombol di samping jika barang sudah diterima oleh Gudang';
         

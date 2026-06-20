@@ -57,7 +57,9 @@ abstract class BaseController extends Controller
             // For API requests, check the referer to maintain the correct role session
             $referer = $this->request->getHeaderLine('referer');
             log_message('error', "[DEBUG] API Request Referer: '{$referer}'");
-            if (strpos($referer, '/gudang') !== false) {
+            if (strpos($referer, '/gudang-lapangan') !== false) {
+                $targetRole = 'kontraktor';
+            } elseif (strpos($referer, '/gudang') !== false) {
                 $targetRole = 'gudang';
             } elseif (strpos($referer, '/purchasing') !== false) {
                 $targetRole = 'purchasing';

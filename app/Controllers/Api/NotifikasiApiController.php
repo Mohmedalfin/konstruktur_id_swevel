@@ -69,13 +69,13 @@ class NotifikasiApiController extends BaseController
     public function markAllAsRead()
     {
         $context = $this->getUserContext();
-        $this->model->where('is_read', 0)
+        $this->model->builder()
+                    ->where('is_read', 0)
                     ->groupStart()
                         ->where('user_id', $context['id'])
                         ->orWhere('role_target', strtolower($context['role']))
                     ->groupEnd()
-                    ->set(['is_read' => 1])
-                    ->update();
+                    ->update(['is_read' => 1]);
 
         return $this->respond(['success' => true]);
     }

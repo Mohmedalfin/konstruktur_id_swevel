@@ -396,37 +396,79 @@ function _bindRowInputs(tr) {
         toast.show('Item berhasil dihapus', 'success', 2000);
     });
 
+    let fetchTimeout;
     uraianInput?.addEventListener('input', function () {
-        const q = uraianInput.value.trim().toLowerCase();
+        const q = uraianInput.value.trim();
         if (!q) { _hideAc(acList); return; }
-        const matches = state.ahsDatabase.filter(item =>
-            item.tipe === tipe && item.uraian.toLowerCase().includes(q)
-        ).slice(0, 8);
-        if (matches.length === 0) { _hideAc(acList); return; }
 
-        acList.innerHTML = matches.map(m => `
-            <li class="flex items-center justify-between px-3 py-2 hover:bg-primary/5 cursor-pointer transition-colors gap-2"
-                data-uraian="${escHtml(m.uraian)}" data-satuan="${escHtml(m.satuan)}" data-harga="${m.hargaSatuan}">
-                <span class="flex-1 text-table-medium truncate text-xs">${escHtml(m.uraian)}</span>
-                <span class="text-table-subtle shrink-0 text-[10px]">${escHtml(m.satuan)} · ${fmt(m.hargaSatuan)}</span>
-            </li>`).join('');
-
-        acList.querySelectorAll('li').forEach(li => {
-            li.addEventListener('mousedown', function (e) {
-                e.preventDefault();
-                uraianInput.value = li.dataset.uraian;
-                const satuanEl = tr.querySelector('.ahs-satuan');
-                if (satuanEl) satuanEl.value = li.dataset.satuan;
-                if (hargaInput) {
-                    const rawHarga = parseFloat(li.dataset.harga) || 0;
-                    hargaInput.value = rawHarga > 0 ? rawHarga.toLocaleString('id-ID') : '';
+        clearTimeout(fetchTimeout);
+        fetchTimeout = setTimeout(async () => {
+            try {
+                const res = await fetch(`/api/ahs/search-master-barang?tipe=${tipe}&q=${encodeURIComponent(q)}`);
+                if (!res.ok) throw new Error('Network error');
+                const json = await res.json();
+                
+                if (json.status !== 'success' || !json.data || json.data.length === 0) {
+                    _hideAc(acList);
+                    return;
                 }
-                recalcRow();
+
+                const matches = json.data;
+                acList.innerHTML = matches.map(m => {
+                    const uraian = escHtml(m.uraian || '');
+                    const satuan = escHtml(m.satuan || '');
+                    const merk = escHtml(m.merk || '');
+                    const spesifikasi = escHtml(m.spesifikasi || '');
+                    const harga = m.hargaSatuan || 0;
+                    
+                    let subText = satuan;
+                    if (merk && merk !== 'Tanpa Merk') subText += ` · ${merk}`;
+                    if (spesifikasi && spesifikasi !== '-') subText += ` · ${spesifikasi}`;
+                    
+                    return `<li class="flex items-center justify-between px-3 py-2 hover:bg-primary/5 cursor-pointer transition-colors gap-2"
+                        data-uraian="${uraian}" data-satuan="${satuan}" data-harga="${harga}" data-merk="${merk}" data-spesifikasi="${spesifikasi}">
+                        <div class="flex-1 min-w-0">
+                            <div class="text-table-medium truncate text-xs font-semibold">${uraian}</div>
+                            <div class="text-table-subtle truncate text-[10px] mt-0.5">${subText}</div>
+                        </div>
+                    </li>`;
+                }).join('');
+
+                acList.querySelectorAll('li').forEach(li => {
+                    li.addEventListener('mousedown', function (e) {
+                        e.preventDefault();
+                        uraianInput.value = li.dataset.uraian;
+                        
+                        const satuanEl = tr.querySelector('.ahs-satuan');
+                        if (satuanEl) satuanEl.value = li.dataset.satuan;
+                        
+                        const merkEl = tr.querySelector('.ahs-merk');
+                        if (merkEl && li.dataset.merk && li.dataset.merk !== 'Tanpa Merk') {
+                            merkEl.value = li.dataset.merk;
+                        }
+                        
+                        const spesifikasiEl = tr.querySelector('.ahs-spesifikasi');
+                        if (spesifikasiEl && li.dataset.spesifikasi && li.dataset.spesifikasi !== '-') {
+                            spesifikasiEl.value = li.dataset.spesifikasi;
+                        }
+                        
+                        if (hargaInput && li.dataset.harga) {
+                            const rawHarga = parseFloat(li.dataset.harga) || 0;
+                            if (rawHarga > 0) {
+                                hargaInput.value = rawHarga.toLocaleString('id-ID');
+                            }
+                        }
+                        recalcRow();
+                        _hideAc(acList);
+                    });
+                });
+                acList.classList.remove('hidden');
+                state.autocompleteActive = acList;
+            } catch (error) {
+                console.error("Error fetching autocomplete:", error);
                 _hideAc(acList);
-            });
-        });
-        acList.classList.remove('hidden');
-        state.autocompleteActive = acList;
+            }
+        }, 300);
     });
     uraianInput?.addEventListener('blur', () => setTimeout(() => _hideAc(acList), 150));
     uraianInput?.addEventListener('keydown', e => { if (e.key === 'Escape') _hideAc(acList); });

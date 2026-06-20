@@ -35,7 +35,12 @@ class MasterDataController extends BaseController
     {
         $data = [
             'title'     => 'Material',
-            'materials' => $this->masterBarangModel->where('id_perusahaan', session()->get('id_perusahaan'))->orderBy('id', 'DESC')->findAll(),
+            'materials' => $this->masterBarangModel
+                ->groupStart()
+                    ->where('id_perusahaan', session()->get('id_perusahaan'))
+                    ->orWhere('id_perusahaan', 0)
+                ->groupEnd()
+                ->orderBy('id', 'DESC')->findAll(),
         ];
 
         $data['activeNav'] = 'master-data';
@@ -68,7 +73,12 @@ class MasterDataController extends BaseController
             'hargasGrouped' => $hargasGrouped,
             'group'     => $group,
             'suppliers' => $this->supplierModel->orderBy('nama_supplier', 'ASC')->findAll(),
-            'materials' => $this->masterBarangModel->where('id_perusahaan', session()->get('id_perusahaan'))->orderBy('nama_barang', 'ASC')->findAll(),
+            'materials' => $this->masterBarangModel
+                ->groupStart()
+                    ->where('id_perusahaan', session()->get('id_perusahaan'))
+                    ->orWhere('id_perusahaan', 0)
+                ->groupEnd()
+                ->orderBy('nama_barang', 'ASC')->findAll(),
         ];
 
         $data['activeNav'] = 'master-data';
@@ -191,7 +201,12 @@ class MasterDataController extends BaseController
 
     public function getMaterials()
     {
-        $materials = $this->masterBarangModel->where('id_perusahaan', session()->get('id_perusahaan'))->orderBy('id', 'DESC')->findAll();
+        $materials = $this->masterBarangModel
+            ->groupStart()
+                ->where('id_perusahaan', session()->get('id_perusahaan'))
+                ->orWhere('id_perusahaan', 0)
+            ->groupEnd()
+            ->orderBy('id', 'DESC')->findAll();
         return $this->response->setJSON([
             'status' => 'success',
             'data'   => $materials

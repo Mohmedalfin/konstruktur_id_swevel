@@ -13,7 +13,8 @@ const AppSwal = Swal.mixin({
         icon: 'app-swal-icon',
     },
     buttonsStyling: false,
-    reverseButtons: true
+    reverseButtons: true,
+    scrollbarPadding: false
 });
 
 function closeAllDropdowns() {

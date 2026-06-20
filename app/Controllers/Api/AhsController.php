@@ -624,4 +624,63 @@ class AhsController extends BaseController
                 ]);
         }
     }
+
+    /**
+     * GET /api/ahs/search-master-barang
+     * Autocomplete endpoint to fetch master_barang across projects
+     */
+    public function searchMasterBarang(): ResponseInterface
+    {
+        try {
+            $db = \Config\Database::connect();
+            $search = $this->request->getGet('q');
+            $tipe = $this->request->getGet('tipe'); // bahan, alat, upah
+            $limit = 10;
+
+            if (empty($search)) {
+                return $this->response->setJSON(['status' => 'success', 'data' => []]);
+            }
+
+            $sql = "
+                SELECT 
+                    id, 
+                    nama_barang AS uraian, 
+                    satuan, 
+                    merk, 
+                    spesifikasi, 
+                    jenis_item AS tipe 
+                FROM master_barang 
+                WHERE nama_barang LIKE ?
+            ";
+            
+            $params = ["%{$search}%"];
+
+            if (!empty($tipe) && $tipe !== 'all') {
+                $sql .= " AND jenis_item = ?";
+                // capitalize first letter to match DB (e.g. 'Bahan')
+                $params[] = ucfirst(strtolower($tipe));
+            }
+
+            $sql .= " LIMIT {$limit}";
+
+            $data = $db->query($sql, $params)->getResultArray();
+
+            // Format numeric prices if needed (master_barang doesn't have prices usually, fallback to 0)
+            foreach ($data as &$row) {
+                $row['hargaSatuan'] = 0; // Price needs to be manually entered or fetched from master_data_harga
+            }
+            unset($row);
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'data' => $data
+            ]);
+        } catch (\Throwable $e) {
+            log_message('error', '[AhsController::searchMasterBarang] ' . $e->getMessage());
+            return $this->response->setStatusCode(500)->setJSON([
+                'status' => 'error',
+                'message' => 'Gagal memuat data autocomplete.'
+            ]);
+        }
+    }
 }

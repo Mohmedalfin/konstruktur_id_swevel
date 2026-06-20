@@ -423,6 +423,9 @@
   .end-2 {
     inset-inline-end: calc(var(--spacing) * 2);
   }
+  .end-2\.5 {
+    inset-inline-end: calc(var(--spacing) * 2.5);
+  }
   .end-3 {
     inset-inline-end: calc(var(--spacing) * 3);
   }
@@ -1042,6 +1045,9 @@
   .max-h-0 {
     max-height: calc(var(--spacing) * 0);
   }
+  .max-h-40 {
+    max-height: calc(var(--spacing) * 40);
+  }
   .max-h-48 {
     max-height: calc(var(--spacing) * 48);
   }
@@ -1260,6 +1266,9 @@
   }
   .w-\[5\%\] {
     width: 5%;
+  }
+  .w-\[5rem\] {
+    width: 5rem;
   }
   .w-\[10\%\] {
     width: 10%;
@@ -7575,6 +7584,11 @@
   .\[\&\:\:-webkit-scrollbar-thumb\]\:bg-slate-200 {
     &::-webkit-scrollbar-thumb {
       background-color: var(--color-slate-200);
+    }
+  }
+  .\[\&\:\:-webkit-scrollbar-thumb\]\:bg-table-border {
+    &::-webkit-scrollbar-thumb {
+      background-color: var(--color-table-border);
     }
   }
   .hover\:\[\&\:\:-webkit-scrollbar-thumb\]\:bg-gray-400 {

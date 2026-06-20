@@ -178,6 +178,7 @@ $routes->group('api', ['namespace' => 'App\Controllers\Api'], function ($routes)
     $routes->get('wilayah/templates', 'WilayahController::templates');
 
     $routes->get('ahs', 'AhsController::index');
+    $routes->get('ahs/search-master-barang', 'AhsController::searchMasterBarang');
     $routes->get('ahs/proyek', 'AhsController::getProyek');
     $routes->get('ahs/shbj', 'AhsController::getShbj');
     $routes->get('ahs/survey', 'AhsController::getSurvey');

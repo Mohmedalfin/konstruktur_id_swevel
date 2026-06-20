@@ -120,7 +120,8 @@
                                     <tr>
                                         <th scope="col" class="px-4 py-3 w-10 text-center">#</th>
                                         <th scope="col" class="px-4 py-3 min-w-[200px]">Nama Barang</th>
-                                        <th scope="col" class="px-4 py-3 w-32 text-center">Volume Ajuan</th>
+                                        <th scope="col" class="px-4 py-3 w-32 text-center">Jumlah (Produk)</th>
+                                        <th scope="col" class="px-4 py-3 w-32 text-center">Volume (Dasar)</th>
                                         <th scope="col" class="px-4 py-3 min-w-[150px]">Keterangan Item</th>
                                         <th scope="col" class="px-4 py-3 w-32 text-center">Status Item</th>
                                     </tr>

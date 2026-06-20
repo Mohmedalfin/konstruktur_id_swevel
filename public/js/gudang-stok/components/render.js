@@ -57,8 +57,19 @@ export function renderStokList(items) {
             statusText = 'Aman';
         }
 
-        const displayMinimum = minimum % 1 === 0 ? parseInt(minimum) : minimum;
-        const displayAktual = aktual % 1 === 0 ? parseInt(aktual) : aktual;
+        let displayAktualNum = parseFloat(item.stok_aktual);
+        let displayMinimumNum = parseFloat(item.stok_minimum);
+        
+        if (item.satuan_kemasan && item.konversi_faktor) {
+            const kf = parseFloat(item.konversi_faktor);
+            if (kf > 0) {
+                displayAktualNum = displayAktualNum / kf;
+                displayMinimumNum = displayMinimumNum / kf;
+            }
+        }
+
+        const displayMinimum = displayMinimumNum % 1 === 0 ? parseInt(displayMinimumNum) : Number(displayMinimumNum.toFixed(2));
+        const displayAktual = displayAktualNum % 1 === 0 ? parseInt(displayAktualNum) : Number(displayAktualNum.toFixed(2));
 
         let satuanDisplay = item.satuan;
         if (item.satuan_kemasan && item.konversi_faktor) {

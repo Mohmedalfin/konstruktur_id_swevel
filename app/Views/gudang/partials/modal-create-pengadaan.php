@@ -102,7 +102,8 @@
                                         <th scope="col" class="px-4 py-3 w-10 text-center">#</th>
                                         <th scope="col" class="px-4 py-3 min-w-[250px]">Nama Barang</th>
                                         <th scope="col" class="px-4 py-3 w-32 text-center">Stok Gudang</th>
-                                        <th scope="col" class="px-4 py-3 w-32">Volume Ajuan</th>
+                                        <th scope="col" class="px-4 py-3 w-32">Jumlah (Produk)</th>
+                                        <th scope="col" class="px-4 py-3 w-32">Volume (Dasar)</th>
                                         <th scope="col" class="px-4 py-3 w-20 text-center">Aksi</th>
                                     </tr>
                                 </thead>
@@ -154,8 +155,17 @@
             </div>
         </td>
         <td class="px-4 py-3">
+            <div class="flex flex-col gap-1">
+                <div class="flex items-center gap-2">
+                    <input type="number" name="jumlah[]" class="input-jumlah w-20 px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-sm text-center font-bold text-indigo-700 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all" min="0.01" step="0.01" placeholder="0" required>
+                    <span class="text-xs font-semibold text-slate-500 display-satuan-kemasan"></span>
+                </div>
+            </div>
+        </td>
+        <td class="px-4 py-3">
             <div class="flex items-center gap-2">
-                <input type="number" name="volume[]" class="input-volume w-24 px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-sm text-center font-bold text-indigo-700 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all" min="0.01" step="0.01" placeholder="0" required>
+                <input type="number" name="volume[]" class="input-volume w-24 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-center font-bold text-slate-600 focus:outline-none transition-all cursor-not-allowed" min="0.01" step="0.01" placeholder="0" readonly>
+                <input type="hidden" class="input-konversi" value="1">
             </div>
         </td>
         <td class="px-4 py-3 text-center">

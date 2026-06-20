@@ -380,11 +380,19 @@ export function renderDetailModal(req, userRole) {
                         const kf = parseFloat(item.konversi_faktor) || 1;
                         const isDifferentName = hasKemasan && String(item.satuan_kemasan).toLowerCase() !== String(item.satuan).toLowerCase();
                         
-                        const stokBase = parseFloat(item.stok_aktual || 0) * kf;
+                        const stokBase = parseFloat(item.stok_aktual || 0);
                         const isKurang = stokBase < parseFloat(item.jumlah);
                         
                         const warningHtml = isKurang ? `<span class="px-2 py-0.5 text-[9px] font-bold bg-rose-100 text-rose-800 border border-rose-200 rounded uppercase ml-2 shadow-sm">Stok Kurang</span>` : '';
                         const stokColor = isKurang ? 'text-rose-600' : 'text-emerald-600';
+                        
+                        let displayStokValue = stokBase;
+                        let displayStokUnit = item.satuan;
+                        if (hasKemasan && kf > 1) {
+                            displayStokValue = stokBase / kf;
+                            displayStokValue = Number.isInteger(displayStokValue) ? displayStokValue : parseFloat(displayStokValue.toFixed(2));
+                            displayStokUnit = item.satuan_kemasan;
+                        }
                         
                         const overLimitBadge = (item.is_over_limit === '1' || item.is_over_limit === 1)
                             ? `<span class="px-2 py-0.5 text-[9px] font-bold bg-red-100 text-red-700 border border-red-200 rounded uppercase ml-2 shadow-sm"><i class="fas fa-exclamation-triangle mr-1"></i> Over: ${parseFloat(item.jumlah_over_limit)} ${item.satuan}</span>`
@@ -413,7 +421,7 @@ export function renderDetailModal(req, userRole) {
                                         <span class="text-sm font-bold text-slate-800">${item.nama_barang}</span>
                                         ${overLimitBadge}
                                     </div>
-                                    <span class="text-[10px] font-medium text-slate-500 mt-0.5 flex flex-wrap items-center gap-1">Stok Gudang: <span class="font-bold ${stokColor}">${parseFloat(item.stok_aktual || 0)} ${item.satuan_kemasan || item.satuan}</span> ${warningHtml}</span>
+                                    <span class="text-[10px] font-medium text-slate-500 mt-0.5 flex flex-wrap items-center gap-1">Stok Gudang: <span class="font-bold ${stokColor}">${displayStokValue} ${displayStokUnit}</span> ${warningHtml}</span>
                                 </div>
                                 <div class="text-right flex flex-col items-end justify-center">
                                     ${jumlahDisplayHtml}

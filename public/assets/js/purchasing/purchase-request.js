@@ -75,13 +75,21 @@ function renderDetailData(data) {
             ? `<span class="bg-[#dcfce3] text-[#166534] px-3 py-1 rounded text-[11px] font-bold inline-flex items-center gap-1 border border-[#86efac]"><i class="fa-solid fa-check"></i> Ordered</span>`
             : `<span class="bg-gray-100 text-gray-600 px-3 py-1 rounded text-[11px] font-bold inline-flex items-center gap-1 border border-gray-300"><i class="fa-regular fa-clock"></i> Pending</span>`;
             
+        let displayVolume = parseFloat(item.volume) || 0;
+        let displaySatuan = item.satuan_kemasan || item.satuan;
+        let konversiFaktor = parseFloat(item.konversi_faktor) || 1;
+        
+        if (item.satuan_kemasan && konversiFaktor > 0) {
+            displayVolume = displayVolume / konversiFaktor;
+        }
+
         const tr = document.createElement('tr');
         tr.className = index % 2 === 0 ? 'bg-[#f8fafc]' : 'bg-[#e2e8f0]';
         tr.innerHTML = `
             <td class="px-3 py-3 text-[13px] font-bold text-center text-[#1e293b] border-r border-gray-300">${index + 1}</td>
             <td class="px-3 py-3 text-[13px] font-semibold text-[#1e293b] border-r border-gray-300">${item.nama_material}</td>
-            <td class="px-3 py-3 text-[13px] font-bold text-center text-[#1e293b] border-r border-gray-300">${item.volume}</td>
-            <td class="px-3 py-3 text-[13px] font-bold text-center text-[#1e293b] border-r border-gray-300">${item.satuan}</td>
+            <td class="px-3 py-3 text-[13px] font-bold text-center text-[#1e293b] border-r border-gray-300">${displayVolume}</td>
+            <td class="px-3 py-3 text-[13px] font-bold text-center text-[#1e293b] border-r border-gray-300">${displaySatuan}</td>
             <td class="px-3 py-3 text-[13px] font-bold text-center text-[#1e293b] border-r border-gray-300">${item.spesifikasi || '-'}</td>
             <td class="px-3 py-3 text-center border-r border-gray-300">${statusHtml}</td>
             <td class="px-3 py-3 text-[13px] font-bold text-center text-[#334155]">${item.po_number || '-'}</td>
@@ -147,6 +155,14 @@ function renderCreatePOData(data) {
             options += `<option value="${sup.supplier_id}" data-harga="${sup.harga}">${sup.nama_supplier} - ${formatRupiah(sup.harga)}</option>`;
         });
 
+        let displayVolume = parseFloat(item.volume) || 0;
+        let displaySatuan = item.satuan_kemasan || item.satuan;
+        let konversiFaktor = parseFloat(item.konversi_faktor) || 1;
+        
+        if (item.satuan_kemasan && konversiFaktor > 0) {
+            displayVolume = displayVolume / konversiFaktor;
+        }
+
         const tr = document.createElement('tr');
         tr.className = index % 2 === 0 ? 'bg-[#f8fafc]' : 'bg-[#e2e8f0]';
         tr.innerHTML = `
@@ -154,8 +170,8 @@ function renderCreatePOData(data) {
                 <input type="checkbox" class="item-checkbox rounded border-gray-400 text-blue-600 focus:ring-blue-500 cursor-pointer w-5 h-5" value="${item.id}" data-material="${item.id_barang || item.material_id}" data-volume="${item.volume}">
             </td>
             <td class="px-3 py-3 text-[13px] font-semibold text-[#1e293b] border-r border-gray-300">${item.nama_material}</td>
-            <td class="px-3 py-3 text-[13px] font-bold text-center text-[#1e293b] border-r border-gray-300">${item.volume}</td>
-            <td class="px-3 py-3 text-[13px] font-bold text-center text-[#1e293b] border-r border-gray-300">${item.satuan}</td>
+            <td class="px-3 py-3 text-[13px] font-bold text-center text-[#1e293b] border-r border-gray-300">${displayVolume}</td>
+            <td class="px-3 py-3 text-[13px] font-bold text-center text-[#1e293b] border-r border-gray-300">${displaySatuan}</td>
             <td class="px-3 py-3 text-[13px] font-bold text-center text-[#1e293b] border-r border-gray-300">${item.spesifikasi || '-'}</td>
             <td class="px-3 py-2 text-center">
                 <select class="supplier-select py-1.5 px-3 block w-full border-gray-300 rounded text-[13px] focus:border-blue-500 focus:ring-blue-500 bg-white">

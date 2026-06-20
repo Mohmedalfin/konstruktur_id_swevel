@@ -109,7 +109,19 @@ export class DetailModal {
             return;
         }
 
-        this.tbody.innerHTML = items.map((item, index) => `
+        this.tbody.innerHTML = items.map((item, index) => {
+            let displayVolume = parseFloat(item.volume) || 0;
+            let displayJumlah = 0;
+            let displaySatuan = item.satuan_kemasan || item.satuan;
+            let konversiFaktor = parseFloat(item.konversi_faktor) || 1;
+            
+            if (item.satuan_kemasan && konversiFaktor > 0) {
+                displayJumlah = displayVolume / konversiFaktor;
+            } else {
+                displayJumlah = displayVolume;
+            }
+
+            return `
             <tr class="hover:bg-slate-50 transition-colors">
                 <td class="px-4 py-3 text-center text-slate-500 font-medium">${index + 1}</td>
                 <td class="px-4 py-3">
@@ -117,16 +129,21 @@ export class DetailModal {
                     <div class="text-[10px] text-slate-400 mt-0.5">Kode: ${item.kode_barang || '-'}</div>
                 </td>
                 <td class="px-4 py-3 text-center font-bold text-indigo-600">
-                    ${item.volume} <span class="text-xs font-normal text-slate-500">${item.satuan_kemasan || item.satuan}</span>
+                    ${displayJumlah} <span class="text-xs font-normal text-slate-500">${displaySatuan}</span>
+                </td>
+                <td class="px-4 py-3 text-center font-bold text-slate-600">
+                    ${displayVolume} <span class="text-xs font-normal text-slate-400">${item.satuan || '-'}</span>
                 </td>
                 <td class="px-4 py-3 text-sm text-slate-600 max-w-[200px] truncate" title="${item.keterangan || ''}">
                     ${item.keterangan || '<span class="italic text-slate-400">Tidak ada</span>'}
+                    ${item.po_number ? `<div class="mt-1 text-[11px] font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100 inline-block w-full truncate" title="${item.nama_supplier}"><i class="fa-solid fa-truck-fast mr-1"></i> ${item.po_number} (${item.nama_supplier})</div>` : ''}
                 </td>
                 <td class="px-4 py-3 text-center">
                     ${this.getItemStatusBadge(item.status)}
                 </td>
             </tr>
-        `).join('');
+            `;
+        }).join('');
     }
 
     updateStepper(status) {
