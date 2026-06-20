@@ -72,7 +72,7 @@ class InventoryHelper
     /**
      * Cari atau buat master barang baru (auto-generate kode) berdasarkan input dari Permintaan/RAB
      */
-    public static function resolveMasterBarang(int $idProject, string $jenisItem, string $namaBarang, ?string $merk = null, ?string $spesifikasi = null, ?string $satuan = null): ?int
+    public static function resolveMasterBarang(int $idProject, string $jenisItem, string $namaBarang, ?string $merk = null, ?string $spesifikasi = null, ?string $satuan = null, ?string $satuanKemasan = null, ?float $konversiFaktor = null): ?int
     {
         $db = \Config\Database::connect();
         
@@ -129,6 +129,8 @@ class InventoryHelper
             'merk'          => $merk,
             'spesifikasi'   => $spesifikasi,
             'satuan'        => $satuan,
+            'satuan_kemasan'=> $satuanKemasan,
+            'konversi_faktor'=> $konversiFaktor ?? 1,
             'jenis_item'    => $jenisItem,
             'created_at'    => date('Y-m-d H:i:s'),
             'updated_at'    => date('Y-m-d H:i:s')

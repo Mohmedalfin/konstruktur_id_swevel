@@ -122,7 +122,7 @@ class PermintaanService
 
         // Fetch detail items
         $details = $db->table('permintaan_detail pd')
-            ->select('pd.*, pr.nama_proyek, pr.lokasi_proyek, rdi.spesifikasi, rdi.merk, COALESCE(sg.stok_aktual, 0) as stok_aktual, mb.satuan_kemasan, mb.konversi_faktor, mb.satuan as satuan_master')
+            ->select('pd.*, pr.nama_proyek, pr.lokasi_proyek, rdi.spesifikasi, rdi.merk, COALESCE(sg.stok_aktual, 0) as stok_aktual, mb.satuan_kemasan, mb.konversi_faktor')
             ->join('projects pr', 'pr.id_project = pd.id_project')
             ->join('rap_detail_item rdi', 'rdi.id_rap_detail_item = pd.id_rap_detail_item', 'left')
             ->join('stok_gudang sg', 'sg.id_barang = pd.id_barang', 'left')
@@ -165,8 +165,6 @@ class PermintaanService
                 'satuan'             => $det['satuan'],
                 'satuan_kemasan'     => $det['satuan_kemasan'] ?? null,
                 'konversi_faktor'    => $det['konversi_faktor'] ?? 1,
-                'jumlah_master'      => (float)$det['jumlah'] * ($det['konversi_faktor'] > 0 ? (float)$det['konversi_faktor'] : 1),
-                'satuan_master'      => $det['satuan_master'] ?? $det['satuan'],
                 'spesifikasi'        => $det['spesifikasi'] ?? '-',
                 'merk'               => $det['merk'] ?? '-',
                 'kategori'           => $det['jenis_item'] ?? 'Bahan',
@@ -258,6 +256,11 @@ class PermintaanService
                         $jumlahOverLimit = $jumlah - max(0, $availableForThisItem);
                         $isGlobalOverLimit = 1;
                     }
+
+                    if (!empty($rapItem['satuan_kemasan']) && (float)$rapItem['konversi_faktor'] > 1) {
+                        $kf = (float)$rapItem['konversi_faktor'];
+                        $finalJumlah = ceil($jumlah / $kf) * $kf;
+                    }
                 }
                 $cumulativeRequestQty[$idRapDetailItem] += $finalJumlah;
             }
@@ -297,10 +300,15 @@ class PermintaanService
             $jenisItem = !empty($item['kategori']) ? trim($item['kategori']) : (!empty($item['jenis_item']) ? trim($item['jenis_item']) : 'Bahan');
             $keterangan = !empty($item['keterangan']) ? trim($item['keterangan']) : null;
 
+            $merk = !empty($item['merk']) ? trim($item['merk']) : null;
+            $spesifikasi = !empty($item['spesifikasi']) ? trim($item['spesifikasi']) : null;
+            $satuanKemasan = !empty($item['satuan_kemasan']) ? trim($item['satuan_kemasan']) : null;
+            $konversiFaktor = !empty($item['konversi_faktor']) ? (float)$item['konversi_faktor'] : null;
+
             // Resolve Master Barang (Generate Kode)
             $idBarang = null;
             if ($idProject > 0) {
-                $idBarang = InventoryHelper::resolveMasterBarang($idProject, $jenisItem, $namaBarang, null, null, $satuan);
+                $idBarang = InventoryHelper::resolveMasterBarang($idProject, $jenisItem, $namaBarang, $merk, $spesifikasi, $satuan, $satuanKemasan, $konversiFaktor);
             }
 
             $detailData = [
@@ -387,7 +395,7 @@ class PermintaanService
                 if ($det['id_barang']) {
                     $kf = (float)($det['konversi_faktor'] ?? 1);
                     if ($kf <= 0) $kf = 1;
-                    $jumlahGudang = (float)$det['jumlah'] * $kf;
+                    $jumlahGudang = (float)$det['jumlah'] / $kf;
 
                     $db->table('stok_gudang')
                        ->where('id_barang', $det['id_barang'])
@@ -424,7 +432,7 @@ class PermintaanService
                     if ($det['id_barang']) {
                         $kf = (float)($det['konversi_faktor'] ?? 1);
                         if ($kf <= 0) $kf = 1;
-                        $jumlahGudang = (float)$det['jumlah'] * $kf;
+                        $jumlahGudang = (float)$det['jumlah'] / $kf;
 
                         $db->table('stok_gudang')
                            ->where('id_barang', $det['id_barang'])

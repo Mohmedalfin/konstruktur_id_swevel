@@ -22,30 +22,25 @@ class PengadaanService
             throw new \InvalidArgumentException("Permintaan tidak ditemukan.");
         }
 
-        // Ambil detail permintaan dan join dengan stok_gudang serta konversi faktor dari master_barang
+        // Ambil detail permintaan dan join dengan stok_gudang
         $details = $db->table('permintaan_detail pd')
-            ->select('pd.*, COALESCE(sg.stok_aktual, 0) as stok_aktual, mb.konversi_faktor, mb.satuan as satuan_master')
+            ->select('pd.*, COALESCE(sg.stok_aktual, 0) as stok_aktual')
             ->join('stok_gudang sg', 'sg.id_barang = pd.id_barang', 'left')
-            ->join('master_barang mb', 'mb.id = pd.id_barang', 'left')
             ->where('pd.id_permintaan', $permintaanId)
             ->get()
             ->getResultArray();
 
         $itemsKurang = [];
         foreach ($details as $det) {
-            $kf = (float)($det['konversi_faktor'] ?? 1);
-            if ($kf <= 0) $kf = 1;
-
             $stokAktual = (float)$det['stok_aktual'];
-            $jumlahDimintaMaster = (float)$det['jumlah'] * $kf; // Konversi dari satuan RAP ke satuan Gudang (Master)
-
-            if ($stokAktual < $jumlahDimintaMaster) {
-                $kurang = ceil($jumlahDimintaMaster - $stokAktual);
+            $jumlahDiminta = (float)$det['jumlah'];
+            if ($stokAktual < $jumlahDiminta) {
+                $kurang = ceil($jumlahDiminta - $stokAktual);
                 if ($kurang > 0) {
                     $itemsKurang[] = [
                         'id_barang'   => $det['id_barang'],
                         'volume'      => $kurang,
-                        'keterangan'  => "Kekurangan stok untuk Permintaan: {$permintaan['nomor_permintaan']} ({$det['jumlah']} {$det['satuan']} -> setara {$jumlahDimintaMaster} " . ($det['satuan_master'] ?? 'unit') . ")"
+                        'keterangan'  => "Kekurangan stok untuk Permintaan: {$permintaan['nomor_permintaan']}"
                     ];
                 }
             }

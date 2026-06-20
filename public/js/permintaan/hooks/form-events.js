@@ -449,7 +449,11 @@ export function initForm() {
                         jumlah: baseQty,
                         satuan: item.satuan,
                         kategori: item.kategori,
-                        keterangan: item.keterangan
+                        keterangan: item.keterangan,
+                        merk: item.merk,
+                        spesifikasi: item.spesifikasi,
+                        satuan_kemasan: item.satuan_kemasan,
+                        konversi_faktor: item.konversi_faktor
                     });
                 });
             });
