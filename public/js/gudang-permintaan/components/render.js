@@ -398,14 +398,12 @@ export function renderDetailModal(req, userRole) {
                         let jumlahDisplayHtml = `<span class="text-sm font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-3 py-1 rounded-lg shadow-sm whitespace-nowrap">${parseFloat(item.jumlah)} <span class="text-[10px] font-semibold text-emerald-500 ml-0.5">${item.satuan}</span></span>`;
                         
                         if (hasKemasan && (kf > 1 || isDifferentName)) {
-                            const jumlahKemasan = parseFloat(item.jumlah) / kf;
-                            // avoid long decimals
-                            const qtyKemasanFmt = Number.isInteger(jumlahKemasan) ? jumlahKemasan : jumlahKemasan.toFixed(2).replace(/\.?0+$/, '');
+                            const qtyKemasanFmt = parseFloat(item.jumlah);
                             
                             jumlahDisplayHtml = `
                                 <div class="flex flex-col items-end gap-1.5">
-                                    <span class="text-sm font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-3 py-1 rounded-lg shadow-sm whitespace-nowrap">${qtyKemasanFmt} <span class="text-[10px] font-semibold text-emerald-500 ml-0.5">${item.satuan_kemasan}</span></span>
-                                    <span class="text-[9px] text-slate-500 font-medium bg-slate-50 px-2 py-0.5 rounded border border-slate-200 shadow-sm whitespace-nowrap"><i class="fas fa-exchange-alt mr-1 text-slate-400"></i> ${parseFloat(item.jumlah)} ${item.satuan}</span>
+                                    <span class="text-sm font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-3 py-1 rounded-lg shadow-sm whitespace-nowrap">${qtyKemasanFmt} <span class="text-[10px] font-semibold text-emerald-500 ml-0.5">${item.satuan}</span></span>
+                                    <span class="text-[9px] text-slate-500 font-medium bg-slate-50 px-2 py-0.5 rounded border border-slate-200 shadow-sm whitespace-nowrap"><i class="fas fa-exchange-alt mr-1 text-slate-400"></i> Setara: ${item.jumlah_master} ${item.satuan_master || 'Unit'}</span>
                                 </div>
                             `;
                         }
