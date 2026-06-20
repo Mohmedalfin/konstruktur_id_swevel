@@ -54,11 +54,11 @@ class PengadaanService
             ];
         }
 
-        // Ambil id_perusahaan dari pengguna
+        // Ambil id_perusahaan dari pengguna (id_pengguna jika parent, atau parent_id jika sub-akun)
         $user = $db->table('pengguna')->where('id_pengguna', $userId)->get()->getRowArray();
-        $idPerusahaan = $user ? (int)$user['id_perusahaan'] : 0;
-        if ($idPerusahaan === 0 && !empty($user['parent_id'])) {
-            $idPerusahaan = (int)$user['parent_id'];
+        $idPerusahaan = 0;
+        if ($user) {
+            $idPerusahaan = !empty($user['parent_id']) ? (int)$user['parent_id'] : (int)$user['id_pengguna'];
         }
 
         // Generate nomor PR
