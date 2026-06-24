@@ -29,21 +29,44 @@
                     Buat Akun Kontraktor.id
                 </h1>
                 
-                <form action="#" class="w-full space-y-5">
+                <?php if (session()->getFlashdata('error')) : ?>
+                    <div class="mb-4 p-3 rounded bg-red-100 text-red-700 border border-red-400 text-sm w-full">
+                        <?= session()->getFlashdata('error') ?>
+                    </div>
+                <?php endif; ?>
+
+                <?php if (session()->getFlashdata('validation_errors')) : ?>
+                    <div class="mb-4 p-3 rounded bg-red-100 text-red-700 border border-red-400 text-sm w-full">
+                        <ul class="list-disc pl-4">
+                        <?php foreach(session()->getFlashdata('validation_errors') as $err): ?>
+                            <li><?= $err ?></li>
+                        <?php endforeach; ?>
+                        </ul>
+                    </div>
+                <?php endif; ?>
+                
+                <form action="<?= site_url('auth/registerProcess') ?>" method="POST" class="w-full space-y-5">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="md:col-span-2">
                             <div id="field-nama" class="border-b border-gray-300 transition-colors">
                                 <label for="nama_lengkap" class="block text-sm font-medium text-brand-dark mb-2">Nama Lengkap</label>
-                                <input type="text" id="nama_lengkap" name="nama_lengkap" class="w-full py-1 bg-transparent focus:outline-none">
+                                <input type="text" id="nama_lengkap" name="nama_pengguna" value="<?= old('nama_pengguna') ?>" class="w-full py-1 bg-transparent focus:outline-none">
                             </div>
                             <span id="nama_lengkap-error" class="text-red-500 text-xs mt-1 hidden"></span>
                         </div>
                         <div>
                             <div id="field-email" class="border-b border-gray-300 transition-colors">
                                 <label for="email" class="block text-sm font-medium text-brand-dark mb-2">Email</label>
-                                <input type="email" id="reg_email" name="email" class="w-full py-1 bg-transparent focus:outline-none">
+                                <input type="email" id="reg_email" name="email" value="<?= old('email') ?>" class="w-full py-1 bg-transparent focus:outline-none">
                             </div>
                             <span id="reg_email-error" class="text-red-500 text-xs mt-1 hidden"></span>
+                        </div>
+                        <div class="md:col-span-2">
+                            <div id="field-username" class="border-b border-gray-300 transition-colors">
+                                <label for="username" class="block text-sm font-medium text-brand-dark mb-2">Username</label>
+                                <input type="text" id="username" name="username" value="<?= old('username') ?>" class="w-full py-1 bg-transparent focus:outline-none">
+                            </div>
+                            <span id="username-error" class="text-red-500 text-xs mt-1 hidden"></span>
                         </div>
                         <div>
                             <div id="field-nohp" class="border-b border-gray-300 transition-colors">
@@ -64,82 +87,29 @@
                         <div class="md:col-span-2">
                             <div id="field-domisili" class="border-b border-gray-300 transition-colors">
                                 <label for="domisili" class="block text-sm font-medium text-brand-dark mb-2">Domisili Perusahaan</label>
-                                <el-select id="domisili" name="domisili" class="block w-full">
-                                    <button type="button" class="grid w-full cursor-default grid-cols-1 py-1 text-left text-brand-dark bg-transparent focus:outline-none sm:text-sm/6">
-                                        <el-selectedcontent class="col-start-1 row-start-1 flex items-center gap-3 pr-5">
-                                            <span class="block truncate text-sm text-gray-400">Pilih Domisili Perusahaan</span>
-                                        </el-selectedcontent>
-                                        <svg class="col-start-1 row-start-1 size-4 self-center justify-self-end text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                                        </svg>
-                                    </button>
-
-                                    <el-options anchor="bottom start" popover class="max-h-56 w-(--button-width) overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 [--anchor-gap:--spacing(1)] data-leave:transition data-leave:transition-discrete data-leave:duration-100 data-leave:ease-in data-closed:data-leave:opacity-0 sm:text-sm">
-                                        <el-option value="kontraktor" class="group/option relative block cursor-default py-2 pr-9 pl-3 text-brand-dark select-none focus:bg-primary focus:text-white focus:outline-hidden">
-                                            <div class="flex items-center">
-                                                <span class="block truncate font-normal group-aria-selected/option:font-semibold">Yogyakarta</span>
-                                            </div>
-                                            <span class="absolute inset-y-0 right-0 flex items-center pr-4 text-primary group-not-aria-selected/option:hidden group-focus/option:text-white in-[el-selectedcontent]:hidden">
-                                                <svg viewBox="0 0 20 20" fill="currentColor" class="size-5">
-                                                    <path d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" fill-rule="evenodd" />
-                                                </svg>
-                                            </span>
-                                        </el-option>
-                                    </el-options>
-                                </el-select>
+                                <select name="id_wilayah" id="domisili" data-hs-select='{
+                                  "hasSearch": true,
+                                  "searchPlaceholder": "Cari Kabupaten/Kota...",
+                                  "searchClasses": "block w-full text-sm bg-white border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500",
+                                  "searchWrapperClasses": "bg-white p-2 -mx-1 sticky top-0",
+                                  "placeholder": "Pilih Kabupaten/Kota",
+                                  "toggleTag": "<button type=\"button\" aria-expanded=\"false\"></button>",
+                                  "toggleClasses": "relative py-2.5 ps-3 pe-9 flex w-full cursor-pointer bg-transparent border-b border-gray-300 text-start text-sm focus:outline-none focus:border-brand-dark transition-colors",
+                                  "dropdownClasses": "mt-2 z-50 w-full max-h-72 p-1 space-y-0.5 bg-white border border-gray-200 shadow-xl overflow-hidden overflow-y-auto",
+                                  "optionClasses": "hs-selected:bg-gray-100 py-2 px-3 w-full text-sm text-gray-800 cursor-pointer hover:bg-gray-50",
+                                  "optionTemplate": "<div class=\"flex justify-between items-center w-full\"><span data-title></span><span class=\"hidden hs-selected:block\"><svg class=\"size-4 text-blue-600\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 16 16\" fill=\"currentColor\"><path d=\"M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022Z\"/></svg></span></div>",
+                                  "extraMarkup": "<div class=\"absolute top-1/2 end-3 -translate-y-1/2\"><svg class=\"size-4 text-gray-500\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 20 20\" fill=\"currentColor\"><path fill-rule=\"evenodd\" d=\"M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.168l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.24 4.5a.75.75 0 0 1-1.08 0l-4.24-4.5a.75.75 0 0 1 .02-1.06Z\" clip-rule=\"evenodd\"/></svg></div>"
+                                }' class="hidden">
+                                    <option value="">-- Pilih Kabupaten/Kota --</option>
+                                    <?php foreach ($cities as $city): ?>
+                                        <option value="<?= $city['id'] ?>"><?= esc($city['nama']) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
                             </div>
                             <span id="domisili-error" class="text-red-500 text-xs mt-1 hidden"></span>
                         </div>
                         
-                        <div class="md:col-span-2">
-                            <div id="field-posisi" class="border-b border-gray-300 transition-colors">
-                            <label for="posisi" class="block text-sm font-medium text-brand-dark mb-2">Posisi Pekerjaan</label>
-                            <el-select id="posisi" name="posisi" class="block w-full">
-                                <button type="button" class="grid w-full cursor-default grid-cols-1 py-1 text-left text-brand-dark bg-transparent focus:outline-none sm:text-sm/6">
-                                    <el-selectedcontent class="col-start-1 row-start-1 flex items-center gap-3 pr-5">
-                                        <span class="block truncate text-sm text-gray-400">Pilih Posisi Pekerjaan</span>
-                                    </el-selectedcontent>
-                                    <svg class="col-start-1 row-start-1 size-4 self-center justify-self-end text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                                    </svg>
-                                </button>
 
-                                <el-options anchor="bottom start" popover class="max-h-56 w-(--button-width) overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 [--anchor-gap:--spacing(1)] data-leave:transition data-leave:transition-discrete data-leave:duration-100 data-leave:ease-in data-closed:data-leave:opacity-0 sm:text-sm">
-                                    <el-option value="kontraktor" class="group/option relative block cursor-default py-2 pr-9 pl-3 text-brand-dark select-none focus:bg-primary focus:text-white focus:outline-hidden">
-                                        <div class="flex items-center">
-                                            <span class="block truncate font-normal group-aria-selected/option:font-semibold">Kontraktor</span>
-                                        </div>
-                                        <span class="absolute inset-y-0 right-0 flex items-center pr-4 text-primary group-not-aria-selected/option:hidden group-focus/option:text-white in-[el-selectedcontent]:hidden">
-                                            <svg viewBox="0 0 20 20" fill="currentColor" class="size-5">
-                                                <path d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" fill-rule="evenodd" />
-                                            </svg>
-                                        </span>
-                                    </el-option>
-                                    <el-option value="purchasing" class="group/option relative block cursor-default py-2 pr-9 pl-3 text-brand-dark select-none focus:bg-primary focus:text-white focus:outline-hidden">
-                                        <div class="flex items-center">
-                                            <span class="block truncate font-normal group-aria-selected/option:font-semibold">Purchasing</span>
-                                        </div>
-                                        <span class="absolute inset-y-0 right-0 flex items-center pr-4 text-primary group-not-aria-selected/option:hidden group-focus/option:text-white in-[el-selectedcontent]:hidden">
-                                            <svg viewBox="0 0 20 20" fill="currentColor" class="size-5">
-                                                <path d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" fill-rule="evenodd" />
-                                            </svg>
-                                        </span>
-                                    </el-option>
-                                    <el-option value="gudang" class="group/option relative block cursor-default py-2 pr-9 pl-3 text-brand-dark select-none focus:bg-primary focus:text-white focus:outline-hidden">
-                                        <div class="flex items-center">
-                                            <span class="block truncate font-normal group-aria-selected/option:font-semibold">Gudang</span>
-                                        </div>
-                                        <span class="absolute inset-y-0 right-0 flex items-center pr-4 text-primary group-not-aria-selected/option:hidden group-focus/option:text-white in-[el-selectedcontent]:hidden">
-                                            <svg viewBox="0 0 20 20" fill="currentColor" class="size-5">
-                                                <path d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" fill-rule="evenodd" />
-                                            </svg>
-                                        </span>
-                                    </el-option>
-                                </el-options>
-                            </el-select>
-                            </div>
-                            <span id="posisi-error" class="text-red-500 text-xs mt-1 hidden"></span>
-                        </div>
                         
                         <div>
                             <div id="field-password" class="relative border-b border-gray-300 transition-colors">
@@ -187,7 +157,12 @@
     </main>
 
     <script src="<?= base_url('assets/js/loginUI.js') ?>"></script>
-    <script src="./node_modules/preline/dist/preline.js"></script>
+    <script src="<?= base_url('assets/js/preline.js') ?>"></script>
+    <script>
+        window.addEventListener('load', () => {
+            window.HSStaticMethods?.autoInit();
+        });
+    </script>
     <script src="<?= base_url('assets/js/notification/registerValidation.js') ?>"></script>
 </body>
 </html>

@@ -34,6 +34,7 @@ class Filters extends BaseFilters
         'forcehttps'    => ForceHTTPS::class,
         'pagecache'     => PageCache::class,
         'performance'   => PerformanceMetrics::class,
+        'auth'          => \App\Filters\AuthFilter::class,
     ];
 
     /**
@@ -106,5 +107,32 @@ class Filters extends BaseFilters
      *
      * @var array<string, array<string, list<string>>>
      */
-    public array $filters = [];
+    public array $filters = [
+        'auth' => [
+            'before' => [
+                'dashboard',
+                'dashboard/*',
+                'proyek',
+                'proyek/*',
+                'menu-rap',
+                'menu-rap/*',
+                'schedule',
+                'schedule/*',
+                'realisasi',
+                'realisasi/*',
+                'permintaan',
+                'permintaan/*',
+                'notifikasi',
+                'notifikasi/*',
+                'profile',
+                'profile/*',
+                'kelola-akun',
+                'kelola-akun/*',
+                'gudang',
+                'gudang/*',
+                'purchasing',
+                'purchasing/*',
+            ]
+        ]
+    ];
 }

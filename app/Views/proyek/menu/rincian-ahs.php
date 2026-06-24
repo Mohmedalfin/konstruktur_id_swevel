@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rincian AHS - Kontraktor.id</title>
     <link href="<?= base_url('assets/css/output.css') ?>" rel="stylesheet">
+    <link rel="stylesheet" href="<?= base_url('assets/fontawesome/css/all.min.css') ?>">
 </head>
 <body class="bg-gray-50 min-h-screen">
     <?php echo view('partials/navbar'); ?>

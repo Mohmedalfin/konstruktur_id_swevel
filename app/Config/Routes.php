@@ -15,7 +15,13 @@ $routes->group('', function ($routes) {
 
     // Auth & Registrasi
     $routes->get('login', 'Home::login');
+    $routes->post('auth/loginProcess', 'AuthController::loginProcess');
+    $routes->get('logout', 'Home::logout');
+    
     $routes->get('Register', 'Home::register');
+    $routes->post('auth/registerProcess', 'AuthController::registerProcess');
+    
+    // Legacy route for reference
     $routes->get('registrasi', 'Registrasi::index');
     $routes->post('registrasi/simpan', 'Registrasi::simpan');
 

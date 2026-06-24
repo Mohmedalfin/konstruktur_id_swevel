@@ -31,13 +31,25 @@
                     Masuk ke Akun Kontraktor.id
                 </h1>
 
-            <form action="#" method="POST" class="flex flex-col">
+            <?php if (session()->getFlashdata('error')) : ?>
+                <div class="mb-4 p-3 rounded bg-red-100 text-red-700 border border-red-400 text-sm">
+                    <?= session()->getFlashdata('error') ?>
+                </div>
+            <?php endif; ?>
+
+            <?php if (session()->getFlashdata('success')) : ?>
+                <div class="mb-4 p-3 rounded bg-green-100 text-green-700 border border-green-400 text-sm">
+                    <?= session()->getFlashdata('success') ?>
+                </div>
+            <?php endif; ?>
+
+            <form action="<?= site_url('auth/loginProcess') ?>" method="POST" class="flex flex-col">
                 
                 <div class="mb-6">
-                    <label for="email" class="block text-sm font-medium text-brand-dark mb-2">Email</label>
-                    <input type="email" id="email" name="email"
+                    <label for="username" class="block text-sm font-medium text-brand-dark mb-2">Username / Email</label>
+                    <input type="text" id="username" name="username" value="<?= old('username') ?>"
                            class="w-full border-b border-gray-300 bg-transparent py-2 text-brand-dark focus:outline-none focus:border-brand-dark transition-colors"
-                           placeholder=" ">
+                           placeholder="Masukkan Username atau Email">
                     <span id="email-error" class="text-red-500 text-xs mt-1 hidden"></span>
                 </div>
 

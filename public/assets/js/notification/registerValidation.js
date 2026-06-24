@@ -35,11 +35,11 @@
 
     const fields = [
       { id: 'nama_lengkap',     wrapperId: 'field-nama',       errorId: 'nama_lengkap-error',     label: 'Nama Lengkap' },
+      { id: 'username',         wrapperId: 'field-username',   errorId: 'username-error',         label: 'Username' },
       { id: 'reg_email',        wrapperId: 'field-email',      errorId: 'reg_email-error',        label: 'Email' },
       { id: 'no_hp',            wrapperId: 'field-nohp',       errorId: 'no_hp-error',            label: 'No. HP' },
       { id: 'nama_perusahaan',  wrapperId: 'field-perusahaan', errorId: 'nama_perusahaan-error',  label: 'Nama Perusahaan' },
       { id: 'domisili',         wrapperId: 'field-domisili',   errorId: 'domisili-error',         label: 'Domisili Perusahaan', isSelect: true },
-      { id: 'posisi',           wrapperId: 'field-posisi',     errorId: 'posisi-error',           label: 'Posisi Pekerjaan',    isSelect: true },
       { id: 'password',         wrapperId: 'field-password',   errorId: 'password-error',         label: 'Password' },
       { id: 'confirmPassword',  wrapperId: 'field-confirm',    errorId: 'confirmPassword-error',  label: 'Konfirmasi Password' },
     ];
@@ -101,8 +101,8 @@
 
       if (!isValid) return;
 
-      // All valid — form would submit here
-      alert('Registrasi berhasil! (dummy)');
+      // All valid — submit form
+      form.submit();
     });
   });
 })();

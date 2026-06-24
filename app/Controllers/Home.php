@@ -32,9 +32,14 @@ class Home extends BaseController
         $admin = $db->table('pengguna')->where('id_pengguna', 1)->get()->getRow();
 
         if ($admin) {
+            $id_perusahaan = (strtolower($admin->kategori_akun) === 'kontraktor' || empty($admin->parent_id)) 
+                ? $admin->id_pengguna 
+                : $admin->parent_id;
+
             session()->set([
                 'id_pengguna'   => $admin->id_pengguna,
                 'id_user'       => $admin->id_pengguna,
+                'id_perusahaan' => $id_perusahaan,
                 'nama_pengguna' => $admin->nama_pengguna,
                 'username'      => $admin->username,
                 'kategori_akun' => strtolower($admin->kategori_akun), // e.g. kontraktor
@@ -47,8 +52,18 @@ class Home extends BaseController
         return 'Gagal bypass: User Admin dengan ID 1 tidak ditemukan di database. Silakan jalankan seeder terlebih dahulu.';
     }
     
+    private function getAllCities()
+    {
+        try {
+            $db = \Config\Database::connect('estimator');
+            return $db->query("SELECT id_wilayah AS id, wilayah AS nama FROM wilayah WHERE kategori = '2' ORDER BY wilayah ASC")->getResultArray();
+        } catch (\Throwable $e) {
+            return [];
+        }
+    }
+
     public function register()
     {
-        return view('auth/registerUser');
+        return view('auth/registerUser', ['cities' => $this->getAllCities()]);
     }
 }
